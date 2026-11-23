@@ -50,3 +50,4 @@ tests/       integration tests
 - Roles: exactly `super_admin` and `user`. Sessions are server-side in SQLite (hashed tokens), 7 days by default (`SESSION_TTL_DAYS`), HttpOnly SameSite cookies, CSRF header on writes, Argon2id passwords, registration limited to 3/IP/hour (`REGISTRATION_RATE_LIMIT_*`).
 - Backup/restore: Admin → App Settings & Backups, or `npm run backup`. Restore = stop app, replace the `.db` file with a backup, start.
 - Schema changes: add a new entry to `server/src/db/migrations.ts` (never edit applied ones).
+"# app.vfd.manuals" 
