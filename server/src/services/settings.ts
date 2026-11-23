@@ -40,6 +40,7 @@ export const USER_SETTING_DEFAULTS: Record<string, unknown> = {
   explanation_levels_open: ['short'],
   selected_model: null, // model id used as the global filter on every page (null = all models)
   model_aliases: {}, // { [modelId]: short tab label }
+  ui_settings: { show_verification_filter: false, show_evidence_filter: false }, // optional list filters, hidden by default
   model_order: [], // personal tab/list order: model ids, first = leftmost
   hidden_models: [], // model ids switched Off (not shown as tabs)
 };

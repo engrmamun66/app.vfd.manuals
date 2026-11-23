@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiError, del, get, patch, post } from '../lib/api';
-import { Crumbs, ErrorBox, Modal, useAsync } from '../components/ui';
+import { Crumbs, DeleteIconButton, ErrorBox, Modal, useAsync } from '../components/ui';
+import { chooseDialog, confirmDialog, promptDialog } from '../components/dialogs';
 
 interface Folder { id: number; parent_id: number | null; name: string; display_order: number; bookmark_count: number }
 
@@ -27,7 +28,7 @@ export function SaveBookmarkButton({ title, context }: { title: string; context:
   const loc = useLocation();
   return (
     <>
-      <button className="small" onClick={() => setOpen(true)}>★ Save Research Bookmark</button>
+      <button className="small" onClick={() => setOpen(true)} title="Save Research Bookmark">★ Save</button>
       {open && <SaveDialog title={title} url={loc.pathname + loc.search} context={context} onClose={() => setOpen(false)} />}
     </>
   );
@@ -43,7 +44,6 @@ function SaveDialog({ title, url, context, onClose }: { title: string; url: stri
   const [newFolder, setNewFolder] = useState('');
   const [fav, setFav] = useState(false);
   const [err, setErr] = useState<any>(null);
-  const [done, setDone] = useState(false);
   const addFolder = async () => {
     if (!newFolder.trim()) return;
     try {
@@ -56,15 +56,15 @@ function SaveDialog({ title, url, context, onClose }: { title: string; url: stri
   const save = async (allowDuplicate = false) => {
     try {
       await post('/bookmarks', { name, description: desc, notes, research_url: url, folder_id: folder, tags: tags.split(',').map((t) => t.trim()).filter(Boolean), favorite: fav, context, allowDuplicate });
-      setDone(true);
+      onClose();
     } catch (e) {
-      if (e instanceof ApiError && e.status === 409 && window.confirm('An identical bookmark already exists. Save another anyway?')) return save(true);
+      if (e instanceof ApiError && e.status === 409 && (await confirmDialog('An identical bookmark already exists. Save another anyway?'))) return save(true);
       setErr(e);
     }
   };
   return (
     <Modal title="Save Research Bookmark" onClose={onClose}>
-      {done ? <div><p>Bookmark saved.</p><button onClick={onClose}>Close</button></div> : (<>
+      {(<>
         <div className="small-text muted" style={{ marginBottom: 8 }}>Saves this exact research location: <span className="mono">{url}</span></div>
         <div className="field"><label htmlFor="bm-name">Name</label><input id="bm-name" value={name} onChange={(e) => setName(e.target.value)} autoFocus /></div>
         <div className="field"><label htmlFor="bm-desc">Description (optional)</label><input id="bm-desc" value={desc} onChange={(e) => setDesc(e.target.value)} /></div>
@@ -140,8 +140,8 @@ export function BookmarksPage() {
 
   const delFolder = async (f: Folder) => {
     const nonEmpty = f.bookmark_count > 0 || (folders ?? []).some((c) => c.parent_id === f.id);
-    if (!nonEmpty) { if (window.confirm(`Delete empty folder “${f.name}”?`)) run(() => del(`/bookmarks/folders/${f.id}`)); return; }
-    const choice = window.prompt(`“${f.name}” is not empty. Its bookmarks and subfolders will NOT be deleted.\nMove them to: type "parent" (parent folder) or "root" (top level). Cancel to keep the folder.`, 'parent');
+    if (!nonEmpty) { if ((await confirmDialog(`Delete empty folder “${f.name}”?`, { danger: true }))) run(() => del(`/bookmarks/folders/${f.id}`)); return; }
+    const choice = await chooseDialog(`“${f.name}” is not empty. Its bookmarks and subfolders will NOT be deleted. Where should they go?`, [{ label: 'Move to the parent folder', value: 'parent' }, { label: 'Move to the top level', value: 'root' }], { title: 'Delete folder' });
     if (choice === 'parent' || choice === 'root') run(async () => { await del(`/bookmarks/folders/${f.id}`, { moveTo: choice }); setSel('all'); });
   };
 
@@ -160,12 +160,12 @@ export function BookmarksPage() {
             {!folders?.length && <p className="muted small-text">No folders yet.</p>}
           </div>
           <div className="row" style={{ marginTop: 10 }}>
-            <button className="small" onClick={() => { const n = window.prompt('New folder name'); if (n?.trim()) run(() => post('/bookmarks/folders', { name: n.trim(), parent_id: typeof sel === 'number' ? sel : null })); }}>+ {typeof sel === 'number' ? 'Subfolder' : 'Folder'}</button>
+            <button className="small" onClick={async () => { const n = await promptDialog('New folder name', { title: 'New folder', confirmLabel: 'Create' }); if (n?.trim()) run(() => post('/bookmarks/folders', { name: n.trim(), parent_id: typeof sel === 'number' ? sel : null })); }}>+ {typeof sel === 'number' ? 'Subfolder' : 'Folder'}</button>
             {typeof sel === 'number' && folders && (() => { const f = folders.find((x) => x.id === sel)!; return f ? (<>
-              <button className="small" onClick={() => { const n = window.prompt('Rename folder', f.name); if (n?.trim()) run(() => patch(`/bookmarks/folders/${f.id}`, { name: n.trim() })); }}>Rename</button>
+              <button className="small" onClick={async () => { const n = await promptDialog('Rename folder', { title: 'Rename folder', defaultValue: f.name, confirmLabel: 'Rename' }); if (n?.trim()) run(() => patch(`/bookmarks/folders/${f.id}`, { name: n.trim() })); }}>Rename</button>
               <button className="small" onClick={() => run(() => patch(`/bookmarks/folders/${f.id}`, { display_order: f.display_order - 15 }))} title="Move up among siblings">↑</button>
               <button className="small" onClick={() => run(() => patch(`/bookmarks/folders/${f.id}`, { display_order: f.display_order + 15 }))} title="Move down among siblings">↓</button>
-              <button className="small danger" onClick={() => delFolder(f)}>Delete</button></>) : null; })()}
+              <DeleteIconButton label="Delete folder" onClick={() => delFolder(f)} /></>) : null; })()}
           </div>
           <p className="small-text muted">Tip: drag folders and bookmarks onto a folder to move them.</p>
           {recent?.length > 0 && <><hr /><b className="small-text">Recently opened</b>{recent.slice(0, 6).map((r: any) => <div key={r.id} className="small-text"><a href={r.research_url} onClick={(e) => { e.preventDefault(); post(`/bookmarks/${r.id}/open`).catch(() => {}); nav(r.research_url); }}>{r.name}</a></div>)}</>}
@@ -195,7 +195,7 @@ export function BookmarksPage() {
                   <button className="small" onClick={() => navigator.clipboard?.writeText(location.origin + b.research_url)}>Copy URL</button>
                   <button className="small" onClick={() => run(() => post(`/bookmarks/${b.id}/duplicate`))}>Duplicate</button>
                   {sort === 'order' && <><button className="small ghost" aria-label="Move up" disabled={i === 0} onClick={() => { const ids = marks.map((x) => x.id); [ids[i - 1], ids[i]] = [ids[i], ids[i - 1]]; run(() => post('/bookmarks/reorder', { orderedIds: ids })); }}>↑</button><button className="small ghost" aria-label="Move down" disabled={i === marks.length - 1} onClick={() => { const ids = marks.map((x) => x.id); [ids[i + 1], ids[i]] = [ids[i], ids[i + 1]]; run(() => post('/bookmarks/reorder', { orderedIds: ids })); }}>↓</button></>}
-                  <button className="small danger" onClick={() => window.confirm(`Delete bookmark “${b.name}”? The technical record is not affected.`) && run(() => del(`/bookmarks/${b.id}`))}>Delete</button></div></td>
+                  <DeleteIconButton label="Delete bookmark" onClick={async () => (await confirmDialog(`Delete bookmark “${b.name}”? The technical record is not affected.`, { danger: true, confirmLabel: 'Delete' })) && run(() => del(`/bookmarks/${b.id}`))} /></div></td>
               </tr>))}
               {marks && !marks.length && <tr><td colSpan={7} className="empty">No bookmarks here. Open a parameter or register in the research explorer and click “Save Research Bookmark”.</td></tr>}</tbody></table></div>
         </section>

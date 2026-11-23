@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { del, get, patch, post, put, fmtBytes, fmtDate, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { Crumbs, ErrorBox, Loading, Modal, PasswordInput, useAsync, download } from '../components/ui';
+import { confirmDialog } from '../components/dialogs';
 
 const TYPES: [string, string][] = [['brand', 'Brands'], ['model', 'Models'], ['category', 'Categories'], ['common_function', 'Common functions'], ['parameter', 'Parameters'], ['modbus_register', 'Modbus registers'], ['document', 'Documents']];
 
@@ -62,7 +63,7 @@ export function AdminUsers() {
   const refresh = () => { reload(); reloadSum(); };
   const toggle = async (u: any) => {
     const to = u.status === 'enabled' ? 'disabled' : 'enabled';
-    if (!window.confirm(to === 'disabled' ? `Disable ${u.email}? All their sessions end immediately. Their data is kept.` : `Re-enable ${u.email}? Previously revoked sessions are NOT restored.`)) return;
+    if (!(await confirmDialog(to === 'disabled' ? `Disable ${u.email}? All their sessions end immediately. Their data is kept.` : `Re-enable ${u.email}? Previously revoked sessions are NOT restored.`, { danger: true }))) return;
     try { setMsg(await patch(`/admin/users/${u.id}`, { status: to })); refresh(); } catch (e) { setMsg(e); }
   };
   const P = sum?.presence;
@@ -134,7 +135,7 @@ function UserDetail({ id, onClose }: { id: number; onClose: () => void }) {
           <tr><th>Phone</th><td>{u.phone ?? '—'}</td></tr><tr><th>Company</th><td>{u.company ?? '—'}</td></tr><tr><th>Designation</th><td>{u.designation ?? '—'}</td></tr></tbody></table>
           <div className="row" style={{ marginTop: 8 }}>
             <select value={u.role} onChange={(e) => run(() => patch(`/admin/users/${u.id}`, { role: e.target.value }))} aria-label="Role"><option value="user">Normal User</option><option value="super_admin">Super Admin</option></select>
-            <button className="small" onClick={() => window.confirm('Generate a one-time temporary password? All sessions of this user will end.') && run(() => post(`/admin/users/${u.id}/reset-password`))}>Reset password</button>
+            <button className="small" onClick={async () => (await confirmDialog('Generate a one-time temporary password? All sessions of this user will end.')) && run(() => post(`/admin/users/${u.id}/reset-password`))}>Reset password</button>
             <button className="small" onClick={() => run(() => post(`/admin/users/${u.id}/revoke-all`, {}))}>Log out all sessions</button></div></div>
         <div><h3>Storage</h3><table><tbody>
           <tr><th>Total used</th><td>{fmtBytes(s.total)} ({s.percent}% of {fmtBytes(u.limits.quotaBytes)})</td></tr><tr><th>Remaining</th><td>{fmtBytes(s.remaining)}</td></tr>
@@ -152,7 +153,7 @@ function UserDetail({ id, onClose }: { id: number; onClose: () => void }) {
         const active = !x.revoked_at && new Date(x.expires_at) > new Date();
         return <tr key={x.id}><td>{x.id}</td><td className="small-text">{(x.user_agent ?? '').slice(0, 60)}</td><td className="small-text">{x.ip}</td><td className="small-text">{fmtDate(x.created_at)}</td><td className="small-text">{fmtDate(x.last_seen_at)}</td><td className="small-text">{fmtDate(x.expires_at)}</td>
           <td>{x.revoked_at ? <span className="badge dashed">revoked: {x.revoke_reason}</span> : active ? <span className="badge strong">active{live ? ' · connected' : ''}</span> : <span className="badge dashed">expired</span>}</td>
-          <td>{active && <button className="small" onClick={() => window.confirm('Log out this session only?') && run(() => post(`/admin/sessions/${x.id}/revoke`, {}))}>Log out</button>}</td></tr>;
+          <td>{active && <button className="small" onClick={async () => (await confirmDialog('Log out this session only?')) && run(() => post(`/admin/sessions/${x.id}/revoke`, {}))}>Log out</button>}</td></tr>;
       })}</tbody></table></div>
       <h3 style={{ marginTop: 10 }}>Login history</h3>
       <div className="table-wrap" style={{ maxHeight: 200, overflow: 'auto' }}><table><tbody>{u.loginHistory.map((h: any, i: number) => <tr key={i}><td className="small-text">{fmtDate(h.created_at)}</td><td>{h.success ? 'success' : 'FAILED'}</td><td className="small-text">{h.reason}</td><td className="small-text">{h.ip}</td></tr>)}</tbody></table></div>

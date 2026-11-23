@@ -41,8 +41,17 @@ export function QuoteBadge({ s }: { s?: string | null }) {
   return <span className={`badge ${s2 === 'exact' || s2 === 'normalized' ? 'strong' : s2 === 'not_found' ? 'warn' : 'dashed'}`}>{map[s2] ?? s2}</span>;
 }
 
+/** Standard loading indicator: spinning ring + label (role=status). `overlay` centres it over a positioned parent. */
+export function Spinner({ label = 'Loading…', overlay = false }: { label?: string; overlay?: boolean }) {
+  return (
+    <div className={`spinner-box ${overlay ? 'overlay' : ''}`} role="status" aria-live="polite">
+      <span className="spinner" aria-hidden="true" />
+      <span className="muted small-text">{label}</span>
+    </div>
+  );
+}
 export function Loading({ what = 'Loading' }: { what?: string }) {
-  return <div className="muted" role="status">{what}…</div>;
+  return <div className="muted loading-inline" role="status"><span className="spinner sm" aria-hidden="true" />{what}…</div>;
 }
 export function ErrorBox({ e }: { e: any }) {
   if (!e) return null;
@@ -153,15 +162,16 @@ export const download = (url: string) => {
   a.click();
 };
 
-export function ConfirmButton({ label, confirmText, onConfirm, className = 'danger small' }: { label: string; confirmText: string; onConfirm: () => void; className?: string }) {
+/** Icon-only delete button (trash can). Always give a descriptive label for screen readers and the tooltip. */
+export function DeleteIconButton({ label, onClick, className = 'small danger' }: { label: string; onClick: () => void; className?: string }) {
   return (
-    <button
-      className={className}
-      onClick={() => {
-        if (window.confirm(confirmText)) onConfirm();
-      }}
-    >
-      {label}
+    <button type="button" className={`${className} icon-only`} aria-label={label} title={label} onClick={onClick}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <polyline points="3 6 5 6 21 6" />
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+        <path d="M10 11v6M14 11v6" />
+        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+      </svg>
     </button>
   );
 }
@@ -195,6 +205,30 @@ export function PasswordInput(props: React.InputHTMLAttributes<HTMLInputElement>
           )}
         </svg>
       </button>
+    </span>
+  );
+}
+
+const ICONS = {
+  search: <><circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></>,
+  filter: <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />,
+};
+
+/** Text input with a leading icon (magnifier = search everything, funnel = filter this list) and a clear button. */
+export function SearchBox({ icon = 'search', value, onChange, onClear, className = '', style, inputRef, ...rest }: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> & {
+  icon?: 'search' | 'filter';
+  value: string;
+  onChange: (v: string) => void;
+  onClear?: () => void;
+  inputRef?: React.Ref<HTMLInputElement>;
+}) {
+  return (
+    <span className={`searchbox ${className}`} style={style}>
+      <svg className="sb-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICONS[icon]}</svg>
+      <input {...rest} ref={inputRef} value={value} onChange={(e) => onChange(e.target.value)} />
+      {value && (
+        <button type="button" className="sb-clear ghost" aria-label="Clear search" title="Clear" onClick={() => { onChange(''); onClear?.(); }}>✕</button>
+      )}
     </span>
   );
 }

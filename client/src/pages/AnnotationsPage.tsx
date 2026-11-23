@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { del, get, patch, post } from '../lib/api';
 import { Crumbs, ErrorBox, Loading, useAsync } from '../components/ui';
 import { COLORS, type Ann } from '../components/Annotatable';
+import { confirmDialog } from '../components/dialogs';
 
 export function AnnotationsPage() {
   const nav = useNavigate();
@@ -50,10 +51,10 @@ export function AnnotationsPage() {
                   <button className="small" onClick={() => run(() => patch(`/annotations/${a.id}`, { favorite: !a.favorite }))}>{a.favorite ? '★ Favorite' : '☆ Favorite'}</button>
                   <button className="small" onClick={() => run(() => patch(`/annotations/${a.id}`, { visibility: a.visibility === 'private' ? 'public' : 'private' }))}>Make {a.visibility === 'private' ? 'public' : 'private'}</button>
                   {a.color && a.comment && <button className="small" onClick={() => run(() => patch(`/annotations/${a.id}`, { color: null }))}>Remove highlight</button>}
-                  <button className="small danger" onClick={() => window.confirm('Move this annotation to Trash? You can restore it later.') && run(() => post(`/annotations/${a.id}/trash`))}>Delete</button></>)}
+                  <button className="small danger" onClick={async () => (await confirmDialog('Move this annotation to Trash? You can restore it later.', { danger: true })) && run(() => post(`/annotations/${a.id}/trash`))}>Delete</button></>)}
                 {a.isOwn && tab === 'trash' && (<>
                   <button className="small" onClick={() => run(() => post(`/annotations/${a.id}/restore`))}>Restore</button>
-                  <button className="small danger" onClick={() => window.confirm('PERMANENTLY delete this annotation and its attached images? This cannot be undone. Manufacturer documents are not affected.') && run(() => del(`/annotations/${a.id}`, { confirm: 'PERMANENT' }))}>Permanently delete</button></>)}
+                  <button className="small danger" onClick={async () => (await confirmDialog('PERMANENTLY delete this annotation and its attached images? This cannot be undone. Manufacturer documents are not affected.', { danger: true })) && run(() => del(`/annotations/${a.id}`, { confirm: 'PERMANENT' }))}>Permanently delete</button></>)}
               </div>
             </div>))}
           {data && !data.length && <div className="empty">{tab === 'trash' ? 'Trash is empty.' : tab === 'public' ? 'No public annotations from other users.' : 'No annotations. Select text on a research page to add a comment or highlight.'}</div>}

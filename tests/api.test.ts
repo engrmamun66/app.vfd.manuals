@@ -227,6 +227,14 @@ describe('multi-user isolation (IDOR) and public/private annotations', () => {
     expect((await w(bob, 'patch', '/me/settings').send({ user_id: alice.id, theme: 'dark' })).status).toBe(400);
   });
 
+  it('ui_settings default to off, are per-user and validated', async () => {
+    expect((await r(alice, '/me/settings')).body.ui_settings).toEqual({ show_verification_filter: false, show_evidence_filter: false });
+    expect((await w(alice, 'patch', '/me/settings').send({ ui_settings: { show_verification_filter: true, show_evidence_filter: 'yes' } })).body.ui_settings).toEqual({ show_verification_filter: true, show_evidence_filter: false });
+    expect((await r(bob, '/me/settings')).body.ui_settings.show_verification_filter).toBe(false);
+    expect((await w(alice, 'patch', '/me/settings').send({ ui_settings: 'x' })).status).toBe(400);
+    await w(alice, 'patch', '/me/settings').send({ ui_settings: { show_verification_filter: false, show_evidence_filter: false } });
+  });
+
   it('selected model and model aliases are per-user, validated, and filter queries', async () => {
     const { ensureBrandModel } = await import('../server/src/services/ingestion/DocumentIngestionService.js');
     const id = ensureBrandModel(db, 'AliasBrand', 'AL-1').modelId;

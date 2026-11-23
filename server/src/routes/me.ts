@@ -43,6 +43,10 @@ function validate(key: string, v: any) {
       if (!Number.isInteger(id) || !getDb().prepare('SELECT 1 FROM models WHERE id = ?').get(id)) throw badRequest('unknown model');
       return id;
     }
+    case 'ui_settings': {
+      if (typeof v !== 'object' || v === null || Array.isArray(v)) throw badRequest('ui_settings must be an object');
+      return { show_verification_filter: v.show_verification_filter === true, show_evidence_filter: v.show_evidence_filter === true };
+    }
     case 'model_order':
       if (!Array.isArray(v)) throw badRequest('model_order must be an array');
       return [...new Set(v.map(Number).filter((n) => Number.isInteger(n) && n > 0))].slice(0, 500);

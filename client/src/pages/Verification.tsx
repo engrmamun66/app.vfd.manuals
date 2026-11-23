@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { get, patch, post } from '../lib/api';
 import { Crumbs, ErrorBox, Loading, Pager, QuoteBadge, useAsync } from '../components/ui';
 import { PageViewer } from '../components/Viewer';
+import { confirmDialog, promptDialog } from '../components/dialogs';
 
 const CMP = ['No Existing Record', 'New Information', 'Exact Match', 'Updated Information', 'Conflicting Information', 'Possible Duplicate', 'Uncertain Match'];
 
@@ -41,7 +42,7 @@ export function VerificationCenter() {
           {job && <button className="small" onClick={() => setSp({})}>Job #{job} ✕</button>}
           <span style={{ flex: 1 }} />
           <button className="small" disabled={!checked.size} onClick={() => act(() => post('/staged/bulk', { action: 'approve', ids: [...checked] }))}>Approve selected ({checked.size})</button>
-          <button className="small" disabled={!checked.size} onClick={() => window.confirm(`Reject ${checked.size} records?`) && act(() => post('/staged/bulk', { action: 'reject', ids: [...checked] }))}>Reject selected</button>
+          <button className="small" disabled={!checked.size} onClick={async () => (await confirmDialog(`Reject ${checked.size} records?`, { danger: true })) && act(() => post('/staged/bulk', { action: 'reject', ids: [...checked] }))}>Reject selected</button>
           <button className="small" disabled={!safeIds.length} title="Only records whose quote was found on the cited page and that have no conflict" onClick={() => setChecked(new Set(safeIds))}>Select quote-verified & conflict-free ({safeIds.length})</button>
         </div>
         {loading && !data ? <Loading /> : (
@@ -91,7 +92,7 @@ function ReviewDialog({ r, onClose, act }: { r: any; onClose: () => void; act: (
               <div className="row" style={{ marginTop: 12 }}>
                 {!needsDecision && <button className="primary" onClick={() => act(() => post(`/staged/${r.id}/approve`, { mode: 'auto' }))}>Approve</button>}
                 {needsDecision && <><button className="primary" onClick={() => act(() => post(`/staged/${r.id}/approve`, { mode: 'create_new' }))}>Create as separate record</button><button onClick={() => act(() => post(`/staged/${r.id}/approve`, { mode: 'attach' }))}>Attach as evidence to existing</button></>}
-                <button className="danger" onClick={() => act(() => post(`/staged/${r.id}/reject`, { note: window.prompt('Reason (optional)') ?? '' }))}>Reject</button>
+                <button className="danger" onClick={async () => { const note = await promptDialog('Reason for rejecting (optional)', { title: 'Reject record', confirmLabel: 'Reject' }); if (note !== null) act(() => post(`/staged/${r.id}/reject`, { note })); }}>Reject</button>
               </div>
             ) : <p className="muted">Already {r.status}{r.review_note ? ` — ${r.review_note}` : ''}.</p>}
           </div>

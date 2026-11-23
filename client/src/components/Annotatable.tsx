@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { api, del, get, patch, post } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { Modal, ErrorBox } from './ui';
+import { confirmDialog } from './dialogs';
 
 export const COLORS = ['yellow', 'green', 'blue', 'pink', 'orange', 'purple'] as const;
 
@@ -334,7 +335,7 @@ function AnnotationEditor({ contentKey, contentHash, sel, ann, onClose, onSaved 
               <button
                 className="small danger"
                 onClick={async () => {
-                  if (!ann || !window.confirm('Remove this image attachment? The comment is kept.')) return;
+                  if (!ann || !(await confirmDialog('Remove this image attachment? The comment is kept.', { danger: true }))) return;
                   await del(`/annotations/${ann.id}/attachments/${a.id}`);
                   setExisting(existing.filter((x) => x.id !== a.id));
                 }}
@@ -407,8 +408,8 @@ function AnnotationPanel({ anns, onClose, onEdit, onChanged }: { anns: Ann[]; on
                 {COLORS.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
               {a.color && a.comment && <button className="small" onClick={() => run(() => patch(`/annotations/${a.id}`, { color: null }))}>Remove highlight</button>}
-              {a.comment && <button className="small danger" onClick={() => window.confirm('Delete this comment? (Moves to Trash if there is no highlight.)') && run(() => post(`/annotations/${a.id}/delete-comment`))}>Delete comment</button>}
-              <button className="small danger" onClick={() => window.confirm('Delete the complete annotation (comment, highlight and attachments)? It can be restored from Trash.') && run(() => post(`/annotations/${a.id}/trash`))}>Delete annotation</button>
+              {a.comment && <button className="small icon-only" title="Delete comment" aria-label="Delete comment" style={{ background: 'var(--inv-bg)', color: 'var(--inv-fg)', borderColor: 'var(--inv-bg)' }} onClick={async () => (await confirmDialog('Delete this comment? (Moves to Trash if there is no highlight.)', { danger: true })) && run(() => post(`/annotations/${a.id}/delete-comment`))}>🗑</button>}
+              <button className="small danger" onClick={async () => (await confirmDialog('Delete the complete annotation (comment, highlight and attachments)? It can be restored from Trash.', { danger: true })) && run(() => post(`/annotations/${a.id}/trash`))}>Delete annotation</button>
             </div>
           )}
           {a.researchUrl && <div className="small-text faint" style={{ marginTop: 6 }}>Context: <a href={a.researchUrl}>{a.researchUrl}</a></div>}
@@ -438,8 +439,8 @@ export function AnnotationDisplayControl() {
   const anyShown = d.showOthersPublic || d.showOwn;
   return (
     <span className="pop-anchor" ref={ref}>
-      <button className="small" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(!open)} title="Annotation display settings">
-        {anyShown ? '👁' : '⊘'} <span className="small-text">Annotations: {anyShown ? 'shown' : 'hidden'}</span>
+      <button className="small" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(!open)} title={`Annotations: ${anyShown ? 'shown' : 'hidden'}`}>
+        {anyShown ? '👁' : '⊘'} Notes
       </button>
       {open && (
         <div className="popover" role="dialog" aria-label="Annotation Display Settings" style={{ top: '100%', right: 0 }}>

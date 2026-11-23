@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { get } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { Annotatable, AnnotationScope } from './Annotatable';
-import { ErrorBox, Loading, QuoteBadge, useAsync } from './ui';
+import { ErrorBox, Loading, QuoteBadge, Spinner, useAsync } from './ui';
 
 /** Resizable two-pane layout. Ratio/enabled state persisted per user in SQLite via settings. */
 export function SplitView({ enabled, left, right, leftTitle, rightTitle }: { enabled: boolean; left: ReactNode; right: ReactNode; leftTitle: string; rightTitle: ReactNode }) {
@@ -68,24 +68,28 @@ export function SplitToggle() {
   const { settings, updateSettings } = useAuth();
   const sv = settings?.split_view ?? { enabled: false, ratio: 0.55, collapsed: null };
   return (
-    <button className="small" aria-pressed={sv.enabled} onClick={() => updateSettings({ split_view: { ...sv, enabled: !sv.enabled, collapsed: null } } as any)}>
-      Split View: {sv.enabled ? 'ON' : 'OFF'}
+    <button className="small" aria-pressed={sv.enabled} title={`Split view: ${sv.enabled ? 'ON' : 'OFF'}`} onClick={() => updateSettings({ split_view: { ...sv, enabled: !sv.enabled, collapsed: null } } as any)}>
+      {sv.enabled ? '▥' : '▯'} Split
     </button>
   );
 }
 
 /** Original manufacturer page: image (zoom/pan) and extracted text (annotatable). Never replaces the image with OCR. */
 export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuote }: { revisionId: number; page: number; onPage?: (p: number) => void; quoteMatch?: string | null; highlightQuote?: string | null }) {
+  const loc = useLocation();
   const [tab, setTab] = useState<'image' | 'text'>('image');
   const [zoom, setZoom] = useState(1);
   const { data, error, loading } = useAsync(() => get(`/revisions/${revisionId}/pages/${page}`), [revisionId, page]);
   const [imgErr, setImgErr] = useState(false);
+  const [loadedSrc, setLoadedSrc] = useState(''); // the image URL that has finished loading
   useEffect(() => setImgErr(false), [revisionId, page]);
   if (error) return <ErrorBox e={error} />;
   if (loading || !data) return <Loading what="Loading page" />;
   const rev = data.revision;
   const p = data.page;
   const scale = zoom <= 1 ? 1.5 : zoom <= 2 ? 2.5 : 3;
+  const imgSrc = `/api/revisions/${revisionId}/pages/${page}/image?scale=${scale}`;
+  const imgLoaded = loadedSrc === imgSrc;
   return (
     <div>
       <div className="row between" style={{ marginBottom: 8 }}>
@@ -99,8 +103,8 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
         </div>
         <div className="row">
           {quoteMatch !== undefined && <QuoteBadge s={quoteMatch} />}
-          <a className="btn small" href={`/api/revisions/${revisionId}/file#page=${page}`} target="_blank" rel="noreferrer">Open original PDF</a>
-          <Link className="btn small" to={`/library/revision/${revisionId}/page/${page}`}>Full viewer</Link>
+          <a className="btn small" href={`/api/revisions/${revisionId}/file#page=${page}`} target="_blank" rel="noreferrer">Open original PDF <span aria-hidden="true">↗</span></a>
+          {!loc.pathname.startsWith('/library/revision/') && <Link className="btn small" to={`/library/revision/${revisionId}/page/${page}`}>Full viewer</Link>}
         </div>
       </div>
       {highlightQuote && (
@@ -126,8 +130,9 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
         imgErr ? (
           <div className="err">The page image could not be rendered. The original file may be missing — check the Documentation Library.</div>
         ) : (
-          <div className="page-img-wrap">
-            <img src={`/api/revisions/${revisionId}/pages/${page}/image?scale=${scale}`} alt={`Manufacturer manual page ${page}`} style={{ width: `${zoom * 100}%`, minWidth: '50%' }} onError={() => setImgErr(true)} loading="lazy" />
+          <div className="page-img-wrap" aria-busy={!imgLoaded} style={!imgLoaded ? { minHeight: 'calc(100vh - 220px)', position: 'relative' } : undefined}>
+            {!imgLoaded && <Spinner label="Loading page image…" overlay />}
+            <img key={imgSrc} src={imgSrc} alt={`Manufacturer manual page ${page}`} style={{ width: `${zoom * 100}%`, minWidth: '50%', opacity: imgLoaded ? 1 : 0, transition: 'opacity .2s ease' }} onLoad={() => setLoadedSrc(imgSrc)} onError={() => setImgErr(true)} ref={(el) => { if (el?.complete && el.naturalWidth > 0 && loadedSrc !== imgSrc) setLoadedSrc(imgSrc); }} />
           </div>
         )
       ) : p.text ? (

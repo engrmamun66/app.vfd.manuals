@@ -89,13 +89,47 @@ function ModelAliases() {
   );
 }
 
+function UiSettings() {
+  const { settings, updateSettings } = useAuth();
+  const u = (settings?.ui_settings ?? {}) as { show_verification_filter?: boolean; show_evidence_filter?: boolean };
+  const [err, setErr] = useState<string | null>(null);
+  const set = async (k: 'show_verification_filter' | 'show_evidence_filter', v: boolean) => {
+    try { setErr(null); await updateSettings({ ui_settings: { show_verification_filter: u.show_verification_filter === true, show_evidence_filter: u.show_evidence_filter === true, [k]: v } }); } catch (e: any) { setErr(e.message); }
+  };
+  const rows: [keyof typeof u, string, string][] = [
+    ['show_verification_filter', 'Show verification dropdown', 'Adds the "Any verification" filter to the Parameters and Modbus Register lists.'],
+    ['show_evidence_filter', 'Show evidence dropdown', 'Adds the "Any evidence" filter to the Parameters list.'],
+  ];
+  return (
+    <div style={{ maxWidth: 720 }}>
+      <h2>UI settings</h2>
+      <p className="muted small-text">Optional interface elements. Personal: they only change your own view.</p>
+      {err && <div className="err" role="alert">{err}</div>}
+      <div className="table-wrap"><table>
+        <thead><tr><th>Setting</th><th>Status</th><th>Switch</th></tr></thead>
+        <tbody>
+          {rows.map(([k, label, hint]) => {
+            const on = u[k] === true;
+            return (
+              <tr key={k}>
+                <td><b>{label}</b><div className="small-text muted">{hint}</div></td>
+                <td><span className={`badge ${on ? 'strong' : 'dashed'}`}>{on ? 'On' : 'Off'}</span></td>
+                <td><button role="switch" aria-checked={on} aria-label={label} className={`switch ${on ? 'on' : ''}`} onClick={() => set(k as any, !on)}><span /></button></td>
+              </tr>);
+          })}
+        </tbody>
+      </table></div>
+    </div>
+  );
+}
+
 /** Full-screen settings: profile, preferences, model aliases, security and (Super Admin) application settings. */
 export function SettingsModal({ onClose: onClosed }: { onClose: () => void }) {
   const [closing, setClosing] = useState(false);
   const onClose = () => { if (!closing) { setClosing(true); window.setTimeout(onClosed, window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 220); } };
   const { user } = useAuth();
   const isAdmin = user?.role === 'super_admin';
-  const tabs = [['models', 'Model aliases'], ['profile', 'Profile & Preferences'], ['security', 'Change password'], ...(isAdmin ? [['app', 'Application & Backups']] : [])] as [string, string][];
+  const tabs = [['models', 'Model aliases'], ['ui', 'UI settings'], ['profile', 'Profile & Preferences'], ['security', 'Change password'], ...(isAdmin ? [['app', 'Application & Backups']] : [])] as [string, string][];
   const [tab, setTab] = useState('models');
   useEffect(() => {
     const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -110,6 +144,7 @@ export function SettingsModal({ onClose: onClosed }: { onClose: () => void }) {
         <div className="fs-content" style={{ padding: '16px 28px' }}>
           {tab === 'profile' && <MySettings embedded />}
           {tab === 'models' && <ModelAliases />}
+          {tab === 'ui' && <UiSettings />}
           {tab === 'security' && <ChangePassword embedded />}
           {tab === 'app' && isAdmin && <AdminSettings embedded />}
         </div>

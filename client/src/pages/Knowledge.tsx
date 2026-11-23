@@ -1,7 +1,7 @@
 import { Fragment, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { get } from '../lib/api';
-import { Crumbs, ErrorBox, Loading, Pager, VerifBadge, useAsync } from '../components/ui';
+import { Crumbs, ErrorBox, Loading, Pager, SearchBox, VerifBadge, useAsync } from '../components/ui';
 import { ModelTabs } from '../components/ModelTabs';
 import { useModels } from '../lib/models';
 
@@ -21,7 +21,7 @@ export const KIND_LABELS: Record<string, string> = {
 
 export function ImportanceBadge({ v }: { v?: string | null }) {
   if (!v) return <span className="faint small-text">—</span>;
-  return <span className={`badge ${v === 'Important' ? 'strong' : v === 'Medium' ? 'solid' : 'dashed'}`}>{v}</span>;
+  return <span className={`badge ${v === 'Important' || v === 'Medium' ? 'strong' : 'dashed'}`}>{v}</span>;
 }
 
 /** Faults, alarms, warnings, troubleshooting, wiring, installation, specs and other non-parameter manual knowledge. */
@@ -52,7 +52,7 @@ export function KnowledgePage() {
           <button key={k} role="tab" aria-selected={kind === k} className={kind === k ? 'primary small' : 'small'} onClick={() => set('kind', k)}>{l} ({counts[k]})</button>
         ))}
       </div>
-      <input placeholder="Search code, title, cause, remedy…" value={q} onChange={(e) => set('q', e.target.value)} style={{ minWidth: 320, marginBottom: 12 }} aria-label="Search topics" />
+      <SearchBox icon="filter" placeholder="Filter topics: code, title, cause, remedy…" value={q} onChange={(v) => set('q', v)} style={{ minWidth: 340, marginBottom: 12 }} aria-label="Search topics" />
       <ErrorBox e={error} />
       {loading && !data ? <Loading /> : (
         <>

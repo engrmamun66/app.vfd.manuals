@@ -16,6 +16,14 @@ let paramUrl = '';
 let paramId = 0;
 let descText = '';
 
+/** Confirms the app's own confirmation modal (replaces native window.confirm). */
+async function confirmModal(page: Page) {
+  const dlg = page.getByRole('dialog', { name: 'Please confirm' });
+  await expect(dlg).toBeVisible();
+  await dlg.getByRole('button', { name: 'Confirm' }).click();
+  await expect(dlg).toBeHidden();
+}
+
 async function register(browser: Browser, u: { email: string; pw: string }) {
   const ctx = await browser.newContext({ baseURL: 'http://127.0.0.1:3077', viewport: { width: 1600, height: 900 } });
   const p = await ctx.newPage();
@@ -251,10 +259,10 @@ test.describe('layout: full width, split view', () => {
 
   test('split view: toggle, drag-resize, persists per user across reload', async () => {
     await admin.goto(`${paramUrl}`);
-    const toggle = admin.getByRole('button', { name: /Split View/ });
-    await expect(toggle).toContainText('OFF');
+    const toggle = admin.getByRole('button', { name: /Split/ });
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
     await toggle.click();
-    await expect(toggle).toContainText('ON');
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
     const div = admin.locator('.split .divider');
     await expect(div).toBeVisible();
     const panes = admin.locator('.split > .pane');
@@ -269,7 +277,7 @@ test.describe('layout: full width, split view', () => {
     const ratioBefore = (await panes.first().boundingBox())!.width / total;
     await admin.waitForTimeout(600);
     await admin.reload();
-    await expect(admin.getByRole('button', { name: /Split View/ })).toContainText('ON');
+    await expect(admin.getByRole('button', { name: /Split/ })).toHaveAttribute('aria-pressed', 'true');
     const total2 = await admin.locator('.split').evaluate((e) => e.getBoundingClientRect().width);
     const ratioAfter = (await admin.locator('.split > .pane').first().boundingBox())!.width / total2;
     expect(Math.abs(ratioAfter - ratioBefore)).toBeLessThan(0.04);
@@ -277,8 +285,8 @@ test.describe('layout: full width, split view', () => {
     await expect(admin.locator('.split > .pane').nth(1).locator('.page-img-wrap img, .evidence-quote').first()).toBeVisible({ timeout: 45_000 });
     // another user's layout is independent
     await alice.goto(paramUrl);
-    await expect(alice.getByRole('button', { name: /Split View/ })).toContainText('OFF');
-    await admin.getByRole('button', { name: /Split View/ }).click();
+    await expect(alice.getByRole('button', { name: /Split/ })).toHaveAttribute('aria-pressed', 'false');
+    await admin.getByRole('button', { name: /Split/ }).click();
     await expect(admin.locator('.split')).toHaveCount(0);
   });
 });
@@ -319,8 +327,8 @@ test.describe('curation by Super Admin', () => {
     expect(target, 'a parameter that has an implementation in another brand exists').toBeTruthy();
     await admin.goto(`/parameter/${target.id}`);
     await expect(admin.getByRole('heading', { level: 1 })).toContainText(target.code);
-    const toggle = admin.getByRole('button', { name: /Split View/ });
-    if ((await toggle.innerText()).includes('OFF')) await toggle.click();
+    const toggle = admin.getByRole('button', { name: /Split/ });
+    if ((await toggle.getAttribute('aria-pressed')) !== 'true') await toggle.click();
     const other = target.otherBrandImplementations[0];
     await admin.getByLabel('Right pane content').selectOption({ value: String(other.id) });
     await expect(admin.locator('.split > .pane').nth(1)).toContainText(other.code);
@@ -391,8 +399,8 @@ test.describe('annotations: comments, highlights, public/private, display settin
 
   test('alice can move an annotation to Trash, restore it, and permanently delete it', async () => {
     await alice.goto('/annotations');
-    alice.on('dialog', (d) => d.accept());
     await alice.getByRole('button', { name: 'Delete', exact: true }).first().click();
+    await confirmModal(alice);
     await expect(alice.getByText('No annotations.')).toBeVisible();
     await alice.getByRole('button', { name: 'Trash' }).click();
     await expect(alice.getByRole('button', { name: 'Restore' })).toBeVisible();
@@ -401,24 +409,25 @@ test.describe('annotations: comments, highlights, public/private, display settin
     await alice.getByRole('button', { name: 'My annotations' }).click();
     await expect(alice.locator('.card').first()).toContainText('Alice private note');
     await alice.getByRole('button', { name: 'Delete', exact: true }).first().click();
+    await confirmModal(alice);
     await alice.getByRole('button', { name: 'Trash' }).click();
     await alice.getByRole('button', { name: 'Permanently delete' }).click();
+    await confirmModal(alice);
     await expect(alice.getByText('Trash is empty.')).toBeVisible();
-    alice.removeAllListeners('dialog');
   });
 });
 
 test.describe('bookmarks', () => {
   test('save an exact research location into a new folder, reopen it, survives reload', async () => {
     await alice.goto(`${paramUrl}/advanced`);
-    await alice.getByRole('button', { name: /Save Research Bookmark/ }).click();
+    await alice.getByTitle('Save Research Bookmark').click();
     await alice.getByPlaceholder('New subfolder name here…').fill('Delta');
     await alice.getByRole('button', { name: 'Create folder' }).click();
     await alice.getByPlaceholder('New subfolder name here…').fill('Parameters');
     await alice.getByRole('button', { name: 'Create folder' }).click();
     await alice.locator('#bm-name').fill('My custom bookmark name');
     await alice.getByRole('button', { name: 'Save', exact: true }).click();
-    await expect(alice.getByText('Bookmark saved.')).toBeVisible();
+    await expect(alice.getByRole('dialog', { name: 'Save Research Bookmark' })).toBeHidden(); // the modal closes after a successful save
     await alice.goto('/bookmarks');
     await expect(alice.locator('.tree')).toContainText('Delta');
     const collapsed = alice.locator('.tree .tw', { hasText: '▸' }).first();
@@ -444,6 +453,21 @@ test.describe('bookmarks', () => {
     const ok = await alice.request.delete(`/api/bookmarks/folders/${child.id}?moveTo=parent`, { headers: { 'X-CSRF-Token': csrf } });
     expect(ok.status()).toBe(200);
     expect((await (await alice.request.get('/api/bookmarks')).json()).length).toBe(1);
+  });
+
+  test('folder create/rename use the app modal (no native prompt); delete is an icon with a confirmation modal', async () => {
+    await alice.goto('/bookmarks');
+    await alice.getByRole('button', { name: /^\+ Folder$/ }).click();
+    const dlg = alice.getByRole('dialog', { name: 'New folder' });
+    await dlg.getByLabel('New folder name').fill('Temp folder');
+    await dlg.getByRole('button', { name: 'Create' }).click();
+    await expect(dlg).toBeHidden();
+    await expect(alice.locator('.tree')).toContainText('Temp folder');
+    await alice.locator('.tree').getByText('Temp folder').click();
+    expect(await alice.getByRole('button', { name: 'Delete folder' }).textContent()).toBe(''); // icon only, no text label
+    await alice.getByRole('button', { name: 'Delete folder' }).click();
+    await confirmModal(alice);
+    await expect(alice.locator('.tree')).not.toContainText('Temp folder');
   });
 });
 
@@ -536,10 +560,10 @@ test.describe('administration', () => {
   });
 
   test('disabling an account signs that user out immediately and blocks login; re-enable allows a new login', async ({ browser }) => {
-    admin.on('dialog', (d) => d.accept());
     await admin.goto('/admin/users');
     await bob.goto('/');
     await admin.locator('tr', { hasText: BOB.email }).getByRole('button', { name: 'Disable' }).click();
+    await confirmModal(admin);
     await expect(bob.getByRole('heading', { name: 'Sign in' })).toBeVisible({ timeout: 20_000 });
     await expect(bob.getByText(/disabled|signed out/i).first()).toBeVisible();
     expect((await bob.request.get('/api/dashboard')).status()).toBe(401);
@@ -548,9 +572,9 @@ test.describe('administration', () => {
     await bob.getByRole('button', { name: 'Sign in' }).click();
     await expect(bob.getByRole('alert')).toContainText(/disabled/i);
     await admin.locator('tr', { hasText: BOB.email }).getByRole('button', { name: 'Enable' }).click();
+    await confirmModal(admin);
     await bob.getByRole('button', { name: 'Sign in' }).click();
     await expect(bob.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
-    admin.removeAllListeners('dialog');
     void browser;
   });
 
@@ -644,6 +668,32 @@ test.describe('theme & accessibility basics', () => {
     await expect(admin.getByRole('button', { name: 'Expand sidebar' })).toBeVisible();
     await admin.getByRole('button', { name: 'Expand sidebar' }).click();
     await admin.locator('.model-tabs button').first().click(); // back to All
+  });
+
+  test('UI settings: verification/evidence dropdowns are hidden by default and switchable', async () => {
+    await admin.goto('/parameters');
+    await expect(admin.getByLabel('Search parameters')).toBeVisible();
+    await expect(admin.getByLabel('Verification status')).toHaveCount(0);
+    await expect(admin.getByLabel('Evidence status')).toHaveCount(0);
+    await admin.getByRole('button', { name: 'Settings', exact: true }).click();
+    const dlg = admin.getByRole('dialog', { name: 'Settings' });
+    await dlg.getByRole('tab', { name: 'UI settings' }).click();
+    await dlg.getByRole('switch', { name: 'Show verification dropdown' }).click();
+    await dlg.getByRole('switch', { name: 'Show evidence dropdown' }).click();
+    await dlg.getByRole('button', { name: 'Close settings' }).click();
+    await expect(dlg).toBeHidden();
+    await expect(admin.getByLabel('Verification status')).toBeVisible();
+    await expect(admin.getByLabel('Evidence status')).toBeVisible();
+    await admin.reload(); // persisted
+    await expect(admin.getByLabel('Verification status')).toBeVisible();
+    // switch both back off
+    await admin.getByRole('button', { name: 'Settings', exact: true }).click();
+    await dlg.getByRole('tab', { name: 'UI settings' }).click();
+    await dlg.getByRole('switch', { name: 'Show verification dropdown' }).click();
+    await dlg.getByRole('switch', { name: 'Show evidence dropdown' }).click();
+    await dlg.getByRole('button', { name: 'Close settings' }).click();
+    await expect(dlg).toBeHidden();
+    await expect(admin.getByLabel('Verification status')).toHaveCount(0);
   });
 
   test('keyboard: help icon opens on Enter and closes on Escape; dialogs are labelled', async () => {

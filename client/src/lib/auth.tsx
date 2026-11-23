@@ -39,6 +39,13 @@ interface Ctx {
 const AuthCtx = createContext<Ctx>(null as any);
 export const useAuth = () => useContext(AuthCtx);
 
+/** Optional UI toggles from Settings → UI settings (all default to off). */
+export function useUiSettings() {
+  const { settings } = useAuth();
+  const u = (settings?.ui_settings ?? {}) as { show_verification_filter?: boolean; show_evidence_filter?: boolean };
+  return { showVerification: u.show_verification_filter === true, showEvidence: u.show_evidence_filter === true };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [settings, setSettings] = useState<Settings | null>(null);

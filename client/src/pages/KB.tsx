@@ -3,9 +3,11 @@ import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } 
 import { get, patch, post, fmtDate } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { ModelTabs } from '../components/ModelTabs';
+import { OriginalPdfButton } from '../components/OriginalPdfButton';
 import { ImportanceBadge } from './Knowledge';
 import { useModels } from '../lib/models';
-import { Crumbs, ErrorBox, EquivBadge, EvBadge, InfoIcon, Loading, Pager, QuoteBadge, Val, VerifBadge, download, useAsync } from '../components/ui';
+import { useUiSettings } from '../lib/auth';
+import { Crumbs, ErrorBox, EquivBadge, EvBadge, InfoIcon, Loading, Pager, QuoteBadge, SearchBox, Val, VerifBadge, download, useAsync } from '../components/ui';
 import { PageViewer, SplitToggle, SplitView } from '../components/Viewer';
 import { Annotatable, AnnotationDisplayControl, AnnotationScope } from '../components/Annotatable';
 import { SaveBookmarkButton } from './Bookmarks';
@@ -56,8 +58,9 @@ export function Parameters({ category }: { category?: string }) {
   const q = Object.fromEntries(sp.entries());
   const page = Number(q.page) || 1;
   const { selected } = useModels();
+  const { showVerification, showEvidence } = useUiSettings();
   const { data: tax } = useAsync(() => get('/taxonomy'), []);
-  const { data, error, loading } = useAsync(() => get('/parameters', { ...q, model: selected, category: category ?? q.category, page, limit: 50 }), [sp.toString(), category, selected]);
+  const { data, error, loading } = useAsync(() => get('/parameters', { ...q, verification: showVerification ? q.verification : undefined, evidence: showEvidence ? q.evidence : undefined, model: selected, category: category ?? q.category, page, limit: 50 }), [sp.toString(), category, selected, showVerification, showEvidence]);
   const set = (k: string, v: string) => {
     const n = new URLSearchParams(sp);
     if (v) n.set(k, v); else n.delete(k);
@@ -69,14 +72,14 @@ export function Parameters({ category }: { category?: string }) {
     <div className="page">
       <Crumbs items={[{ label: 'Knowledge Base', to: '/parameters' }, { label: catName ?? 'All Parameters' }]} />
       <div className="row between"><h1>{catName ?? 'All Parameters'}</h1>
-        <div className="row"><button className="small" onClick={() => download(`/export?scope=parameters&format=csv${category ? '&category=' + category : ''}`)}>Export CSV</button><button className="small" onClick={() => download(`/export?scope=parameters&format=json${category ? '&category=' + category : ''}`)}>Export JSON</button></div></div>
+        <div className="row"><button className="small" onClick={() => download(`/export?scope=parameters&format=csv${category ? '&category=' + category : ''}`)}>Export CSV</button><button className="small" onClick={() => download(`/export?scope=parameters&format=json${category ? '&category=' + category : ''}`)}>Export JSON</button><OriginalPdfButton /></div></div>
       <ModelTabs />
       <div className="row" style={{ marginBottom: 12 }}>
-        <input placeholder="Search code, name, description (EN/বাংলা)…" value={q.q ?? ''} onChange={(e) => set('q', e.target.value)} style={{ minWidth: 280 }} aria-label="Search parameters" />
+        <SearchBox icon="filter" placeholder="Filter this list: code, name, description (EN/বাংলা)…" value={q.q ?? ''} onChange={(v) => set('q', v)} style={{ minWidth: 300 }} aria-label="Search parameters" />
         {!category && <select value={q.category ?? ''} onChange={(e) => set('category', e.target.value)} aria-label="Category"><option value="">All categories</option>{tax?.map((c: any) => <option key={c.slug} value={c.slug}>{c.name}</option>)}</select>}
         <select value={q.importance ?? ''} onChange={(e) => set('importance', e.target.value)} aria-label="Importance"><option value="">Any importance</option><option>Important</option><option>Medium</option><option>Optional</option></select>
-        <select value={q.verification ?? ''} onChange={(e) => set('verification', e.target.value)} aria-label="Verification status"><option value="">Any verification</option>{['Verified', 'Unverified', 'Requires Manual Verification', 'Documentation Conflict'].map((s) => <option key={s}>{s}</option>)}</select>
-        <select value={q.evidence ?? ''} onChange={(e) => set('evidence', e.target.value)} aria-label="Evidence status"><option value="">Any evidence</option>{['Explicitly Documented', 'Calculated from Documented Data', 'Cross-Referenced', 'Unverified', 'Conflicting'].map((s) => <option key={s}>{s}</option>)}</select>
+        {showVerification && <select value={q.verification ?? ''} onChange={(e) => set('verification', e.target.value)} aria-label="Verification status"><option value="">Any verification</option>{['Verified', 'Unverified', 'Requires Manual Verification', 'Documentation Conflict'].map((s) => <option key={s}>{s}</option>)}</select>}
+        {showEvidence && <select value={q.evidence ?? ''} onChange={(e) => set('evidence', e.target.value)} aria-label="Evidence status"><option value="">Any evidence</option>{['Explicitly Documented', 'Calculated from Documented Data', 'Cross-Referenced', 'Unverified', 'Conflicting'].map((s) => <option key={s}>{s}</option>)}</select>}
         <select value={q.access ?? ''} onChange={(e) => set('access', e.target.value)} aria-label="Access type"><option value="">Read / Write</option><option>Read</option><option>Write</option></select>
       </div>
       <ErrorBox e={error} />
@@ -160,7 +163,7 @@ function EvidenceList({ evidence, selected, onSelect }: { evidence: any[]; selec
           <div className="row">
             <button className="small" onClick={() => onSelect(i)}>Show page here</button>
             {e.page_index && <Link className="btn small" to={`/library/revision/${e.revision_id}/page/${e.page_index}`}>Open in viewer</Link>}
-            <a className="btn small" href={`/api/revisions/${e.revision_id}/file#page=${e.page_index ?? 1}`} target="_blank" rel="noreferrer">Open original PDF</a>
+            <a className="btn small" href={`/api/revisions/${e.revision_id}/file#page=${e.page_index ?? 1}`} target="_blank" rel="noreferrer">Open original PDF <span aria-hidden="true">↗</span></a>
           </div>
         </div>
       ))}
@@ -480,17 +483,18 @@ export function Registers() {
   const [sp, setSp] = useSearchParams();
   const q = Object.fromEntries(sp.entries());
   const { selected } = useModels();
-  const { data, error, loading } = useAsync(() => get('/registers', { ...q, model: selected, page: q.page || 1, limit: 100 }), [sp.toString(), selected]);
+  const { showVerification } = useUiSettings();
+  const { data, error, loading } = useAsync(() => get('/registers', { ...q, verification: showVerification ? q.verification : undefined, model: selected, page: q.page || 1, limit: 100 }), [sp.toString(), selected, showVerification]);
   const set = (k: string, v: string) => { const n = new URLSearchParams(sp); v ? n.set(k, v) : n.delete(k); n.delete('page'); setSp(n, { replace: true }); };
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Modbus & RS485' }, { label: 'Register Explorer' }]} />
-      <div className="row between"><h1>Modbus Register Explorer</h1><div className="row"><button className="small" onClick={() => download('/export?scope=registers&format=csv')}>Export CSV</button><button className="small" onClick={() => download('/export?scope=registers&format=json')}>Export JSON</button></div></div>
+      <div className="row between"><h1>Modbus Register Explorer</h1><div className="row"><button className="small" onClick={() => download('/export?scope=registers&format=csv')}>Export CSV</button><button className="small" onClick={() => download('/export?scope=registers&format=json')}>Export JSON</button><OriginalPdfButton /></div></div>
       <ModelTabs />
       <div className="row" style={{ marginBottom: 12 }}>
-        <input placeholder="Address (e.g. 2103, 0x2103, 40100), name…" value={q.q ?? ''} onChange={(e) => set('q', e.target.value)} style={{ minWidth: 300 }} aria-label="Search registers" />
+        <SearchBox icon="filter" placeholder="Filter this list: address (2103, 0x2103, 40100) or name…" value={q.q ?? ''} onChange={(v) => set('q', v)} style={{ minWidth: 340 }} aria-label="Search registers" />
         <select value={q.access ?? ''} onChange={(e) => set('access', e.target.value)} aria-label="Access"><option value="">Read / Write</option><option>Read</option><option>Write</option></select>
-        <select value={q.verification ?? ''} onChange={(e) => set('verification', e.target.value)} aria-label="Verification"><option value="">Any verification</option>{['Verified', 'Unverified', 'Requires Manual Verification', 'Documentation Conflict'].map((s) => <option key={s}>{s}</option>)}</select>
+        {showVerification && <select value={q.verification ?? ''} onChange={(e) => set('verification', e.target.value)} aria-label="Verification"><option value="">Any verification</option>{['Verified', 'Unverified', 'Requires Manual Verification', 'Documentation Conflict'].map((s) => <option key={s}>{s}</option>)}</select>}
       </div>
       <p className="muted small-text">Search matches only addresses present in the database (original text and stored mathematical conversions).</p>
       <ErrorBox e={error} />

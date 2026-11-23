@@ -11,9 +11,10 @@ import { AnnotationsPage } from './pages/AnnotationsPage';
 import { DocumentPage, ImportPage, Library, RevisionViewer } from './pages/Library';
 import { VerificationCenter } from './pages/Verification';
 import { AdminContent, AdminLogs, AdminSettings, AdminUsers, MySettings } from './pages/Admin';
-import { Loading, useAsync } from './components/ui';
+import { Loading, SearchBox, useAsync } from './components/ui';
 import { ModelsProvider, useModels } from './lib/models';
 import { SettingsModal } from './components/SettingsModal';
+import { DialogProvider } from './components/dialogs';
 
 function Nav({ to, children, sub }: { to: string; children: React.ReactNode; sub?: boolean }) {
   return <NavLink to={to} end className={({ isActive }) => `nav-link ${sub ? 'sub' : ''} ${isActive ? 'active' : ''}`}>{children}</NavLink>;
@@ -28,7 +29,7 @@ function GlobalSearch() {
   const go = (to: string) => { setOpen(false); setQ(''); nav(to); };
   return (
     <div className="search" style={{ position: 'relative' }}>
-      <input style={{ width: '100%' }} placeholder="Search parameters, registers (2103, 0x2103), brands, models, manual text…" value={q} onChange={(e) => { setQ(e.target.value); setOpen(true); }} onFocus={() => setOpen(true)} onKeyDown={(e) => e.key === 'Escape' && setOpen(false)} aria-label="Global search" />
+      <SearchBox icon="search" placeholder="Search everything (2103, 0x2103, manual text…)" value={q} onChange={(v) => { setQ(v); setOpen(true); }} onFocus={() => setOpen(true)} onKeyDown={(e) => e.key === 'Escape' && setOpen(false)} aria-label="Global search" />
       {open && data && (
         <div className="popover" style={{ top: '100%', left: 0, width: 'min(720px, 92vw)', maxHeight: '70vh', overflow: 'auto' }} onMouseLeave={() => undefined}>
           <div className="row between"><b>Results for “{data.q}”</b><button className="small ghost" onClick={() => setOpen(false)}>Close</button></div>
@@ -155,7 +156,9 @@ function AdminOnly({ children }: { children: React.ReactNode }) {
 export const Root = () => (
   <BrowserRouter>
     <AuthProvider>
-      <App />
+      <DialogProvider>
+        <App />
+      </DialogProvider>
     </AuthProvider>
   </BrowserRouter>
 );

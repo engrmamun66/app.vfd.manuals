@@ -6,7 +6,7 @@
   --fg: #0a0a0a;
   --fg-muted: #555555;
   --fg-faint: #8a8a8a;
-  --line: #d4d4d4;
+  --line: #b0b0b0;
   --line-strong: #0a0a0a;
   --inv-bg: #0a0a0a;
   --inv-fg: #ffffff;
@@ -261,3 +261,26 @@ mark.snip, .snippet mark { background: var(--inv-bg); color: var(--inv-fg); padd
 @keyframes tip-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .tooltip { animation: none; } }
 .tooltip::before { content: ''; position: absolute; left: 50%; top: -5px; width: 10px; height: 10px; background: var(--inv-bg); transform: translateX(-50%) rotate(45deg); border-radius: 1px; }
+
+/* ---------- search box with icon ---------- */
+.searchbox { position: relative; display: inline-flex; align-items: center; min-width: 0; }
+.searchbox input { width: 100%; padding-left: 36px; padding-right: 32px; height: 38px; border-radius: 6px; transition: border-color .12s, box-shadow .12s; }
+.searchbox:focus-within input { border-color: var(--fg); box-shadow: 0 0 0 3px color-mix(in srgb, var(--fg) 12%, transparent); }
+.searchbox .sb-icon { position: absolute; left: 11px; color: var(--fg-faint); pointer-events: none; transition: color .12s; }
+.searchbox:focus-within .sb-icon { color: var(--fg); }
+.searchbox .sb-clear { position: absolute; right: 5px; padding: 2px 7px; border: none; border-radius: 50%; font-size: .75rem; line-height: 1.4; color: var(--fg-muted); }
+.searchbox .sb-clear:hover { background: var(--bg-hover); color: var(--fg); }
+.topbar .search .searchbox { width: 100%; }
+
+/* ---------- icon-only buttons ---------- */
+button.icon-only { display: inline-flex; align-items: center; justify-content: center; padding: 5px 8px; line-height: 1; }
+button.icon-only.danger:hover { background: var(--inv-bg); color: var(--inv-fg); }
+
+/* ---------- loading spinner ---------- */
+.spinner-box { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; }
+.spinner-box.overlay { position: absolute; inset: 0; z-index: 1; }
+.spinner { width: 34px; height: 34px; border: 3px solid var(--line); border-top-color: var(--fg); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
+.spinner.sm { width: 16px; height: 16px; border-width: 2px; }
+.loading-inline { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
