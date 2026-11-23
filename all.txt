@@ -1,0 +1,3596 @@
+
+=====PAGE 1 (printed null)
+900 Series AC Drive User Manual
+- 1 -
+Contents
+Chapter 1 Safety Information and Precautions ...................................................................................... - 3 -
+1.1 Safety Information ............................................................................................................................... - 3 -
+1.2 General Precautions .............................................................................................................................- 4 -
+Chapter 2  Product Information ...........................................................................................................- 6 -
+2.1 Products Nameplate ............................................................................................................................ - 6 -
+2.2 Products Model Number ......................................................................................................................- 6 -
+2.3 Products Dimensions ........................................................................................................................... - 8 -
+2.4 Technical Specifications ....................................................................................................................... - 9 -
+2.5 Brake Chopper & Brake Resistor List  ...............................................................................................- 10 -
+Chapter 3 Mechanical Installation and Electrical Installation ................................................................- 11 -
+3.1 Mechanical Installation ..................................................................................................................... - 11 -
+3.1.1 Installation Environment Requirements .....................................................................................- 11 -
+3.1.2 Installation Clearance Requirements ..........................................................................................- 11 -
+3.1.3 Routine Maintenance ................................................................................................................. - 12 -
+3.2 Electrical Installation ......................................................................................................................... - 12 -
+3.2.1 Inverter Main Loop Terminal ...................................................................................................... - 12 -
+3.2.2 Caution of Power Terminal Wiring ............................................................................................. - 12 -
+3.2.3 Description of Control Terminals ................................................................................................- 13 -
+3.2.4 Terminal Wiring Diagram ............................................................................................................- 15 -
+Chapter 4 Keypad and Display Operation ............................................................................................ - 17 -
+4.1 General Type Operation Panel ...........................................................................................................- 17 -
+4.1.1 General Type Keyboard Function Description ............................................................................ - 17 -
+4.1.2 Mini Type Operation Panel (0.75-2.2KW) ...................................................................................- 18 -
+4.1.3 Mini Type Keyboard Function Description (0.75-2.2KW) ........................................................... - 18 -
+4.1.4 General Type Panel Operation ....................................................................................................- 18 -
+4.2 Cases Study ........................................................................................................................................ - 19 -
+4.2.1 Inverter Three-wire Setting ........................................................................................................ - 19 -
+4.2.2 Multi-speed settings (mini type) ................................................................................................ - 21 -
+4.2.3 Application of Inverter Constant Pressure Water Supply Function ............................................- 22 -
+4.2.4 Application of Multi-inverter Network Function (Taking three inverters as an example) ......... - 23 -
+4.2.5 Application of one inverter controls multiple pumps  ................................................................. - 24 -
+Chapter 5 Parameters ......................................................................................................................... - 26 -
+5.1 Parameters Overview ........................................................................................................................ - 26 -
+
+=====PAGE 2 (printed null)
+900 Series AC Drive User Manual
+- 2 -
+5.2 Parameters Description ..................................................................................................................... - 32 -
+5.2.1 F0 Parameter Group – Basic Parameters ....................................................................................- 32 -
+5.2.2 F1 Parameter Group – Terminal IO Function Selection .............................................................. - 36 -
+5.2.3 F2 Parameter Group - VF Curve ..................................................................................................- 41 -
+5.2.4 F3 Parameter Group – Start/Stop Process Control .....................................................................- 42 -
+5.2.5 F4 Parameter Group – Multi-segment Command ......................................................................- 45 -
+5.2.6 F5 Parameter Group – PID & Constant Pressure Water Supply Parameters .............................. - 47 -
+5.2.7 F6 Parameter Group – Extend Parameter .................................................................................. - 51 -
+5.2.8 F7 Parameter Group – Communication Parameters .................................................................. - 54 -
+5.2.9 F8 Parameter Group – Motor Control Mode ..............................................................................- 56 -
+5.2.10 F9 Parameter Group – Motor Control Advanced Parameter ................................................... - 58 -
+5.3 Monitoring Parameter .......................................................................................................................- 62 -
+Chapter 6 Communication ...................................................................................................................- 64 -
+6.1 Modbus-RTU Communication Protocol ............................................................................................. - 64 -
+6.2 Modbus Register Definition ............................................................................................................... - 65 -
+6.3 Modbus Application Cases .................................................................................................................- 66 -
+6.3.1  Setting Communication Parameters ........................................................................................- 66 -
+6.3.2  Enable Communication Function ............................................................................................ - 66 -
+Chapter7 Maintenance and Troubleshooting .......................................................................................- 67 -
+7.1  Routine Maintenance ..................................................................................................................... - 67 -
+7.1.1  Regular Inspection ...................................................................................................................- 67 -
+7.1.2  Long-time Storage ................................................................................................................... - 67 -
+7.2  Faults and Solutions ........................................................................................................................- 67 -
+7.3 Common Faults and Solutions ........................................................................................................... - 72 -
+7.4 Warranty Agreement .........................................................................................................................- 73 -
+Warranty Card  ..................................................................................................................................- 74 -
+
+=====PAGE 3 (printed null)
+900 Series AC Drive User Manual
+- 3 -
+Chapter 1 Safety Information and Precautions
+1.1 Safety Information
+Please read this chapter carefully while installing and commissioning the inverter and be sure to follow the
+safety precautions required in this chapter. We will assume no liability or responsibility for any injury or loss
+caused by improper operation.
+In this manual, safety precautions are classified into the following two categories ：
+Indicates there is a risk of electric shock,
+which may cause equipment damage or
+personal injury if not avoided.
+Indicates potential risks, which could
+result in equipment damage or property
+loss if not avoided
+Danger  Warning
+Danger
+★ Do not install the equipment if you find water seepage, component missing or damage
+upon unpacking ！
+★ Do not use the strip to supply power to the inverter.
+★ Do not conduct any high voltage insulation and withstand voltage test.
+★ Before touching the inverter, disconnect the power supply; After power off, terminal and
+internal will exist high pressure for ten minutes, during when don't touch any input/output
+terminals.
+★ Rotating motor may feed electrical energy back to the inverter, before touching it, please
+ensure that the motor has stopped, or disconnected with the inverter.
+★ Before connecting the cable, make sure there is no voltage at the power terminal.
+★ Ground the inverter as standard. The ground wire must be able to withstand the maximum
+fault current limited by the fuse or circuit breaker.
+注意
+▲ Handle the equipment with care during transportation.
+▲ Keep away from combustibles and electrical conductors.
+▲ Inverters are best used indoors, IP20 inverters must be installed in a level 2 pollution
+environment or in the cabinet of the IP54 and higher level of protection.
+▲ Ensure adequate heat dissipation while installing the inverter and do not drill holes near it,
+for drilling dust and metal debris could fall into the inverter, which may lead to danger.
+▲ Do not drop wire end or screw into the inverter.
+▲ Never connect the power cables to the output terminals (U, V, W) of the inverter.
+▲ Never connect the braking resistor between the DC bus terminals DC+ and DC-.
+▲ Do not install any automatic control device between the inverter and the motor.
+▲ When the control cable is near the power line, keep a minimum spacing of 100 mm and
+arrange a 90-degree crossover. Make sure all the terminals have been fastened using the
+appropriate torque.
+▲ If the enable input signal is valid, the driven motor may start directly after being powered
+on.
+▲ Ensure that the supply voltage, frequency and phase are in accordance with the inverter
+rating.
+▲ When motor autotune, pay attention that the motor may rotate, which may cause danger.
+▲ The inverter can control the motor to run above or below the rated speed. When needing
+
+=====PAGE 4 (printed null)
+900 Series AC Drive User Manual
+- 4 -
+the motor to run overrated speed, you can confirm whether it is feasible with motor
+manufacturers.
+▲ Do not power on or off the inverter frequently, which may be easy to shorten its service
+life. Please power on again ten minutes after power off.
+▲ In the area with an altitude of more than 1000m, derating is required.
+▲ Do not try to repair the inverter when errors and faults occur. Contact us for more help.
+1.2 General Precautions
+1. Requirement on Residual Current Device (RCD)
+The inverter generates high leakage current during running, which flows through the protective
+earthing (PE) conductor. Thus install a type-B RCD at primary side of the power supply. When selecting the
+RCD, you should consider the transient and steady-state leakage current to ground that may be generated
+at startup and during running of the inverter. You can select a specialized RCD with the function of
+suppressing high harmonics or a general-purpose RCD with relatively large residual current.
+2. Motor Insulation Test
+Perform the insulation test when the motor is used for the first time, or when it is reused after being
+stored for a long time, or in a regular check-up, in order to prevent the poor insulation of motor windings
+from damaging the inverter. The motor must be disconnected from the inverter during the insulation test.
+A 500V mega-Ohm meter is recommended for the test. The insulation resistance must not be less than 5
+MΩ.
+3. Thermal Protection of Motor
+If the rated capacity of the motor selected does not match that of the inverter, especially when the
+inverter's rated power is greater than the motor's, adjust the motor protection parameters on the
+operation panel of the Inverter or install a thermal relay in the motor circuit for protection.
+4. Running at Over 50 Hz
+The inverter provides frequency output of 0 to 500 Hz. If the inverter is required to run at over 50 Hz,
+consider the capacity of the mechanical devices.
+5. Vibration of Mechanical Device
+The inverter may encounter the mechanical resonance point at some output frequencies, which can
+be avoided by setting the skip frequency.
+6.Motor Heat and Noise
+The output of the inverter is pulse width modulation (PWM) wave with certain harmonic frequencies,
+and therefore, the motor temperature, noise, and vibration are slightly greater than those when the
+inverter runs at grid power (50 Hz).
+7.Varistor or capacitor on output side of the Inverter
+Do not install the capacitor for improving power factor or lightning protection voltage-sensitive
+resistor on the output side of the inverter because the output of the inverter is PWM wave. Otherwise, the
+inverter may suffer transient over-current or even be damaged.
+8.Contactor at the I/O Terminal of the Inverter
+When a contactor is installed between the input side of the inverter and the power supply, the
+inverter must not be started or stopped by switching the contactor on or off. If the inverter has to be
+operated by the contactor, ensure that the time interval between switching is at least one hour since
+frequent charge and discharge will shorten the service life of the capacitor inside the inverter.
+When a contactor is installed between the output side of the inverter and the motor, do not turn off
+the contactor when the inverter is active. Otherwise, modules inside the inverter may be damaged.
+
+=====PAGE 5 (printed null)
+900 Series AC Drive User Manual
+- 5 -
+9.When External Voltage is Out of Rated Voltage Range
+The inverter must not be used outside the allowable voltage range specified in this manual. Otherwise,
+the inverter's components may be damaged. If required, use a corresponding voltage step-up or step-down
+device.
+10.Prohibition of Three-phase Input Changed into Two-phase Input
+Do not change the three-phase input of the inverter into two-phase input. Otherwise, a fault will
+result in, or the inverter will be damaged.
+11.Lightning Shock Protection
+The inverter has a built-in lightning overcurrent protection device, it has certain self-protection ability
+for inductive lightning. But user should also install lightning protection device at the front end of the
+inverters in frequent lightning area.
+12.Temperature and De-rating
+The regular using temperature of this inverter is -10 ℃ - +40 ℃ . De-rating using is required when
+temperature is more than 40 ℃ . De-rating by 1.5% for every degree increase in ambient temperature. The
+highest ambient temperature is 50 ℃ .
+13.Altitude and De-rating
+In places where the altitude is above 1000m and the cooling effect reduces due to thin air, it is
+necessary to de-rate the inverter. When the altitude is above 1000m, de-rating by 1% for 100m increase in
+altitude. The highest altitude is 3000m.
+14.Some Special Usage
+If the user needs to use a method other than the recommended wiring diagram in this manual, such
+as shared DC bus, please consult us.
+15.Scrap
+The electrolytic capacitors on the main circuits and PCB may explode when they are burnt. Poisonous
+gas is generated when the plastic parts are burnt. Please treat them as industrial waste.
+16.About Adaptable Motor
+• The default setting of this inverter is for the 4-pole cage asynchronous induction motors. For other types
+of motors, select proper parameters in the inverter.
+• The cooling fan and rotor shaft of non-variable-frequency motor are coaxial, which results in reduced
+cooling effect when the rotational speed declines. If variable speed is required, add a more powerful fan or
+replace it with variable-frequency motor in applications where the motor overheats easily.
+• The standard parameters of the adaptable motor have been configured inside the inverter. It is still
+necessary to perform motor auto-tuning or modify the default values based on actual conditions.
+Otherwise, the running result and protection performance will be affected.
+• The inverter may alarm or even be damaged when short-circuit exists on cables or inside the motor.
+Therefore, perform insulation short-circuit test when the motor and cables are newly installed or during
+routine maintenance. During the test, make sure that the inverter is disconnected from the tested parts.
+
+=====PAGE 6 (printed null)
+900 Series AC Drive User Manual
+- 6 -
+Chapter 2  Product Information
+Our inverters have been tested and inspected before leaving our factory. Before unpacking the product,
+please check product packaging for shipping damage caused by careless transportation and whether the
+specifications and type of the product complies with the order. If there is any question, please contact the
+supplier of the products, or directly contact us.
+2.1 Products Nameplate
+900 series inverters are named following rules below:
+2.2 Products Model Number
+900M ， Single Phase Input ： 200~240V±10% ， Three Phase Input ： 380~480V±10% ， 50/60Hz
+Inverter Model
+Adapted motor  Rated output
+current(A)  Frame
+KW  HP
+900-0007M1  0.75  1  4  A00M
+900-0015M1  1.5  2  7  A00M
+900-0007M3  0.75  1  2.5  A00M
+900-0015M3  1.5  2  3.7  A00M
+900-0022M3  2.2  3  5.1  A00M
+Single Phase Input ： 200~240V±10% ， 50/60Hz
+Inverter Model
+Adapted motor  Rated output
+current(A)  Frame
+KW  HP
+900-0007G1  0.75  1  4  A00
+900-0015G1  1.5  2  7  A00
+900-0022G1  2.2  3  10  A01
+X9 0075 G 3 EE 0001 *
+900  series
+Power ： 0075 means7.5KW
+G  means General Type;
+M  means Mini Type;
+Voltage Level(3 means three phase
+380V, 2 means three phase 220V,
+1 means single phase 220V)
+Date of manufacturing
+Production Type
+Special model
+
+=====PAGE 7 (printed null)
+900 Series AC Drive User Manual
+- 7 -
+900-0040G1  4.0  5  18  A01
+Three Phase Input: 200~240V ± 10%, 50/60Hz
+Inverter Model
+Adapted motor  Rated output
+current(A)  Frame
+KW  HP
+900-0040G2  4  5  18.1  A02
+900-0055G2  5.5  7.5  28  A03
+900-0075G2  7.5  10  37.1  A03
+900-0110G2  11  15  49.8  A04
+900-0150G2  15  20  65.4  A05
+900-0185G2  18.5  25  81.6  A05
+900-0220G2  22  30  97.7  A06
+900-0300G2  30  40  122.1  A07
+900-0370G2  37  50  157  A07
+900-0450G2  45  60  185  A07
+900-0550G2  55  70  215  A08
+900-0750G2  75  100  320  A09
+Three Phase Input ： 380~480V ± 10% ， 50/60Hz
+Inverter Model
+Adapted motor  Rated output
+Current(A)  Frame
+KW  HP
+900-0007G3  0.75  1  2.5  A00
+900-0015G3  1.5  2  3.7  A00
+900-0022G3  2.2  3  5.1  A00
+900-0040G3  4  5  8.5  A01
+900-0055G3  5.5  7.5  13  A01
+900-0075G3  7.5  10  16  A02
+900-0110G3  11  15  25  A02
+900-0150G3  15  20  32  A03
+900-0185G3  18.5  25  38  A03
+900-0220G3  22  30  45  A04
+900-0300G3  30  40  60  A04
+900-0370G3  37  50  75  A05
+900-0450G3  45  60  90  A05
+900-0550G3  55  70  110  A06
+900-0750G3  75  100  150  A07
+900-0930G3  93  125  170  A07
+900-1100G3  110  150  210  A08
+900-1320G3  132  175  250  A08
+900-1600G3  160  210  300  A09
+
+=====PAGE 8 (printed null)
+900 Series AC Drive User Manual
+- 8 -
+900-1850G3  185  245  340  A09
+900-2000G3  200  260  380  A09
+900-2200G3  220  300  415  A09
+900-2500G3  250  350  470  A10
+900-2800G3  280  370  520  A10
+900-3150G3  315  400  600  A10
+900-3550G3  355  420  650  A11
+900-4000G3  400  530  725  A11
+900-4500G3  450  595  820  A11
+900-5000G3  500  595  980  A11
+900-5600G3  560  740  1080  A12
+900-6300G3  630  830  1200  A12
+2.3  Products Dimensions
+No.  Power  Dimension(mm)  Installation
+Size(mm)  Holeφ
+H  W  D  H1  W1
+A00M  0.75~1.5KW/220V
+0.75~2.2KW/380V  153  86  123  143  76  4.5mm
+A00  0.75~2.2KW/220V
+0.75~2.2KW/380V  170  86  141  157  75  5mm
+A01  4.0~5.5KW/380V
+4.0/220V  188  96  171  176  83.6  5mm
+A02  7.5~11KW  228  114  192  214.5  98.7  5mm
+A03  15~18.5KW  290  160  182  269  143  6.5mm
+A04  22~37KW  328  193  217  305  172  8.5mm
+A05  45~55KW *  344  228  223  324  206  8.5mm
+A06  45~55KW  490  327.5  238  459  202.5  10mm
+A07  75~93KW  526  300  304  504  200  9mm
+A08  110~132KW  690  370  360  636.5  232  10mm
+A09  160~220KW  720  410  360  690  330  10mm
+A10  250~315KW  1060  650  392.5  1030  420  12mm
+A11  355~500KW  1361.5  818  404.5  1280  520  16mm
+A12  560~630KW  1330  786  410  1295  500  16mm
+*Due to Product upgrade, size update without prior notice, Consult staff for details.
+
+=====PAGE 9 (printed null)
+900 Series AC Drive User Manual
+- 9 -
+2.4 Technical Specifications
+Item  Specifications
+Basic
+Functions
+Maximum Frequency  Vector Control ： 0~500Hz  V/F Control ： 0~500Hz
+Carrier Frequency  0.5kHz~16kHz; the carrier frequency will be automatically
+adjusted according to the load characteristics.
+Input Frequency
+Resolution
+Digital Setting ：  0.1Hz
+Analog Setting ：  0.01V corresponding maximum frequency
+×0.1%
+Control Mode  Open Loop Vector Control(SVC) ；  V/F Control
+Startup Torque  0.5Hz/150%(SVC) ；
+Basic
+Functions
+Speed Range and
+Precision  1 ： 100(SVC) ； ±0.5%(SVC)
+Overload Capability  150% rated current 60s  ； 180% rated current 3s
+Torque Boost  0.1%~30.0%
+V/F Curve  Line Type 、 Square Type
+Acc. / dec Curve
+Straight line or S curve acceleration and deceleration mode
+Acceleration and deceleration time range between 0.0 to
+500.0s.
+DC Brake  DC Brake Frequency ： 0.00Hz to maximum frequency. Brake
+time ：  0.0s to 36.0s
+Multi-speed Running  It can realize at maximum of 4 segments speed running via
+the control terminal.
+Built-in PID  It is easy to realize process-controlled closed loop control
+system.
+Over-voltage/current
+Stall Control
+It can limit the running voltage/current automatically and
+prevent frequent over-voltage/current tripping during the
+running process.
+Motor Over-temperature
+Protection  Acceptable motor temperature sensor input (PT100, PT1000)
+Timing Control  Timing control function ： set time range 0.0~6500.0Min
+Bus Support  Support Site Bus ： Modbus
+Protection Function
+It can implement power-on motor short-circuit detection,
+output phase loss protection, over current protection, over
+voltage protection, under voltage protection, overheating
+protection and overload protection, which can be turned on
+or shielded as required.
+
+=====PAGE 10 (printed null)
+900 Series AC Drive User Manual
+- 10 -
+Item  Specifications
+Running
+Running Command
+Source
+Operation panel reference, control terminal reference, and
+communication reference
+Target Frequency Source
+Digital reference, analog signal reference, multi-segment
+speed reference, PI control reference, and communication
+reference
+Control Signal Input
+Terminal
+5 digital input ；
+2 analog input ， support 0~10V 、 4~20mA 、 0~20mA 、 20~0mA 、
+20~4mA and 10~0V signal
+Control Signal Output
+Terminal
+1 relay output, 2 analog input.
+2 analog output ， support 0~10V 、 4~20mA 、 0~20mA 、
+20~0mA 、 20~4mA and 10~0V 0~20mA signal
+Environme
+nt
+Using Place  Indoor, and be free from direct sunlight, dust, corrosive gas,
+combustible gas, oil smoke, vapor, drip or salt.
+Altitude  0~4000m ； Derating use when more than 1000m (decrease
+by 1% per 100 meters)
+Ambient Temperature  -10  ℃  to +40  ℃  (Derating use when under ambient
+temperature of 40  ℃  to 50  ℃ )
+Humidity  Less than 95%RH, without condensing
+Vibration  Less than 5.9m/s (0.6g)
+Storge Temperature  － 20 ℃ ~ ＋ 60 ℃
+IP Level  IP20
+Pollution Level  PD2
+Power Distribution
+System  TN, TT
+2.5 Brake Chopper & Brake Resistor List
+Voltage(V)  Inverter Power(KW)  Brake Chopper Specification  Voltage(V)
+W  Ω
+Single Phase
+220V
+0.75  80  150
+Single Phase 220V 1.5  100  100
+2.2  100  70
+Three Phase
+380V
+0.75  150  300
+Three Phase 380V
+1.5  150  220
+2.2  250  200
+4.0  300  130
+5.5  400  90
+7.5  500  65
+Note: models above 5.5KW need external brake unit. Contact the supplier for more information.
+
+=====PAGE 11 (printed null)
+900 Series AC Drive User Manual
+- 11 -
+Chapter 3 Mechanical Installation and Electrical
+Installation
+3.1 Mechanical Installation
+3.1.1 Installation Environment Requirements
+1)  The inverter should be installed vertically and fixed on the mounting support or smooth plane with
+screws.
+2)  Ensure that the installation environment meets the environmental requirements in Section 2.5.
+3)  Keep away from combustibles and areas where water may drench and have enough space around
+it for heat dissipation.
+3.1.2 Installation Clearance Requirements
+The clearance that needs to be reserved varies with the power class of the inverter, as
+shown in the following figure:
+Figure. 3.1.2.1
+Installation clearance requirements on the inverters of different power classes ：
+Power Class  Clearance Requirements(mm)
+0.75kW~22kW  A≥10  B≥200
+30kW~37kW  A≥50  B≥200
+45kW~110kW  A≥50  B≥300
+Heat dissipation of inverter is distributed from bottom to top. When multiple inverters work, they are
+usually installed side by side. In the case of upper and lower row installation, the heat of lower row inverter
+will cause the temperature rise of upper row equipment and lead to failure, so measures such as
+A  A
+B
+B
+Hot wind
+Cold wind
+
+=====PAGE 12 (printed null)
+900 Series AC Drive User Manual
+- 12 -
+installation of heat insulation guide plate should be taken.
+3.1.3 Routine Maintenance
+（1）  Environmental temperature must be kept within the limits set out in Section 2.5.
+（2）  The radiator fan must rotate easily and be free from dust.
+（3）  The cabinet in which the inverter is installed should be free of dust and condensation, and the
+ventilation fan and air filter should work properly to ensure adequate airflow.
+3.2 Electrical Installation
+3.2.1 Inverter Main Loop Terminal
+Mark  Terminal Name  Function Description
+R 、 S 、 T
+Three Phase Power
+Input Terminal
+AC input three-phase power connection point, for
+single phase inverter, connect R 、 S terminal.
+U 、 V 、 W  Inverter Output
+Terminal  Connect three phase motors.
+P(+) 、 PB(-)  External Brake
+Terminal  External Brake Resistor
+Earth Terminal PE  Earth Terminal
+3.2.2 Caution of Power Terminal Wiring
+1)Input Power R 、 S 、 T ：
+  Inverter input side connection, no phase sequence requirements.
+  The specifications and installation methods of the external power wiring should comply with the local
+regulations and related IEC standards.
+  Please refer to the following table for power cable wiring ：
+Inverter Model
+Recommended
+Breaker
+Specifications
+Recommended
+Contactor
+Specification
+Recommended
+Input Power
+Cable ( ㎡ )
+Recommended
+Motor Cable( ㎡ )
+Recommended
+Control
+Cable( ㎡ )
+Single Phase
+220V
+0.75KW  16  10  2.5  2.5  1.5
+1.5KW  20  16  4  2.5  1.5
+2.2KW  32  20  6  4  1.5
+Three Phase 380V
+0.75KW  10  10  2.5  2.5  1.5
+1.5KW  16  10  2.5  2.5  1.5
+2.2KW  16  10  2.5  2.5  1.5
+4KW  25  16  4  4  1.5
+5.5KW  32  25  6  6  1.5
+7.5KW  40  32  6  6  1.5
+Caution of terminal wiring:
+1.  Inverter input side:
+▲  Three-phase power supply should be connected to R, S, T terminal, do not have to consider the phase
+sequence; Single-phase power supply (220V model) should be connected to the R and S terminal.
+▲  Proper protection devices installed on input and distribution lines should comply with local safety
+regulations.
+
+=====PAGE 13 (printed null)
+900 Series AC Drive User Manual
+- 13 -
+▲  Protection can be provided by installing a suitable fuse at the power supply entry line. Fuses used must
+comply with local regulations.
+▲  Residual high voltage exists at terminals of DC bus DC+ and DC- after power off. Therefore, power off for
+10 minutes before wiring.
+2.  Inverter output side:
+▲  Capacitor or surge absorber cannot be connected to the output side of the inverter, Otherwise, inverter
+protection or even damage will be caused.
+▲  The selection of brake resistance should refer to the recommended value, and the wiring distance
+should be less than 5m.
+▲  When the length of motor cable is more than 100m, AC output reactor should be installed near the
+inverter.
+▲  In order to reduce the interference of inverter output to other equipment, it is recommended to use
+shielded cable for motor cable.
+▲  Motor terminal box connection: Most general-purpose motors can operate at dual voltages, as
+indicated on the motor nameplate. The operating voltage of the motor is usually selected when the motor
+is installed, star connection or angle connection. The star connection is usually the one with the highest
+voltage rating.
+Motor Input Voltage  Motor Nameplate Voltage  Motor Wiring Mode
+230 VAC  230/400 VAC
+Delta
+400 VAC  400/690 VAC
+400 VAC  230/400 VAC  Star
+3.2.3 Description of Control Terminals
+Description of Control Terminals of mini type inverter:
+TA  TB  DC  AI  DI1  DI2  DI3  DI4  GND  AO  S+  S-
+*S+ S-  is for external expansion, not standard;
+Description of Control Terminals of general type inverter:
+NC  NC1  DI1  DI2  DI3  DI4  DI5  S-  S+  AI1  AO1
+TA  TB  TC  DO1  COM  DO2  24V  AO2  GND  AI2  10V
+*NC NC1 is a non-standard function and needs to be produced according to the order requirements.
+
+=====PAGE 14 (printed null)
+900 Series AC Drive User Manual
+- 14 -
+Control Terminals Description:
+Type  Terminal  Terminal
+Name  Function Description
+Power
+Output  +10V-GND  Terminal of 10V
+power output
+Provide +10V power supply for external units, with
+maximum output current of 10mA.
+It is generally used as the operating power supply for
+the external potentiometer.
+The potentiometer resistance range is 1-5kΩ.
+Analog Input
+AI1-GND  Analog input
+terminal 1  F0-07 set voltage and current mode.
+AI2-GND  Analog input
+terminal 2  F0-07 set voltage and current mode.
+Digital
+Input
+DI1-COM  Digital Input 1
+1. Optical coupling isolation ， bipolar input.
+DI2-COM  Digital Input 2
+DI3-COM  Digital Input 3
+DI4-COM  Digital Input 4
+DI5-COM  Digital Input 5
+Analog
+Output
+AO1-GND  Analog output  F0-07 set voltage and current mode.
+AO2-GND  Analog output  F0-07 set voltage and current mode.
+Digital
+Output
+DO1-COM  Digital output
+Optical coupling isolation, dual polarity open collector
+output.
+Output voltage range ： 0-24V.
+DO2-COM  Digital output
+Optical coupling isolation, dual polarity open collector
+output.
+Output voltage range ： 0-24V.
+Relay Output  T/B-T/C  Normally closed  Contact driving capacity ： 250Vac ， 3A;
+30Vdc, 1A T/A-T/B  Normally open
+485
+Communicati
+on Interface
+S+/S-
+485
+communication
+interface
+Respectively are the positive end of 485 differential
+signal and the negative end of 485 differential signal
+(reference ground: GND). Standard 485 communication
+interface, please use twisted pair or shielded cable.
+
+=====PAGE 15 (printed null)
+900 Series AC Drive User Manual
+- 15 -
+3.2.4 Terminal Wiring Diagram
+Mini type three-phase 380V terminal wiring diagram:
+*s+/s- need to be connected with an external RS485 module.
+
+=====PAGE 16 (printed null)
+900 Series AC Drive User Manual
+- 16 -
+General type three-phase 380V terminal wiring diagram:
+*NC NC1  is not standard function, production depends on purchasing order.
+*0.75~5.5KW built-in braking unit, external braking resistor connected to P and PB terminals.
+*Inverter above 5.5KW/380V need to be connected with an external braking unit.
+
+=====PAGE 17 (printed null)
+900 Series AC Drive User Manual
+- 17 -
+Chapter 4 Keypad and Display Operation
+4.1 General Type Operation Panel
+You can modify the parameters, monitor the working status, and start or stop the inverters by operating the
+panel.
+Operation Panel Diagram (General Type 900G)
+Function Indicator Description:
+FWD ： Forward Running Indicator  REV ： Reverse Running Indicator
+STOP ： Stop Indicator  ALARM: Fault Indicator
+4.1.1 General Type Keyboard Function Description(900G)
+Key Sign  Name  Function Description
+PRGM  Program/Enter  Long press more than 3 seconds enter/back main menu.
+Press to read /write parameter.
+▲  Increase  Increase the data or the function code.
+▼  Decrease  Decrease the data or the function code.
+<<  Shift  Select the parameter modification and display content.
+RUN  Run  Panel start.
+STOP  Stop/Reset  Stop/reset operation.
+RUN
+STOP
+▼ « PRGM
+▲
+
+=====PAGE 18 (printed null)
+900 Series AC Drive User Manual
+- 18 -
+4.1.2 Mini Type Operation Panel (900M  0.75-2.2KW)
+Operation Panel Diagram (Mini Type 900M)
+Running Indicator:  Light on when inverter is running; light off when inverter stops.
+LOCAL/Remote mode indicator:  Light off when local speed adjustment; light on when remote speed
+adjustment.
+FWD/REV:  Light off when inverter is forward running; Light on when inverter is reverse running.
+4.1.3 Mini Type Keyboard Function Description (900M  0.75-2.2KW)
+Key Sign  Description  Key Sign  Description
+RUN
+Running indicator:
+Frequency converter running often
+bright; Extinguish when it stops.
+Increase the number upward.
+LOCAL
+REMOT
+Local/remote mode indicator:
+When the local speed is off; Remote
+speed control often bright.
+Decrease the number downward.
+FWD
+REV
+Forward/reverse indicator light:
+Extinguish at positive turn; Inversion
+often bright; .
+In panel control mode, for running
+operation.
+Enter the parameter interface from the
+main interface or return.
+Stop operation; Or fault reset
+operation.
+Save or modifying parameters.  In panel control mode, it is used for
+reverse and jog switching.
+Switch between interfaces; Or switch
+the number of digits.
+4.1.4 General Type Panel Operation
+（1）  Running and stopping
+The default mode is the panel control mode (parameter F0-00 = 0). The Run key run the inverter and the
+STOP key controls the inverter to stop. When the inverter is running, the main interface display frequency
+value; When the inverter stops, the frequency value flashes.
+PRGM
+ENTER
+RUN
+STOP
+REV
+>>
+
+=====PAGE 19 (printed null)
+900 Series AC Drive User Manual
+- 19 -
+（2）  Switching running interface
+When the inverter is running, the screen displays the main interface by default. At this time, press the "
+" key, and the screen will switch among various operating interfaces, starting with the output frequency, and
+then displaying the motor speed, output voltage, output current and output power in turn. Examples are
+shown in the following figure.
+（3）  Parameter switching
+When displaying main interface, press "PRGM" to enter the first-level menu interface, and then select
+the parameter group you want to access through "Up/Down" in the first-level menu interface; Press
+"ENTER" to enter the second-level menu interface from the first-level menu interface, where you can select
+the parameters which can be modified. Press "ENTER" again, and you will enter the third-level menu
+interface from the second-level menu interface. At this time, you can check or modify the value of this
+parameter.
+When the inverter displays the third-level menu interface, you can press "PRGM" or "ENTER" to return
+to the second-level menu interface but pressing "PRGM" will not save the modified parameters, only
+pressing "ENTER" will save the parameters. When the inverter  displays the first-level menu interface, press
+"PRGM" to return to the main interface.
+PRGM  ENTER  ENTER  PRGM
+（4）  Selection of parameters
+When the second-level menu interface is displayed, press "Up" or "Down" to switch the parameters
+you want to access.
+The inverter also has monitoring parameters. The way to view them is to find U0 in the first-level
+menu interface, and then press "ENTER" to enter the monitoring parameter access interface.
+（5）  Reset parameters
+The parameter F0-24 can be used to reset the parameter. The default value of F0-24 is 0. Change it to
+1 and press "ENTER". You can reset the parameters to factory default values.
+4.2 Cases Study
+4.2.1 Inverter Three-wire Setting
+0 ： Two-wire mode 1: (Mini type 900M)
+TA  TB  DC  AI  DI1  DI2  DI3  DI4  GND  AO  S+  S-
+PRGM
+ENTER
+ENTER
+
+=====PAGE 20 (printed null)
+900 Series AC Drive User Manual
+- 20 -
+Parameter settings:
+F0-00=1 (external terminal control)
+F1-06=1  (Two-wire type 1)
+F1-00=1
+F1-01=2
+In this control mode, DI1 and GND are turned on, and the inverter is running forward; DI2 and GND
+are turned on, and the inverter runs in reverse.
+1 ： Two-wire mode 2 ： (Mini type 900M)
+TA  TB  DC  AI  DI1  DI2  DI3  DI4  GND  AO  S+  S-
+Parameter settings:
+F0-00=1 (external terminal control)
+F1-06=1 (Two-wire type 2)
+F1-00=1
+F1-01=2
+In this control mode, when DI1 and GND are turning on, and the inverter is running forward; When DI1
+and GND are on, DI2 and GND are on, and the inverter runs in reverse.
+2 ： Three-wire mode 1 ： (Mini type 900M)
+TA  TB  DC  AI  DI1  DI2  DI3  DI4  GND  AO  S+  S-
+Parameter settings:
+F0-00=1 (External terminal control)
+F1-06=2 (Three-wire type 1)
+F1-00=1
+F1-01=2
+F1-02=3
+In this control mode, when DI3 and GND are turned on, DI1 and GND are turned on, and the inverter
+Forward  Reverse
+Running Enable
+FWD/REV
+Running
+direction
+Forward
+Running
+Enable Reverse
+
+=====PAGE 21 (printed null)
+900 Series AC Drive User Manual
+- 21 -
+runs in a forward direction; When DI3 and GND are on, DI2 and GND are on, and the inverter runs in
+reverse. During normal start-up and operation, DI3 and GND must be conducted, and the commands of DI1
+and DI2 will take effect at the edge of conducting action. The running state of the inverter will be subject to
+the last key action of these three switches.
+3 ： Three-wire mode 2 ： (Mini type 900M)
+TA  TB  DC  AI  DI1  DI2  DI3  DI4  GND  AO  S+  S-
+Parameter settings:
+F0-00=1 (External terminal control)
+F1-06=3 (Three-wire type  2)
+F1-00=1
+F1-01=2
+F1-02=3
+In this control mode, when DI3 and GND are turned on, DI1 and GND are turned on, and the inverter runs
+in a forward direction; When DI3 and GND are turned on and DI1 and GND are turned on, turn DI2 and
+GND on, and the inverter will run in reverse. During normal startup and operation, DI3 and GND must be
+kept on, and the command of DI1 will take effect as soon as it is turned on.
+4.2.2 Multi-speed settings (mini type  900M )
+TA  TB  DC  AI  DI1  DI2  DI3  DI4  GND  AO  S+  S-
+Parameter settings:
+F0-00=1 (external terminal control)
+F0-01=4 (Frequency source is selected as multi-speed)
+F1-00=1 (DI1 terminal connected to external switch K)
+F1-01=8 (DI2 terminal connected to external switch K1)
+F1-02=9 (DI3 terminal connected to external switch K2)
+F1-03=10 (DI4 terminal connected to external switch K3)
+Parameter group F1 defines multi-segment speed function, 8 represents multi-segment command 1,9
+represents multi-segment command 2, and 10 represents multi-segment command 3, 3 terminals can be
+Running
+command  Stop
+FWD/REV
+Running
+direction
+K3 K2 K1 K
+
+=====PAGE 22 (printed null)
+900 Series AC Drive User Manual
+- 22 -
+combined into 8 speed segments, and the frequency values of 8 speed segments can be set by F4-01~F4-08
+respectively, and the corresponding truth table is as follows ：
+K3  K2  K1  Command Setting  Corresponding
+parameters
+OFF  OFF  OFF  Multi-segment command 0  F4-01
+OFF  OFF  ON  Multi-segment command 1  F4-02
+OFF  ON  OFF  Multi-segment command 2  F4-03
+OFF  ON  ON  Multi-segment command 3  F4-04
+ON  OFF  OFF  Multi-segment command 4  F4-05
+ON  OFF  ON  Multi-segment command 5  F4-06
+ON  ON  OFF  Multi-segment command 6  F4-07
+ON  ON  ON  Multi-segment command 7  F4-08
+When the frequency source is multi-speed, the function code F4-01-F4-07 can directly set the
+frequency value of multi-speed. In addition to the multi-segment speed function, multi-segment command
+can also be used as a given source of PID, or as a voltage source of V/F separation control, etc., to meet the
+need of switching between different given values.
+4.2.3 Application of Inverter Constant Pressure Water Supply Function
+( Mini type inverter )
+Parameter settings:
+F0-00=0 or 1 (Panel or external terminal starts)
+F0-01=6 (Constant pressure water supply function mode)
+F5-02=0 or 1 (PID feedback source, 0 is generally connected to the remote pressure gauge, and 1 is
+generally connected to the pressure sensor)
+F5-08=0/1/2/3  (Sensor type selection, 0:0~10V input can be selected; 1:4~20mA input; 2:0~5V
+input;3:0.5V~4.5V input)
+F5-09  (Sensor range)
+
+=====PAGE 23 (printed null)
+900 Series AC Drive User Manual
+- 23 -
+4.2.4 Application of Multi-inverter Network Function (Taking three inverters as an example)
+1. Three inverters network, multi-pump master and slave control mode
+Parameters setting:
+Master  Slave 1  Slave 2
+F0-26=3 ( 3 inverters network master
+setting )
+F5-32=0( multi-pump master and slave
+control )
+F5-37(adding pump frequency)
+F5-38(under-pressure adding pump time)
+F5-39(reducing pump frequency)
+F5-40(over-pressure reducing pump time)
+F0-26=11
+(slave 1 in the
+network setting)
+F0-26=12
+(slave 2 in the network setting)
+2. Three inverters network, multi-pump synchronous control mode
+Parameters setting:
+Master  Slave 1  Slave 2
+F0-26=3( 3 inverters network master setting )
+F5-32=1( multi-pump synchronous control )
+F5-35(alternating pump period)
+F0-26=11
+(slave 1 in the
+network setting)
+F0-26=12
+(slave 2 in the network setting)
+3. Three inverters network, multi-pump one for use one for standby control mode
+Parameters setting:
+Master  Slave 1  Slave 2
+F0-26=3( 3 inverters network master
+setting )
+F5-32=2( multi-pump one for use one for
+standby control )
+F0-26=11
+(slave 1 in the
+network setting)
+F0-26=12
+(slave 2 in the network
+setting)
+4. Three inverters network, standby master running mode; This function is applicable to any of
+the above three modes; Only slave 1 can be set as the standby master
+Parameters setting:
+Master
+Inverter
+S+  S-
+Slave1
+Inverter
+S+  S-
+Slave2
+Inverter
+S+  S-
+
+=====PAGE 24 (printed null)
+900 Series AC Drive User Manual
+- 24 -
+Master  Slave 1  Slave 2
+F0-26=3
+( 3 inverters network
+master setting )
+F5-32=0/1/2
+F0-26=11(slave 1 in the network setting)
+F5-33=0/1/2(0 ： The standby master controls
+other slaves in the network stop together
+1 ： The standby master controls other slaves in
+the network run as the F5-34 setting
+frequency at constant speed
+2 ： The standby master controls other slaves in
+the network run at constant pressure(This
+mode requires the standby master to connect
+to the pressure sensor)
+F5-34(Standby master running frequency)
+F5-46=1(Standby master and slave quantity)
+F0-26=12
+(slave 2 in the network
+setting)
+4.2.5 Application of one inverter controls multiple pumps
+1.  Two pumps alternate mode
+
+=====PAGE 25 (printed null)
+900 Series AC Drive User Manual
+- 25 -
+Parameters setting ：
+F0-26=07(Two pumps alternate automatically)
+F5-35(Alternating pump period)
+F5-37(Adding pump frequency)
+F5-38(Under-pressure adding pump time)
+F5-39(Reducing pump frequency)
+F5-40(Over-pressure reducing pump time)
+F5-45=1(Number of pumps running at the same time)
+2. Fix one pump for inverter mode(The wiring diagram takes one for inverter, three for grid power as an
+example)
+Parameters setting ：
+F0-26=17/18/19(17  ：  One for inverter, one for grid power(Fix pump 1 for inverter, pump 2 for grid
+power, do not alternate; 18 ： One for inverter, two for grid power(Fix pump 1 for inverter, pump 3
+for grid power, do not alternate ； 19 ： One for inverter, three for power conversion(Fix pump 1 for
+inverter, pump 2/3/4 for power frequency, don’t alternate)
+F5-37(Adding pump frequency)
+F5-38(Under-pressure adding pump time)
+F5-39(Reducing pump frequency)
+F5-40(Over-pressure reducing pump time)
+
+=====PAGE 26 (printed null)
+900 Series AC Drive User Manual
+- 26 -
+Chapter 5 Parameters
+The symbols in the function code table are described as follows:
+" ☆ ": The parameter can be modified when the inverter is in either stop or running state.
+" ★ ": The parameter cannot be modified when the inverter is in the running state.
+" ● ": The parameter is the measured value in real-time and cannot be modified.
+"*": The parameter is factory parameter and can be set only by the manufacturer, not available for user.
+" ▲ ": The parameter is factory parameter and can be set only by the manufacturer, not available for user.
+5.1 Parameters Overview
+Function
+Code
+Name  Function
+Code
+Name
+F0-00  Command source selection  F0-14  Running direction
+F0-01  Main frequency source selection  F0-15  Speed tracking start
+F0-02  Auxiliary frequency source selection  F0-16  Preset frequency
+F0-03  Frequency source selection  F0-17  Running action frequency below
+lower limit frequency
+F0-04  Acceleration time  F0-18  Command source & frequency
+source binding
+F0-05  Deceleration time  F0-19  JOG/REV key function selection
+F0-06  DC output selection  F0-20  STOP key function
+F0-07  Analog input/output signal format  F0-21  Jog running frequency
+F0-08  Halt mode  F0-22  Jog acceleration time
+F0-09  Upper limit frequency preset  F0-23  Jog deceleration time
+F0-10  Lower limit frequency preset  F0-24  Restore factory parameters
+F0-11  Torque boost  F0-25  Select display menu type
+F0-12  Torque boost cut-off frequency  F0-26  Water pump running mode
+F0-13  Carrier frequency
+Function
+Code
+Name  Function
+Code
+Name
+F1-00  DI1 terminal function selection  F1-18  Relay output current reaches 2 set
+value
+F1-01  DI2 terminal function selection  F1-19  Relay output current reaches 2
+bandwidth
+F1-02  DI3 terminal function selection  F1-20  Relay1 output delay time
+F1-03  DI4 terminal function selection  F1-21  Relay2 output delay time
+F1-04  DI5 terminal function selection  F1-22  DO1 output delay time
+F1-05  DI1~DI5 terminal valid mode selection  F1-23  DO2 output delay time
+F1-06  Terminal command mode  F1-24  AI1 gain
+
+=====PAGE 27 (printed null)
+900 Series AC Drive User Manual
+- 27 -
+F1-07  Relay terminal valid state selection  F1-25  AI1 offset
+F1-08  Relay1 function selection  F1-26  AI2 gain
+F1-09  Relay2 function selection  F1-27  AI2 offset
+F1-10  DO1 output function selection(collector
+output)
+F1-28  AO1 output function selection
+F1-11  DO2 output function selection(collector
+output)
+F1-29  AO2 output function selection
+F1-12  Relay output frequency reaches 1 set
+value
+F1-30  AO1 gain
+F1-13  Relay output frequency reaches 1
+bandwidth
+F1-31  AO1 offset
+F1-14  Relay output frequency reaches 2 set
+value
+F1-32  AO2 gain
+F1-15  Relay output frequency reaches 2
+bandwidth
+F1-33  AO2 offset
+F1-16  Relay output current reaches 1 set
+value
+F1-34  DI delay time
+F1-17  Relay output current reaches 1
+bandwidth
+Function
+Code  Name  Function
+Code  Name
+F2-00  V/F curve setting  F2-11  VF over-current stall action current
+F2-01  Multi-point V/F frequency point 1  F2-12  VF over-current stall enable
+F2-02  Multi-point V/F voltage point 1  F2-13  VF over-current stall inhibition gain
+F2-03  Multi-point V/F frequency point 2  F2-14  VF multiple over-current stall action
+current compensation coefficient
+F2-04  Multi-point V/F voltage point 2  F2-15  V/F over- magnetizing gain
+F2-05  Multi-point V/F frequency point 3  F2-16  VF over-voltage stall action voltage
+F2-06  Multi-point V/F voltage point 3  F2-17  VF over voltage stall enable
+F2-07  Multi-point V/F frequency point 4  F2-18  VF over-voltage stall suppression
+frequency gain
+F2-08  Multi-point V/F voltage point 4  F2-19  VF over-voltage stall suppression
+voltage gain
+F2-09  Multi-point V/F frequency point 5  F2-20  Maximum frequency limit of
+over-voltage stall
+F2-10  Multi-point V/F voltage point 5
+Function
+code  Name  Function
+code  Name
+F3-00  Start frequency  F3-14  Skip frequency 1
+F3-01  Start frequency hold time  F3-15  Skip frequency bandwidth
+
+=====PAGE 28 (printed null)
+900 Series AC Drive User Manual
+- 28 -
+F3-02  Start DC braking current  F3-16  Dead time of forward & reverse
+rotations
+F3-03  Start DC braking time  F3-17  Reverse rotation control
+F3-04  DC braking initial frequency at stop  F3-18  Brake utilization ratio
+F3-05  DC braking waiting time at stop  F3-19  Brake chopper action voltage
+F3-06  DC braking current at stop  F3-20  Speed tracking mode
+F3-07  DC braking time at stop  F3-21  Speed tracking
+F3-08  Acc./Dec. mode  F3-22  Speed tracking current loop Kp
+F3-09  Time proportion of S-curve
+initial-segment
+F3-23  Speed tracking current Ki
+F3-10  Time proportion of S-curve end
+segment
+F3-24  Speed tracking current value
+F3-11  Acceleration time 2  F3-25  Speed tracking current lower limit
+F3-12  Deceleration time 2  F3-26  Speed tracking voltage increasing
+time
+F3-13  Acc. time1 & acc. time 2 frequency
+switching point
+F3-27  Demagnetizing time
+Function
+code  Name  Function
+code  Name
+F4-00  Multi-segment command 0 frequency
+source
+F4-14  PLC segment 1 running time
+F4-01  Multi-reference 0 frequency  F4-15  PLC segment 1 acc./dec. time
+selection
+F4-02  Multi-reference 1 frequency  F4-16  PLC segment 2 running time
+F4-03  Multi-reference 2 frequency  F4-17  PLC segment 2 acc./dec. time
+selection
+F4-04  Multi-reference 3 frequency  F4-18  PLC segment 3 running time
+F4-05  Multi-reference 4 frequency  F4-19  PLC segment 3 acc./dec. time
+selection
+F4-06  Multi-reference 5 frequency  F4-20  PLC segment 4 running time
+F4-07  Multi-reference 6 frequency  F4-21  PLC segment 4 acc./dec. time
+selection
+F4-08  Multi-reference 7 frequency  F4-22  PLC segment 5 running time
+F4-09  PLC running mode  F4-23  PLC segment 5 acc./dec. time
+selection
+F4-10  PLC power off save selection  F4-24  PLC segment 6 running time
+F4-11  PLC running time unit  F4-25  PLC segment 6 acc./dec. time
+selection
+F4-12  PLC segment 0 running time  F4-26  PLC segment 7 running time
+F4-13  PLC segment 0 acc./dec. time selection  F4-27  PLC segment 7 acc./dec. time
+
+=====PAGE 29 (printed null)
+900 Series AC Drive User Manual
+- 29 -
+selection
+Function
+code  Name  Function
+code  Name
+F5-00  PID reference source  F5-25  Antifreezing function enable
+F5-01  PID reference value  F5-26  Antifreezing running frequency
+F5-02  PID feedback source  F5-27  Antifreezing running time
+F5-03  PID action direction  F5-28  Antifreezing running period
+F5-04  Acc. PID proportional gain Kp  F5-29  Auto start enable
+F5-05  Acc. PID integral time Ki  F5-30  Auto start delay time
+F5-06  Dec. PID proportional gain Kp  F5-31  Reserved
+F5-07  Dec. PID integral time Ki  F5-32  Multi-pump network mode
+F5-08  Sensor type  F5-33  Standby master running mode
+F5-09  Sensor scale  F5-34  Standby master 1 running frequency
+F5-10  Sensor zero deviation  F5-35  Alternating pump switching period
+F5-11  Sensor full scale deviation  F5-36  Adding pump pressure deviation
+F5-12  Dormant frequency  F5-37  Adding pump frequency
+F5-13  Dormant delay time  F5-38  Under-pressure adding pump time
+F5-14  Dormant pressure deviation  F5-39  Reducing pump frequency
+F5-15  Dormant dec. frequency step  F5-40  Over-pressure reducing pump time
+F5-16  Dormant dec. judging time  F5-41  PID feedback loss detection value
+F5-17  Wake up pressure  F5-42  Burst pipe pressure
+F5-18  Pressure upper limit  F5-43  Burst pipe judging time
+F5-19  Water shortage detection time  F5-44  Reserved
+F5-20  Water shortage detection frequency  F5-45  Maximum number of pumps running
+at the same time
+F5-21  Water shortage detection current  F5-46  Standby master and slave quantity
+F5-22  Water shortage detection pressure  F5-47  Secondary target pressure setting
+F5-23  Water shortage restart time interval  F5-48  Adding pump switching delay
+F5-24  Water shortage auto restart pressure  F5-49  Grid power and frequency
+conversion switching delay
+Function
+code  Name  Function
+code  Name
+F6-00  Zero-level menu display data auto
+switching
+F6-15  Start protection selection
+F6-01  Parameters modify attribute  F6-16  Fault enable selection 1
+F6-02  LED2 display data selection (dual
+display reserved parameter)
+F6-17  Fault enable selection 2
+F6-03  User password  F6-18  Fault auto reset times
+F6-04  Setting accumulative power-on  F6-19  Fault auto reset interval time
+
+=====PAGE 30 (printed null)
+900 Series AC Drive User Manual
+- 30 -
+achieving time
+F6-05  Regular running time  F6-20  Drop load protection selection
+F6-06  Carrier frequency adjusting with
+temperature
+F6-21  Drop load detection level
+F6-07  Carrier frequency adjusting start
+temperature
+F6-22  Drop load detection time
+F6-08  Carrier frequency adjusting time  F6-23  Voltage sag function selection
+F6-09  DPWM switching upper limit frequency  F6-24  Voltage sag judging voltage
+F6-10  Excessive speed deviation detection
+value
+F6-25  Voltage sag recovery judging tine
+F6-11  Excessive speed deviation detection
+time
+F6-26  Voltage sag action judging voltage
+F6-12  Motor overload protection gain  F6-27  Voltage sag gain
+F6-13  External temperature sensor type  F6-28  Voltage sag integral coefficient
+F6-14  Overtemperature protection threshold  F6-29  Voltage sag action deceleration time
+Function
+code  Name  Function
+code  Name
+F7-00  Local address  F7-11  Torque reception data offset
+F7-01  Baud rate  F7-12  Torque reception data gain
+F7-02  Data format  F7-13  Frequency reception data offset
+F7-03  Communication timeout  F7-14  Frequency reception data gain
+F7-04  Master and slave control valid (For
+900M, this parameter is MODBUS data
+communication format, see F7-19)
+F7-15
+Salve frequency forward maximum
+deviation
+F7-05  Master and slave selection  F7-16  Salve frequency reverse maximum
+deviation
+F7-06  Number of slaves  F7-17  Droop control
+F7-07  Slave follows master command  F7-18  Reserved
+F7-08  Slave data reception  F7-19  MODBUS data communication
+format
+F7-09  Master and slave communication
+timeout time  F7-20  Enable old inverter Modbus
+F7-10  Master and slave control
+communication transmission period
+Function
+code  Name  Function
+code  Name
+F8-00  Motor rated power  F8-10  Torque set value
+F8-01  Motor rated voltage  F8-11  Asynchronous motor stator
+resistance
+F8-02  Motor rated current  F8-12  Asynchronous motor rotor
+
+=====PAGE 31 (printed null)
+900 Series AC Drive User Manual
+- 31 -
+resistance
+F8-03  Motor rated frequency  F8-13  Asynchronous motor leakage
+inductance
+F8-04  Motor rated speed  F8-14  Asynchronous motor mutual
+inductance reactance
+F8-05  Permanent magnet motor back EMF
+coefficient
+F8-15  Asynchronous motor no-load current
+F8-06  Motor control mode  F8-16  Synchronous motor stator resistance
+F8-07  Motor parameter self-detection  F8-17  Synchronous motor D-axis
+inductance
+F8-08  Speed/torque control selection  F8-18  Synchronous motor Q-axis
+inductance
+F8-09  Torque setting source selection
+Function
+code  Name  Function
+code  Name
+F9-00  High speed area switching frequency  F9-21  Maximum torque ratio current
+enable
+F9-01  Speed loop proportional gain at high
+speed
+F9-22  Convexity gain coefficient
+F9-02  Speed loop integral time of high-speed
+segment
+F9-23  Starting carrier frequency
+F9-03  Low speed segment switching
+frequency
+F9-24  SVC low-speed carrier frequency
+F9-04  Speed loop proportional gain at low
+speed
+F9-25  Low speed carrier frequency
+switching frequency
+F9-05  Speed loop integral time of low-speed
+segment
+F9-26  Low-speed maximum excitation
+current
+F9-06  Velocity loop filtering time constant  F9-27  Low-speed excitation current
+switching frequency
+F9-07  Slip compensation coefficient  F9-28  Low-speed excitation current
+switching frequency bandwidth
+F9-08  Maximum output voltage coefficient  F9-29  Synchronous motor initial position
+detection mode
+F9-09  Torque control forward maximum
+frequency
+F9-30  Synchronous motor initial position
+identification current initial value
+F9-10  Torque control reverse maximum
+frequency
+F9-31  Synchronous motor initial position
+compensation angle
+F9-11  Torque acceleration time  F9-32  Synchronous electrical sensing
+current
+F9-12  Torque deceleration time  F9-33  Synchronous motor back EMF
+identification initial current
+
+=====PAGE 32 (printed null)
+900 Series AC Drive User Manual
+- 32 -
+F9-13  M-axis current loop KP  F9-34  Synchronous motor back EMF
+identification final current
+F9-14  M-axis current loop KI  F9-35  Synchronous motor tuning current
+loop KP
+F9-15  T-axis current loop KP  F9-36  Synchronous motor tuning current
+loop Ki
+F9-16  T-axis current loop KI  F9-37  Reserved
+F9-17  Synchronous motor flux weakening
+mode
+F9-38  Reserved
+F9-18  Synchronous motor flux weakening
+coefficient
+F9-39  Reserved
+F9-19  Flux weakening integral multiple  F9-40  Reserved
+F9-20  Output voltage saturation margin
+5.2 Parameters Description
+5.2.1 F0 Parameter Group – Basic Parameters
+Parameter  Description  Minimum
+Value
+Default
+Value
+Maximum
+Value  Unit  Change
+Permission
+F0-00  Command Source Selection  0  0  3  -  ☆
+0: Panel control. Press the RUN key of the inverter to run and press the STOP key to stop.
+1: Terminal control. It is directly controlled by the inverter control terminal. By default, DI1
+controls forward rotation and DI2 controls reverse rotation.
+2. Communication control. It is controlled by Modbus RTU (RS485).
+3.R eserved
+F0-01  Main Frequency Source
+Selection  0  1  9  -  ★
+0: function code setting, power-off memory
+1: panel potentiometer
+2 ： AI1  3: AI2 (reserved)
+4: Multi-segment command  5: PLC
+6: Constant pressure water supply 7: General PID
+8: Communication Settings
+9: Reserved
+F0-02  Auxiliary Frequency Source
+Selection  0  0  9  -  ★
+Same as F0-01
+F0-03  Frequency Source Selection  00  00  34  -  ☆
+Bit: frequency source selection
+0: main frequency source
+1: primary and secondary operation results (the operation relationship is determined by
+ten digits)
+2. Switch between the main frequency source and the auxiliary frequency source
+
+=====PAGE 33 (printed null)
+900 Series AC Drive User Manual
+- 33 -
+3. Switch between main frequency source and main and auxiliary operation results.
+4. The auxiliary frequency source and the main and auxiliary operation results
+Ten digits: the main and auxiliary operation relationship of frequency source.
+0: Primary + Secondary
+1: Primary - secondary
+2: The maximum value of both
+3: The minimum value of both
+F0-04  Acceleration Time  0  Depends
+on model  500.0  second  ☆
+The acceleration time required for the inverter to accelerate from 0 Hz to the upper limit
+frequency (F0-09).
+F0-05  Deceleration Time  0  Depends
+on model  500.0  second  ☆
+The deceleration time required for the inverter to decelerate from the upper limit
+frequency (F0-09) to 0 Hz.
+F0-06  Control Terminal DC Output
+Selection  0  1  2  -  ★
+0 ： 5V  Output 5V DC voltage
+1 ： 10V  Output voltage of 10V DC
+2 ： 24V  Output DC 24V voltage
+F0-07  Analog Input and Output
+Signal Format  0000  0000  5555  -  ★
+0 ： 0-10V  1 ： 0-20mA 2 ： 4-20mA  3: 20-4mA  4: 20-0mA  5:10-0V
+Bit: AI1; Ten bits: AI2 ; Hundreds: AO1 ;  Thousands: AO2
+F0-08  Stop Mode  0  0  1  -  ☆
+0: Ramp to stop. After the shutdown command is effective, the inverter reduces the
+output frequency according to the deceleration time and stops after the frequency drops
+to 0.
+1: Coast to stop. After the shutdown command is effective, the inverter immediately stops
+the output, and the motor stops freely according to the mechanical inertia.
+F0-09  Frequency Upper limit  F0-10  50.0  599.9  Hz  ☆
+Inverter maximum output frequency
+F0-10  Frequency Lower limit  0.0  0.0  F0-09  Hz  ☆
+Inverter minimum output frequency
+F0-11  Torque Boost  0  Depends
+on model  30.0  %  ☆
+Under the V/F control mode, the output torque of the motor is relatively low in low
+frequency operation, which can increase the value of this parameter; However, the torque
+boost setting is too large, the motor is easy to overheat, and the inverter is easy to
+overcurrent.
+When the load is heavy and the starting torque of the motor is insufficient, it is
+recommended to increase this parameter. When the load is light, the torque can be
+reduced.
+F0-12  Torque Boost Cut-off
+Frequency  0.0  50.0  F8-03  Hz  ★
+
+=====PAGE 34 (printed null)
+900 Series AC Drive User Manual
+- 34 -
+Below this frequency, the torque boost is effective, and beyond this set frequency, the
+torque boost fails.
+F0-13  Switching Frequency  1.0  Depends
+on model  16.0  kHz  ☆
+This function adjusts the switching frequency of the inverter. When the switching
+frequency is low, the higher harmonic component of the output current increases, the
+motor loss increases, and the motor temperature rises. When the switching frequency is
+high, the motor loss decreases, the motor temperature rises, but the frequency is
+changed.
+The loss of inverter increases, the temperature rise of inverter increases, and the
+interference increases.
+F0-14  Output Phase Sequence  0  0  1  -  ☆
+0 ： U V W  1 ： U W V
+Changing this parameter can change the motor direction without changing the motor
+wiring.
+Note: after the parameter is initialized, the parameter will return to the default value of 0,
+so be careful on some occasions where it is forbidden to change the motor direction.
+F0-15  Speed Tracking Start  0  0  1  -  ☆
+0: Disable  1: Enable
+When the inverter starts, there is a short time delay to detect the motor speed and control
+it from the current motor speed.
+F0-16  Preset Frequency  F0-10  F8-03  F0-09  Hz  ☆
+When the target frequency setting mode is selected as "Digital Setting", this parameter
+sets the initial value for the target frequency of the inverter.
+After the target frequency is modified by the "Up/Down" key, this parameter will become
+invalid temporarily, unless this parameter is modified again.
+F0-17  Low Frequency Action  0  0  2  -  ☆
+0 ： Running at lower limit frequency
+1 ： Stop
+2 ： Zero-speed running
+When the set frequency is below the lower limit frequency, the running state of the
+inverter can be selected by this parameter.
+F0-18  Command Source &
+Frequency Source Binding  000  000  999  -  ☆
+Bit: operation panel command binding frequency source selection
+0: no binding
+1: The up and down keys on the panel are given (the terminal UP/DOWN can be modified,
+and the power-off memory)
+2: Panel potentiometer
+3 ： AI1
+4 ： AI2
+5: Multi-speed
+6 ： PLC
+7: Constant pressure water supply PID
+8: General PID
+
+=====PAGE 35 (printed null)
+900 Series AC Drive User Manual
+- 35 -
+9: Communication Settings
+Ten bits: terminal command binding frequency source selection
+Hundred bits: communication command binding frequency source selection
+Define the binding combination between three running command channels and nine
+channels with given frequencies, which is convenient to realize synchronous switching.
+F0-19  JOG/REV Key Function
+Selection  0  0  4  -  ★
+0 ： JOG/REV invalid
+1 ： The command channel of the operation panel is switched with the remote command
+channel (terminal command channel or communication command channel).
+2 ： Forward/reverse switching
+3 ： Forward jogging
+4 ： Reverse jogging
+The JOG/REV key is a multi-function key, which can be switched during stop and
+operation. (only available on the 900M key panel). The 900G key panel requires both the
+"Increase " key and "Decrease " key to be pressed together for switching.
+F0-20  STOP Key Function  0  1  1  -  ☆
+0: Only in keyboard operation mode, the stop function of it is effective.
+1: Under any operation mode, the stop function of it is effective.
+F0-21  Jog Running Frequency  0.0  2.0  F0-09  Hz  ☆
+F0-22  Jog Acceleration Time  0.0  20.0  6500.0  second  ☆
+F0-23  Jog Deceleration Time  0.0  20.0  6500.0  second  ☆
+F0-21-F0-23 defines the given frequency and acceleration and deceleration time of the
+inverter when jogging.
+F0-24  Reset to Factory Parameters  0  0  65535  -  ★
+1: Reset the factory settings.
+F0-25  Select the Display Menu
+Type.  1  1  3  -  ★
+1: Default menu
+2: Only the parameters changed by the user are displayed.
+3: Reserved
+F0-26  Water pump running mode  0  1  19  -  ★
+0: Manual mode
+1: One for use, one for standby (single pump)
+2: 2 inverters network master
+3: 3 inverters network master
+4: 4 inverters network master
+5: 5 inverters network master
+6: Reserved
+7: Two pumps auto alternate)
+8: Reserved
+9: Reserved
+11: Slave 1 in the network setting (Standby master)
+12: Slave 2 in the network
+13: Slave 3 in the network
+
+=====PAGE 36 (printed null)
+900 Series AC Drive User Manual
+- 36 -
+14: Slave 4 in the network
+15: Reserved
+16: Reserved
+17: One for inverter, one for grid power (Fix pump 1 for inverter, pump 2 for grid power, do
+not alternate)
+18: One for inverter, two for grid power (Fix pump 1 for inverter, pump 2, pump 3 for grid
+power, do not alternate)
+19: One for inverter, three for grid power (Fix pump 1 for inverter, pump 2, pump 3, pump
+4 for grid power, do not alternate)
+5.2.2 F1 Parameter Group – Terminal IO Function Selection
+Parameter  Description  Minimum
+Value
+Default
+Value
+Maximum
+Value  Unit  Change
+Permission
+F1-00  DI1 Terminal Function
+Selection  0  1  35  -  ★
+0: No function
+1: Forward running FWD
+2: Reverse running REV
+3: Three-wire mode running control
+4: Two-wire/three-wire switching
+5: Forward jog
+6: Reverse jog
+7: Fault reset
+8:  Multi-segment command terminal 1
+9:  Multi-segment command terminal 2
+10: Multi-segment command terminal 3
+11: External stop terminal, which is only valid for panel control.
+12: Coast stop, that is, blocking PWM output.
+13: External terminal shutdown (deceleration time 2, which is valid at any time)
+14: Emergency stop
+15: DC braking
+16: Deceleration DC braking
+17: External fault input (normally open)
+18: External fault normally closed input
+19: Running Command switch terminal 1
+F0-00=1 or 2 is effective.
+When F0-00=1, this terminal can perform external terminal and keyboard key switching.
+When F0-00=2, this terminal can perform communication and keyboard key switching.
+20: Command source switching terminal 2
+Used for switching between external terminal control and communication command
+control; If the current state is set to external terminal control, when this terminal is valid,
+switch to communication command control and vice versa.
+21: Terminal UP
+22: Terminal DOWN
+23: UP/DOWN setting is cleared.
+
+=====PAGE 37 (printed null)
+900 Series AC Drive User Manual
+- 37 -
+24: Frequency source switching
+25: Switch between the main frequency source and the preset frequency.
+26: Switch between auxiliary frequency source and preset frequency.
+27: Effective terminal for frequency setting.
+28: Acceleration and deceleration are prohibited.
+29: Acceleration and deceleration time selection terminal 1
+30: PLC status reset
+31: Speed control/torque control switching
+32: Empty-water
+33: Full-water
+34: Secondary target pressure setting
+35: Running pause
+F1-01  DI2 Terminal Function
+Selection  0  2  35  -  ★
+Same as DI1.
+F1-02  DI3 Terminal Function
+Selection  0  8  35  -  ★
+Same as DI1.
+F1-03  DI4 Terminal Function
+Selection  0  9  35  -  ★
+Same as DI1.
+F1-04  DI5 Terminal Function
+Selection  0  10  35  -  ★
+Same as DI1.
+F1-05  DI5-DI1 Terminal Effective
+Mode Selection  00000  00000  11111  -  ★
+0: The high level is active.
+1: The low level is active.
+Each of the five digits can only choose 0 or 1, which respectively correspond to the valid
+modes of DI1~5. They are:
+Bit: DI1; Ten: DI2; Hundreds: DI3; Thousands: DI4; Ten thousand bits: DI5
+F1-06  Terminal Command Mode  0  0  3  -  ★
+0 : Two-wire mode 1  1 : Two-wire mode 2
+2 : Three-wire mode 1  3 : Three-wire mode 2
+F1-07  DO Output Terminal
+Effective State Selection  0000  0000  1111  -  ☆
+0: Positive logic
+1. Negative logic
+Bit: Relay 1
+Ten bits: Relay 2
+Hundreds: DO1
+Thousand: DO2
+Define the output logic of the output terminal.
+F1-08  Relay 1 Output Function
+Selection  0  1  27  -  ☆
+
+=====PAGE 38 (printed null)
+900 Series AC Drive User Manual
+- 38 -
+The output terminal of each relay can provide 27 kinds of functions, these functions are:
+0: No function.
+1. The inverter is running.  The inverter is in the running state, and when there is an output
+frequency (which can be zero), it outputs the ON signal.
+2: Inverter fault.  When the inverter fails and stops, it outputs the ON signal.
+3: Ready for running.  When the power supply of the main circuit and control circuit of the
+inverter is stable, and the inverter does not detect any fault information, and the inverter is
+in an operational state, the ON signal is output.
+4: The upper limit frequency arrives.  When the operating frequency reaches the upper
+limit frequency, the ON signal is output.
+5: The lower limit frequency arrives.  When the operating frequency reaches the lower
+limit frequency, the ON signal is output. This signal is OFF in the stop state.
+6: Torque limit.  In the speed control mode of the inverter, when the output torque reaches
+the torque limit, the inverter is in the stall protection state and outputs the ON signal at
+the same time.
+7. Communication control.  The relay output is controlled by Modbus RTU (RS485).
+8: Motor overload pre-alarm.  Output ON signal before motor overload protection action.
+9: Inverter overload pre-alarm.  Output the ON signal 10s before the overload protection
+of the inverter occurs.
+10: Timed time exceeded.  When the running time of the inverter reaches the set timing
+time (F6-05), it outputs the ON signal.
+11: The frequency reaches 1.  When the operating frequency of the inverter reaches the
+set value of F1-12, it outputs the ON signal.
+12: The frequency reaches 2.  When the operating frequency of the inverter reaches the
+set value of F1-14, it outputs the ON signal.
+13: The current reaches 1.  When the running current of the inverter reaches the set value
+of F1-16, it outputs the ON signal.
+14: The current reaches 2.  When the running current of the inverter reaches the set value
+of F1-18, the ON signal is output.
+15: AI1 input exceeds the upper or lower limits.
+16~19: Reserved
+20: Pump 1 runs in inverter mode.  Water supply mode judges pump 1 runs in inverter
+mode, output ON signal
+21: Pump 1 runs in grid power mode.  Water supply mode judges pump 1 runs in grid
+power mode, output ON signal
+22: Pump 2 runs in inverter mode.  Water supply mode judges pump 2 runs in inverter
+mode, output ON signal
+23: Pump 2 runs in grid power mode.  Water supply mode judges pump 2 runs in grid
+power mode, output ON signal
+24: Pump 3 runs in inverter mode.  Water supply mode judges pump 3 runs in inverter
+mode, output ON signal
+25: Pump 3 runs in grid power mode.  Water supply mode judges pump 3 runs in grid
+power mode, output ON signal
+26: Pump 4 runs in inverter mode.  Water supply mode judges pump 4 runs in inverter
+mode, output ON signal
+
+=====PAGE 39 (printed null)
+900 Series AC Drive User Manual
+- 39 -
+27: Pump 4 runs in grid power mode.  Water supply mode judges pump 4 runs in grid
+power mode, output ON signal
+F1-09  Relay 2 Output Function
+Selection  0  2  27  -  ☆
+Same as F1-08
+F1-10  DO1 Collector Output
+Function Selection  0  1  27  -  ☆
+Same as F1-08
+F1-11  DO2 Collector Output
+Function Selection  0  2  27  -  ☆
+Same as F1-08
+F1-12  Relay Output Reaches
+Frequency Setting Value 1  0.0  50.0  F0-09  Hz  ☆
+Set value of frequency when relay output function is set to 11. Set the ratio based on the
+rated value.
+F1-13  Relay Output Reaches
+Frequency Bandwidth 1  0.0  0.0  100.0  %  ☆
+When the output frequency of the inverter is within the positive and negative detection
+width of any set arrival frequency, the relay 1 outputs ON signal.
+F1-14  Relay Output Reaches
+Frequency Setting Value 2  0  100  F0-09  Hz  ☆
+Set value of frequency when relay output function is set to 12. Set the ratio based on the
+rated value.
+F1-15  Relay Output Reaches
+Frequency Bandwidth 2  0.0  0.0  100.0  %  ☆
+When the output frequency of the inverter is within the positive and negative detection
+width of any set arrival frequency, the relay 2 outputs ON signal.
+F1-16  The Relay Output Reaches
+Current Set Value 1  0.0  100.0  300.0  %  ☆
+Set value of frequency or current when relay output function is set to 13. Set the ratio
+based on the rated value.
+F1-17  Relay Output Reaches
+Current Bandwidth 2  0.0  0.0  300.0  %  ☆
+When the output current of the inverter is within the set positive and negative detection
+width of any arrival current, the relay 1 outputs ON signal.
+F1-18  The Relay Output Reaches
+Current Set Value 2  0.0  100.0  300.0  %  ☆
+Set value of frequency or current when relay output function is set to 14. Set the ratio
+based on the rated value.
+F1-19  Relay Output Reaches
+Frequency Bandwidth 2  0.0  0.0  300.0  %  ☆
+When the output current of the inverter is within the set positive and negative detection
+width of any arrival current, the relay 2 outputs ON signal.
+F1-20  Relay 1 Output Delay Time  0.0  0.0  3600.0  second  ☆
+
+=====PAGE 40 (printed null)
+900 Series AC Drive User Manual
+- 40 -
+Delay time of relay 1 from state change to actual output change.
+F1-21  Relay 2 Output Delay Time  0.0  0.0  3600.0  second  ☆
+Delay time of relay 2 from state change to actual output change.
+F1-22  DO1 Output Delay Time  0.0  0.0  3600.0  second  ☆
+The delay time from the state change of the collector DO1 to the actual output change
+F1-23  DO2 Output Delay Time  0.0  0.0  3600.0  second  ☆
+The delay time from the state change of the collector DO2 to the actual output change
+F1-24  AI 1 Gain  0  1.00  20.00  -  ★
+Analog input AI1 signal gain multiple, maximum gain up to 20 times. For example, AI1 is
+used as the target frequency setting, F0-07 is set to "0:0-10V", and this parameter is set to
+2.00; Then a 5V input signal can make the Inverter run at the maximum frequency.
+F1-25  AI 1 Offset  -10.00  0.00  10.00  V  ★
+Analog input 1 signal offset value, the maximum offset can be +/-10V. For example, AI1 is
+set as the target frequency, F0-07 is set to "0:0-10V", and this parameter is set to 2.0; Then
+the 8V input signal can make the inverter run at the maximum frequency. When F0-07 is
+set to "1:0-20mA", 10.0V of this parameter indicates an offset of 20mA, and other values
+also correspond linearly. When F0-07 is set to "2:4-20mA", 10.0V of this parameter
+indicates the offset of 16mA, and the other values also correspond linearly.
+Internal calculated value of AI1 = actual input *F1-24+F1-25
+F1-26  AI 2 Gain  0  1.00  20.00  -  ★
+Analog input 2 signal gain multiple, maximum gain up to 20 times.
+F1-27  AI 2 Offset  -10.0  0  10.0  V  ★
+Analog input 2 signal offset value, maximum offset +/-10V.
+F1-28  AO1 Output Function
+Selection  0  0  6  -  ☆
+0: Running frequency.
+1: (Target) Set frequency.
+2: Output current. 100% AO output signal corresponds to 2 times the rated current.
+3: Output torque. 100% AO output signal corresponds to 2 times the rated torque. This
+value is the absolute value of torque.
+4: Output power. 100% AO output signal corresponds to 2 times the rated power.
+5: Output voltage. 100% AO output signal corresponds to 1.2 times the rated voltage.
+6. Communication control. The AO output signal is controlled by Modbus RTU (RS485).
+F1-29  AO 2 Output Function
+Selection  0  1  6  -  ☆
+Same as AO1
+F1-30  AO 1 Gain  0  1.00  20.00  -  ☆
+Analog output 1 signal gain multiple, maximum gain up to 20 times.
+F1-31  AO 1 Offset  -10.00  0.00  10.00  V  ☆
+Analog output 1 signal bias value, the maximum bias can be +/-10V.
+F1-32  AO 2 Gain  0  1.00  20.00  -  ☆
+Analog output 2 signal gain multiple, maximum gain up to 20 times.
+F1-33  AO 2 Offset  -10.00  0.00  10.00  V  ☆
+Analog output 2 signal bias value, maximum bias +/-10V.
+
+=====PAGE 41 (printed null)
+900 Series AC Drive User Manual
+- 41 -
+F1-34  DI delay time  0.000  0.010  1.000  s  ☆
+5.2.3 F2 Parameter Group - VF Curve
+Parameter  Description  Minimum
+Value
+Default
+Value
+Maximum
+Value  Unit  Change
+Permission
+F2-00  VF curve setting  0  0  2  -  ★
+0: straight line v/f.
+1: multipoint v/f.
+2: square v/f.
+Note: F2-00 ~F2-10 is only valid when F8-06 selects "V/F Control".
+F2-01  Multi-point VF Frequency
+Point 1  0.0  0.0  F2-03  Hz  ★
+F2-02  Multi-point VF Voltage Point 1  0  0  100.0  %  ★
+F2-03  Multi-point VF Frequency
+Point 2  F2-01  0  F2-05  Hz  ★
+F2-04  Multi-point VF Voltage Point 2  0  0  100.0  %  ★
+F2-05  Multi-point VF Frequency
+Point 3  F2-03  0  F2-07  Hz  ★
+F2-06  Multi-point VF Voltage Point 3  0  0  100.0  %  ★
+F2-07  Multi-point VF Frequency
+Point 4  F2-05  0  F2-09  Hz  ★
+F2-08  Multi-point VF Voltage Point 4  0  0  100.0  %  ★
+F2-09  Multi-point VF Frequency
+Point 5  F2-07  0  F0-09  Hz  ★
+F2-10  Multi-point VF Voltage Point 5  0  0.0  100.0  %  ★
+F2-01~F2-10 parameters define five V/F curves.
+Voltage relationship: the voltage of each section can be set arbitrarily and can be assigned
+reasonably according to the load characteristics.
+Frequency relationship: the multi-point V/F curve of five-segment frequency >
+four-segment frequency > three-segment frequency > two-segment frequency >
+one-segment frequency.
+Multi-point VF should be set according to the load characteristics of the motor.
+When the low-frequency voltage is set too high, the motor may overheat or even burn out,
+and the inverter may be over-run or over-current protected.
+F2-11  VF Over-current Stall Action
+Current  50  150  200  %  ★
+F2-12  VF Over-current Stall Enable  0  1  1  -  ★
+0: Disable
+1: Enable
+F2-13  VF Over-current Stall
+Inhibition Gain  0  20  100  -  ☆
+F2-14  VF Multiple Over-current Stall
+Action Current Compensation
+Coefficient
+50  50  200  -  ★
+In high frequency area, the motor drive current is small, relative to the rated frequency,
+
+=====PAGE 42 (printed null)
+900 Series AC Drive User Manual
+- 42 -
+under the same stall current, motor speed drop is large, in order to improve the running
+characteristics of the motor, can reduce the rated frequency above stall current action, in
+some centrifuge such as running frequency is higher, need several times flux weakening
+and load the occasion of moment of inertia is larger, this method has good effect on
+acceleration.
+F2-15  VF Overexcitation Gain  0  64  200  -  ☆
+In the process of inverter deceleration, over magnetizing control can restrain the rise of bus
+voltage and avoid overvoltage fault. The greater the over magnetizing gain, the stronger
+the inhibition effect.
+When the inverter is prone to overvoltage alarm during deceleration, it is necessary to
+increase the over magnetizing gain. However, the over magnetizing gain is too large, which
+easily leads to the increase of output current, so it needs to be weighed in application.
+When the inertia is small, there will be no voltage rise during motor deceleration, so it is
+recommended to set the over magnetizing gain to 0. To places that have requirements of
+braking resistor, also suggested that over magnetizing gain is set to 0.
+F2-16  VF Overvoltage Stall Action
+Voltage  200.0  Depend
+on model  2000.0  V  ★
+VF overvoltage stall running voltage.
+F2-17  VF Overvoltage Stall Enable  0  1  1  -  ★
+0: Disable
+1: Enable
+F2-18  VF Overvoltage Stall
+Inhibition Frequency Gain  0  30  100  -  ☆
+Increasing F2-18 will improve the control effect of DC bus voltage, but the output
+frequency will fluctuate. If the output frequency fluctuates greatly, F2-18 can be
+appropriately reduced.
+F2-19  VF Overvoltage Stall
+Inhibition Voltage Gain  0  30  100  -  ☆
+Increasing F2-19 can reduce the overshoot of DC bus voltage.
+F2-20  Maximum Rising Limiting
+Frequency of Overpressure
+Stall
+0  5  50  Hz  ★
+Limit of maximum rising frequency of overvoltage inhibition.
+5.2.4 F3 Parameter Group – Start/Stop Process Control
+Parameter  Description  Minimum
+Value
+Default
+Value
+Maximum
+Value  Unit  Change
+Permission
+F3-00  Start Frequency  0.0  0.0  10.0  Hz  ☆
+To ensure the motor torque at start, please set the appropriate start frequency.
+F3-01  Start Frequency Hold Time  0.0  0.0  100.0  second  ★
+In order to fully establish the magnetic flux when the motor starts, it is necessary to keep
+the start frequency for a certain time.
+F3-02  Start DC Braking Current  0  0  100  %  ★
+The greater the DC braking current, the greater the braking force. When set to 0, the
+
+=====PAGE 43 (printed null)
+900 Series AC Drive User Manual
+- 43 -
+inverter will still perform the braking process for F3-03.
+Set the time, but there is no braking force at this time. This parameter value corresponds
+to the rated current percentage.
+F3-03  Start DC Braking Time  0.0  0.0  100.0  second  ★
+Duration of starting DC braking.
+F3-04  DC Braking Initial Frequency
+at Stop  0.0  0.0  F0-09  Hz  ☆
+In the process of deceleration and stop, when the running frequency decreases to this
+frequency, the DC braking process begins.
+F3-05  DC Braking Waiting Time at
+Stop  0.0  0.0  100.0  second  ☆
+After the running frequency is reduced to the starting frequency of stopping DC braking,
+the inverter stops outputting for a period of time before starting DC.
+Braking process. It is used to prevent overcurrent and other faults that may be caused
+when DC braking is started at a higher speed.
+F3-06  DC Braking Current at Stop  0  0  100  %  ☆
+There are two situations of DC braking current relative to the basic value.
+1. When the rated current of the motor is less than or equal to 80% of the rated current of
+the inverter, it is the base value of the percentage relative to the rated current of the
+motor.
+2. When the rated current of the motor is greater than 80% of the rated current of the
+inverter, it is percentage relatively 80% inverter rated current to the base value.
+F3-07  DC Braking Time  0.0  0.0  100.0  second  ☆
+The duration of DC braking. When this value is 0, the DC braking process is cancelled.
+F3-08  Acceleration and
+Deceleration Mode  0  0  1  -  ★
+0: linear acceleration and deceleration. The output frequency increases or decreases in a
+straight line.
+1: S curve acceleration and deceleration. When the target frequency is fixed, the output
+frequency increases or decreases according to the S curve.
+F3-09  S-curve Initial Time
+Proportion  0.0  30.0  100.0  %  ★
+The proportion of time at the beginning of curve acceleration and deceleration, during
+which the slope of output frequency change gradually increases. It should satisfy with
+F3-10 ： F3-09+F3-10<100% 。
+F3-10  S-curve End Time
+Proportion  0.0  30.0  100.0  %  ★
+The proportion of the time at the end of the acceleration and deceleration of the S-curve,
+during which the slope of the output frequency change decreases gradually. In time
+between the beginning and the end, the inverter output frequency is increased or
+decreased according to the straight line.
+F3-11  Acceleration Time 2  0.1  Depends
+on model  6500.0  second  ☆
+F3-12  Deceleration Time 2  0.1  Depends
+on model  6500.0  second  ☆
+
+=====PAGE 44 (printed null)
+900 Series AC Drive User Manual
+- 44 -
+F3-13  Acceleration & Deceleration
+Time 1-2 Switching
+Frequency Point
+0.0  0.0  F0-09  Hz  ☆
+It is used to select different acceleration and deceleration time according to the running
+frequency range, not through DI terminal.
+F3-14  Skip Frequency  0.0  0.0  F0-09  Hz  ☆
+When the target frequency is set within the skip frequency range, the final running
+frequency of the inverter will avoid the range and run stably with the boundary value
+outside the range. It can be used to avoid the frequency resonance point of mechanical
+equipment. This parameter is the reference value of skip frequency, and the range is set by
+F3-15.
+F3-15  Skip Frequency Bandwidth  0.0  0.0  F0-09  Hz  ☆
+Used in combination with F3-14, set specific skip frequency range (F3-14-F3-15) ~ (F3-14+
+F3-15). After this range is enabled, the actual operating frequency of the inverter is a
+hysteresis curve: when the frequency rises from low to within the range, the frequency
+remains at the low frequency boundary; When the frequency decreases from high to
+within the range, the frequency remains at the high frequency boundary;
+F3-16  Forward/Reverse Dead
+Time  0.0  0.0  3000.0  second  ☆
+Set the transition time at the output of 0Hz during the forward and reverse transitions of
+the inverter.
+F3-17  Reverse Control  Inversion
+control
+Inversion
+control
+Inversion
+control
+Inversion
+control
+Inversion
+control
+0: Reverse is allowed.  1: Reverse is prohibited.
+F3-18  Brake Unit Duty  0  50  100  %  ☆
+It is used to adjust the duty cycle of the braking unit. If the braking utilization rate is high,
+the braking unit has a high duty cycle and strong braking effect. However, the bus voltage
+of the inverter fluctuates greatly in the braking process. When set to 0, brake unit is not
+enabled.
+F3-19  Brake Unit Action Voltage  200.0  Depends
+on model  1000.0  V  ☆
+Built-in starting voltage of braking unit action, after the bus voltage is higher than this
+voltage, the braking unit will start to act.
+F3-20  Speed Tracking Mode  0  1  2  -  ★
+0: Start with the shutdown frequency. Tracking down from the frequency when the power
+is off.
+1: Start from the preset frequency. Track upward from the preset frequency and use it
+when the power is cut off for a long time and then restarted.
+2: Start with the maximum frequency. Tracking down from the maximum frequency,
+generally used by generating loads.
+F3-21  Speed Tracking  1  50  100  -  ☆
+When speed tracking starts, set the speed of speed tracking. The larger the parameter is,
+the faster the tracking speed is. However, if the parameter is too large, the tracking effect
+may be unreliable.
+F3-22  Speed Tracking Current  0  Depends  1000  -  ☆
+
+=====PAGE 45 (printed null)
+900 Series AC Drive User Manual
+- 45 -
+Loop Kp  on model
+F3-22-F3-26 parameters need not be set by users.
+F3-23  Speed Tracking Current
+Loop ki  0  Depends
+on model  1000  -  ☆
+F3-24  Speed Tracking Current
+Value  5  Depends
+on model  200  %  ☆
+F3-25  Speed Tracking Current
+Lower Limit  5  30  100  %  ★
+F3-26  Speed Tracking Voltage
+Rising Time  0.5  1.1  3.0  second  ★
+F3-27  Demagnetizing Time  0.00  1.00  5.00  second  ★
+The demagnetizing time is the minimum interval between stop and start-up, and this
+function will take effect only after the speed tracking function is turned on.
+If the setting value is too small, it is easy to cause overvoltage fault.
+5.2.5 F4 Parameter Group – Multi-segment Command
+Parameter  Description  Minimum
+Value
+Default
+Value
+Maximum
+Value  Unit  Change
+Permission
+F4-00  Multi-segment Command 0
+Frequency Source  0  0  6  -  ☆
+0: Digital setting (F4-01)
+1: Preset frequency
+2: Panel potentiometer
+3: AI1
+4: AI2
+5: PID
+6: Reserved
+F4-01  Multi-segment Command 0
+Frequency  -F0-09  0.0  F0-09  Hz  ☆
+F4-02  Multi-segment Command 1
+Frequency  -F0-09  0.0  F0-09  Hz  ☆
+F4-03  Multi-segment Command 2
+Frequency  -F0-09  0.0  F0-09  Hz  ☆
+F4-04  Multi-segment Command 3
+Frequency  -F0-09  0.0  F0-09  Hz  ☆
+F4-05  Multi-segment Command 4
+Frequency  -F0-09  0.0  F0-09  Hz  ☆
+F4-06  Multi-segment Command 5
+Frequency  -F0-09  0.0  F0-09  Hz  ☆
+F4-07  Multi-segment Command 6
+Frequency  -F0-09  0.0  F0-09  Hz  ☆
+F4-08  Multi-segment Command 7
+Frequency  -F0-09  0.0  F0-09  Hz  ☆
+Multi-segment command can be used in three occasions: as frequency source, as voltage
+
+=====PAGE 46 (printed null)
+900 Series AC Drive User Manual
+- 46 -
+source of VF separation, and as setting source of process PID.
+In three applications, the dimension of multi-segment command is relative value, ranging
+from-100.0% to 100.0%, which is the percentage of relative maximum frequency when
+used as frequency source; When used as VF separation voltage source, is the percentage
+relative to the rated voltage of the motor; Since PID setting is originally relative value,
+multi-segment command as PID setting source does not require dimensional conversion.
+F4-09  PLC Running Mode  0  0  2  -  ☆
+0 ： Stop at the end of a single running.
+1 ： The final value is maintained at the end of a single running
+2 ： Keep circulating
+F4-10  PLC Power Off Memory
+Selection  00  00  11  -  ☆
+Bit: power-down memory selection
+0: Don't remember when power is off.
+1: Power-off memory
+Ten Bit: Stop memory selection
+0: Don't remember when power is off.
+1. Power-off memory
+F4-11  PLC Running Time Unit  0  0  1  -  ☆
+0 ： s(second)  1 ： h(hours)
+F4-12  PLC Segment 0 Running
+Time  0  0  6500.0  s(h)  ☆
+F4-13  PLC Segment 0
+Acceleration &
+Deceleration time selection
+0  0  1  -  ☆
+0: Acceleration and deceleration time 1
+1: Acceleration and deceleration time 2
+F4-14  PLC Segment 1 Running
+Time  0  0  6500.0  s(h)  ☆
+F4-15  PLC Segment 1
+Acceleration &
+Deceleration Time
+Selection
+0  0  1  -  ☆
+Same as F4-13
+F4-16  PLC Segment 2 Running
+Time  0  0  6500.0  s(h)  ☆
+F4-17  PLC Segment 2
+Acceleration &
+Deceleration Time
+Selection
+0  0  1  -  ☆
+Same as  F4-13
+F4-18  PLC Segment 3 Running
+Time  0  0  6500.0  s(h)  ☆
+
+=====PAGE 47 (printed null)
+900 Series AC Drive User Manual
+- 47 -
+F4-19  PLC Segment 3
+Acceleration &
+Deceleration Time
+Selection
+0  0  1  -  ☆
+Same as  F4-13
+F4-20  PLC Segment 4 Running
+Time  0  0  6500.0  s(h)  ☆
+F4-21  PLC Segment 4
+Acceleration &
+Deceleration Time
+Selection
+0  0  1  -  ☆
+Same as  F4-13
+F4-22  PLC segment 5 Running
+Time  0  0  6500.0  s(h)  ☆
+F4-23  PLC segment 5 Acceleration
+& Deceleration Time
+Selection
+0  0  1  -  ☆
+Same as  F4-13
+F4-24  PLC segment 6 Running
+Time  0  0  6500.0  s(h)  ☆
+F4-25  PLC segment 6 Acceleration
+& Deceleration Time
+Selection
+0  0  1  -  ☆
+Same as  F4-13
+F4-26  PLC segment 7 Running
+Time  0  0  6500.0  s(h)  ☆
+F4-27  PLC segment 7 Acceleration
+& Deceleration Time
+Selection
+0  0  1  -  ☆
+Same as F4-13
+5.2.6 F5 Parameter Group – PID & Constant Pressure Water Supply Parameters
+Parameter  Description  Minimum
+Value
+Default
+Value
+Maximum
+Value  Unit  Change
+Permission
+F5-00  PID Reference Source  0  0  4  -  ☆
+This parameter is used to select the target quantity given channel during PID control.
+0: F5-01 setting  1 ： AI1  2 ： AI2
+3: Panel potentiometer  4: Communication
+No matter which channel, the set target quantity is a relative value, and the set range is
+0.0%~100.0%.
+F5-01  PID Reference Value
+(Actual Pressure)  0.1  3.5  1000.0  Bar  ☆
+Through the value of this parameter, a given amount of PID control is set.
+F5-02  PID Feedback Source  0  0  4  -  ☆
+
+=====PAGE 48 (printed null)
+900 Series AC Drive User Manual
+- 48 -
+0: AI1  1: AI2  2: Communication
+3: DC bus voltage  4: Temperature
+This parameter is used to select the feedback quantity in PID control. For a given channel,
+the feedback quantity is relative as the given quantity.
+F5-03  PID Direction  0  0  1  -  ☆
+0: Positive effect. When the feedback signal of PID is less than a given amount, the output
+frequency of the inverter increases.
+1: Negative effect. When the feedback signal of PID is less than a given amount, the output
+frequency of inverter decreases.
+The function of PID control is to make the given quantity and the feedback quantity the
+same. Through this parameter, you can set the running trend of the inverter when there is
+a difference between the given quantity and the feedback quantity.
+F5-04  Acceleration PID
+Proportional Gain Kp  0.0  20.0  6500.0  -  ☆
+The proportional gain of PID controller determines the adjustment strength of the whole
+PID controller. The greater Kp, the greater the adjustment strength. If the value is high,
+even if the difference between the given and the feedback is small, the transducer can
+respond quickly, and the output frequency can vary greatly. But too high a value can cause
+instability.
+F5-05  Acceleration PID Integral
+Time Ki  0.01  0.80  10.00  second  ☆
+The integral time of PID controller determines the integral adjustment intensity of PID
+controller. The shorter the integral time, the greater the adjustment intensity. If this
+parameter is set too small, the system may shock easily.
+F5-06  Deceleration PID
+Proportional Gain Kp  0.0  200.0  6500.0  -  ☆
+Same as F5-04
+F5-07  Deceleration PID Integral
+Time Ki  0.01  0.01  10.00  second  ☆
+Same as F5-05
+F5-08  Sensor Type  0  0  3  -  ☆
+0 ： 0~10V  1 ： 4~20mA
+2 ： 0~5V  3 ： 0.5V~4.5V
+F5-09  Sensor Range  0.0  16.0  25.0  Bar  ☆
+The maximum pressure measuring range of the sensor, the sensor nameplate or dial are
+marked.
+F5-10  Sensor Zero Correction  -10.0  0.0  10.0  Bar  ☆
+This parameter is set when there is no pressure in the pipeline and pressure is fed back by
+the inverter.
+F5-11  Sensor Full-scale
+Correction  -10.0  0.0  10.0  Bar  ☆
+This parameter is set when the pressure displayed on the pressure gauge is inconsistent
+with the feedback pressure after the pipeline is pressurized.
+F5-12  Sleep Frequency  0  20.0  F0-09  Hz  ☆
+When the inverter detects that the feedback pressure reaches the target value, the
+
+=====PAGE 49 (printed null)
+900 Series AC Drive User Manual
+- 49 -
+frequency will be reduced to this parameter value, and the inverter will sleep and stop.
+F5-13  Sleep Delay Time  0.0  0.0  1200.0  second  ☆
+During the running of the inverter, when the set frequency is less than f5-12 sleep
+frequency, after the F5-13 sleep delay time, the inverter enters the sleep state and
+automatically stops.
+F5-14  Sleep Pressure Offset  0  8  100  %  ☆
+Percentage relative to target pressure.
+F5-15  Frequency Step of Sleep
+Deceleration  0.0  3.0  F0-09  Hz  ☆
+Effective at constant or critical pressure.
+F5-16  Sleep Deceleration Time
+Delay  60.0  60.0  600.0  second  ☆
+Note: f5-14 ~ f5-16 is effective when the pressure fluctuation is small.
+F5-17  Wake Up Pressure  0  80  100  %  ☆
+Wake up pressure value, relative to feedback pressure; For example, set it to 80%, the
+feedback pressure is 10 bar, and the pressure wake-up is 8 bar.
+F5-18  Pressure Upper Limit  0  150  300  %  ☆
+The percentage of the target pressure, exceeding this pressure, an overpressure fault err53
+is reported.
+F5-19  Water Shortage Detection
+Time  0.0  0.0  1200.0  second  ☆
+It takes time from water pump water shortage to alarm detection. When set to 0.0, disable
+the water shortage protection function.
+F5-20  Water Shortage Detection
+Frequency  0  45.0  F0-09  Hz  ☆
+When the frequency reaches the set value, the current is lower than the set value of F5-21
+or the pressure is lower than the set value of F5-22, Err52 water shortage fault is reported.
+F5-21  Water Shortage Detection
+Current  0  0  200  %  ☆
+Percentage of motor rated current. When the current is lower than this value, it is
+reported that err52 is short of water.
+When set to non 0, the water shortage function is enabled.
+F5-22  Water Shortage Detection
+Pressure  0  20  100  %  ☆
+Percentage of target pressure. When the pressure is lower than this, it is reported that
+err52 is short of water.
+F5-23  Water Shortage Restart
+Time  1  20  2000  Min  ☆
+The inverter will restart automatically after this time.
+F5-24  Water Shortage Auto
+Restart Pressure  0  50  100  %  ☆
+Percentage of target pressure.
+F5-25  Antifreeze Function  0  0  1  -  ☆
+0: Disable  1 ： enable
+F5-26  Antifreeze Running  2.0  10.0  F0-09  Hz  ☆
+
+=====PAGE 50 (printed null)
+900 Series AC Drive User Manual
+- 50 -
+Frequency
+When F5-25 is set to 1, the antifreeze function takes effect, and the inverter runs at this
+frequency.
+F5-27  Antifreeze Running Time  60.0  60.0  3600.0  second  ☆
+The time of single running when the inverter is enabled with anti-freezing function.
+F5-28  Anti-freezing running
+period  0  30  1440  Min  ☆
+Running period of inverter when antifreeze function is enabled.
+F5-29  Auto start enable  0  0  1  -  ☆
+0 ： Forbidden  1 ： Enabled
+F5-30  Auto start delay time(only
+Water supply mode)
+0  10  120  second  ☆
+F5-31  Reserved
+F5-32  Multi-pump network mode  0  0  2  -  ☆
+0 ： Multi-pump master and slave control
+When the pressure is not enough, start the slave pump in turn
+1 ： Multi-pump synchronous control
+When the pressure is not enough, slave pump runs at the same frequency
+2 ： Multi-pump one for use, one for standby control
+Only one pump is running at any time, and other pumps are used as stand-by for each other
+F5-33  Standby master running
+mode
+0  0  2  -  ☆
+0 ： Stop
+1 ： Constant speed
+2 ： Constant pressure(Slave 1 must have sensors)
+F5-34  Standby master mode 1
+running frequency
+F0-10  F8-03  F0-09  Hz  ☆
+F5-35  Alternating pump
+switching period
+0  0  168  h  ☆
+0:Will not replace pump
+201:Only for debugging, it takes 3 minutes to replace the pump. After debugging, you need
+to set other values.
+When set this value greater than 0, change waiting time.
+F5-36  Adding pump pressure
+deviation
+0  0.3  2.0  Bar  ☆
+F5-37  Adding pump frequency  F0-10  49  F0-09  Hz  ☆
+F5-38  Under-pressure adding
+pump time
+1.0  2.0  3600.0  s  ☆
+F5-39  Reducing pump frequency  F0-10  30.0  F0-09  Hz  ☆
+F5-40  Over-pressure reducing
+pump time
+1.0  2.0  3600.0  s  ☆
+F5-41  PID feedback loss
+detection value
+0.0  0.0  100.0  -  ☆
+F5-42  Burst pipe pressure  0  50  100  %  ☆
+F5-43  Burst pipe judging time  0.0  0.0  600.0  s  ☆
+
+=====PAGE 51 (printed null)
+900 Series AC Drive User Manual
+- 51 -
+Turns off when set to 0.0
+F5-44  Reserved
+F5-45  Maximum number of
+pumps running at the same
+time
+0  1  5  -  ☆
+F5-46  Standby master and slave
+quantity
+0  1  3  -  ☆
+F5-47  Secondary target pressure
+setting
+0.1  3.5  1000.0  Bar  ☆
+While supplying water, when the DI terminal function is set to 34, the secondary target
+pressure is valid
+F5-48  Adding pump switching
+delay
+0.1  0.2  3600.0  s  ☆
+F5-49  Grid power and inverter
+switching delay
+0.1  0.5  3600.0  s  ☆
+5.2.7 F6 Parameter Group – Extend Parameter
+Parameter  Description  Minimum
+Value
+Default
+Value
+Maximum
+Value  Unit  Change
+Permission
+F6-00  Main Menu Display Auto
+Switching  0  1  1  -  ☆
+0: Switching is prohibited. When the display is switched from the frequency interface to
+other interfaces, it is forbidden to automatically switch back to the frequency interface.
+1: Automatic switching. When the display is switched from the frequency interface to other
+interfaces, it will automatically switch back to the frequency interface after 10 seconds.
+F6-01  Parameter Modification
+Attribute  0  0  1  -  ☆
+0: Allow modification.
+1. No modification is allowed.
+When this parameter is set to 1, the inverter is forbidden to modify the parameter, and it
+must be set to 0 before it can be changed.
+F6-02  LED2 Display Data
+Selection(Double Display
+Reserved Parameters)
+0  2  12  -  ☆
+0:  Running Frequency
+1: Running Speed
+2: Output Current
+3: DC Bus Voltage
+4: Output Voltage
+5: Output Power
+6: PID Feedback
+7: Power frequency pump current
+8 ： AI1 Voltage
+9 ： Motor Temperature Value
+
+=====PAGE 52 (printed null)
+900 Series AC Drive User Manual
+- 52 -
+10 ： heatsink temperature
+11 ： Actual Switching Frequency
+12 ： Actual Running Speed
+F6-03  User Password  0  0  65535  -  ★
+The inverter provides the user password protection function. When F6-03 is SET to
+non-zero, it is the user password. The password protection will take effect after exiting the
+function code editing state. Press the SET key again, "-------" will be displayed. You must
+input the user password correctly to enter the parameter interface.
+F6-04  Set Inverter Power on Time  0  0  17520  hour  ☆
+After the accumulated power-on time of the inverter exceeds this value, the inverter
+reports a fault Err20. The function of this parameter is invalid when it is set to 0.
+F6-05  Set Inverter Running Time  0.0  0.0  6500.0  min  ☆
+When the frequency converter starts, it will start timing. When the running time reaches
+this value, the frequency converter will stop automatically. This parameter is invalid when
+the value is set to 0.
+F6-06  Switching Frequency
+Adjusting with Temperature  0  1  1  -  ☆
+When the inverter detects that the radiator temperature is high, it automatically reduces
+the switching frequency to reduce the temperature rise of the inverter. When the radiator
+temperature is low, the switching frequency gradually returns to the set value. This
+parameter is disabled when the value is set to 0.
+F6-07  Switching Frequency
+Adjusting Start Temperature  0  63  150  ℃  ☆
+When the inverter detects that the radiator temperature exceeds the set value of this
+parameter, F6-06 function is effective, and the switching frequency is adjusted with the
+temperature.
+F6-08  Switching Frequency
+Adjusting Time  0.1  20.0  50.0  s  ☆
+When the inverter detects that the heat sink temperature exceeds the set value of F6-07,
+the switching frequency starts to adjust after the set time of F6-08.
+F6-09  DPWM Switching Frequency  5.0  F8-03  F0-09  Hz  ☆
+This parameter is valid only for VF control.
+When the asynchronous VF is running, the wave sending mode is 7-segment continuous
+modulation mode below this value, and on the contrary, it is 5-segment intermittent
+modulation mode.
+For 7-segment continuous modulation, the switch loss of an inverter is large, but the
+current ripple is small; The switching loss is small, and the current ripple is large in the 5 -
+segment discontinuous modulation mode. However, it may lead to instability of motor
+operation at high frequency, and generally does not need to be modified.
+F6-10  Excessive Speed Deviation
+Detection Value  0.0  30.0  100.0  %  ☆
+F6-11  Excessive Speed Deviation
+Detection Time  0.0  5.0  60.0  s  ☆
+This function is only valid when there is vector control of speed sensor. When this
+
+=====PAGE 53 (printed null)
+900 Series AC Drive User Manual
+- 53 -
+parameter is 0.0s, the detection of excessive speed deviation will be cancelled.
+F6-12  Motor Overload Protection
+Gain  0.20  1.00  10.00  -  ☆
+Used to adjust the gain multiple of the set value of overload current in the inverter.
+Note: Increasing this parameter means increasing the overload current, so improper setting
+may burn out the motor.
+F6-13  External Temperature
+Sensor Type  0  0  3  -  ☆
+0: Disable.
+1: PT100
+2: PT1000
+3: 5k NTC resistance
+F6-14  Overtemperature Protection
+Threshold  0  200  200  ℃  ☆
+When the temperature of the external sensor exceeds the protection threshold, the
+inverter will give an alarm.
+F6-15  Start Protection Selection  0  0  1  -  ☆
+If the parameter is set to 1, the inverter will not respond to the running command if the
+running command is valid when the inverter is powered on or after a fault is reset. The
+running command must be removed once before the inverter responds to the running
+command.
+F6-16  Fault Enable Selection 1  00000  01111  11111  -  ☆
+0: Protection is prohibited.  1: Enable protection
+Bit: Relay closing fault
+Ten bits: Output open-phase protection.
+Hundred bits: Input open-phase protection.
+Thousand bit: Power-on short-circuit protection to ground.
+Ten thousand bits: output detection before operation (including grounding and phase loss)
+F6-17  Fault Enable Selection 2  00000  00001  11111  -  ☆
+0: Protection is Prohibited.  1: Enable protection
+Bit: Motor overload protection selection
+Ten bits: AI input lower limit protection selection
+Hundred bits: Reserved
+Thousand bits: Reserved
+Ten thousand bits: Reserved
+F6-18  Fault Auto Reset Times  0  0  20  time  ☆
+Inverter can automatically reset after fault alarm. After this number is exceeded, the
+inverter will remain in a fault state.
+When set to 0, the automatic reset function is not enabled.
+F6-19  Fault Auto Reset Interval
+Time  0.1  1.0  100.0  second  ☆
+The waiting time from the inverter fault alarm to the automatic fault reset.
+F6-20  Drop load protection selection  0  0  1  -  ☆
+0 ： Invalid
+1 ： Valid
+
+=====PAGE 54 (printed null)
+900 Series AC Drive User Manual
+- 54 -
+When the parameter is set to 1, the output current of the inverter is less than F6-21 and the
+duration is greater than F6-22, and the output frequency is automatically reduced to 7% of
+the rated frequency. If the load recovers, the system continues to run at the preset frequency.
+F6-21  Drop load detection level  0.0  10.0  100.0  %  ☆
+F6-22  Drop load detection time  0.0  1.0  60.0  s  ☆
+F6-23  Voltage sag function selection  0  0  2  -  ★
+0 ： Invalid
+1  ：  Deceleration. When the voltage of the inverter decreases suddenly (including but not
+limited to instantaneous power failure), the inverter decelerates. When the line voltage
+returns to normal and the duration exceeds F6-25, the inverter accelerates to the original set
+frequency normally.
+2 ： Ramp to stop. When the voltage of the inverter decreases suddenly (including but not
+limited to instantaneous power failure), the inverter ramps to stop.
+When the voltage of the inverter decreases suddenly (including but not limited to instantaneous
+power failure), and when the busbar voltage drops below F6-26, the inverter reduces the output
+frequency, so that the motor is in the state of generating power. This function can make the
+electric energy that feeds back to the busbar voltage maintain the busbar voltage at about F6-26,
+so that the system can normally decelerate to 0Hz.  When the bus voltage returns to F6-24 and
+the duration exceeds F6-25, the inverter accelerates to the original setting frequency
+normally.
+F6-24  Voltage sag judging voltage  80  85  100  %  ★
+F6-25  Voltage sag recovery judging time  0.0  0.5  100.0  s  ★
+F6-26  Voltage sag action judging voltage  60  80  100  %  ☆
+F6-27  Voltage sag gain Kp  0  40  100  -  ☆
+F6-28  Voltage sag integral coefficient Ki  0  30  100  -  ☆
+F6-29  Voltage sag action deceleration time  0.0  20.0  300.0  s  ★
+5.2.8 F7 Parameter Group – Communication Parameters
+Parameter  Description  Minimum
+Value
+Default
+Value
+Maximum
+Value  Unit  Change
+Permission
+F7-00  Inverter Address  1  1  249  -  ☆
+The local address when using the communication function of the inverter. When this value
+is set to 0, it is the broadcast address, which realizes the broadcast function of the upper
+computer.
+F7-01  Baud Rate  0  0  4  -  ☆
+0 ： 9600bps  1 ： 19200bps  2 ： 38400bps
+3 ： 57600bps  4 ： 115200bps
+F7-02  Data Format  0  3  3  -  ☆
+0: No check -2 stop bits (8-N-2)
+1: Even check -1 stop bit (8-E-1)
+2: Odd check -1 stop bit (8-O-1)
+3: No check -1 stop bit (8-N-1)
+F7-03  Communication Timeout  0.0  0.0  60.0  second  ☆
+When this parameter is set to 0.0 second, no communication timeout detection is
+performed.
+
+=====PAGE 55 (printed null)
+900 Series AC Drive User Manual
+- 55 -
+When this parameter is set to more than 0.1 second, if the interval between one
+communication and the next communication exceeds the communication timeout, the
+inverter will report a communication failure (Err16).
+F7-04  Master and slave control valid  0  0  2  -  ★
+0 ： Copy keyboard
+1 ： Inverter synchronous mode cascade
+2 ： Water supply network
+(For 900M, this parameter is MODBUS data communication format, see F7-19)
+F7-05  Master and slave selection  0  0  1  -  ★
+0 ： Master
+1 ： Slave
+F7-06  Number of slaves  0  1  4  -  ☆
+F7-07  Slave follows master command  000  11  111  -  ★
+Bit: Slave follows command
+Ten bits: Slave fault information transmission
+Hundred bits: Master displays the slave is disconnected
+0 ： Disable
+1 ： Enabled
+F7-08  Slave data reception  0  0  1  -  ☆
+0 ： Running frequency
+1 ： Target frequency
+F7-09  Master  and  slave  communication
+timeout time
+0.0  1.0  10.0  s  ☆
+This parameter is used to set communication outage time of master and slave, only valid
+for master. Does not take effect when it is set to 0.
+F7-10  Master and slave control
+communication transmission period
+0.001  0.001  10.000  s  ☆
+This parameter is valid only for master, setting the data transmission period of master
+during master and slave communication.
+F7-11  Torque reception data offset  -100.0  0.00  100.00  %  ☆
+F7-12  Torque reception data gain  -10.00  1.00  10.00  -  ☆
+F7-11, F7-12: correct received torque data.
+If the offset is represented by b, the gain is represented by k, the data received by the slave
+is represented by x, and the actual data used is represented by y.
+Then y = kx + b, that is, actual torque usage data=F7-12*received data+F7-11.
+F7-13  Frequency reception data offset  -100.0  0.00  100.00  %  ☆
+F7-14  Frequency reception data gain  -10.00  1.00  10.00  -  ☆
+F7-13, F7-14: correct received frequency data.
+If the offset is represented by b, the gain is represented by k, the data received by the slave
+is represented by x, and the actual data used is represented by y.
+Then y = kx + b, that is, actual frequency usage data=F7-14*received data+F7-13.
+F7-15  Slave frequency forward maximum
+deviation
+0.00  10.00  100.00  %  ☆
+Set to 0.00%, this function is invalid.
+
+=====PAGE 56 (printed null)
+900 Series AC Drive User Manual
+- 56 -
+F7-16  Slave frequency  reverse maximum
+deviation
+0.20  0.50  10.00  Hz  ☆
+If this parameter is set for master and slave control, the speed of the master and slave can
+be synchronized within the deviation range.
+F7-17  Droop control  0.00  0.00  10.00  Hz  ☆
+This function is generally used for load distribution when multiple motors drive the same
+load.
+This parameter refers to the frequency drop of the inverter when it outputs the rated load.
+F7-18  Reserved
+F7-19  MODBUS data communication
+format
+0  0  1  -  ☆
+0 ： Standard MODBUS
+1 ： Nonstandard MODBUS protocol
+F7-20  Enable old inverter Modbus  0  0  1  -  ☆
+0 ： Disable
+1 ： Enable
+5.2.9 F8 Parameter Group – Motor Control Mode
+Parameter  Description  Minimum
+Value
+Default
+Value
+Maximum
+Value  Unit  Change
+Permission
+F8-00  Motor Rated Power  0.1  Depends
+on model  1000.0  Kw  ★
+This parameter is set to the rated power of the motor (nameplate).
+F8-01  Motor Rated Voltage  1  Depends
+on model  500  V  ★
+This parameter is set to the rated voltage of the motor (nameplate).
+F8-02  Motor Rated Current  0.01  Depends
+on model  655.35  A  ★
+This parameter is set to the rated current of the motor (nameplate).
+F8-03  Motor Rated Frequency  0  50.0  500.0  Hz  ★
+This parameter is set to the rated frequency of the motor (nameplate).
+F8-04  Motor Rated Speed  1  1460  65535  Rpm  ★
+This parameter is set to the rated speed of the motor (nameplate).
+F8-05  Back EMF Coefficient for
+PM Motor  0  Depends
+on model  6553.5  V  ★
+This parameter is set as the back EMF coefficient of synchronous machine.
+F8-06  Motor Control Mode  0  0  2  -  ★
+0: V/F control.
+1: Vector speed control (IMSVC) of asynchronous motor. F8-07 parameter identification is
+required after SVC control is selected.
+2: Vector speed control (FMSVC) of synchronous motor. F8-07 parameter identification is
+required after SVC control is selected.
+F8-07  Motor Parameter Autotune  0  0  3  -  ★
+
+=====PAGE 57 (printed null)
+900 Series AC Drive User Manual
+- 57 -
+0: No operation.
+1: Static parameter identification. If the motor can't be completely separated from the
+load and can't rotate freely, please choose static parameter identification.
+2: Dynamic parameter identification. If the motor is completely disconnected from the
+load and can rotate freely, please choose dynamic parameter identification.
+Note: After restoring the factory setting value, changing the model or setting the motor
+power and voltage level, it is necessary to identify the parameters again so that the vector
+control can run best.
+F8-08  Speed/Torque Control
+Selection  0  0  1  -  ★
+0: Speed control
+1. Torque control
+It is used to select the inverter control mode: speed control or torque control, and the
+torque control only works in vector mode.
+F8-09  Torque Setting Source
+Selection  0  0  7  -  ★
+0: Parameter setting (F8-10)  1: Panel potentiometer setting  2 ： AI1
+3: AI2  4: Communication
+5: The minimum of AI1 and AI2  6: The maximum of AI1 and AI2
+7: Reserved
+Choose the torque setting source. There are seven torque setting methods.
+F8-10  Torque Setting Value  -200.0  120.0  +200.0  %  ☆
+Torque value when F8-09 torque setting source is selected as 0.
+F8-11  Asynchronous Motor Stator
+Resistance  0.001  Depends
+on model  65.535  Ω  ★
+F8-12  Asynchronous Motor Rotor
+Resistance  0.001  Depends
+on model  65.535  KW  ★
+F8-13  Asynchronous Motor
+Leakage Inductance  0.01  Depends
+on model  655.35  mH  ★
+F8-14  Asynchronous Motor
+Mutual Inductance  0.1  Depends
+on model  6553.5  mH  ★
+F8-15  Asynchronous Motor
+Magnetizing Current  0.01  Depends
+on model  F8-02  A  ★
+F8-11~F8-15 are asynchronous motor parameters, these parameters are generally not on
+the motor nameplate, need to be obtained by motor parameter identification F8-07. If the
+induction motor cannot be tuned on site, you can input the above parameters according
+to the parameters provided by the motor manufacturer.
+F8-16  Synchronous Motor Stator
+Resistance  0.001  Depends
+on model  65.535  Ω  ★
+F8-17  Synchronous Motor D-axis
+Inductance  0.01  Depends
+on model  655.35  mH  ★
+F8-18  Synchronous Motor Q-axis
+Inductance  0.01  Depends
+on model  655.35  mH  ★
+F8-16~F8-18 are synchronous motor parameters. Some synchronous motor nameplates
+will provide some parameters, but most of the motor nameplates do not provide the
+
+=====PAGE 58 (printed null)
+900 Series AC Drive User Manual
+- 58 -
+above parameters. These parameters must be obtained through parameter identification
+and must be identified in synchronous motor vector control mode.
+5.2.10 F9 Parameter Group – Motor Control Advanced Parameter
+Parameter  Description  Minimum
+Value
+Default
+Value
+Maximum
+Value  Unit  Change
+Permission
+F9-00  High Speed Area Switching
+Frequency  F9-03  10.0  F8-03  Hz  ☆
+When the running frequency is greater than this value, the speed loop PID parameter is
+selected as the speed loop parameter in the high-speed segment. Running frequency
+between high speed and low speed, the speed loop PID parameter linear transformation
+of two sets of PID parameters.
+F9-01  High Speed Area
+Proportional Gain  1  20  100  -  ☆
+Setting the proportional coefficient of the speed regulator can adjust the speed dynamic
+response characteristics of vector control. Increasing the proportional gain can speed up
+the dynamic response of the speed loop, but excessive proportional gain may make the
+system oscillate.
+Note: The parameters of high-speed area and low-speed area are only valid when F8-06
+selects vector control.
+F9-02  High Speed Area Integral
+Time Constant  0.01  1.00  10.00  secon
+d  ☆
+The speed dynamic response characteristic of vector control can be adjusted by setting the
+integral time of the speed regulator. Shortening the integral time can accelerate the
+dynamic response of the speed loop, but too short integral time may make the system
+oscillate.
+F9-03  Low Speed Area Switching
+Frequency  0.0  5.0  F9-00  Hz  ☆
+When the operating frequency is less than this value, F9-04 and F9-05 are selected as PID
+parameters of speed loop.
+F9-04  Low Speed Area
+Proportional Gain  1  30  100  -  ☆
+The inverter runs at different frequencies and can select different speed loop PID
+parameters. When the running frequency is less than the switching frequency of the
+low-speed segment F9-03, the proportional gain of the speed loop is used.
+F9-05  Low Speed Area Integral
+Time Constant  0.01  0.50  10.00  secon
+d  ☆
+When the operating frequency is less than the switching frequency F9-03 in the low-speed
+section, the value of this parameter is used for the speed loop integral time.
+F9-06  Speed Loop Filter Time
+Constant  0.000  0.200  1.000  secon
+d  ☆
+This parameter generally does not need to be adjusted, and the filtering time can be
+appropriately increased when the speed fluctuation is large. If the motor oscillates, the
+parameter should be appropriately reduced. The speed loop filter time constant is small,
+and the output torque of a inverter may fluctuate greatly ， but the response speed is fast.
+
+=====PAGE 59 (printed null)
+900 Series AC Drive User Manual
+- 59 -
+F9-07  Slip Compensation
+Coefficient  50  100  200  %  ☆
+For speed sensorless vector control, this parameter is used to adjust the steady speed
+accuracy of the motor: when the motor has a low speed, increase this parameter, and vice
+versa.
+With vector control of speed sensor, this parameter can adjust the output current of
+down-converter with the same load.
+F9-08  Maximum Output Voltage
+Coefficient  100  105  110  %  ★
+The maximum output voltage of inverter can be increased. Increasing F9-08 can improve
+the maximum load capacity of fan weak magnetic area, but the increase of motor current
+ripple will aggravate the motor heat. On the contrary, the maximum load capacity of
+motor weak magnetic area will decrease, but the ripple of motor current will reduce the
+motor heat. Generally, no adjustment is required.
+F9-09  Torque Control Forward
+Maximum Frequency  0.0  50.0  F0-09  Hz  ☆
+F9-10  Torque Control Reverse
+Maximum Frequency  0.0  50.0  F0-09  Hz  ☆
+Used to set the forward or reverse maximum operating frequency of inverter under torque
+control mode.
+When the inverter in torque control mode, if the load torque is less than the output
+torque of the motor, the motor speed will keep rising. In order to prevent accidents such
+as coasting in the mechanical system, the maximum motor speed during torque control
+must be limited.
+If it is necessary to change the maximum torque control frequency dynamically, the upper
+limit frequency can be controlled.
+F9-11  Torque Acceleration Time  0.0  0.0  6500.0  secon
+d  ☆
+F9-12  Torque Deceleration Time  0.0  0.0  6500.0  secon
+d  ☆
+Under the torque control mode, the difference between the output torque of the motor
+and the load torque determines the speed change rate of the motor and the load.
+Therefore, the motor speed may change rapidly, resulting in noise or excessive mechanical
+stress. By setting the torque control acceleration and deceleration time, the motor speed
+can be changed smoothly.
+In the torque control of small torque start, it is not recommended to set the torque
+acceleration and deceleration time; If the torque acceleration and deceleration time is set,
+it is suggested to increase the speed filter coefficient appropriately.
+When the torque needs to respond quickly, set the torque control acceleration and
+deceleration time to 0.00s.
+F9-13  M-axis Current Loop Kp  0  2000  30000  -  ☆
+F9-14  M-axis Current Loop Ki  0  1000  30000  -  ☆
+F9-15  T-axis Current Loop Kp  0  2000  30000  -  ☆
+F9-16  T-axis Current Loop Ki  0  1000  30000  -  ☆
+F9-13-F9-16 is the current loop PID adjustment parameter, which will be automatically
+
+=====PAGE 60 (printed null)
+900 Series AC Drive User Manual
+- 60 -
+obtained after tuning, and generally does not need to be modified.
+F9-17  Synchronous Motor Flux
+Weakening Mode  0  1  2  -  ☆
+0: Disable. The motor is not subject to flux-weakening control. At this time, the maximum
+speed of the motor is related to the bus voltage of the inverter. There is no flux-weakening
+current, and the output current is small, but the running frequency may not reach the set
+frequency. If you want to achieve a higher speed, you need to turn on the flux-weakening
+function.
+1: Automatic adjustment. It is automatically adjusted by the inverter, and the higher the
+speed after entering the field weakening area, the greater the field weakening current.
+2: Calculation + Automatic Adjustment. Combined with automatic adjustment, the speed
+of flux weakening current adjustment is faster, and this mode can be set when automatic
+adjustment can't meet the demand, but this mode depends on the accuracy of motor
+parameters.
+F9-18  Synchronous Motor Flux
+Weakening Coefficient  0  05  50  -  ☆
+In the direct calculation mode, the required demagnetizing current can be calculated
+according to the target speed, and the size of demagnetizing current can be manually
+adjusted through F9-18. The smaller the demagnetizing current is, the smaller the total
+output current will be, but the desired flux weakening effect may not be achieved.
+F9-19  Flux Weakening Integral
+Multiple  02  02  10  -  ☆
+Changing this parameter can change the adjustment speed of the flux weakening current.
+However, faster adjustment of the flux weakening current may lead to instability.
+Therefore, you do not need to manually change this parameter.
+F9-20  Saturation  Margin  for  PM
+Motor
+01  05  50  %  ☆
+This parameter too small will cause the output voltage to reach saturation easily, so the
+inverter control performance will be worse.
+F9-21  Maximum Torque Ratio
+Current Enable  0  0  1  -  ☆
+0: Disable
+1: Enabled
+F9-22  Salient Rate Gain Coefficient  50  100  500  -  ☆
+Related to the structure of synchronous motor, according to the different characteristics of
+the motor to set different salient pole rate gain coefficient, generally no need to set.
+F9-23  Starting Switching
+Frequency  1.0  3.0  F0-13  KHz  ☆
+The size of the carrier frequency at startup.
+F9-24  SVC Low Speed Switching
+Frequency  1.0  4.0  F0-13  KHz  ☆
+In SVC mode, the switching frequency of synchronous motor running at low speed.
+F9-25  Low Speed Switching
+Frequency Switch Frequency  5.0  20.0  F8-03  Hz  ☆
+At low speed, the switching frequency is the set value of F9-23. After running the set value
+
+=====PAGE 61 (printed null)
+900 Series AC Drive User Manual
+- 61 -
+of this parameter, the switching frequency changes to the set value of F0-13.
+F9-26  Low Speed Maximum
+Magnetizing Current  0  20  80  %  ☆
+Set the maximum excitation current of synchronous motor at low speed.
+F9-27  Low Speed Magnetizing
+Current Switching Frequency  0  20.0  F8-03  Hz  ☆
+The maximum magnetizing current of synchronous motor at low speed is set at F9-26.
+After reaching this frequency, it will switch to normal current size. The default value of this
+parameter will change with the upper frequency (F0-09) and the rated frequency of the
+motor (F8-03).
+F9-28  Low Speed Magnetizing
+Current Switching Frequency
+Bandwidth
+0.0  5.0  F8-03  Hz  ☆
+When the synchronous motor runs at low speed, when the frequency reaches the set
+value of F9-27, if the current changes within the set range of F9-28, the low-speed
+magnetizing current is switched only once.
+F9-29  Synchronous Motor Initial
+Position Detection Mode  0  1  1  -  ☆
+0: Check before each run.
+1: No detection
+F9-30  Synchronous Motor Initial
+Position Identification
+Current Initial Value
+30  120  180  %  ★
+F9-31  Synchronous Motor Initial
+Position Compensation
+Angle
+0.0  0.0  359.9  °  ☆
+F9-32  Synchronous Motor
+Inductance Detection
+Current
+30  80  120  %  ☆
+F9-33  Synchronous Motor Back
+EMF Identification Initial
+Current
+0  50  180  %  ★
+F9-34  Synchronous Motor Back
+EMF Identification Final
+Current
+30  80  180  %  ★
+F9-35  Synchronous Motor Tuning
+Current Loop Kp Adjustment
+Coefficient
+1  6  100  -  ☆
+F9-36  Synchronous Motor Tuning
+Current Loop Ki Adjustment
+Coefficient
+1  6  100  -  ☆
+F9-37-F9-
+70
+Reserved  0  0  1  -  ☆
+
+=====PAGE 62 (printed null)
+900 Series AC Drive User Manual
+- 62 -
+5.3 Monitoring Parameter
+The monitoring parameters of the inverter can only be read and cannot be modified.
+Parameter  Description  Unit  Communication
+Address
+Parameter
+Attribute
+U0-00  Inverter Running State  1: forward  2:
+reverse  3: stop  -  1000H  ▲
+U0-01  Fault Code  -  1001H  ▲
+U0-02  Set Frequency  0.1Hz  1002H  ▲
+U0-03  Running Frequency  0.1Hz  1003H  ▲
+U0-04  Running Speed  Rpm  1004H  ▲
+U0-05  Output Voltage  V  1005H  ▲
+U0-06  Output Current  0.1A  1006H  ▲
+U0-07  Output Power  0.1KW  1007H  ▲
+U0-08  DC Bus Voltage  V  1008H  ▲
+U0-09  Output Torque  0.1Nm  1009H  ▲
+U0-10  Power Factor Angle  -  100AH  ▲
+U0-11  DI input state, default display  .
+DI1-DI4 effective will display  -  100BH  ▲
+U0-12  Relay and DO output state, default display
+. Relay 1 effective will display  -  100CH  ▲
+U0-13  AI1 Voltage Before Correction  0.01V  100DH  ▲
+U0-14  AI2 Voltage Before Correction  0.01V  100EH  ▲
+U0-15  AI1 Voltage  0.01V  100FH  ▲
+U0-16  AI2 Voltage  0.01V  1010H  ▲
+U0-17  PID Setting  -  1011H  ▲
+U0-18  PID Feedback  -  1012H  ▲
+U0-19  Remaining Running Time  0.1Min  1013H  ▲
+U0-20  Current Power-on Time  Min  1014H  ▲
+U0-21  Current Running Time  0.1Min  1015H  ▲
+U0-22  Cumulative Running Time  Hour  1016H  ▲
+U0-23  Accumulated Power-on Time  Hour  1017H  ▲
+U0-24  Cumulative Power Consumption  Kwh  1018H  ▲
+U0-25  Motor Temperature Value  ℃  1019H  ▲
+U0-26  IGBT Temperature Value  ℃  101AH  ▲
+U0-27  Actual Switching Frequency  0.1KHz  101BH  ▲
+U0-28  M-axis Current Actual Value  0.1A  101CH  ▲
+U0-29  T-axis Current Actual Value  0.1A  101DH  ▲
+U0-30  Feedback Speed Actual Value  0.1Hz  101EH  ▲
+U0-31  Reserved  -  101FH  ▲
+U0-32  Cascading running status of water pumps  -  1020H  ▲
+
+=====PAGE 63 (printed null)
+900 Series AC Drive User Manual
+- 63 -
+U0-33  Water supply pump state  -  1021H  ▲
+U0-34  Master and slave output torque  -  1022H  ▲
+U0-35  On-line identification of back EMF  -  1023H  ▲
+U0-36  Timing pump switching remain time display  -  h  ▲
+U0-37  Reserved  -  1025H  ▲
+U0-38  Reserved  -  1026H  ▲
+U0-39  Reserved  -  1027H  ▲
+U0-40  Reserved  -  1028H  ▲
+U0-41  Reserved  -  1029H  ▲
+U0-42  Product Serial Number Lower 16 Digits  -  102AH  ▲
+U0-43  Product Serial Number Higher 16 Digits  -  102BH  ▲
+U0-44  Motor Boot Version  -  102CH  ▲
+U0-45  CPU Type  -  102DH  ▲
+U0-46  Power Board Hardware Version  -  102EH  ▲
+U0-47  Power Board Software Version  -  102FH  ▲
+U0-48  Control Board Software Version  -  1030H  ▲
+U0-49  Product Number  -  1031H  ▲
+U0-50  Manufacturer Code  -  1032H  ▲
+U0-51  Third (most recent) Fault Code  -  1033H  ▲
+U0-52  Second Fault Code  -  1034H  ▲
+U0-53  First Fault Code  -  1035H  ▲
+U0-54  Third Fault Frequency  0.1Hz  1036H  ▲
+U0-55  Third Fault Current  0.1A  1037H  ▲
+U0-56  Third Fault DC Bus Voltage  0.1V  1038H  ▲
+U0-57  Third Fault Heatsink Temperature  ℃  1039H  ▲
+U0-58  Third Fault Time(from power-on time)  Min  103AH  ▲
+U0-59  Third Fault Time(from running time)  0.1Hour  103BH  ▲
+U0-60  Second Fault Frequency  0.1Hz  103CH  ▲
+U0-61  Second Fault Current  0.1A  103DH  ▲
+U0-62  Second Fault DC Bus Voltage  0.1V  103EH  ▲
+U0-63  Second Fault Heatsink Temperature  ℃  103FH  ▲
+U0-64  Second Fault Time(from power-on time)  Min  1040H  ▲
+U0-65  Second Fault Time(from running time)  0.1Hour  1041H  ▲
+U0-66  First Fault Frequency  0.1Hz  1042H  ▲
+U0-67  First Fault Current  0.1A  1043H  ▲
+U0-68  First Fault DC Bus Voltage  0.1V  1044H  ▲
+U0-69  First Fault Heatsink Temperature  ℃  1045H  ▲
+U0-70  First Fault Time(from power-on time)  Min  1046H  ▲
+U0-71  First Fault Time(from running time)  0.1Hour  1047H  ▲
+
+=====PAGE 64 (printed null)
+900 Series AC Drive User Manual
+- 64 -
+Chapter 6 Communication
+6.1 Modbus-RTU Communication Protocol
+The controller can read consecutive addresses at one time, with a maximum of 12 addresses, but it should
+be noted that it cannot exceed the last address, otherwise it will make an error. The read operation
+command is 0x03; The write command is 0x06, which does not support reading and writing of bytes or bits.
+Operation  command frame
+Read
+Write
+Fault
+
+=====PAGE 65 (printed null)
+900 Series AC Drive User Manual
+- 65 -
+6.2 Modbus Register Definition
+Register
+Number
+Function
+Code
+Parameter
+Function
+Code  Function  Range  Description
+0x01  -  06/03  Set communication
+frequency  -10000~10000
+10000 refers to 100%
+corresponding to the maximum
+frequency, 0 refers to 0%
+corresponding to the minimum
+frequency, when set to negative
+direction.
+0x02  -  06  Control command  1~7
+1 ： forward running
+2 ： reverse running
+3 ： forward jogging
+4 ： reverse jogging
+5 ： free stop
+6 ： ramp to stop
+7 ： fault reset
+0x03  -  06  Relay control  0x00~0x0F
+BIT0 ： relay 1 control ；
+BIT1 ： relay 2 control
+BIT2 ： DO1 control ；
+BIT3 ： DO2 control
+0x04  -  06  AO1 output control  0 ～ 7FFF  0 corresponding output 0% ，
+7FFF corresponding output 100%
+0x05  -  06  AO2 output control  0 ～ 7FFF  0 corresponding output 0% ，
+7FFF corresponding output 100%
+0xF000  F0-00  03  Command source  0~2  Refer to F0-00
+……
+0xF924  F9-36  03
+Synchronous motor
+tuning
+time current loop Ki
+adjustment coefficient
+Depend on
+inverter model  Refer to F9-36
+0x1000  U0-00  03  Refer to U0-00
+……
+0x1047  U0-71  03  Refer to U0-71
+All user-configurable parameters can be read or written from the hold register by the appropriate Modbus
+command. The register numbers of parameters F0-00 to F9-40 are defined as 0xF001 to 0xF928. The
+register numbers of parameters U0-00 to U0-71 are defined as 0x1000 to 0x1047.
+
+=====PAGE 66 (printed null)
+900 Series AC Drive User Manual
+- 66 -
+6.3 Modbus Application Cases
+6.3.1  Setting Communication Parameters
+During MODBUS communication, you need to set relevant parameters first, and they can be set in F7
+parameter group.
+Parameter  Name  Description
+F7-00  Inverter
+address
+The local address of the inverter when it uses the communication function. If
+the value is set to 0, the broadcast address is used to implement the
+broadcast function of the upper computer.
+F7-01  Baud Rate  0 ： 9600BPS 1 ： 19200BPS  2 ： 38400BPS  3 ： 57600BPS
+4 ： 115200BPS
+F7-02  Data Format  0: No verification (8-N-2) 1: even check (8-E-1)
+2: Odd check (8-O-1) 3: No verification (8-N-1)
+F7-03  Communicati
+on Timeout
+When this parameter is set to 0.0 second, no communication timeout
+detection is performed.
+When this parameter is set to more than 0.1 second, if the interval between
+one communication and the next communication exceeds the communication
+timeout, the inverter will report a communication failure (Err16).
+6.3.2  Enable Communication Function
+Parameter  Set Value  Function
+F0-00 ： Command Mode  2
+The start-stop control mode of an inverter is set as communication
+control. The controller writes the number "1~5" to register no.2 to
+control the start-stop command executed by the inverter. See
+Section 6.2 for the specific command.
+F0-01 ： Target Frequency
+Setting Mode  8
+The target frequency setting mode of an inverter is communication
+setting. The controller can control the target frequency of an
+inverter by writing the number "-10000~10000" to register No. 1.
+For specific command, see Section 6.2.
+F1-08 ： Relay Output
+Selection  7
+The inverter relay is set for communication control, and the
+controller writes the number "0 or 1" into the No.3 register, which
+can control the closing and opening of the relay.
+F1-28 ： AO1/AO2 Output
+Selection  6
+The analog output terminal of the inverter is set as communication
+control, and the controller writes numbers "0~7FFF" to register no.
+4, where 0 corresponds to 0% output and 7FFF to 100% output.
+F5-00: PID Setting Source
+F5-02: PID Feedback
+Source  4/2
+The Modbus register No.1 of the inverter is enabled at this time, and
+its value is used as the given value or feedback value of PID.
+
+=====PAGE 67 (printed null)
+900 Series AC Drive User Manual
+- 67 -
+Chapter7 Maintenance and Troubleshooting
+7.1  Routine Maintenance
+7.1.1  Regular Inspection
+Due to the influence of environmental temperature, humidity, dust and vibration, the internal devices of
+the inverter will be aged, resulting in potential failures of the inverter or reducing the service life of the
+inverter. Therefore, it is necessary to carry out daily and regular maintenance of the inverter.
+Daily Inspection Items  Regular Inspection Items
+▲  Whether the sound of the motor changes
+abnormally or vibrates during running.  ▲  Check whether the air channel is clean
+▲  Does the installation environment of inverter
+change.  ▲  Check whether the screws are loose.
+▲  Whether the cooling fan of the inverter works
+normally and whether there are stains.  ▲  Check whether the inverter is corroded.
+▲  Is the inverter overheated.  ▲  Check the wiring terminals for traces of arcing
+pulling.
+▲  Is the inverter kept clean.
+7.1.2  Long-time Storage
+If the inverter has been stored for a period of time before installation or has not been powered by the main
+power supply for a long time, it is necessary to age and energize the DC capacitor in the inverter according
+to the following instructions before operation, and the inverter can run normally after the aging is
+completed.
+Storage
+Time
+Input
+Voltage 1  Duration 1  Input
+Voltage 2  Duration 2  Input
+Voltage 3  Duration 3  Input
+Voltage 4  Duration 4
+Less than 1
+year  100%  Without treatment
+1-2 years  100%  1 hour  Normal running
+2~3 years  25%  0.5 hour  50%  0.5 hour  75%  0.5 hour  100%  0.5 hour
+More than
+3 years  25%  2 hours  50%  2 hours  75%  2 hours  100%  2 hours
+7.2  Faults and Solutions
+If the inverter system fails during operation, the inverter will stop output immediately to protect the motor.
+At the same time, the inverter fault relay acts. The inverter panel displays fault codes. The following table
+lists the fault types and common solutions corresponding to the fault codes.
+The list in the table is for reference only. Do not repair or modify it without authorization. If you can't
+troubleshoot, please ask the supplier for technical support.
+
+=====PAGE 68 (printed null)
+900 Series AC Drive User Manual
+- 68 -
+Fault Name  Display  Possible Causes  Solutions
+Inverter Unit
+Protection  Err01
+1. The output circuit is
+grounded or short circuited
+2. The connecting cable of the
+motor is too long
+3. The module overheats
+4. The internal connections
+become loose
+5. The main control board is
+faulty
+6. The drive board is faulty
+7. The inverter module is faulty
+1. Eliminate external faults
+2. Install a reactor or an output filter
+3. Check the air filter and the cooling
+fan
+4. Connect all cables properly
+5. Contact for technical support
+6. Contact for technical support
+7. Contact for technical support
+Overcurrent
+During
+Acceleration
+Err02
+1. The output circuit is
+grounded or short circuited
+2. The control method is vector
+and no parameter identification
+3. The acceleration time is too
+short
+4. Manual torque boost or V/F
+curve is not appropriate
+5. The voltage is too low
+6. The startup operation is
+performed on the rotating
+motor.
+7. A sudden load is added
+during acceleration
+8. The inverter model is of too
+small power class
+1. Eliminate external faults
+2. Perform the motor auto-tuning
+3. Increase the acceleration time
+4. Adjust the manual torque boost or
+V/F curve
+5. Adjust the voltage to normal range
+6. Select rotational speed tracking
+restart or start the motor after it
+stops
+7. Remove the added load.
+8. Select higher power rating inverter
+Overcurrent
+During
+Deceleration
+Err03
+1. The output circuit is
+grounded or short circuited
+2. The control method is vector
+and no parameter identification
+3. The deceleration time is too
+short
+4. The voltage is too low
+5. A sudden load is added
+during deceleration
+6. The braking unit and braking
+resistor are not installed
+1. Eliminate external faults
+2. Perform the motor auto-tuning
+3. Increase the deceleration time
+4. Adjust the voltage to normal range
+5. Remove the added load.
+6. Install the braking unit and braking
+resistor
+
+=====PAGE 69 (printed null)
+900 Series AC Drive User Manual
+- 69 -
+Fault Name  Display  Possible Causes  Solutions
+Overcurrent at
+Constant Speed  Err04
+1. The output circuit is
+grounded or short circuited
+2. The control method is vector
+and no parameter identification
+3. The voltage is too low
+4. A sudden load is added
+during deceleration
+5. The inverter model is of too
+small power class
+1. Eliminate external faults
+2. Perform the motor auto-tuning
+3. Adjust the voltage to normal range
+4. Remove the added load.
+5. Select higher power rating inverter
+Overvoltage
+During
+Acceleration
+Err05
+1. The input voltage is too high
+2. An external force drives the
+motor during acceleration
+3. The acceleration time is too
+short
+4. The braking unit and braking
+resistor are not installed
+1. Adjust the voltage to normal range
+2. Cancel the external force or install
+a braking resistor
+3. Increase the acceleration time
+4. Install the braking unit and braking
+resistor
+Overvoltage
+During
+Deceleration
+Err06
+1. The input voltage is too high
+2. An external force drives the
+motor during deceleration
+3. The deceleration time is too
+short
+4. The braking unit and braking
+resistor are not installed
+1. Adjust the voltage to normal range
+2. Cancel the external force or install
+a braking resistor
+3. Increase the deceleration time
+4. Install the braking unit and braking
+resistor
+Overvoltage at
+Constant Speed  Err07
+1. The input voltage is too high
+2. An external force drives the
+motor during running
+1. Adjust the voltage to normal range
+2. Cancel the external force or install
+a braking resistor
+Control Power
+Supply Fault  Err08  1. The input voltage is not
+within the allowable range  1. Adjust the voltage to normal range
+Undervoltage  Err09
+1. Instantaneous power failure
+2. The inverter’s input voltage is
+not within the allowable range
+3. The DC bus voltage is
+abnormal
+4. The rectifier bridge and
+buffer resistor are faulty
+5. The drive board is faulty
+6. The main control board is
+faulty
+1. Reset the fault
+2. Adjust the voltage to normal range
+3. Contact for Technical support
+4. Contact for Technical support
+5. Contact for Technical support
+6. Contact for Technical support
+Inverter
+Overload  Err10
+1. The load is too heavy or
+locked rotor occurs on the
+motor
+2. The inverter model is of too
+small power class
+1. Reduce the load and check the
+motor and mechanical condition
+2. Select an inverter of higher power
+class
+
+=====PAGE 70 (printed null)
+900 Series AC Drive User Manual
+- 70 -
+Fault Name  Display  Possible Causes  Solutions
+Motor
+Overload  Err11
+1. P9-01 is set improperly
+2. The load is too heavy or
+locked rotor occurs on the
+motor
+3. The inverter model is of too
+small power class
+1. Set P9-01 correctly
+2. Reduce the load and check the
+motor and mechanical condition
+3.  Select higher power rating
+inverter
+Power Input
+Phase Loss  Err12
+1. The three-phase power input
+is abnormal
+2. The drive board is faulty
+3. The lightening board is faulty
+4. The main control board is
+faulty
+1. Eliminate external faults
+2. Contact for Technical support
+3. Contact for Technical support
+4. Contact for Technical support
+Power Output
+Phase Loss  Err13
+1. The cable connecting the
+inverter and the motor is faulty
+2. The inverter’s three-phase
+outputs are unbalanced when
+the motor is running
+3. The drive board is faulty
+4. The module is faulty
+1. Eliminate external faults
+2. Check whether the motor
+three-phase winding is normal
+3. Contact for Technical support
+4. Contact for Technical support
+Module
+Overheat  Err14
+1. The ambient temperature is
+too high
+2. The air filter is blocked
+3. The fan is damaged
+4. The thermally sensitive
+resistor of the module is
+damaged
+5. The inverter module is
+damaged
+1. Lower the ambient temperature
+2. Clean the air filter
+3. Replace the damaged fan
+4. Replace the damaged thermally
+sensitive resistor
+5. Replace the inverter module
+External
+Equipment
+Fault
+Err15
+1. External fault signal is input
+via DI
+2. External fault signal is input
+via virtual I/O
+1. Reset the operation
+2. Reset the operation
+Communication
+Fault  Err16
+1. The controller is in abnormal
+state
+2. The communication cable is
+faulty
+4. The communication
+parameters are set improperly
+1. Check the cabling of host
+computer
+2. Check the communication cabling
+4. Set the communication
+parameters properly
+Contactor Fault  Err17
+1. The drive board and power
+supply are faulty
+2. The contactors is faulty
+1. Replace the faulty drive board or
+power supply board
+2. Replace the faulty contactor
+Current
+Detection Fault  Err18  1. The HALL device is faulty
+2. The drive board is faulty
+1. Replace the faulty HALL device
+2. Replace the faulty drive board
+
+=====PAGE 71 (printed null)
+900 Series AC Drive User Manual
+- 71 -
+Fault Name  Display  Possible Causes  Solutions
+Motor
+Auto-tuning
+Fault
+Err19
+1. The motor parameters are
+not set according to the
+nameplate
+2. The motor auto-tunning
+times out
+1. Set the motor parameters
+according to the nameplate properly
+2. Check the cable connecting the
+inverter and the motor
+EEPROM
+Write Fault  Err21  1. The EEPROM chip is damaged  1. Replace the main control board
+Inverter
+Hardware Fault  Err22  1 、 Overvoltage
+2 、 Overcurrent
+1. Solve as overvoltage fault
+2. Solve as overcurrent fault
+Short Circuit to
+Ground  Err23  1. The motor is short circuited
+to the ground  1. Replace the cable or motor
+Accumulative
+Running Time
+Reached
+Err26  1. The accumulative running
+time reaches the setting value
+1. Clear the record through the
+parameter initialization function
+Accumulative
+Power-on Time
+Reached
+Err29  1. The accumulative power-on
+time reaches the setting value
+1. Clear the record through the
+parameter initialization function
+Pulse-by-pulse
+Current Limit
+Fault
+Err40
+1. The load is too heavy or
+locked rotor occurs on the
+motor
+2. The inverter model is of too
+small power class
+1. Reduce the load and check the
+motor and mechanical condition
+2. Select an inverter of higher power
+class
+Motor
+Switchover
+Fault During
+Running
+Err41
+1. Change the selection of the
+motor via terminal during
+running of the inverter
+1. Perform motor switchover after
+the inverter stops
+Excessive
+Speed
+Deviation Fault
+Err42
+1. Excessive Speed deviation
+Inspection parameter P6-10,
+P6-11 Setting is not correct
+2. No parameter identification
+1. Correctly Setting Parameter
+P6-10, P6-11.
+2. Executive parameter identification
+Water Shortage
+alarm  A52
+1. Pressure sensor is damaged
+2. Check whether the
+parameters of the inverter are
+incorrectly set
+3. Whether the pipe network
+and motor are correct
+1. Check pressure sensor
+2. Check inverter parameter setting
+3. Check motor and pipe
+Overpressure
+Fault  Err53
+1. Pressure sensor is damaged
+2. Check whether the
+parameters of the inverter are
+incorrectly set
+1. check the pressure sensor
+2. Test whether the inverter F5-18 is
+correctly set
+
+=====PAGE 72 (printed null)
+900 Series AC Drive User Manual
+- 72 -
+7.3 Common Faults and Solutions
+The following faults may be encountered during the use of the inverter. Refer to the following table for
+simple fault analysis ：
+SN  Fault  Possible Causes  Solutions
+1
+There is no
+display at
+power-on
+1. There is no power supply to the
+inverter or the power input to the
+inverter is too low
+2. The power supply of the switch on
+the drive board of the inverter is
+faulty
+3. The rectifier bridge is damaged
+4. The buffer resistor is faulty
+5. The control board or the
+operation panel is faulty
+6. The cable connecting the control
+board and the drive board, and the
+operation panel breaks
+1. Check the power supply
+2. Check the DC bus voltage
+3. Re-connect the 10-core cables
+4~6. Contact us for technical support
+2
+”Err23” is
+displayed at
+power-on
+1. The motor or the motor output
+cable is short circuited to the ground
+2. The inverter is damaged
+1. Measure the insulation of the
+motor and the output cable with a
+megger
+2. Contact us for technical support
+3
+Err14 (Module
+overheat) fault
+alarm frequently
+1. The setting of switching frequency
+is too high
+2. The cooling fan is damaged, or the
+air filter is blocked
+3. Components inside the inverter
+are damaged (thermocouple or
+other)
+1. Reduce the switching frequency
+(P0-13)
+2. Replace the fan and clean the air
+filter
+3. Contact us for technical support
+4
+The motor does
+not rotate after
+the inverter runs
+1. Check the motor and the motor
+cables
+2. The inverter parameters are set
+improperly (Motor parameters)
+3. The cable between the drive
+board and the control board is in
+poor contact
+4. The drive board is faulty
+1. Ensure the cable between the
+inverter and the motor is normal
+2. Replace the motor or clear
+mechanical faults
+3. Check the re-set motor
+parameters
+4. Contact us for technical support
+5  The DI terminals
+are disabled
+1. The parameters are set incorrectly
+2. The external signal is incorrect
+3. The control board is faulty
+1. Check and reset the parameters in
+group P4
+2. Re-connect the external signal
+cables
+3. Contact us for technical support
+
+=====PAGE 73 (printed null)
+900 Series AC Drive User Manual
+- 73 -
+SN  Fault  Possible Causes  Solutions
+6
+The inverter
+overcurrent and
+overvoltage
+frequently
+1. The motor parameters are set
+improperly
+2. The acceleration/deceleration
+time is improper
+3. The load fluctuates
+1. Re-set motor parameters or
+re-perform the motor auto-tunning
+2. Set proper
+acceleration/deceleration time
+3. Contact us for technical support
+7
+Err17 alarm
+when power-on
+or running
+The soft startup contactor is not
+picked up
+1. Check whether the contactor
+cable is loose
+2. Check whether the contactor is
+faulty
+3. Check whether 24V power supply
+of the contactor is faulty
+4. Contact us for technical support
+7.4 Warranty Agreement
+（1）  Free warranty only refers to the inverter itself.
+（2）  In case of failure or damage within the warranty terms, our company is responsible for 12
+months warranty (from the date of delivery, the bar code on the fuselage shall prevail, and if
+there is a contract agreement, it shall be implemented according to the agreement). For
+more than 12 months, we will charge a reasonable maintenance fee;
+（3）  During the warranty period, our company will charge a certain maintenance fee if:
+a)  Machine damage caused by the user's failure to comply with the regulations in the user
+manual;
+b)  Machine  damage  caused  by  mistakes  in  use  and  unauthorized  maintenance  and
+modification;
+c)  Damage caused by fire, flood, abnormal voltage, etc.;
+d)  Damage caused by using the inverter for abnormal functions;
+e)  Damage caused by man-made falling and transportation after purchase;
+f)  Failure and damage caused by obstacles outside the machine (such as external equipment
+factors);
+（4）  The service fee is calculated according to the uniform standard of the manufacturer. If there
+is a contract, the contract will take precedence.
+（5）  If there is any problem in the service process, please contact the supplier in time.
+（6）  The final interpretation right of warranty instructions belongs to our company.
+
+=====PAGE 74 (printed null)
+900 Series AC Drive User Manual
+- 74 -
+Warranty Card
+Customer
+Information
+Address:
+Name:  Contact:
+Postal code:  Tel:
+Product
+Information
+Product model:
+Fuselage Bar code (posted here):
+Agent name:
+Fault
+Information
+V900.23.05.25.E
+Certificate
+This product has gone through rigorous quality control tests at factory.
+Inspector
+Approval Mark
