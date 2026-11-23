@@ -596,4 +596,39 @@ CREATE TABLE research_annotation_attachments (
 CREATE INDEX idx_att_ann ON research_annotation_attachments(annotation_id);
 `,
   },
+  {
+    version: 2,
+    name: 'parameter_importance_and_knowledge_items',
+    sql: /* sql */ `
+ALTER TABLE parameters ADD COLUMN importance TEXT CHECK (importance IS NULL OR importance IN ('Important','Medium','Optional'));
+ALTER TABLE parameters ADD COLUMN param_group TEXT;
+CREATE INDEX idx_param_importance ON parameters(model_id, importance);
+
+-- Non-parameter manual knowledge: faults/alarms/warnings, troubleshooting, wiring, installation, safety, specs, communication notes.
+CREATE TABLE knowledge_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  model_id INTEGER NOT NULL REFERENCES models(id),
+  revision_id INTEGER REFERENCES document_revisions(id),
+  kind TEXT NOT NULL CHECK (kind IN ('fault','alarm','warning','troubleshooting','wiring','installation','safety','specification','communication','maintenance','note')),
+  code TEXT,
+  title TEXT NOT NULL,
+  description TEXT,
+  cause TEXT,
+  remedy TEXT,
+  details_json TEXT,
+  section TEXT,
+  page_index INTEGER,
+  printed_page TEXT,
+  evidence_quote TEXT,
+  quote_match TEXT,
+  importance TEXT CHECK (importance IS NULL OR importance IN ('Important','Medium','Optional')),
+  evidence_status TEXT NOT NULL DEFAULT 'Unverified' CHECK (evidence_status IN ('Explicitly Documented','Calculated from Documented Data','Cross-Referenced','Not Documented','Unverified','Conflicting')),
+  verification_status TEXT NOT NULL DEFAULT 'Unverified' CHECK (verification_status IN ('Verified','Unverified','Requires Manual Verification','Documentation Conflict','Rejected')),
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+CREATE UNIQUE INDEX uq_knowledge_item ON knowledge_items(model_id, kind, COALESCE(code,''), title);
+CREATE INDEX idx_knowledge_model_kind ON knowledge_items(model_id, kind);
+`,
+  },
 ];

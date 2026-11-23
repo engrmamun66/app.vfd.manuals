@@ -45,7 +45,7 @@ export interface IngestResult {
   };
   pages: { total: number; withTextLayer: number; ocrProcessed: number; ocrFailed: number; empty: number };
   ocrStatus: string;
-  extraction: { source: string | null; parametersExtracted: number; registersExtracted: number; staged: number; skippedAlreadyStaged: number };
+  extraction: { source: string | null; parametersExtracted: number; registersExtracted: number; knowledgeItems: number; staged: number; skippedAlreadyStaged: number };
   comparison: Record<string, number>;
   duplicates: { existingRevisionId: number; existingDocumentId: number; existingPath: string } | null;
   conflicts: { recordType: string; code: string; existingId: number; fields: string[] }[];
@@ -126,6 +126,8 @@ const PARAM_COMPARE_FIELDS: [keyof CuratedParameter, string][] = [
   ['min_value', 'min_value'],
   ['max_value', 'max_value'],
   ['resolution', 'resolution'],
+  ['importance', 'importance'],
+  ['param_group', 'param_group'],
 ];
 const REG_COMPARE_FIELDS: [keyof CuratedRegister, string][] = [
   ['name', 'name'],
@@ -218,7 +220,7 @@ export class DocumentIngestionService {
       detected: { folderHint: null, brandFromContent: [], brand: null, model: null, identificationSource: 'none', identificationStatus: 'needs_review', modelEvidenceQuoteMatch: null },
       pages: { total: 0, withTextLayer: 0, ocrProcessed: 0, ocrFailed: 0, empty: 0 },
       ocrStatus: 'not_needed',
-      extraction: { source: null, parametersExtracted: 0, registersExtracted: 0, staged: 0, skippedAlreadyStaged: 0 },
+      extraction: { source: null, parametersExtracted: 0, registersExtracted: 0, knowledgeItems: 0, staged: 0, skippedAlreadyStaged: 0 },
       comparison: {},
       duplicates: null,
       conflicts: [],
@@ -506,6 +508,20 @@ export class DocumentIngestionService {
     db.transaction(() => {
       for (const p of params) if (p?.code) stage('parameter', p);
       for (const r of regs) if (r?.original_address && r?.name) stage('modbus_register', r);
+      // faults / warnings / troubleshooting / wiring / specs etc. go straight into knowledge_items (additive, INSERT OR IGNORE; never overwrites)
+      if (!dryRun && modelId && revisionId) {
+        const insKi = db.prepare(
+          `INSERT OR IGNORE INTO knowledge_items(model_id, revision_id, kind, code, title, description, cause, remedy, details_json, section, page_index, printed_page, evidence_quote, quote_match, importance, evidence_status, verification_status)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        );
+        for (const k of curated.knowledge_items ?? []) {
+          if (!k?.kind || !k?.title) continue;
+          const qm = matchQuote(pageText(k.page_index), k.evidence_quote);
+          const ok = qm === 'exact' || qm === 'normalized';
+          const r = insKi.run(modelId, revisionId, k.kind, k.code?.trim() || null, k.title.trim(), k.description ?? null, k.cause ?? null, k.remedy ?? null, k.details ? json(k.details) : null, k.section ?? null, k.page_index ?? null, k.printed_page ?? null, k.evidence_quote ?? null, qm, ['Important', 'Medium', 'Optional'].includes(k.importance as string) ? k.importance : null, ok ? 'Explicitly Documented' : 'Unverified', ok ? 'Unverified' : 'Requires Manual Verification');
+          result.extraction.knowledgeItems += r.changes;
+        }
+      } else result.extraction.knowledgeItems = (curated.knowledge_items ?? []).length;
       if (!dryRun && result.extraction.staged) {
         this.task('review_import', 'import_job', jobId, `Review ${result.extraction.staged} extracted record(s) from ${curated.document_file}`, { curatedFile: curated._file }, jobId);
         result.verificationTasksCreated++;

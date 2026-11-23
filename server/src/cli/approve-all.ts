@@ -15,7 +15,13 @@ let ok = 0;
 const skipped: Record<string, number> = {};
 for (const r of rows) {
   try {
-    approveStaged(r.id, admin.id, { note: 'bulk approved by owner request; verify against manual later' });
+    try {
+      approveStaged(r.id, admin.id, { note: 'bulk approved by owner request; verify against manual later' });
+    } catch (e: any) {
+      // "Possible Duplicate" / "Uncertain Match": a new code is a different parameter, so create it (existing records stay untouched)
+      if (!/requires an explicit decision/.test(String(e.message))) throw e;
+      approveStaged(r.id, admin.id, { mode: 'create_new', note: 'bulk approved (create_new); verify against manual later' });
+    }
     ok++;
   } catch (e: any) {
     const k = String(e.message).slice(0, 90);

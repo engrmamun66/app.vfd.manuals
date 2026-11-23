@@ -5,14 +5,19 @@ import { useAuth } from '../lib/auth';
 import { Crumbs, ErrorBox, Loading, VerifBadge, useAsync } from '../components/ui';
 import { PageViewer } from '../components/Viewer';
 import { escSnippet } from './ModbusTools';
+import { ModelTabs } from '../components/ModelTabs';
+import { useModels } from '../lib/models';
 
 export function Library() {
   const { user } = useAuth();
-  const { data, error, loading } = useAsync(() => get('/documents'), []);
+  const { data: all, error, loading } = useAsync(() => get('/documents'), []);
+  const { selected } = useModels();
+  const data = selected == null ? all : all?.filter((d: any) => d.models.some((m: any) => m.id === selected));
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Documentation Library' }, { label: 'Manuals' }]} />
       <div className="row between"><h1>Documentation Library</h1>{user?.role === 'super_admin' && <Link className="btn primary" to="/library/import">Import documents</Link>}</div>
+      <ModelTabs />
       <ErrorBox e={error} />
       {loading ? <Loading /> : (
         <div className="table-wrap"><table><thead><tr><th>Document</th><th>Brand</th><th>Model(s)</th><th>Revision(s)</th><th>Pages</th><th>Text / OCR</th><th>Identification</th></tr></thead>

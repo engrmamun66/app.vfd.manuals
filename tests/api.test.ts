@@ -461,3 +461,42 @@ describe('backup, restore and path safety', () => {
     expect(rec.filesystem.orphanCount).toBeGreaterThanOrEqual(1);
   });
 });
+
+describe('parameter importance and knowledge items', () => {
+  it('importance + group are stored, filterable and sorted Important-first; knowledge items list, filter and count per kind', async () => {
+    const { ensureBrandModel } = await import('../server/src/services/ingestion/DocumentIngestionService.js');
+    const { modelId } = ensureBrandModel(db, 'ImpBrand', 'IMP-1');
+    const ins = db.prepare('INSERT INTO parameters(model_id, code, name, importance, param_group) VALUES (?,?,?,?,?)');
+    ins.run(modelId, 'P3', 'Optional one', 'Optional', 'G9');
+    ins.run(modelId, 'P1', 'Important one', 'Important', 'G1');
+    ins.run(modelId, 'P2', 'Medium one', 'Medium', 'G2');
+    db.prepare("INSERT OR IGNORE INTO content_display(entity_type, entity_id) SELECT 'parameter', id FROM parameters WHERE model_id = ?").run(modelId);
+    const all = (await r(alice, `/parameters?model=${modelId}`)).body.rows as any[];
+    expect(all.map((p) => p.importance)).toEqual(['Important', 'Medium', 'Optional']);
+    expect(all[0].param_group).toBe('G1');
+    expect(((await r(alice, `/parameters?model=${modelId}&importance=Medium`)).body.rows as any[]).map((p) => p.code)).toEqual(['P2']);
+
+    const k = db.prepare("INSERT INTO knowledge_items(model_id, kind, code, title, cause, remedy, page_index, importance) VALUES (?,?,?,?,?,?,?,?)");
+    k.run(modelId, 'fault', 'OC1', 'Overcurrent', 'Short circuit', 'Check wiring', 12, 'Important');
+    k.run(modelId, 'warning', null, 'Do not touch terminals', null, null, 3, 'Important');
+    k.run(modelId, 'wiring', 'L1', 'Power terminal L1', null, null, 20, 'Medium');
+    const res = (await r(alice, `/knowledge?model=${modelId}`)).body;
+    expect(res.total).toBe(3);
+    expect(Object.fromEntries(res.kinds.map((x: any) => [x.kind, x.n]))).toEqual({ fault: 1, warning: 1, wiring: 1 });
+    const f = (await r(alice, `/knowledge?model=${modelId}&kind=fault`)).body;
+    expect(f.rows).toHaveLength(1);
+    expect(f.rows[0].remedy).toBe('Check wiring');
+    expect((await r(alice, `/knowledge?model=${modelId}&q=terminals`)).body.total).toBe(1);
+    expect((await r(alice, '/knowledge?kind=bogus')).status).toBe(400);
+    // duplicates are ignored by the unique index (INSERT OR IGNORE keeps the first)
+    expect(db.prepare("INSERT OR IGNORE INTO knowledge_items(model_id, kind, code, title) VALUES (?,?,?,?)").run(modelId, 'fault', 'OC1', 'Overcurrent').changes).toBe(0);
+    // cleanup so other tests keep their model/order assumptions
+    db.prepare('DELETE FROM knowledge_items WHERE model_id = ?').run(modelId);
+    db.prepare('DELETE FROM content_display WHERE entity_type = \'parameter\' AND entity_id IN (SELECT id FROM parameters WHERE model_id = ?)').run(modelId);
+    db.prepare('DELETE FROM parameters WHERE model_id = ?').run(modelId);
+    const brandId = (db.prepare('SELECT brand_id FROM models WHERE id = ?').get(modelId) as any).brand_id;
+    db.prepare("DELETE FROM content_display WHERE (entity_type = 'model' AND entity_id = ?) OR (entity_type = 'brand' AND entity_id = ?)").run(modelId, brandId);
+    db.prepare('DELETE FROM models WHERE id = ?').run(modelId);
+    db.prepare('DELETE FROM brands WHERE id = ?').run(brandId);
+  });
+});

@@ -81,6 +81,37 @@ for (const [entityType, table] of [['parameter', 'parameters'], ['modbus_registe
     }
   }
 }
+// ---- knowledge items (faults, warnings, troubleshooting, wiring ...): the evidence quote must be covered by the cited page; a code, when given, must be on it
+{
+  const bucketOf = (name: string) => (summary[name.slice(0, 18) + ' (topics)'] ??= { pass: 0, fail: 0 });
+  const items = db
+    .prepare("SELECT k.*, m.name model_name FROM knowledge_items k JOIN models m ON m.id = k.model_id WHERE k.verification_status IN ('Unverified','Requires Manual Verification')")
+    .all() as any[];
+  const pg = db.prepare('SELECT text FROM document_pages WHERE revision_id = ? AND page_index = ?');
+  const upd = db.prepare("UPDATE knowledge_items SET verification_status = ?, evidence_status = ?, updated_at = ? WHERE id = ?");
+  for (const k of items) {
+    const b = bucketOf(k.model_name);
+    const text = (pg.get(k.revision_id, k.page_index) as any)?.text as string | undefined;
+    const reasons: string[] = [];
+    if (!text) reasons.push('no page text for cited page');
+    else {
+      const pw = new Set(words(text));
+      const qw = words(k.evidence_quote ?? '');
+      const cov = qw.length ? qw.filter((w) => pw.has(w)).length / qw.length : 0;
+      if (!qw.length) reasons.push('no evidence quote');
+      else if (cov < 0.85) reasons.push(`quote only ${(cov * 100).toFixed(0)}% on page`);
+      if (k.code && alnum(String(k.code)).length >= 2 && !alnum(text).includes(alnum(String(k.code)))) reasons.push(`code "${k.code}" not on page`);
+    }
+    if (!reasons.length) {
+      b.pass++;
+      if (apply) { upd.run('Verified', 'Explicitly Documented', new Date().toISOString(), k.id); verified++; }
+    } else {
+      b.fail++;
+      failures.push(`knowledge #${k.id} ${k.model_name.slice(0, 14)} ${k.kind} ${k.code ?? k.title}: ${reasons.join('; ')}`);
+      if (apply && k.verification_status !== 'Requires Manual Verification') upd.run('Requires Manual Verification', k.evidence_status, new Date().toISOString(), k.id);
+    }
+  }
+}
 console.log(JSON.stringify({ mode: apply ? 'apply' : 'dry-run', verified, summary }, null, 2));
 console.log(failures.filter((f) => !process.env.ONLY || f.includes(process.env.ONLY)).slice(0, 25).join('\n'));
 console.log(`failures total: ${failures.length}`);

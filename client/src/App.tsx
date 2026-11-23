@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './lib/auth';
 import { escSnippet, AddressConverter, CommSettings, PlcIntegration } from './pages/ModbusTools';
 import { ChangePassword, Login, Register } from './pages/AuthPages';
 import { Compare, Dashboard, FunctionPage, ModelPage, ParameterResearch, Parameters, RegisterResearch, Registers, ResolveEntity } from './pages/KB';
+import { KnowledgePage } from './pages/Knowledge';
 import { BookmarksPage } from './pages/Bookmarks';
 import { AnnotationsPage } from './pages/AnnotationsPage';
 import { DocumentPage, ImportPage, Library, RevisionViewer } from './pages/Library';
@@ -69,6 +70,7 @@ function ShellInner() {
         <div className="nav-group">Knowledge Base</div>
         <Nav to="/parameters">All Parameters</Nav>
         {kbCats.map((c: any) => <Nav sub key={c.slug} to={`/kb/${c.slug}`}>{c.name}</Nav>)}
+        <Nav to="/knowledge">Troubleshooting & Manual Topics</Nav>
         <div className="nav-group">Modbus & RS485</div>
         <Nav to="/modbus/registers">Register Explorer</Nav><Nav to="/modbus/communication">Communication Settings</Nav><Nav to="/modbus/converter">Address Converter</Nav><Nav to="/modbus/plc">PLC Integration</Nav>
         <div className="nav-group">Research</div>
@@ -114,6 +116,7 @@ export default function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/parameters" element={<Parameters />} />
         <Route path="/kb/:slug" element={<CategoryRoute />} />
+        <Route path="/knowledge" element={<KnowledgePage />} />
         <Route path="/function/:slug" element={<FunctionPage />} />
         <Route path="/model/:id" element={<ModelPage />} />
         <Route path="/parameter/:id" element={<ResolveEntity kind="parameter" />} />

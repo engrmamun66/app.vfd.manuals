@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { get } from '../lib/api';
 import { Crumbs, InfoIcon, useAsync } from '../components/ui';
+import { ModelTabs } from '../components/ModelTabs';
+import { useModels } from '../lib/models';
 
 /** Pure arithmetic only. Never decides that a result is a valid PLC address or a 4xxxx reference. */
 function parseAddr(s: string): { value: number; base: 'hex' | 'dec'; error?: string } | { error: string } {
@@ -63,9 +65,8 @@ export function AddressConverter() {
 
 export function CommSettings() {
   const { data } = useAsync(() => get('/parameters', { category: 'modbus-rs485', limit: 500 }), []);
-  const { data: models } = useAsync(() => get('/models'), []);
-  const [model, setModel] = useState('');
-  const rows = data?.rows.filter((p: any) => !model || String(p.model_id) === model) ?? [];
+  const { selected } = useModels();
+  const rows = data?.rows.filter((p: any) => selected == null || p.model_id === selected) ?? [];
   const byFn = new Map<string, any[]>();
   rows.forEach((p: any) => byFn.set(p.function_name ?? 'Unmapped', [...(byFn.get(p.function_name ?? 'Unmapped') ?? []), p]));
   return (
@@ -73,7 +74,7 @@ export function CommSettings() {
       <Crumbs items={[{ label: 'Modbus & RS485' }, { label: 'Communication Settings' }]} />
       <h1>Communication Settings</h1>
       <p className="muted">Slave address, baud rate, parity/stop bits, timeouts and loss behavior — only parameters from approved records.</p>
-      <select value={model} onChange={(e) => setModel(e.target.value)} aria-label="Model" style={{ marginBottom: 12 }}><option value="">All models</option>{models?.map((m: any) => <option key={m.id} value={m.id}>{m.brand} {m.name}</option>)}</select>
+      <ModelTabs />
       <div className="table-wrap"><table><thead><tr><th>Function</th><th>Brand / Model</th><th>Code</th><th>Name</th><th>Default</th><th>Range</th><th>Verification</th></tr></thead><tbody>
         {rows.map((p: any) => <tr key={p.id}><td>{p.function_name ?? '—'}</td><td>{p.brand} <span className="muted">{p.model}</span></td><td className="code"><Link to={`/parameter/${p.id}`}>{p.code}</Link></td><td>{p.name}</td><td>{p.default_value ?? <span className="faint">Not Documented</span>}</td><td>{p.min_value || p.max_value ? `${p.min_value ?? '?'} … ${p.max_value ?? '?'}` : <span className="faint">Not Documented</span>}</td><td><span className="badge dashed">{p.verification_status}</span></td></tr>)}
         {!rows.length && <tr><td colSpan={7} className="empty">No communication parameters approved yet.</td></tr>}

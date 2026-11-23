@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } 
 import { get, patch, post, fmtDate } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { ModelTabs } from '../components/ModelTabs';
+import { ImportanceBadge } from './Knowledge';
 import { useModels } from '../lib/models';
 import { Crumbs, ErrorBox, EquivBadge, EvBadge, InfoIcon, Loading, Pager, QuoteBadge, Val, VerifBadge, download, useAsync } from '../components/ui';
 import { PageViewer, SplitToggle, SplitView } from '../components/Viewer';
@@ -73,6 +74,7 @@ export function Parameters({ category }: { category?: string }) {
       <div className="row" style={{ marginBottom: 12 }}>
         <input placeholder="Search code, name, description (EN/বাংলা)…" value={q.q ?? ''} onChange={(e) => set('q', e.target.value)} style={{ minWidth: 280 }} aria-label="Search parameters" />
         {!category && <select value={q.category ?? ''} onChange={(e) => set('category', e.target.value)} aria-label="Category"><option value="">All categories</option>{tax?.map((c: any) => <option key={c.slug} value={c.slug}>{c.name}</option>)}</select>}
+        <select value={q.importance ?? ''} onChange={(e) => set('importance', e.target.value)} aria-label="Importance"><option value="">Any importance</option><option>Important</option><option>Medium</option><option>Optional</option></select>
         <select value={q.verification ?? ''} onChange={(e) => set('verification', e.target.value)} aria-label="Verification status"><option value="">Any verification</option>{['Verified', 'Unverified', 'Requires Manual Verification', 'Documentation Conflict'].map((s) => <option key={s}>{s}</option>)}</select>
         <select value={q.evidence ?? ''} onChange={(e) => set('evidence', e.target.value)} aria-label="Evidence status"><option value="">Any evidence</option>{['Explicitly Documented', 'Calculated from Documented Data', 'Cross-Referenced', 'Unverified', 'Conflicting'].map((s) => <option key={s}>{s}</option>)}</select>
         <select value={q.access ?? ''} onChange={(e) => set('access', e.target.value)} aria-label="Access type"><option value="">Read / Write</option><option>Read</option><option>Write</option></select>
@@ -81,7 +83,7 @@ export function Parameters({ category }: { category?: string }) {
       {loading && !data ? <Loading /> : (
         <>
           <div className="table-wrap"><table>
-            <thead><tr><th>Brand / Model</th><th>Code</th><th>Name</th><th>Common function</th><th>Unit</th><th>Default</th><th>Range</th><th>Verification</th></tr></thead>
+            <thead><tr><th>Brand / Model</th><th>Code</th><th>Name</th><th>Common function</th><th>Unit</th><th>Default</th><th>Range</th><th>Importance</th><th>Verification</th></tr></thead>
             <tbody>{data?.rows.map((p: any) => (
               <tr key={p.id}>
                 <td>{p.brand}<div className="small-text muted">{p.model}</div></td>
@@ -90,9 +92,10 @@ export function Parameters({ category }: { category?: string }) {
                 <td>{p.function_slug ? <Link to={`/function/${p.function_slug}`}>{p.function_name}</Link> : <span className="faint">Unmapped</span>}{p.function_name_bn && <div className="small-text muted">{p.function_name_bn}</div>}</td>
                 <td><Val v={p.unit} /></td><td><Val v={p.default_value} /></td>
                 <td>{p.min_value || p.max_value ? `${p.min_value ?? '?'} … ${p.max_value ?? '?'}` : <Val v={null} />}</td>
+                <td><ImportanceBadge v={p.importance} /></td>
                 <td><VerifBadge s={p.verification_status} /></td>
               </tr>))}
-              {!data?.rows.length && <tr><td colSpan={8} className="empty">No parameters match. Parameters appear after staged import records are approved in the Verification Center.</td></tr>}</tbody></table></div>
+              {!data?.rows.length && <tr><td colSpan={9} className="empty">No parameters match. Parameters appear after staged import records are approved in the Verification Center.</td></tr>}</tbody></table></div>
           {data && <Pager page={data.page} limit={data.limit} total={data.total} onPage={(p) => { const n = new URLSearchParams(sp); n.set('page', String(p)); setSp(n); }} />}
         </>)}
     </div>

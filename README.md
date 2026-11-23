@@ -28,6 +28,12 @@ First start: creates `database/vfd-knowledge.db`, applies migrations, seeds the 
 - Extracted records are **staged**, never written directly. Review them in Verification Center: approve / reject / attach as evidence / create separate record. Conflicts never overwrite — both sources are kept and a task is created. Approved records start as `Unverified`; you mark them `Verified` after checking the manual page.
 - `data/curated/*.json` were produced by AI-assisted reading of the manuals; every `evidence_quote` is machine-checked against the page text (`exact` / `normalized` / `not_found` / `no_text_layer`). Treat all of them as Unverified.
 
+## Adding a new VFD manual (skill)
+
+Run the project skill **`/import-new-vfd-manual <path-to-pdf>`** (in `.claude/skills/import-new-vfd-manual/`). It previews the PDF, copies it to `vfd-manuals/<Brand>/`, imports the pages and extracts ALL parameters (tiered `Important` / `Medium` / `Optional`), Modbus/communication data and knowledge items (faults, alarms, warnings, troubleshooting, wiring, installation, specifications), validates the result against the manual text, imports, approves and auto-verifies. The extraction format is documented in `data/curated/README.md`.
+
+Helper commands: `npm run manual:new`, `npm run curated:check -- <file>`, `npm run approve:all`, `npm run verify:records [-- --apply]`.
+
 ## Layout
 
 ```

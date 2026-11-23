@@ -215,6 +215,8 @@ function paramFilters(q: any, req: any) {
   if (q.verification) (where.push('p.verification_status = ?'), args.push(String(q.verification)));
   if (q.evidence) (where.push('p.evidence_status = ?'), args.push(String(q.evidence)));
   if (q.access) (where.push('p.access_type LIKE ?'), args.push(`%${q.access}%`));
+  if (q.importance) (where.push('p.importance = ?'), args.push(String(q.importance)));
+  if (q.group) (where.push('p.param_group = ?'), args.push(String(q.group)));
   if (q.unmapped === '1') where.push('p.common_function_id IS NULL');
   if (q.q) {
     const like = `%${String(q.q).slice(0, 100)}%`;
@@ -236,12 +238,56 @@ kbRouter.get(
     const total = (db.prepare(`SELECT COUNT(*) c ${PARAM_FROM} WHERE ${where}`).get(...args) as { c: number }).c;
     const rows = db
       .prepare(
-        `SELECT p.id, p.code, p.name, p.unit, p.default_value, p.min_value, p.max_value, p.access_type, p.verification_status, p.evidence_status, p.equivalence, p.is_demo,
+        `SELECT p.id, p.code, p.name, p.unit, p.default_value, p.min_value, p.max_value, p.access_type, p.verification_status, p.evidence_status, p.equivalence, p.is_demo, p.importance, p.param_group,
            m.id model_id, m.name model, b.name brand, b.slug brand_slug, f.slug function_slug, f.name function_name, f.name_bn function_name_bn, c.slug category_slug, c.name category
-         ${PARAM_FROM} WHERE ${where} ORDER BY ${cdOrder('cdb')}, b.name, ${cdOrder('cdm')}, m.name, ${cdOrder('cdp')}, p.code LIMIT ? OFFSET ?`,
+         ${PARAM_FROM} WHERE ${where} ORDER BY ${cdOrder('cdb')}, b.name, ${cdOrder('cdm')}, m.name, ${cdOrder('cdp')}, CASE p.importance WHEN 'Important' THEN 0 WHEN 'Medium' THEN 1 WHEN 'Optional' THEN 2 ELSE 3 END, p.code LIMIT ? OFFSET ?`,
       )
       .all(...args, limit, offset);
     res.json({ total, page, limit, rows });
+  }),
+);
+
+// ---------------- knowledge items (faults, warnings, troubleshooting, wiring, ...) ----------------
+const KNOWLEDGE_KINDS = ['fault', 'alarm', 'warning', 'troubleshooting', 'wiring', 'installation', 'safety', 'specification', 'communication', 'maintenance', 'note'];
+kbRouter.get(
+  '/knowledge',
+  ah(async (req, res) => {
+    const db = getDb();
+    const { limit, offset, page } = paging(req.query as any, 50, 500);
+    const where: string[] = ['1=1'];
+    const args: unknown[] = [];
+    if (!includeHidden(req)) where.push(cdVisible('cdm'), cdVisible('cdb'));
+    const ids = String(req.query.model ?? '').split(',').map(Number).filter((n) => Number.isInteger(n) && n > 0);
+    if (ids.length) (where.push(`k.model_id IN (${ids.map(() => '?').join(',')})`), args.push(...ids));
+    if (req.query.kind) {
+      oneOf(String(req.query.kind), 'kind', KNOWLEDGE_KINDS);
+      (where.push('k.kind = ?'), args.push(String(req.query.kind)));
+    }
+    if (req.query.verification) (where.push('k.verification_status = ?'), args.push(String(req.query.verification)));
+    if (req.query.importance) (where.push('k.importance = ?'), args.push(String(req.query.importance)));
+    if (req.query.q) {
+      const like = `%${String(req.query.q).slice(0, 100)}%`;
+      where.push('(k.code LIKE ? OR k.title LIKE ? OR k.description LIKE ? OR k.cause LIKE ? OR k.remedy LIKE ?)');
+      args.push(like, like, like, like, like);
+    }
+    const from = `FROM knowledge_items k JOIN models m ON m.id=k.model_id JOIN brands b ON b.id=m.brand_id ${cdJoin('model', 'm', 'cdm')} ${cdJoin('brand', 'b', 'cdb')}`;
+    const w = where.join(' AND ');
+    const total = (db.prepare(`SELECT COUNT(*) c ${from} WHERE ${w}`).get(...args) as { c: number }).c;
+    // per-kind counts ignore the kind filter so the tabs always show what exists
+    const kindArgs: unknown[] = [];
+    const kw: string[] = ['1=1'];
+    if (!includeHidden(req)) kw.push(cdVisible('cdm'), cdVisible('cdb'));
+    if (ids.length) (kw.push(`k.model_id IN (${ids.map(() => '?').join(',')})`), kindArgs.push(...ids));
+    const kinds = db.prepare(`SELECT k.kind, COUNT(*) n ${from} WHERE ${kw.join(' AND ')} GROUP BY k.kind`).all(...kindArgs);
+    const rows = db
+      .prepare(
+        `SELECT k.id, k.kind, k.code, k.title, k.description, k.cause, k.remedy, k.details_json, k.section, k.page_index, k.printed_page, k.revision_id, k.importance,
+           k.evidence_status, k.verification_status, m.id model_id, m.name model, b.name brand
+         ${from} WHERE ${w} ORDER BY b.name, m.name, k.kind, CASE k.importance WHEN 'Important' THEN 0 WHEN 'Medium' THEN 1 WHEN 'Optional' THEN 2 ELSE 3 END, k.code, k.title LIMIT ? OFFSET ?`,
+      )
+      .all(...args, limit, offset)
+      .map((r: any) => ({ ...r, details: parseJson(r.details_json, null), details_json: undefined }));
+    res.json({ total, page, limit, rows, kinds });
   }),
 );
 

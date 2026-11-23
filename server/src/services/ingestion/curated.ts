@@ -23,6 +23,10 @@ export interface CuratedParameter {
   section?: string | null;
   table_ref?: string | null;
   evidence_quote?: string | null;
+  /** Priority tier: Important (core setup/commissioning), Medium, Optional (rarely needed / advanced). */
+  importance?: 'Important' | 'Medium' | 'Optional' | null;
+  /** Parameter group as printed in the manual, e.g. "F0 Basic Parameters". */
+  param_group?: string | null;
 }
 export interface CuratedRegister {
   common_function?: string | null;
@@ -44,6 +48,21 @@ export interface CuratedRegister {
   table_ref?: string | null;
   evidence_quote?: string | null;
 }
+export type KnowledgeKind = 'fault' | 'alarm' | 'warning' | 'troubleshooting' | 'wiring' | 'installation' | 'safety' | 'specification' | 'communication' | 'maintenance' | 'note';
+export interface CuratedKnowledge {
+  kind: KnowledgeKind;
+  code?: string | null;
+  title: string;
+  description?: string | null;
+  cause?: string | null;
+  remedy?: string | null;
+  details?: Record<string, unknown> | null;
+  page_index?: number | null;
+  printed_page?: string | null;
+  section?: string | null;
+  evidence_quote?: string | null;
+  importance?: 'Important' | 'Medium' | 'Optional' | null;
+}
 export interface CuratedFile {
   document_file: string;
   document_title?: string | null;
@@ -54,6 +73,7 @@ export interface CuratedFile {
   extraction_method?: string;
   parameters?: CuratedParameter[];
   modbus_registers?: CuratedRegister[];
+  knowledge_items?: CuratedKnowledge[];
   notes?: string[];
   _file?: string;
 }

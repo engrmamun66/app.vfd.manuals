@@ -51,6 +51,8 @@ function addEvidence(db: DB, entityType: string, entityId: number, srcId: number
 }
 
 const PARAM_FILL: [string, string][] = [
+  ['importance', 'importance'],
+  ['param_group', 'param_group'],
   ['name', 'name'],
   ['description', 'description_en'],
   ['unit', 'unit'],
@@ -94,8 +96,8 @@ function createParameter(db: DB, p: any, userId: number, ev: string, ver: string
     db
       .prepare(
         `INSERT INTO parameters(model_id, common_function_id, category_id, code, name, description_en, unit, data_type, default_value, min_value, max_value, resolution,
-          access_type, setting_conditions, options_json, equivalence, equivalence_note, evidence_status, verification_status, created_by_user_id, updated_by_user_id)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+          access_type, setting_conditions, options_json, equivalence, equivalence_note, evidence_status, verification_status, created_by_user_id, updated_by_user_id, importance, param_group)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       )
       .run(
         p._model_id,
@@ -119,6 +121,8 @@ function createParameter(db: DB, p: any, userId: number, ev: string, ver: string
         ver,
         userId,
         userId,
+        ['Important', 'Medium', 'Optional'].includes(p.importance) ? p.importance : null,
+        p.param_group ?? p.section ?? null,
       ).lastInsertRowid,
   );
   db.prepare("INSERT OR IGNORE INTO content_display(entity_type, entity_id) VALUES ('parameter', ?)").run(id);
