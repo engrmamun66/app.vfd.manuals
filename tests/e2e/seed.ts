@@ -19,10 +19,12 @@ for (const f of ['vfd-manuals/Delta/Delta-VFD-EL-Series-Users-Manual.pdf', 'vfd-
 }
 const rows = db.prepare("SELECT id FROM staged_records WHERE status='pending' AND quote_match IN ('exact','normalized') AND comparison='No Existing Record'").all() as { id: number }[];
 let ok = 0;
-for (const r of rows) {
+// keep a few records pending so the Verification Center has something to review (curated files now match the manuals fully)
+const toApprove = rows.slice(0, Math.max(0, rows.length - 3));
+for (const r of toApprove) {
   try { approveStaged(r.id, 1, {}); ok++; } catch { /* leave for review */ }
 }
 // mark one record Verified so the UI shows both states
 db.prepare("UPDATE parameters SET verification_status='Verified' WHERE id=(SELECT MIN(id) FROM parameters)").run();
-console.error(`[seed] approved ${ok}/${rows.length}`);
+console.error(`[seed] approved ${ok}/${toApprove.length}`);
 process.exit(0);

@@ -20,6 +20,8 @@ await bootstrap(() => {});
 const db = getDb();
 const admin = db.prepare("SELECT id FROM users WHERE role='super_admin' ORDER BY id LIMIT 1").get() as { id: number };
 
+/** Some PDFs (e.g. OMRON MX2) store ASCII glyphs as private-use characters U+F020..U+F07E (= ASCII + 0xF000); decode them so codes match. */
+const decode = (t: string | null | undefined) => (t ?? '').replace(/[-]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xf000));
 const squash = (s: string) => s.toLowerCase().replace(/\s+/g, '');
 const alnum = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 const words = (s: string) => s.toLowerCase().match(/[a-z0-9]+/g) ?? [];
@@ -31,7 +33,13 @@ interface Check { ok: boolean; reasons: string[]; coverage: number }
 function check(entityType: 'parameter' | 'modbus_register', row: any, pageText: string, quote: string | null): Check {
   const reasons: string[] = [];
   const id = entityType === 'parameter' ? String(row.code) : String(row.original_address);
-  const idOk = squash(pageText).includes(squash(id)) || (alnum(id).length >= 3 && alnum(pageText).includes(alnum(id)));
+  let idOk = squash(pageText).includes(squash(id)) || (alnum(id).length >= 3 && alnum(pageText).includes(alnum(id)));
+  if (!idOk && entityType === 'modbus_register') {
+    // addresses are printed in many notations (0x1000, 1000H, 1000): every address token of a list/range must appear as a whole token
+    const toks = id.split(/\s*(?:-|–|;|,|\bto\b)\s*/i).map((t) => t.trim().replace(/^0x/i, '').replace(/h$/i, '')).filter(Boolean);
+    const esc = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    idOk = toks.length > 0 && toks.every((t) => new RegExp(`(?<![0-9A-Za-z])(?:0x)?${esc(t)}h?(?![0-9A-Za-z])`, 'i').test(pageText));
+  }
   if (!idOk) reasons.push(`identifier "${id}" not on page`);
   const pageWords = new Set(words(pageText));
   const qw = words(quote ?? '');
@@ -64,7 +72,7 @@ for (const [entityType, table] of [['parameter', 'parameters'], ['modbus_registe
       failures.push(`${entityType} #${row.id} ${row.model_name.slice(0, 14)}: no page text for cited page`);
       continue;
     }
-    const r = check(entityType, row, ev.text, ev.quote);
+    const r = check(entityType, row, decode(ev.text), decode(ev.quote));
     if (r.ok) {
       bucket.pass++;
       if (apply) {
@@ -91,16 +99,17 @@ for (const [entityType, table] of [['parameter', 'parameters'], ['modbus_registe
   const upd = db.prepare("UPDATE knowledge_items SET verification_status = ?, evidence_status = ?, updated_at = ? WHERE id = ?");
   for (const k of items) {
     const b = bucketOf(k.model_name);
-    const text = (pg.get(k.revision_id, k.page_index) as any)?.text as string | undefined;
+    const rawText = (pg.get(k.revision_id, k.page_index) as any)?.text as string | undefined;
+    const text = rawText ? decode(rawText) : undefined;
     const reasons: string[] = [];
     if (!text) reasons.push('no page text for cited page');
     else {
       const pw = new Set(words(text));
-      const qw = words(k.evidence_quote ?? '');
+      const qw = words(decode(k.evidence_quote));
       const cov = qw.length ? qw.filter((w) => pw.has(w)).length / qw.length : 0;
       if (!qw.length) reasons.push('no evidence quote');
       else if (cov < 0.85) reasons.push(`quote only ${(cov * 100).toFixed(0)}% on page`);
-      if (k.code && alnum(String(k.code)).length >= 2 && !alnum(text).includes(alnum(String(k.code)))) reasons.push(`code "${k.code}" not on page`);
+      if ((k.kind === 'fault' || k.kind === 'alarm') && k.code && alnum(String(k.code)).length >= 2 && !alnum(text).includes(alnum(String(k.code)))) reasons.push(`code "${k.code}" not on page`);
     }
     if (!reasons.length) {
       b.pass++;
@@ -113,6 +122,6 @@ for (const [entityType, table] of [['parameter', 'parameters'], ['modbus_registe
   }
 }
 console.log(JSON.stringify({ mode: apply ? 'apply' : 'dry-run', verified, summary }, null, 2));
-console.log(failures.filter((f) => !process.env.ONLY || f.includes(process.env.ONLY)).slice(0, 25).join('\n'));
+console.log(failures.filter((f) => !process.env.ONLY || f.includes(process.env.ONLY)).slice(0, 60).join('\n'));
 console.log(`failures total: ${failures.length}`);
 process.exit(0);

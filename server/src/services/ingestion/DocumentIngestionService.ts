@@ -491,6 +491,11 @@ export class DocumentIngestionService {
       if (dryRun) return;
       if (already(type, key)) {
         result.extraction.skippedAlreadyStaged++;
+        // re-import of an extraction file: enrich the live record with the newer tier/group fields (fill-empty only, never overwrites)
+        if (type === 'parameter' && modelId && (rec.importance || rec.param_group))
+          db.prepare(
+            `UPDATE parameters SET importance = COALESCE(importance, ?), param_group = COALESCE(param_group, ?) WHERE model_id = ? AND code = ? AND (importance IS NULL OR param_group IS NULL)`,
+          ).run(['Important', 'Medium', 'Optional'].includes(rec.importance) ? rec.importance : null, rec.param_group ?? rec.section ?? null, modelId, String(rec.code).trim());
         return;
       }
       ins.run(

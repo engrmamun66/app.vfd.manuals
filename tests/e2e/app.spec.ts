@@ -421,7 +421,8 @@ test.describe('bookmarks', () => {
     await expect(alice.getByText('Bookmark saved.')).toBeVisible();
     await alice.goto('/bookmarks');
     await expect(alice.locator('.tree')).toContainText('Delta');
-    await alice.locator('.tree .tw', { hasText: '▸' }).first().click();
+    const collapsed = alice.locator('.tree .tw', { hasText: '▸' }).first();
+    if (await collapsed.count()) await collapsed.click(); // may already be expanded
     await expect(alice.locator('.tree')).toContainText('Parameters');
     await alice.getByRole('link', { name: 'My custom bookmark name' }).click();
     await expect(alice).toHaveURL(new RegExp('/advanced$'));
@@ -487,7 +488,7 @@ test.describe('library, import and verification (Super Admin)', () => {
     await admin.goto('/verification');
     await expect(admin.getByRole('tab', { name: /Staged records/ }).or(admin.getByRole('button', { name: /Staged records/ }))).toBeVisible();
     await expect(admin.locator('tbody tr').first()).toBeVisible();
-    await expect(admin.locator('tbody')).toContainText(/Quote NOT found|No text layer|Not checked/);
+    await expect(admin.locator('tbody')).toContainText(/Quote matches|Quote NOT found|No text layer|Not checked/);
     await admin.locator('tbody tr.clickable').first().click();
     const dlg = admin.getByRole('dialog', { name: 'Review staged record' });
     await expect(dlg).toContainText('Evidence quote');
@@ -617,11 +618,12 @@ test.describe('theme & accessibility basics', () => {
     await dlg.getByRole('button', { name: /^Move .* down$/ }).first().click();
     await expect.poll(firstRow).not.toBe(before);
     await dlg.getByRole('button', { name: 'Close settings' }).click();
+    await expect(dlg).toBeHidden(); // wait for the close animation to finish
     await expect(admin.locator('.model-tabs button').nth(2)).toHaveText('Q9'); // moved-down model is now the 2nd model tab
     const selTip = await admin.locator('.model-tabs button[aria-selected="true"]').getAttribute('title'); // page title = tab tooltip
     await expect(admin).toHaveTitle(`${selTip} · VFD Knowledge Base`);
     await admin.getByRole('button', { name: 'Settings', exact: true }).click();
-    await dlg.getByRole('tab', { name: 'Model aliases' }).click();
+    await expect(dlg.getByRole('tab', { name: 'Model aliases' })).toHaveAttribute('aria-selected', 'true'); // opens on this tab
     await dlg.getByRole('button', { name: /^Move .* up$/ }).nth(1).click(); // back to the original order
     await expect.poll(firstRow).toBe(before);
     const sw = dlg.getByRole('switch').nth(1);
