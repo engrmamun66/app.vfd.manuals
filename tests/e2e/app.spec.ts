@@ -620,7 +620,10 @@ test.describe('theme & accessibility basics', () => {
     await dlg.getByRole('button', { name: 'Close settings' }).click();
     await expect(dlg).toBeHidden(); // wait for the close animation to finish
     await expect(admin.locator('.model-tabs button').nth(2)).toHaveText('Q9'); // moved-down model is now the 2nd model tab
-    const selTip = await admin.locator('.model-tabs button[aria-selected="true"]').getAttribute('title'); // page title = tab tooltip
+    const selBtn = admin.locator('.model-tabs button[aria-selected="true"]');
+    await selBtn.hover();
+    const selTip = await admin.getByRole('tooltip').textContent(); // standard tooltip (not a native title attribute); page title = tooltip text
+    expect(await selBtn.getAttribute('title')).toBeNull();
     await expect(admin).toHaveTitle(`${selTip} · VFD Knowledge Base`);
     await admin.getByRole('button', { name: 'Settings', exact: true }).click();
     await expect(dlg.getByRole('tab', { name: 'Model aliases' })).toHaveAttribute('aria-selected', 'true'); // opens on this tab

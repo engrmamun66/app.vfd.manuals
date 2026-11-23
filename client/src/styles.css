@@ -255,3 +255,9 @@ mark.snip, .snippet mark { background: var(--inv-bg); color: var(--inv-fg); padd
 .fs-modal { animation: fs-in .22s ease-out both; }
 .fs-modal.closing { animation: fs-out .2s ease-in both; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .fs-modal, .fs-modal.closing { animation: none; } }
+
+/* ---------- standard tooltip ---------- */
+.tooltip { position: fixed; transform: translateX(-50%); z-index: 200; max-width: min(360px, 90vw); padding: 5px 9px; font-size: .8rem; line-height: 1.35; background: var(--inv-bg); color: var(--inv-fg); border-radius: 3px; pointer-events: none; box-shadow: 0 2px 8px rgba(0, 0, 0, .25); animation: tip-in .12s ease-out both; }
+@keyframes tip-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .tooltip { animation: none; } }
+.tooltip::before { content: ''; position: absolute; left: 50%; top: -5px; width: 10px; height: 10px; background: var(--inv-bg); transform: translateX(-50%) rotate(45deg); border-radius: 1px; }
