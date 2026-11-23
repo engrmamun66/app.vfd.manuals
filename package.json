@@ -15,7 +15,8 @@
     "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc -p client/tsconfig.json --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "test:all": "vitest run && playwright test"
+    "test:all": "vitest run && playwright test",
+    "sessions:reset": "tsx server/src/cli/reset-sessions.ts"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.2.0",

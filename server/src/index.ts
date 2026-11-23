@@ -32,6 +32,15 @@ async function main() {
     app.use(vite.middlewares);
   }
 
+  server.on('error', (e: NodeJS.ErrnoException) => {
+    if (e.code === 'EADDRINUSE') {
+      console.error(`
+Port ${config.port} is already in use — the app is probably already running at http://localhost:${config.port}.
+Stop the other instance, or set a different PORT in .env.`);
+      process.exit(1);
+    }
+    throw e;
+  });
   server.listen(config.port, config.host, () => {
     console.log(`\nVFD Knowledge Base running at http://${config.host === '0.0.0.0' ? 'localhost' : config.host}:${config.port}`);
     console.log(`Database: ${config.dbPath}`);

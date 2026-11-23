@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ApiError, get, post } from '../lib/api';
 import { useAuth } from '../lib/auth';
-import { ErrorBox } from '../components/ui';
+import { ErrorBox, PasswordInput } from '../components/ui';
 
 function Wrap({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -48,7 +48,7 @@ export function Login() {
       {notice && <div className="ok-box" role="status">{notice} <button className="small ghost" onClick={clearNotice}>Dismiss</button></div>}
       <form onSubmit={submit}>
         <div className="field"><label htmlFor="email">Email address</label><input id="email" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-        <div className="field"><label htmlFor="pw">Password</label><input id="pw" type="password" autoComplete="current-password" required value={pw} onChange={(e) => setPw(e.target.value)} /></div>
+        <div className="field"><label htmlFor="pw">Password</label><PasswordInput id="pw" autoComplete="current-password" required value={pw} onChange={(e) => setPw(e.target.value)} /></div>
         <ErrorBox e={err} />
         <button className="primary" disabled={busy} style={{ width: '100%', justifyContent: 'center' }}>{busy ? 'Signing in…' : 'Sign in'}</button>
       </form>
@@ -58,11 +58,6 @@ export function Login() {
     </Wrap>
   );
 }
-
-const pwHints = (pw: string) => [
-  ['At least 10 characters', pw.length >= 10],
-  ['3 of: lowercase, uppercase, digit, symbol (or 16+ characters)', pw.length >= 16 || [/[a-z]/, /[A-Z]/, /[0-9]/, /[^A-Za-z0-9]/].filter((r) => r.test(pw)).length >= 3],
-] as const;
 
 export function Register() {
   const { register } = useAuth();
@@ -102,11 +97,10 @@ export function Register() {
       <form onSubmit={submit}>
         <div className="field"><label htmlFor="r-email">Email address *</label><input id="r-email" type="email" required autoComplete="email" value={f.email} onChange={set('email')} /></div>
         <div className="field">
-          <label htmlFor="r-pw">Password *</label><input id="r-pw" type="password" required autoComplete="new-password" value={f.password} onChange={set('password')} />
-          <ul className="small-text muted" style={{ margin: '4px 0 0', paddingLeft: 18 }}>{pwHints(f.password).map(([t, ok]) => <li key={t}>{ok ? '✓' : '○'} {t}</li>)}</ul>
+          <label htmlFor="r-pw">Password *</label><PasswordInput id="r-pw" required autoComplete="new-password" value={f.password} onChange={set('password')} />
         </div>
         <div className="field">
-          <label htmlFor="r-pw2">Confirm password *</label><input id="r-pw2" type="password" required autoComplete="new-password" value={f.confirmPassword} onChange={set('confirmPassword')} aria-invalid={mismatch} />
+          <label htmlFor="r-pw2">Confirm password *</label><PasswordInput id="r-pw2" required autoComplete="new-password" value={f.confirmPassword} onChange={set('confirmPassword')} aria-invalid={mismatch} />
           {mismatch && <div className="small-text" role="alert">Passwords do not match.</div>}
         </div>
         <div className="field"><label htmlFor="r-ph">Phone number (optional)</label><input id="r-ph" type="tel" autoComplete="tel" value={f.phone} onChange={set('phone')} /></div>
@@ -141,10 +135,9 @@ export function ChangePassword({ forced }: { forced?: boolean }) {
   const form = (
     <form onSubmit={submit}>
       {forced && <div className="ok-box">You must change your password before continuing.</div>}
-      <div className="field"><label htmlFor="cp1">Current password</label><input id="cp1" type="password" autoComplete="current-password" required value={f.currentPassword} onChange={(e) => setF({ ...f, currentPassword: e.target.value })} /></div>
-      <div className="field"><label htmlFor="cp2">New password</label><input id="cp2" type="password" autoComplete="new-password" required value={f.newPassword} onChange={(e) => setF({ ...f, newPassword: e.target.value })} />
-        <ul className="small-text muted" style={{ margin: '4px 0 0', paddingLeft: 18 }}>{pwHints(f.newPassword).map(([t, o]) => <li key={t}>{o ? '✓' : '○'} {t}</li>)}</ul></div>
-      <div className="field"><label htmlFor="cp3">Confirm new password</label><input id="cp3" type="password" autoComplete="new-password" required value={f.confirmPassword} onChange={(e) => setF({ ...f, confirmPassword: e.target.value })} /></div>
+      <div className="field"><label htmlFor="cp1">Current password</label><PasswordInput id="cp1" autoComplete="current-password" required value={f.currentPassword} onChange={(e) => setF({ ...f, currentPassword: e.target.value })} /></div>
+      <div className="field"><label htmlFor="cp2">New password</label><PasswordInput id="cp2" autoComplete="new-password" required value={f.newPassword} onChange={(e) => setF({ ...f, newPassword: e.target.value })} /></div>
+      <div className="field"><label htmlFor="cp3">Confirm new password</label><PasswordInput id="cp3" autoComplete="new-password" required value={f.confirmPassword} onChange={(e) => setF({ ...f, confirmPassword: e.target.value })} /></div>
       <ErrorBox e={err} />
       {ok && <div className="ok-box" role="status">Password changed. Other sessions were signed out.</div>}
       <div className="row"><button className="primary">Change password</button>{forced && <button type="button" onClick={logout}>Sign out</button>}</div>

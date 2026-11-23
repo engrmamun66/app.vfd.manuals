@@ -12,18 +12,11 @@ export async function verifyPassword(hashStr: string, pw: string) {
   }
 }
 
-/** Returns a list of problems; empty list = acceptable. */
-export function passwordProblems(pw: string, email?: string | null): string[] {
-  const p: string[] = [];
-  if (typeof pw !== 'string' || pw.length < 10) p.push('Password must be at least 10 characters long.');
-  if (pw && pw.length > 200) p.push('Password must be at most 200 characters long.');
-  const classes = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^A-Za-z0-9]/].filter((r) => r.test(pw || '')).length;
-  if (pw && pw.length < 16 && classes < 3)
-    p.push('Use at least 3 of: lowercase, uppercase, digits, symbols (or a passphrase of 16+ characters).');
-  if (pw && /^(.)\1+$/.test(pw)) p.push('Password must not be a single repeated character.');
-  const local = email?.split('@')[0]?.toLowerCase();
-  if (local && local.length >= 4 && pw.toLowerCase().includes(local)) p.push('Password must not contain your email name.');
-  return p;
+/** Password policy intentionally minimal (owner request): only non-empty and a sane upper bound. */
+export function passwordProblems(pw: string, _email?: string | null): string[] {
+  if (typeof pw !== 'string' || pw.length < 1) return ['Password is required.'];
+  if (pw.length > 200) return ['Password must be at most 200 characters long.'];
+  return [];
 }
 
 export function normalizeEmail(e: string): string {

@@ -46,6 +46,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const hb = useRef<number | null>(null);
+  const userRef = useRef<User | null>(null);
+  userRef.current = user;
 
   const apply = (r: { user: User; csrfToken: string; settings: Settings }) => {
     setCsrf(r.csrfToken);
@@ -73,7 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setUnauthorizedHandler((code) => {
       if (code === 'MUST_CHANGE_PASSWORD') return;
-      clearAuth('Your session has ended. Please sign in again.');
+      // only announce an ended session if someone was actually signed in (not for failed logins / first load)
+      clearAuth(userRef.current ? 'Your session has ended. Please sign in again.' : undefined);
     });
     refresh();
   }, [refresh, clearAuth]);

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { del, get, patch, post, put, fmtBytes, fmtDate, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
-import { Crumbs, ErrorBox, Loading, Modal, useAsync, download } from '../components/ui';
+import { Crumbs, ErrorBox, Loading, Modal, PasswordInput, useAsync, download } from '../components/ui';
 
 const TYPES: [string, string][] = [['brand', 'Brands'], ['model', 'Models'], ['category', 'Categories'], ['common_function', 'Common functions'], ['parameter', 'Parameters'], ['modbus_register', 'Modbus registers'], ['document', 'Documents']];
 
@@ -107,7 +107,7 @@ function CreateUser({ onClose }: { onClose: () => void }) {
   return (
     <Modal title="Create user" onClose={onClose}>
       <div className="field"><label>Email</label><input value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
-      <div className="field"><label>Temporary password (user must change it at first login)</label><input type="password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
+      <div className="field"><label>Temporary password (user must change it at first login)</label><PasswordInput value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
       <div className="field"><label>Role</label><select value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })}><option value="user">Normal User</option><option value="super_admin">Super Admin</option></select></div>
       <ErrorBox e={err} />
       <button className="primary" onClick={async () => { try { await post('/admin/users', f); onClose(); } catch (e) { setErr(e); } }}>Create</button>
