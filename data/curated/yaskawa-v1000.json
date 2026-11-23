@@ -1,0 +1,1737 @@
+{
+  "document_file": "vfd-manuals/Yaskawa/Yaskawa-V1000-CIMR-VC-Guide -- heavy.pdf",
+  "document_title": "YASKAWA AC Drive - V1000 Technical Manual",
+  "document_revision": "SIEP C710606 18C",
+  "brand": "Yaskawa",
+  "model": "V1000",
+  "model_evidence": {
+    "page_index": 2,
+    "evidence_quote": "YASKAWA ELECTRIC SIEP C710606 18C YASKAWA AC Drive – V1000 Technical Manual"
+  },
+  "extraction_method": "ai-assisted-reading",
+  "parameters": [
+    {
+      "common_function": "control-mode",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Range printed as \"0, 2, 5\". Footnote <2>: setting value is not reset to the default value during drive initialization.",
+      "code": "A1-02",
+      "name": "Control Method Selection",
+      "description": "Selects the Control Method of the drive. Auto-Tuning must be performed when selecting one of the vector control modes.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Does not return to the default setting after initialization.",
+      "options": [
+        {
+          "value": "0",
+          "label": "V/f Control without PG"
+        },
+        {
+          "value": "2",
+          "label": "Open Loop Vector (OLV)"
+        },
+        {
+          "value": "5",
+          "label": "PM Open Loop Vector (PM)"
+        }
+      ],
+      "page_index": 349,
+      "printed_page": "349",
+      "section": "A: Initialization Parameters",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "A1-02 <2> Control Method Selection Selects the Control Method of the drive. Auto-Tuning must be performed when selecting one of the vector control modes. 0: V/f Control without PG 2: Open Loop Vector (OLV) 5: PM Open Loop Vector (PM)"
+    },
+    {
+      "common_function": "parameter-reset",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Not reset during initialization: A1-00, A1-02, A1-07, E1-03, E5-oo, F6-08, L8-35, o2-04, o2-09, and all U2 and U3 monitors.",
+      "code": "A1-03",
+      "name": "Initialize Parameters",
+      "description": "Resets all parameters to factory default settings. (Initializes the drive then returns A1-03 to 0)",
+      "unit": null,
+      "default_value": "0",
+      "min_value": "0",
+      "max_value": "5550",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "No Initialize"
+        },
+        {
+          "value": "1110",
+          "label": "User Initialize (First set user parameter values must be stored using parameter o2-03)"
+        },
+        {
+          "value": "2220",
+          "label": "2-Wire Initialization"
+        },
+        {
+          "value": "3330",
+          "label": "3-Wire Initialization"
+        },
+        {
+          "value": "5550",
+          "label": "oPE04 Error Reset"
+        }
+      ],
+      "page_index": 349,
+      "printed_page": "349",
+      "section": "A: Initialization Parameters",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "A1-03 Initialize Parameters Resets all parameters to factory default settings. (Initializes the drive then returns A1-03 to 0) 0: No Initialize 1110: User Initialize (First set user parameter values must be stored using parameter o2-03) 2220: 2-Wire Initialization 3330: 3-Wire Initialization 5550: oPE04 Error Reset 0 to 5550 0"
+    },
+    {
+      "common_function": "parameter-lock",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Password comparison A1-04 vs A1-05 (Password 2, hidden).",
+      "code": "A1-04",
+      "name": "Password 1",
+      "description": "When the value set into A1-04 does not match the value set into A1-05, parameters A1-01 through A1-03, A1-06, and A2-01 through A2-32 cannot be changed.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": "0",
+      "max_value": "9999",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 349,
+      "printed_page": "349",
+      "section": "A: Initialization Parameters",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "A1-04 Password 1 When the value set into A1-04 does not match the value set into A1-05, parameters A1-01 through A1-03, A1-06, and A2-01 through A2-32 cannot be changed. 0 to 9999 0"
+    },
+    {
+      "common_function": "frequency-source",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "b1-01",
+      "name": "Frequency Reference Selection 1",
+      "description": "Selects the frequency reference input source.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": "0",
+      "max_value": "4",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Operator - Digital preset speed d1-01 to d1-17."
+        },
+        {
+          "value": "1",
+          "label": "Terminals - Analog input terminal A1 or A2."
+        },
+        {
+          "value": "2",
+          "label": "MEMOBUS communications"
+        },
+        {
+          "value": "3",
+          "label": "Option PCB"
+        },
+        {
+          "value": "4",
+          "label": "Pulse Input (Terminal RP)"
+        }
+      ],
+      "page_index": 350,
+      "printed_page": "350",
+      "section": "b: Application",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "b1-01 Frequency Reference Selection 1 Selects the frequency reference input source. 0: Operator - Digital preset speed d1-01 to d1-17. 1: Terminals - Analog input terminal A1 or A2. 2: MEMOBUS communications 3: Option PCB 4: Pulse Input (Terminal RP) 0 to 4 1"
+    },
+    {
+      "common_function": "command-source",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "b1-02",
+      "name": "Run Command Selection 1",
+      "description": "Selects the run command input source.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": "0",
+      "max_value": "3",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Operator - RUN and STOP keys on the digital operator."
+        },
+        {
+          "value": "1",
+          "label": "Digital input terminals"
+        },
+        {
+          "value": "2",
+          "label": "MEMOBUS communications"
+        },
+        {
+          "value": "3",
+          "label": "Option PCB."
+        }
+      ],
+      "page_index": 350,
+      "printed_page": "350",
+      "section": "b: Application",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "b1-02 Run Command Selection 1 Selects the run command input source. 0: Operator - RUN and STOP keys on the digital operator. 1: Digital input terminals 2: MEMOBUS communications 3: Option PCB. 0 to 3 1"
+    },
+    {
+      "common_function": "stop-method",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "DC Injection Braking at Stop cannot be selected when using Open Loop Vector for PM motors.",
+      "code": "b1-03",
+      "name": "Stopping Method Selection",
+      "description": "Selects the stopping method when the run command is removed.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": "0",
+      "max_value": "3",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Ramp to Stop"
+        },
+        {
+          "value": "1",
+          "label": "Coast to Stop"
+        },
+        {
+          "value": "2",
+          "label": "DC Injection Braking to Stop"
+        },
+        {
+          "value": "3",
+          "label": "Coast with Timer (A new run command is ignored if received before the timer expires)"
+        }
+      ],
+      "page_index": 350,
+      "printed_page": "350",
+      "section": "b: Application",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "b1-03 Stopping Method Selection Selects the stopping method when the run command is removed. 0: Ramp to Stop 1: Coast to Stop 2: DC Injection Braking to Stop 3: Coast with Timer (A new run command is ignored if received before the timer expires) 0 to 3 0"
+    },
+    {
+      "common_function": "reverse-prohibit",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "b1-04",
+      "name": "Reverse Operation Selection",
+      "description": "Permits or prohibits reverse operation.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": "0",
+      "max_value": "1",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Reverse enabled."
+        },
+        {
+          "value": "1",
+          "label": "Reverse disabled."
+        }
+      ],
+      "page_index": 351,
+      "printed_page": "351",
+      "section": "b: Application",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "b1-04 Reverse Operation Selection Permits or prohibits reverse operation. 0: Reverse enabled. 1: Reverse disabled. 0, 1 0"
+    },
+    {
+      "common_function": "dc-injection-braking",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Related: b2-01 DC Injection Braking Start Frequency (0.0 to 10.0, default 0.5 Hz); b2-04 DC Injection Braking Time at Stop (0.00 to 10.00, default 0.50 s).",
+      "code": "b2-02",
+      "name": "DC Injection Braking Current",
+      "description": "Sets the DC Injection Braking current as a percentage of the drive rated current.",
+      "unit": "%",
+      "default_value": "50%",
+      "min_value": "0",
+      "max_value": "75",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 351,
+      "printed_page": "351",
+      "section": "b: Application",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "b2-02 DC Injection Braking Current Sets the DC Injection Braking current as a percentage of the drive rated current. 0 to 75 50%"
+    },
+    {
+      "common_function": "dc-injection-braking",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Control mode column for PM is \"−\" (not available).",
+      "code": "b2-04",
+      "name": "DC Injection Braking Time at Stop",
+      "description": "Sets DC Injection Braking time at stop. Disabled when set to 0.00.",
+      "unit": "s",
+      "default_value": "0.50 s",
+      "min_value": "0.00",
+      "max_value": "10.00",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 351,
+      "printed_page": "351",
+      "section": "b: Application",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "b2-04 DC Injection Braking Time at Stop Sets DC Injection Braking time at stop."
+    },
+    {
+      "common_function": "pid-control",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "b5-01",
+      "name": "PID Function Setting",
+      "description": "Sets the PID control mode.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": "0",
+      "max_value": "4",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Disabled"
+        },
+        {
+          "value": "1",
+          "label": "Enable (PID output = freq. ref., PID input is D-controlled)"
+        },
+        {
+          "value": "2",
+          "label": "(PID output = freq. ref., PID feedback is D-controlled)"
+        },
+        {
+          "value": "3",
+          "label": "Enable (PID output added to freq. ref., PID input is D- controlled)"
+        },
+        {
+          "value": "4",
+          "label": "Enable (PID output added to freq. ref., PID feedback is D- controlled)"
+        }
+      ],
+      "page_index": 352,
+      "printed_page": "352",
+      "section": "b: Application",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "b5-01 PID Function Setting Sets the PID control mode. 0: Disabled 1: Enable (PID output = freq. ref., PID input is D-controlled) 2: (PID output = freq. ref., PID feedback is D-controlled)"
+    },
+    {
+      "common_function": "acceleration-time-1",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Footnote <2>: setting range depends on C1-10; when C1-10 = 0 (units of 0.01 seconds) the range becomes 0.00 to 600.00 seconds.",
+      "code": "C1-01",
+      "name": "Acceleration Time 1",
+      "description": "Sets the time to accelerate from 0 to maximum frequency.",
+      "unit": "s",
+      "default_value": "10.0 s",
+      "min_value": "0.0",
+      "max_value": "6000.0",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "<1> Parameter can be changed during run.",
+      "options": [],
+      "page_index": 355,
+      "printed_page": "355",
+      "section": "C: Tuning",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "C1-01 <1> Acceleration Time 1 Sets the time to accelerate from 0 to maximum frequency. 0.0 to 6000.0 <2> 10.0 s"
+    },
+    {
+      "common_function": "deceleration-time-1",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Range \"0.0 to 6000.0 <2>\" and default \"10.0 s\" are printed in merged table cells shared by C1-01 to C1-08 (checked on page image).",
+      "code": "C1-02",
+      "name": "Deceleration Time 1",
+      "description": "Sets the time to decelerate from maximum frequency to 0.",
+      "unit": "s",
+      "default_value": "10.0 s",
+      "min_value": "0.0",
+      "max_value": "6000.0",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "<1> Parameter can be changed during run.",
+      "options": [],
+      "page_index": 355,
+      "printed_page": "355",
+      "section": "C: Tuning",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "C1-02 <1> Deceleration Time 1 Sets the time to decelerate from maximum frequency to 0."
+    },
+    {
+      "common_function": "acceleration-time-2",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Range and default from merged table cells shared by C1-01 to C1-08 (checked on page image).",
+      "code": "C1-03",
+      "name": "Acceleration Time 2",
+      "description": "Sets the time to accelerate from 0 to maximum frequency when Accel/Decel times 2 are selected by a digital input.",
+      "unit": "s",
+      "default_value": "10.0 s",
+      "min_value": "0.0",
+      "max_value": "6000.0",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "<1> Parameter can be changed during run.",
+      "options": [],
+      "page_index": 355,
+      "printed_page": "355",
+      "section": "C: Tuning",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "C1-03 <1> Acceleration Time 2 Sets the time to accelerate from 0 to maximum frequency when Accel/Decel times 2 are selected by a digital input."
+    },
+    {
+      "common_function": "deceleration-time-2",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Range and default from merged table cells shared by C1-01 to C1-08 (checked on page image).",
+      "code": "C1-04",
+      "name": "Deceleration Time 2",
+      "description": "Sets the time to decelerate from maximum frequency to 0 when Accel/Decel times 2 are selected by a digital input.",
+      "unit": "s",
+      "default_value": "10.0 s",
+      "min_value": "0.0",
+      "max_value": "6000.0",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "<1> Parameter can be changed during run.",
+      "options": [],
+      "page_index": 355,
+      "printed_page": "355",
+      "section": "C: Tuning",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "C1-04 <1> Deceleration Time 2 Sets the time to decelerate from maximum frequency to 0 when Accel/Decel times 2 are selected by a digital input."
+    },
+    {
+      "common_function": "s-curve",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "C2-02 Accel End (0.00 to 10.0, 0.20 s), C2-03 Decel Start (0.00 to 10.0, 0.20 s), C2-04 Decel End (0.00 to 10.0, 0.00 s). Footnote <4> on C2-01 default: depends on A1-02; value shown is for V/f Control.",
+      "code": "C2-01",
+      "name": "S-Curve Characteristic at Accel Start",
+      "description": "S-curve is used to further soften the starting and stopping ramp. The longer the S-curve time, the softer the starting and stopping ramp.",
+      "unit": "s",
+      "default_value": "0.20 s",
+      "min_value": "0.00",
+      "max_value": "10.00",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 356,
+      "printed_page": "356",
+      "section": "C: Tuning",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "S-curve is used to further soften the starting and stopping ramp. The longer the S-curve time, the softer the starting and stopping ramp. 0.00 to 10.00 0.20 s"
+    },
+    {
+      "common_function": "slip-compensation",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Footnote <4>: default depends on A1-02; value shown is for A1-02 = 0-V/f Control. Not available in PM mode (\"−\").",
+      "code": "C3-01",
+      "name": "Slip Compensation Gain",
+      "description": "Sets the slip compensation gain. Decides for what amount the output frequency is boosted in order to compensate the slip.",
+      "unit": null,
+      "default_value": "0.0",
+      "min_value": "0.0",
+      "max_value": "2.5",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "<1> Parameter can be changed during run.",
+      "options": [],
+      "page_index": 356,
+      "printed_page": "356",
+      "section": "C: Tuning",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "C3-01 <1> Slip Compensation Gain Sets the slip compensation gain. Decides for what amount the output frequency is boosted in order to compensate the slip. Note: Adjustment is not normally required. 0.0 to 2.5 0.0 <4>"
+    },
+    {
+      "common_function": "torque-boost",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Footnote <5>: parameter cannot be changed during run when A1-02 = 5-PM OLV Control. Default printed \"1.00 <4>\" (depends on A1-02; shown for V/f).",
+      "code": "C4-01",
+      "name": "Torque Compensation Gain",
+      "description": "V/f Control: Sets the gain for the automatic torque (voltage) boost function and helps to produce better starting torque. Open Loop Vector: Sets the torque compensation function gain.",
+      "unit": null,
+      "default_value": "1.00",
+      "min_value": "0.00",
+      "max_value": "2.50",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 356,
+      "printed_page": "356",
+      "section": "C: Tuning",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "C4-01 <5> Torque Compensation Gain V/f Control: Sets the gain for the automatic torque (voltage) boost function and helps to produce better starting torque."
+    },
+    {
+      "common_function": "carrier-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Range footnote <7>: PRG: 1020 and later: 1 to B; F. PRG: 1018 and earlier: 1 to A; F. C to E: No setting possible. Default footnote <8>: dependent on o2-04, A1-02 and C6-01.",
+      "code": "C6-02",
+      "name": "Carrier Frequency Selection",
+      "description": "Selects the carrier frequency",
+      "unit": null,
+      "default_value": "Determined by o2-04, A1-02 and C6-01 (footnote <8>)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "1",
+          "label": "2.0 kHz"
+        },
+        {
+          "value": "2",
+          "label": "5.0 kHz"
+        },
+        {
+          "value": "3",
+          "label": "8.0 kHz"
+        },
+        {
+          "value": "4",
+          "label": "10.0 kHz"
+        },
+        {
+          "value": "5",
+          "label": "12.5 kHz"
+        },
+        {
+          "value": "6",
+          "label": "15.0 kHz"
+        },
+        {
+          "value": "7",
+          "label": "Swing PWM1 (Audible sound 1)"
+        },
+        {
+          "value": "8",
+          "label": "Swing PWM2 (Audible sound 2)"
+        },
+        {
+          "value": "9",
+          "label": "Swing PWM3 (Audible sound 3)"
+        },
+        {
+          "value": "A",
+          "label": "Swing PWM4 (Audible sound 4)"
+        },
+        {
+          "value": "B",
+          "label": "Leakage Current Rejection PWM"
+        },
+        {
+          "value": "F",
+          "label": "User defined (determined by C6-03 through C6-05)"
+        }
+      ],
+      "page_index": 357,
+      "printed_page": "357",
+      "section": "C: Tuning",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "C6-02 Carrier Frequency Selection Selects the carrier frequency 1 : 2.0 kHz 2 : 5.0 kHz 3 : 8.0 kHz 4 : 10.0 kHz 5 : 12.5 kHz 6 : 15.0 kHz 7 : Swing PWM1 (Audible sound 1)"
+    },
+    {
+      "common_function": "multi-step-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "d1-01 to d1-16 = Frequency Reference 1 to 16. Range \"0.00 to 400.00 Hz <2> <3>\" is printed in a merged table cell (checked on page image); footnote <2>: default depends on o1-03; <3>: range upper limit depends on E1-04 and d2-01.",
+      "code": "d1-02",
+      "name": "Frequency Reference 2",
+      "description": "Frequency reference when digital input \"Multi-Step Speed Reference 1\" (H1-oo = 3) is on.",
+      "unit": "Hz",
+      "default_value": "0.00 Hz",
+      "min_value": "0.00",
+      "max_value": "400.00",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "<1> Parameter can be changed during Run.",
+      "options": [],
+      "page_index": 358,
+      "printed_page": "358",
+      "section": "d: References",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "d1-02 <1> Frequency Reference 2 Frequency reference when digital input \"Multi-Step Speed Reference 1\" (H1- oo = 3) is on. 0.00 Hz"
+    },
+    {
+      "common_function": "jog-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Range \"0.00 to 400.00 Hz <2> <3>\" from merged table cell shared with d1-11 to d1-16 (checked on page image).",
+      "code": "d1-17",
+      "name": "Jog Frequency Reference",
+      "description": "Frequency reference when digital inputs \"Jog Frequency Reference\", \"Forward Jog\", or \"Reverse Jog.\" are on. \"Jog Frequency Reference\" has priority over \"Multi-Step Speed Reference 1 to 16\".",
+      "unit": "Hz",
+      "default_value": "6.00 Hz",
+      "min_value": "0.00",
+      "max_value": "400.00",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "<1> Parameter can be changed during Run.",
+      "options": [],
+      "page_index": 358,
+      "printed_page": "358",
+      "section": "d: References",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "d1-17 <1> Jog Frequency Reference Frequency reference when digital inputs \"Jog Frequency Reference\", \"Forward Jog\", or \"Reverse Jog.\" are on."
+    },
+    {
+      "common_function": "frequency-upper-limit",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "d2-01",
+      "name": "Frequency Reference Upper Limit",
+      "description": "Sets the frequency reference upper limit as a percentage of maximum output frequency (E1-04). This limit applies to all frequency reference sources.",
+      "unit": "%",
+      "default_value": "100.0 %",
+      "min_value": "0.0",
+      "max_value": "110.0",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 359,
+      "printed_page": "359",
+      "section": "d: References",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "d2-01 Frequency Reference Upper Limit Sets the frequency reference upper limit as a percentage of maximum output frequency (E1-04). Output speed is limited to this value even if the frequency reference is higher. This limit applies to all frequency reference sources. 0.0 to 110.0 100.0 %"
+    },
+    {
+      "common_function": "frequency-lower-limit",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "d2-02",
+      "name": "Frequency Reference Lower Limit",
+      "description": "Sets the frequency reference lower limit as a percentage of maximum output frequency (E1-04). This limit applies to all frequency reference sources.",
+      "unit": "%",
+      "default_value": "0.0%",
+      "min_value": "0.0",
+      "max_value": "110.0",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 359,
+      "printed_page": "359",
+      "section": "d: References",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "d2-02 Frequency Reference Lower Limit Sets the frequency reference lower limit as a percentage of maximum output frequency (E1-04). Output speed is limited to this value even if the frequency reference is lower. This limit applies to all frequency reference sources. 0.0 to 110.0 0.0%"
+    },
+    {
+      "common_function": "maximum-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Range \"40.0 to 400.0 <3>\" and default \"60 Hz <4>\" (checked on page image; in the text layer they appear after the V/f figure labels). Footnote <4> (p.364): default depends on E5-01, Motor Code Selection.",
+      "code": "E1-04",
+      "name": "Maximum Output Frequency",
+      "description": "These parameters are only applicable when E1-03 is set to F.",
+      "unit": "Hz",
+      "default_value": "60 Hz",
+      "min_value": "40.0",
+      "max_value": "400.0",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 361,
+      "printed_page": "361",
+      "section": "E: Motor Parameters",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "E1-04 Maximum Output Frequency These parameters are only applicable when E1-03 is set to F."
+    },
+    {
+      "common_function": "maximum-output-voltage",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Footnote <1> (p.364): values shown are for 200 V class drives; double the value for a 400 V class drive. <4>: default depends on E5-01.",
+      "code": "E1-05",
+      "name": "Maximum Output Voltage",
+      "description": "Maximum output voltage of the V/f pattern (applicable when E1-03 is set to F).",
+      "unit": "V",
+      "default_value": "230 V",
+      "min_value": "0.0",
+      "max_value": "255.0",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 361,
+      "printed_page": "361",
+      "section": "E: Motor Parameters",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "E1-05 <1> Maximum Output Voltage 0.0 to 255.0 230 V <4>"
+    },
+    {
+      "common_function": "base-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Footnote <4>: default depends on E5-01, Motor Code Selection.",
+      "code": "E1-06",
+      "name": "Base Frequency",
+      "description": "Base frequency of the V/f pattern (applicable when E1-03 is set to F).",
+      "unit": "Hz",
+      "default_value": "60 Hz",
+      "min_value": "0.0",
+      "max_value": "E1-04",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 361,
+      "printed_page": "361",
+      "section": "E: Motor Parameters",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "E1-06 Base Frequency 0.0 to E1-04 60 Hz <4>"
+    },
+    {
+      "common_function": "minimum-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Footnote <5>: default depends on A1-02; value shown is for V/f Control. <4>: depends on E5-01.",
+      "code": "E1-09",
+      "name": "Minimum Output Frequency",
+      "description": "Minimum output frequency of the V/f pattern (applicable when E1-03 is set to F).",
+      "unit": "Hz",
+      "default_value": "1.5 Hz",
+      "min_value": "0.0",
+      "max_value": "E1-04",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 361,
+      "printed_page": "361",
+      "section": "E: Motor Parameters",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "E1-09 Minimum Output Frequency 0.0 to E1-04 1.5 Hz <5> <4>"
+    },
+    {
+      "common_function": "rated-motor-current",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Range printed as \"10 to 200% of drive rated current\". <9>: setting units determined by o2-04 (less than 11 kW: 2 decimal points, 11 kW and above: 1 decimal point). Not available in PM mode.",
+      "code": "E2-01",
+      "name": "Motor Rated Current",
+      "description": "Sets the motor nameplate full load current in amperes (A). Automatically set during Auto-Tuning.",
+      "unit": "A",
+      "default_value": "Determined by o2-04 and C6-01 (footnote <10>)",
+      "min_value": "10% of drive rated current",
+      "max_value": "200% of drive rated current",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 361,
+      "printed_page": "361",
+      "section": "E: Motor Parameters",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "E2-01 <8> Motor Rated Current Sets the motor nameplate full load current in amperes (A). Automatically set during Auto-Tuning. Note: Set E2-03 (Motor No-Load Current) before making changes to E2-01. An oPE01 error will be triggered if E2-01 < E2-03. 10 to 200% of drive rated current <9> <10>"
+    },
+    {
+      "common_function": "motor-poles",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "E2-04",
+      "name": "Number of Motor Poles",
+      "description": "Sets the number of motor poles. Automatically set during Auto-Tuning.",
+      "unit": "poles",
+      "default_value": "4 poles",
+      "min_value": "2",
+      "max_value": "48",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 361,
+      "printed_page": "361",
+      "section": "E: Motor Parameters",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "E2-04 Number of Motor Poles Sets the number of motor poles. Automatically set during Auto-Tuning. 2 to 48 4 poles"
+    },
+    {
+      "common_function": "rated-motor-power",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Default footnote <6> (p.364): dependent on o2-04, Drive Model Selection.",
+      "code": "E2-11",
+      "name": "Motor Rated Output",
+      "description": "Sets the motor rated power in kilowatts (kW). Automatically set during Auto-Tuning. (1 HP = 0.746 kW).",
+      "unit": "kW",
+      "default_value": "0.40 kW",
+      "min_value": "0.00",
+      "max_value": "650.00",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 362,
+      "printed_page": "362",
+      "section": "E: Motor Parameters",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "E2-11 Motor Rated Output Sets the motor rated power in kilowatts (kW). Automatically set during Auto-Tuning. (1 HP = 0.746 kW). 0.00 to 650.00 0.40 kW <6>"
+    },
+    {
+      "common_function": "digital-input-function",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Range printed as hexadecimal setting values \"1 to 9F\". Option list is on pp. 369-371; not transcribed here.",
+      "code": "H1-01",
+      "name": "Multi-Function Digital Input Terminal S1 Function Selection",
+      "description": "Assigns a function to the multi-function digital inputs. Refer to H1 Multi-Function Digital Input Selections on page 369 for a description of setting values.",
+      "unit": null,
+      "default_value": "40",
+      "min_value": "1",
+      "max_value": "9F",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 368,
+      "printed_page": "368",
+      "section": "H: Terminal Functions",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "H1-01 Multi-Function Digital Input Terminal S1 Function Selection Assigns a function to the multi- function digital inputs. Refer to H1 Multi-Function Digital Input Selections on page 369 for a description of setting values. 1 to 9F <1> 40"
+    },
+    {
+      "common_function": "relay-output-function",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Option list on pp. 371-373; not transcribed here.",
+      "code": "H2-01",
+      "name": "Terminal MA, MB and MC Function Selection (relay)",
+      "description": "Refer to H2 Multi-Function Digital Output Settings on page 371 for a description of setting values.",
+      "unit": null,
+      "default_value": "E",
+      "min_value": "0",
+      "max_value": "192",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 371,
+      "printed_page": "371",
+      "section": "H: Terminal Functions",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "H2-01 Terminal MA, MB and MC Function Selection (relay) Refer to H2 Multi-Function Digital Output Settings on page 371 for a description of setting values. 0 to 192 <1> E"
+    },
+    {
+      "common_function": "slave-address",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Footnote <3> (p.376): If this parameter is set to 0, the drive will be unable to respond to MEMOBUS/Modbus commands.",
+      "code": "H5-01",
+      "name": "Drive Node Address",
+      "description": "Selects drive station node number (address) for MEMOBUS/Modbus terminals R+, R-, S+, S-. Cycle power for the setting to take effect.",
+      "unit": null,
+      "default_value": "1F",
+      "min_value": "0",
+      "max_value": "20 H",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Cycle power for the setting to take effect.",
+      "options": [],
+      "page_index": 375,
+      "printed_page": "375",
+      "section": "H5: MEMOBUS/Modbus Communications",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "H5-01 <3> Drive Node Address Selects drive station node number (address) for MEMOBUS/ Modbus terminals R+, R-, S+, S-. Cycle power for the setting to take effect. 0 to 20 H 1F"
+    },
+    {
+      "common_function": "baud-rate",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "H5-02",
+      "name": "Communication Speed Selection",
+      "description": "Selects the baud rate for MEMOBUS/Modbus terminals R+, R-, S+ and S-. Cycle power for the setting to take effect.",
+      "unit": null,
+      "default_value": "3",
+      "min_value": "0",
+      "max_value": "8",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Cycle power for the setting to take effect.",
+      "options": [
+        {
+          "value": "0",
+          "label": "1200 bps"
+        },
+        {
+          "value": "1",
+          "label": "2400 bps"
+        },
+        {
+          "value": "2",
+          "label": "4800 bps"
+        },
+        {
+          "value": "3",
+          "label": "9600 bps"
+        },
+        {
+          "value": "4",
+          "label": "19200 bps"
+        },
+        {
+          "value": "5",
+          "label": "38400 bps"
+        },
+        {
+          "value": "6",
+          "label": "57600 bps"
+        },
+        {
+          "value": "7",
+          "label": "76800 bps"
+        },
+        {
+          "value": "8",
+          "label": "115200 bps"
+        }
+      ],
+      "page_index": 375,
+      "printed_page": "375",
+      "section": "H5: MEMOBUS/Modbus Communications",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "H5-02 Communication Speed Selection Selects the baud rate for MEMOBUS/Modbus terminals R+, R-, S+ and S-. Cycle power for the setting to take effect. 0 : 1200 bps 1 : 2400 bps 2 : 4800 bps 3 : 9600 bps 4 : 19200 bps 5 : 38400 bps 6 : 57600 bps 7 : 76800 bps 8 : 115200 bps 0 to 8 3"
+    },
+    {
+      "common_function": "parity-stop-bits",
+      "equivalence": "Partially Equivalent",
+      "equivalence_note": "Parity only. Data length 8 bit (fixed) and stop bit 1 bit (fixed) per C.3 Communication Specifications (p.426).",
+      "code": "H5-03",
+      "name": "Communication Parity Selection",
+      "description": "Selects the communication parity for MEMOBUS/Modbus terminals R+, R-, S+ and S-. Cycle power for the setting to take effect.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": "0",
+      "max_value": "2",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Cycle power for the setting to take effect.",
+      "options": [
+        {
+          "value": "0",
+          "label": "No parity"
+        },
+        {
+          "value": "1",
+          "label": "Even parity"
+        },
+        {
+          "value": "2",
+          "label": "Odd parity"
+        }
+      ],
+      "page_index": 375,
+      "printed_page": "375",
+      "section": "H5: MEMOBUS/Modbus Communications",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "H5-03 Communication Parity Selection Selects the communication parity for MEMOBUS/Modbus terminals R+, R-, S+ and S-. Cycle power for the setting to take effect. 0: No parity 1: Even parity 2: Odd parity 0 to 2 0"
+    },
+    {
+      "common_function": "comm-loss-action",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "H5-04",
+      "name": "Stopping Method After Communication Error",
+      "description": "Selects the stopping method when a communication time-out fault (CE) is detected.",
+      "unit": null,
+      "default_value": "3",
+      "min_value": "0",
+      "max_value": "3",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Ramp to stop"
+        },
+        {
+          "value": "1",
+          "label": "Coast to stop"
+        },
+        {
+          "value": "2",
+          "label": "Fast-stop"
+        },
+        {
+          "value": "3",
+          "label": "Alarm only"
+        }
+      ],
+      "page_index": 375,
+      "printed_page": "375",
+      "section": "H5: MEMOBUS/Modbus Communications",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "H5-04 Stopping Method After Communication Error Selects the stopping method when a communication time-out fault (CE) is detected. 0: Ramp to stop 1: Coast to stop 2: Fast-stop 3: Alarm only 0 to 3 3"
+    },
+    {
+      "common_function": "comm-timeout",
+      "equivalence": "Partially Equivalent",
+      "equivalence_note": "Enable/disable of CE detection; detection time is H5-09.",
+      "code": "H5-05",
+      "name": "Communication Fault Detection Selection",
+      "description": "Enables or disables the communications time-out fault (CE) detection.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": "0",
+      "max_value": "1",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Disabled"
+        },
+        {
+          "value": "1",
+          "label": "Enabled - If communication is lost for more than two seconds, a CE fault will occur."
+        }
+      ],
+      "page_index": 375,
+      "printed_page": "375",
+      "section": "H5: MEMOBUS/Modbus Communications",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "H5-05 Communication Fault Detection Selection Enables or disables the communications time-out fault (CE) detection. 0: Disabled 1: Enabled - If communication is lost for more than two seconds, a CE fault will occur. 0, 1 1"
+    },
+    {
+      "common_function": "comm-timeout",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "H5-09",
+      "name": "CE Detection Time",
+      "description": "Sets the time required to detect a communications error. Adjustment may be need when networking several drives.",
+      "unit": "s",
+      "default_value": "2.0 s",
+      "min_value": "0.0",
+      "max_value": "10.0",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 375,
+      "printed_page": "375",
+      "section": "H5: MEMOBUS/Modbus Communications",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "H5-09 CE Detection Time Sets the time required to detect a communications error. Adjustment may be need when networking several drives. 0.0 to 10.0 s 2.0 s"
+    },
+    {
+      "common_function": "comm-response-delay",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "H5-06",
+      "name": "Drive Transmit Wait Time",
+      "description": "Set the wait time between receiving and sending data.",
+      "unit": "ms",
+      "default_value": "5 ms",
+      "min_value": "5",
+      "max_value": "65",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 375,
+      "printed_page": "375",
+      "section": "H5: MEMOBUS/Modbus Communications",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "H5-06 Drive Transmit Wait Time Set the wait time between receiving and sending data. 5 to 65 5 ms"
+    },
+    {
+      "common_function": "comm-protocol",
+      "equivalence": "Insufficient Documentation",
+      "equivalence_note": "No protocol-selection parameter was found for the built-in port (protocol is MEMOBUS/Modbus RTU only, p.426). H5-11 (ENTER behaviour) is recorded as the closest protocol-related setting.",
+      "code": "H5-11",
+      "name": "Communications ENTER Function Selection",
+      "description": "Select the function for the enter command that saves parameter data to the drive.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": "0",
+      "max_value": "1",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Parameter changes are activated when ENTER command is entered."
+        },
+        {
+          "value": "1",
+          "label": "Parameter changes are activated immediately without ENTER command (compatible with Varispeed VS606-V7)."
+        }
+      ],
+      "page_index": 375,
+      "printed_page": "375",
+      "section": "H5: MEMOBUS/Modbus Communications",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "H5-11 Communications ENTER Function Selection Select the function for the enter command that saves parameter data to the drive. 0: Parameter changes are activated when ENTER command is entered. 1: Parameter changes are activated immediately without ENTER command (compatible with Varispeed VS606-V7). 0, 1 1"
+    },
+    {
+      "common_function": "motor-overload-protection",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Range printed \"0 to 4; 6\". Footnote <1>: setting 6 available in PRG: 1016 and later. Default \"1 <2>\": depends on A1-02; shown for V/f Control.",
+      "code": "L1-01",
+      "name": "Motor Overload Protection Selection",
+      "description": "Sets the motor thermal overload protection (oL1) based on the cooling capacity of the motor.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": "0",
+      "max_value": "6",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Disabled"
+        },
+        {
+          "value": "1",
+          "label": "General Purpose Motor (Standard Fan Cooled)"
+        },
+        {
+          "value": "2",
+          "label": "Drive Dedicated Motor with a Speed Range of 1:10"
+        },
+        {
+          "value": "3",
+          "label": "Vector Motor with a Speed Range of 1:100"
+        },
+        {
+          "value": "4",
+          "label": "PM Motor with Variable Torque"
+        },
+        {
+          "value": "6",
+          "label": "General Purpose Motor (50 Hz)"
+        }
+      ],
+      "page_index": 377,
+      "printed_page": "377",
+      "section": "L: Protection Function",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "L1-01 Motor Overload Protection Selection Sets the motor thermal overload protection (oL1) based on the cooling capacity of the motor. 0: Disabled 1: General Purpose Motor (Standard Fan Cooled) 2: Drive Dedicated Motor with a Speed Range of 1:10 3: Vector Motor with a Speed Range of 1:100 4: PM Motor with Variable Torque 6: General Purpose Motor (50 Hz)"
+    },
+    {
+      "common_function": "auto-restart",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Restart after momentary power loss.",
+      "code": "L2-01",
+      "name": "Momentary Power Loss Operation Selection",
+      "description": "Enables and disables the momentary power loss function.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": "0",
+      "max_value": "2",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Disabled - Drive trips on (Uv1) fault when power is lost."
+        },
+        {
+          "value": "1",
+          "label": "Power Loss Ride-Thru Time - Drive will restart if power returns within the time set in L2-02."
+        },
+        {
+          "value": "2",
+          "label": "CPU Power Active - Drive will restart if power returns as long as the CPU is working."
+        }
+      ],
+      "page_index": 377,
+      "printed_page": "377",
+      "section": "L: Protection Function",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "L2-01 Momentary Power Loss Operation Selection Enables and disables the momentary power loss function. 0: Disabled - Drive trips on (Uv1) fault when power is lost. 1: Power Loss Ride-Thru Time - Drive will restart if power returns within the time set in L2-02. 2: CPU Power Active - Drive will restart if power returns as long as the CPU is working. 0 to 2 0"
+    },
+    {
+      "common_function": "stall-prevention",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Range \"0 to 2 <7>\": setting value 2 is not available for A1-02 = 5-PM OLV Control. L3-04 (deceleration) and L3-05 (run) are the related stall prevention selections.",
+      "code": "L3-01",
+      "name": "Stall Prevention Selection during Acceleration",
+      "description": "Selects the Stall Prevention method used to prevent excessive current during acceleration.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": "0",
+      "max_value": "2",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Disabled - Motor accelerates at active acceleration rate. The motor may stall if load is too heavy or accel time is too short."
+        },
+        {
+          "value": "1",
+          "label": "General Purpose - When output current exceeds L3-02 level, acceleration stops. Acceleration will continue when the output current level falls below the L3-02 level."
+        },
+        {
+          "value": "2",
+          "label": "Intelligent - The active acceleration rate is ignored. Acceleration is completed in the shortest amount of time without exceeding the current value set in L3-02."
+        }
+      ],
+      "page_index": 378,
+      "printed_page": "378",
+      "section": "L: Protection Function",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "L3-01 Stall Prevention Selection during Acceleration Selects the Stall Prevention method used to prevent excessive current during acceleration."
+    },
+    {
+      "common_function": "stall-prevention",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Range printed \"0 to 4; 7 <9>\" (PM OLV: 0 to 2 and 7). Option labels shortened to the leading name of each printed option.",
+      "code": "L3-04",
+      "name": "Stall Prevention Selection during Deceleration",
+      "description": "When using a braking resistor, use setting \"0\". Setting \"3\" is used in specific applications.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Disabled"
+        },
+        {
+          "value": "1",
+          "label": "General Purpose"
+        },
+        {
+          "value": "2",
+          "label": "Intelligent"
+        },
+        {
+          "value": "3",
+          "label": "Stall Prevention with Braking Resistor"
+        },
+        {
+          "value": "4",
+          "label": "Overexcitation Deceleration"
+        },
+        {
+          "value": "7",
+          "label": "Overexcitation Deceleration 3"
+        }
+      ],
+      "page_index": 378,
+      "printed_page": "378",
+      "section": "L: Protection Function",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "L3-04 Stall Prevention Selection during Deceleration When using a braking resistor, use setting \"0\". Setting \"3\" is used in specific applications."
+    },
+    {
+      "common_function": "auto-restart",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "L5-01",
+      "name": "Number of Auto Restart Attempts",
+      "description": "Sets the counter for the number of times the drive attempts to restart when one of the following faults occurs: GF, LF, oC, ov, PF, rH, rr, oL1, oL2, oL3, oL4, Uv1.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": "0",
+      "max_value": "10",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 380,
+      "printed_page": "380",
+      "section": "L: Protection Function",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "L5-01 Number of Auto Restart Attempts Sets the counter for the number of times the drive attempts to restart when one of the following faults occurs: GF, LF, oC, ov, PF, rH, rr, oL1, oL2, oL3, oL4, Uv1."
+    },
+    {
+      "common_function": "rated-motor-voltage",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Auto-Tuning input (T1 group); the E2 group has no separate rated-voltage parameter. Footnote <4> not checked.",
+      "code": "T1-03",
+      "name": "Motor Rated Voltage",
+      "description": "Sets the motor rated voltage in volts (V).",
+      "unit": "V",
+      "default_value": "200.0 V",
+      "min_value": "0.0",
+      "max_value": "255.5",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 391,
+      "printed_page": "391",
+      "section": "T: Motor Tuning",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "T1-03 <4> Motor Rated Voltage Sets the motor rated voltage in volts (V). 0.0 to 255.5 200.0 V"
+    },
+    {
+      "common_function": "rated-motor-frequency",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Auto-Tuning input (T1 group).",
+      "code": "T1-05",
+      "name": "Motor Base Frequency",
+      "description": "Sets the base frequency of the motor in Hertz (Hz).",
+      "unit": "Hz",
+      "default_value": "60.0 Hz",
+      "min_value": "0.0",
+      "max_value": "400.0",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 391,
+      "printed_page": "391",
+      "section": "T: Motor Tuning",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "T1-05 Motor Base Frequency Sets the base frequency of the motor in Hertz (Hz). 0.0 to 400.0 60.0 Hz"
+    },
+    {
+      "common_function": "rated-motor-speed",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Auto-Tuning input (T1 group).",
+      "code": "T1-07",
+      "name": "Motor Base Speed",
+      "description": "Sets the base speed of the motor in revolutions per minute r/min (RPM).",
+      "unit": "r/min",
+      "default_value": "1750 r/ min",
+      "min_value": "0",
+      "max_value": "24000",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 391,
+      "printed_page": "391",
+      "section": "T: Motor Tuning",
+      "table_ref": "B.2 Parameter Table",
+      "evidence_quote": "T1-07 Motor Base Speed Sets the base speed of the motor in revolutions per minute r/min (RPM). 0 to 24000 1750 r/ min"
+    }
+  ],
+  "modbus_registers": [
+    {
+      "common_function": "modbus-function-codes",
+      "name": "Supported function codes",
+      "original_address": null,
+      "address_format": null,
+      "register_type": null,
+      "function_codes": "03H, 08H, 10H",
+      "access": null,
+      "data_length_words": null,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": [
+        {
+          "bit": "03H",
+          "meaning": "Read MEMOBUS/Modbus registers"
+        },
+        {
+          "bit": "08H",
+          "meaning": "Loopback test"
+        },
+        {
+          "bit": "10H",
+          "meaning": "Write to multiple MEMOBUS/Modbus registers"
+        }
+      ],
+      "description": "Three function codes. A drive MEMOBUS/Modbus register always has a data length of two bytes. Function code 03H reads a maximum of 16 registers at a time (p.437). Error code 01H: function code other than 03H, 08H, and 10H (p.451).",
+      "page_index": 435,
+      "printed_page": "435",
+      "section": "C.8 Message Format",
+      "table_ref": null,
+      "evidence_quote": "03H Read MEMOBUS/Modbus registers 8 8 7 37 08H Loopback test 8 8 8 8 10H Write to multiple MEMOBUS/Modbus registers 11 41 8 8"
+    },
+    {
+      "common_function": "reg-control-word",
+      "name": "Operation Signals and Multi-function Inputs",
+      "original_address": "0001H",
+      "address_format": "HEX",
+      "register_type": "Holding",
+      "function_codes": "03H, 10H",
+      "access": "Read-Write",
+      "data_length_words": 1,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": [
+        {
+          "bit": "0",
+          "meaning": "H5-12 = 0: Forward Run Command (0 = Stop, 1 = Forward Run); H5-12 = 1: Run Command (0 = Stop, 1 = Run)"
+        },
+        {
+          "bit": "1",
+          "meaning": "H5-12 = 0: Reverse Run Command (0 = Stop, 1 = Reverse Run); H5-12 = 1: Forward/Reverse (0 = Forward, 1 = Reverse)"
+        },
+        {
+          "bit": "2",
+          "meaning": "External Fault (EF0)"
+        },
+        {
+          "bit": "3",
+          "meaning": "Fault Reset"
+        },
+        {
+          "bit": "4",
+          "meaning": "Multi-Function Input 1 (Function is ComRef when H1-01 = 40 (Forward/Stop))"
+        },
+        {
+          "bit": "5",
+          "meaning": "Multi-Function Input 2 (Function is ComCtrl when H1-02 = 41 (Reverse/Stop))"
+        },
+        {
+          "bit": "6",
+          "meaning": "Multi-Function Input 3"
+        },
+        {
+          "bit": "7",
+          "meaning": "Multi-Function Input 4"
+        },
+        {
+          "bit": "8",
+          "meaning": "Multi-Function Input 5"
+        },
+        {
+          "bit": "9",
+          "meaning": "Multi-Function Input 6"
+        },
+        {
+          "bit": "A",
+          "meaning": "Multi-Function Input 7"
+        },
+        {
+          "bit": "B to F",
+          "meaning": "Reserved"
+        }
+      ],
+      "description": "Command data (it is possible to both read and write command data). Bits that are not used should be set to 0. Function codes listed are the drive read/write codes (03H, 10H); no per-register code is printed.",
+      "page_index": 439,
+      "printed_page": "439",
+      "section": "C.10 MEMOBUS/Modbus Data Table",
+      "table_ref": null,
+      "evidence_quote": "0001H Operation Signals and Multi-function Inputs bit 0 H5-12 = 0: Forward Run Command (0 = Stop, 1 = Forward Run) H5-12 = 1: Run Command (0 = Stop, 1 = Run) bit 1 H5-12 = 0: Reverse Run Command (0 = Stop, 1 = Reverse Run) H5-12 = 1: Forward/Reverse (0 = Forward, 1 = Reverse) bit 2 External Fault (EF0) bit 3 Fault Reset"
+    },
+    {
+      "common_function": "reg-frequency-command",
+      "name": "Frequency Reference",
+      "original_address": "0002H",
+      "address_format": "HEX",
+      "register_type": "Holding",
+      "function_codes": "03H, 10H",
+      "access": "Read-Write",
+      "data_length_words": 1,
+      "data_type": null,
+      "scaling": "Units are determined by parameter o1-03",
+      "unit": null,
+      "bit_definitions": [],
+      "description": "Command data. Drive control from MEMOBUS/Modbus requires b1-01 = 2 and b1-02 = 2 (Table C.1, p.433). In broadcast data, 0002H Frequency Reference is printed as \"30000/100%\" (p.448).",
+      "page_index": 439,
+      "printed_page": "439",
+      "section": "C.10 MEMOBUS/Modbus Data Table",
+      "table_ref": null,
+      "evidence_quote": "0002H Frequency Reference Units are determined by parameter o1-03"
+    },
+    {
+      "common_function": "reg-status-word",
+      "name": "Drive Status 1",
+      "original_address": "0020H",
+      "address_format": "HEX",
+      "register_type": "Holding",
+      "function_codes": "03H",
+      "access": "Read",
+      "data_length_words": 1,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": [
+        {
+          "bit": "0",
+          "meaning": "During Run"
+        },
+        {
+          "bit": "1",
+          "meaning": "During Reverse"
+        },
+        {
+          "bit": "2",
+          "meaning": "Drive Ready"
+        },
+        {
+          "bit": "3",
+          "meaning": "Fault"
+        },
+        {
+          "bit": "4",
+          "meaning": "Data Setting Error"
+        },
+        {
+          "bit": "5",
+          "meaning": "Multi-Function Contact Output (terminal MA/MB-MC)"
+        },
+        {
+          "bit": "6",
+          "meaning": "Multi-Function Photocoupler Output 1 (terminal P1 - PC)"
+        },
+        {
+          "bit": "7",
+          "meaning": "Multi-Function Photocoupler Output 2 (terminal P2 - PC)"
+        },
+        {
+          "bit": "8 to D",
+          "meaning": "Reserved"
+        },
+        {
+          "bit": "E",
+          "meaning": "ComRef status"
+        },
+        {
+          "bit": "F",
+          "meaning": "NetRef status"
+        }
+      ],
+      "description": "Monitor data can be read only.",
+      "page_index": 440,
+      "printed_page": "440",
+      "section": "C.10 MEMOBUS/Modbus Data Table",
+      "table_ref": null,
+      "evidence_quote": "0020H Drive Status 1 bit 0 During Run bit 1 During Reverse bit 2 Drive Ready bit 3 Fault bit 4 Data Setting Error"
+    },
+    {
+      "common_function": "reg-fault-code",
+      "name": "Fault Contents 1",
+      "original_address": "0021H",
+      "address_format": "HEX",
+      "register_type": "Holding",
+      "function_codes": "03H",
+      "access": "Read",
+      "data_length_words": 1,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": [
+        {
+          "bit": "0",
+          "meaning": "Overcurrent (oC), Ground fault (GF), IGBT Short Circuit or Ground Fault (SC)"
+        },
+        {
+          "bit": "1",
+          "meaning": "Overvoltage (ov)"
+        },
+        {
+          "bit": "2",
+          "meaning": "Drive Overload (oL2)"
+        },
+        {
+          "bit": "3",
+          "meaning": "Overheat 1 (oH1), Drive Overheat Warning (oH2)"
+        },
+        {
+          "bit": "4",
+          "meaning": "Dynamic Braking Transistor Fault (rr), Braking Resistor Overheat (rH)"
+        },
+        {
+          "bit": "5",
+          "meaning": "Reserved"
+        },
+        {
+          "bit": "6",
+          "meaning": "PID Feedback Loss (FbL/FbH)"
+        },
+        {
+          "bit": "7",
+          "meaning": "EF0 to 7: External Fault"
+        },
+        {
+          "bit": "8",
+          "meaning": "CPF oo: Hardware Fault (includes oFA oo)"
+        },
+        {
+          "bit": "9",
+          "meaning": "Motor Overload (oL1), Overtorque Detection 1/2 (oL3/oL4), Undertorque Detection 1/2 (UL3/ UL4)"
+        },
+        {
+          "bit": "A",
+          "meaning": "PG Disconnected (PGo), Overspeed (oS), Excessive Speed Deviation (dEv)"
+        },
+        {
+          "bit": "B",
+          "meaning": "Main Circuit Undervoltage (Uv)"
+        },
+        {
+          "bit": "C",
+          "meaning": "Undervoltage (Uv1), Control Power Supply Undervoltage (Uv2), Soft Charge Circuit Fault (Uv3)"
+        },
+        {
+          "bit": "D",
+          "meaning": "Output Phase Loss (LF), Input Phase Loss (PF)"
+        },
+        {
+          "bit": "E",
+          "meaning": "MEMOBUS/Modbus Communication Error (CE), Option Communication Error (bUS)"
+        },
+        {
+          "bit": "F",
+          "meaning": "Operator Connection Fault (oPr)"
+        }
+      ],
+      "description": "Bit-mapped fault contents (monitor data, read only).",
+      "page_index": 440,
+      "printed_page": "440",
+      "section": "C.10 MEMOBUS/Modbus Data Table",
+      "table_ref": null,
+      "evidence_quote": "0021H Fault Contents 1 bit 0 Overcurrent (oC), Ground fault (GF), IGBT Short Circuit or Ground Fault (SC) bit 1 Overvoltage (ov) bit 2 Drive Overload (oL2)"
+    },
+    {
+      "common_function": "reg-fault-code",
+      "name": "Current Fault (U2-01)",
+      "original_address": "0080H",
+      "address_format": "HEX",
+      "register_type": "Holding",
+      "function_codes": "03H",
+      "access": "Read",
+      "data_length_words": 1,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": [],
+      "description": "Registers 0080H to 0097H are used for monitors U2-oo, U3-oo; U2-01 Current Fault has Addr. Hex 80 in the U monitor table (p.393). Fault code values are listed in Table C.4 Fault Trace / History Register Contents (p.448), e.g. 0002H Undervoltage (Uv1), 0007H Overcurrent (oC), 0008H Overvoltage (ov).",
+      "page_index": 443,
+      "printed_page": "443",
+      "section": "C.10 MEMOBUS/Modbus Data Table",
+      "table_ref": null,
+      "evidence_quote": "0080H to 0097H Used for monitors U2- oo , U3- oo . Refer to U: Monitors on page 392 for parameter details and Refer to Fault Trace Contents on page 448 for register value descriptions."
+    },
+    {
+      "common_function": "reg-output-frequency",
+      "name": "Output Frequency",
+      "original_address": "0024H",
+      "address_format": "HEX",
+      "register_type": "Holding",
+      "function_codes": "03H",
+      "access": "Read",
+      "data_length_words": 1,
+      "data_type": null,
+      "scaling": "<1> Units are determined by parameter o1-03.",
+      "unit": null,
+      "bit_definitions": [],
+      "description": "Monitor data (read only). Footnote <1> (p.447): Units are determined by parameter o1-03.",
+      "page_index": 440,
+      "printed_page": "440",
+      "section": "C.10 MEMOBUS/Modbus Data Table",
+      "table_ref": null,
+      "evidence_quote": "0024H Output Frequency, <1>"
+    },
+    {
+      "common_function": "reg-output-voltage",
+      "name": "Output Voltage Reference",
+      "original_address": "0025H",
+      "address_format": "HEX",
+      "register_type": "Holding",
+      "function_codes": "03H",
+      "access": "Read",
+      "data_length_words": 1,
+      "data_type": null,
+      "scaling": "0.1 V units (units are determined by parameter H5-10)",
+      "unit": "V",
+      "bit_definitions": [],
+      "description": "Monitor data (read only). H5-10 selects 0: 0.1 V units / 1: 1 V units.",
+      "page_index": 440,
+      "printed_page": "440",
+      "section": "C.10 MEMOBUS/Modbus Data Table",
+      "table_ref": null,
+      "evidence_quote": "0025H Output Voltage Reference, 0.1 V units (units are determined by parameter H5-10)"
+    },
+    {
+      "common_function": "reg-output-current",
+      "name": "Output Current",
+      "original_address": "0026H",
+      "address_format": "HEX",
+      "register_type": "Holding",
+      "function_codes": "03H",
+      "access": "Read",
+      "data_length_words": 1,
+      "data_type": null,
+      "scaling": "<2> 0.01 A units for drives set to 11 kW in Heavy or Normal Duty and 0.1 A units for drives set to 15 kW and above.",
+      "unit": "A",
+      "bit_definitions": [],
+      "description": "Monitor data (read only). Footnote <2> text from p.447.",
+      "page_index": 440,
+      "printed_page": "440",
+      "section": "C.10 MEMOBUS/Modbus Data Table",
+      "table_ref": null,
+      "evidence_quote": "0026H Output Current, <2>"
+    },
+    {
+      "common_function": "reg-dc-bus-voltage",
+      "name": "DC Bus Voltage",
+      "original_address": "0031H",
+      "address_format": "HEX",
+      "register_type": "Holding",
+      "function_codes": "03H",
+      "access": "Read",
+      "data_length_words": 1,
+      "data_type": null,
+      "scaling": "1 Vdc units",
+      "unit": "Vdc",
+      "bit_definitions": [],
+      "description": "Monitor data (read only).",
+      "page_index": 442,
+      "printed_page": "442",
+      "section": "C.10 MEMOBUS/Modbus Data Table",
+      "table_ref": null,
+      "evidence_quote": "0031H DC Bus Voltage, 1 Vdc units"
+    },
+    {
+      "common_function": "reg-parameter-access",
+      "name": "Enter Command (EEPROM / RAM)",
+      "original_address": "0900H",
+      "address_format": "HEX",
+      "register_type": "Holding",
+      "function_codes": "10H",
+      "access": "Write",
+      "data_length_words": 1,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": [],
+      "description": "An Enter command is enabled by writing 0 to register number 0900H or 0910H. 0900H writes data into the EEPROM and enables the data in RAM; 0910H writes data in the RAM only. These registers are write-only. Whether Enter is required depends on H5-11. Function code 10H is assumed from the write example on p.438 (not printed for 0900H itself).",
+      "page_index": 450,
+      "printed_page": "450",
+      "section": "C.11 Enter Command",
+      "table_ref": "Table C.6 Enter Command Types",
+      "evidence_quote": "An Enter command is enabled by writing 0 to register number 0900H or 0910H. These registers can be written to only. An error will occur if the user attempts to read from these registers."
+    }
+  ],
+  "notes": [
+    "Source: the \"heavy\" file (498 pages, YASKAWA AC Drive - V1000 Technical Manual, SIEP C710606 18C) per coordinator instruction. The \"light\" file is a different document: V1000 Quick Start Guide, MANUAL NO. TOEP C710606 15C (YASKAWA Europe, 44 pages); it was not used for extraction.",
+    "PDF page index equals the printed page number throughout this manual (e.g. PDF page 349 shows \"349\").",
+    "Page 1 (cover) has no text layer; model_evidence uses the page-2 footer.",
+    "Evidence quotes were checked by script against the pdf.js text layer of each cited page (whitespace-normalized). Some range/default values that sit in merged table cells (C1-02..C1-04, d1-02, d1-17, E1-04) are not inside the quoted span; they were read from rendered page images and the note on each record says so.",
+    "Footnote markers (<1>, <2>, ...) are defined per parameter group and their meaning differs between groups; meanings were taken from the footnote list of the same group (A/b/C/d: e.g. C and d groups <1> = \"Parameter can be changed during run\"; E group <1> = \"Values shown here are for 200 V class drives. Double the value when using a 400 V class drive.\").",
+    "Voltage values (E1-05, T1-03) are 200 V class values; the manual says to double them for 400 V class drives.",
+    "Rated motor voltage, base frequency (motor) and rated speed exist only as Auto-Tuning inputs (T1-03, T1-05, T1-07); E1-06 is the V/f base frequency.",
+    "No documented general rule mapping parameter numbers to MEMOBUS/Modbus registers was found in Appendix C. The B.2 Parameter Table has an \"Addr. Hex\" column per parameter (e.g. b1-01 = 180, H5-01 = 425), but the table does not state in words that this is the MEMOBUS/Modbus register number; no record was created for it.",
+    "Not extracted: comm protocol selection (only MEMOBUS/Modbus RTU on the built-in port, p.426: \"Protocol MEMOBUS/Modbus (using RTU mode only)\", \"Max Number of Slaves 31 drives\"), H1/H2 option lists (pp. 369-373), L3-05 details.",
+    "H5-01 range \"0 to 20 H\" and default \"1F\" are hexadecimal as printed.",
+    "0002H broadcast frequency reference is printed as \"30000/100%\" (p.448), while command register 0002H units are \"determined by parameter o1-03\" (p.439)."
+  ]
+}

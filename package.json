@@ -1,0 +1,52 @@
+{
+  "name": "vfd-knowledge-base",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VFD Knowledge Base & Technical Research Explorer (local, SQLite)",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false --ignore client/** --ignore storage/** --ignore database/** server/src/index.ts",
+    "build": "vite build --config client/vite.config.ts && tsc -p tsconfig.server.json",
+    "start": "node dist-server/server/src/index.js --prod",
+    "migrate": "tsx server/src/cli/migrate.ts",
+    "import:manual": "tsx server/src/cli/import-manual.ts",
+    "import:curated": "tsx server/src/cli/import-curated.ts",
+    "backup": "tsx server/src/cli/backup.ts",
+    "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc -p client/tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:all": "vitest run && playwright test"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.2.0",
+    "@node-rs/argon2": "^2.2.2",
+    "better-sqlite3": "^13.2.0",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "helmet": "^8.3.0",
+    "multer": "^2.5.0",
+    "pdfjs-dist": "^6.5.438",
+    "socket.io": "^4.8.4",
+    "tesseract.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/supertest": "^7.2.1",
+    "@vitejs/plugin-react": "^6.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.6",
+    "socket.io-client": "^4.8.4",
+    "supertest": "^7.3.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1"
+  }
+}

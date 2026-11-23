@@ -1,0 +1,1534 @@
+{
+  "document_file": "vfd-manuals/Altivar/VFD_ATV312_programming_manual.pdf",
+  "document_title": "Altivar 312 Variable speed drives for asynchronous motors Programming manual",
+  "document_revision": "BBV46385 06/2010",
+  "brand": "Schneider Electric",
+  "model": "Altivar 312",
+  "model_evidence": {
+    "page_index": 1,
+    "evidence_quote": "Altivar 312 Variable speed drives for asynchronous motors Programming manual 06/2010"
+  },
+  "extraction_method": "ai-assisted-reading",
+  "parameters": [
+    {
+      "common_function": "rated-motor-voltage",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "UnS",
+      "name": "[Rated motor volt.]",
+      "description": "Nominal motor voltage given on the rating plate. When the line voltage is lower than the nominal motor voltage, set [Rated motor volt.] (UnS) to the same value as the line voltage for the drive terminals. ATV312pppM2: 100 to 240 V; ATV312pppM3: 100 to 240 V; ATV312pppN4: 100 to 500 V; ATV312pppS6: 100 to 600 V",
+      "unit": "V",
+      "default_value": "In accordance with the drive rating",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameters can only be changed in stop mode, with no run command present (drC- menu)",
+      "options": [],
+      "page_index": 41,
+      "printed_page": "41",
+      "section": "[MOTOR CONTROL] (drC-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Rated motor volt.] In accordance with the drive rating In accordance with the drive rating Nominal motor voltage given on the rating plate."
+    },
+    {
+      "common_function": "rated-motor-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "FrS",
+      "name": "[Rated motor freq.]",
+      "description": "Nominal motor frequency marked on the rating plate. The factory setting is 50 Hz, or preset to 60 Hz if [Standard mot. freq] (bFr) is set to 60 Hz.",
+      "unit": "Hz",
+      "default_value": "50 Hz",
+      "min_value": "10",
+      "max_value": "500",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameters can only be changed in stop mode, with no run command present (drC- menu)",
+      "options": [],
+      "page_index": 41,
+      "printed_page": "41",
+      "section": "[MOTOR CONTROL] (drC-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Rated motor freq.] 10 to 500 Hz 50 Hz Nominal motor frequency marked on the rating plate."
+    },
+    {
+      "common_function": "rated-motor-current",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "nCr",
+      "name": "[Rated mot. current]",
+      "description": "Nominal motor current given on the rating plate. In corresponds to the nominal drive current indicated in the Installation Manual and on the drive nameplate.",
+      "unit": null,
+      "default_value": "In accordance with the drive rating",
+      "min_value": "0.25 In",
+      "max_value": "1.5 In",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameters can only be changed in stop mode, with no run command present (drC- menu)",
+      "options": [],
+      "page_index": 41,
+      "printed_page": "41",
+      "section": "[MOTOR CONTROL] (drC-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Rated mot. current] 0.25 to 1.5 In (1) In accordance with the drive rating Nominal motor current given on the rating plate."
+    },
+    {
+      "common_function": "rated-motor-speed",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "nSP",
+      "name": "[Rated motor speed]",
+      "description": "Rated motor speed; 0 to 9,999 rpm then 10.00 to 32.76 krpm.",
+      "unit": "rpm",
+      "default_value": "In accordance with the drive rating",
+      "min_value": "0",
+      "max_value": "32,760",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameters can only be changed in stop mode, with no run command present (drC- menu)",
+      "options": [],
+      "page_index": 42,
+      "printed_page": "42",
+      "section": "[MOTOR CONTROL] (drC-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Rated motor speed] 0 to 32,760 rpm In accordance with the drive rating 0 to 9,999 rpm then 10.00 to 32.76 krpm"
+    },
+    {
+      "common_function": "motor-power-factor",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "COS",
+      "name": "[Motor 1 Cosinus Phi]",
+      "description": "Motor Cos Phi given on the motor rating plate",
+      "unit": null,
+      "default_value": "In accordance with the drive rating",
+      "min_value": "0.5",
+      "max_value": "1",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameters can only be changed in stop mode, with no run command present (drC- menu)",
+      "options": [],
+      "page_index": 42,
+      "printed_page": "42",
+      "section": "[MOTOR CONTROL] (drC-) menu",
+      "table_ref": null,
+      "evidence_quote": "COS M [Motor 1 Cosinus Phi] Motor Cos Phi given on the motor rating plate 0.5 to 1 In accordance with the drive rating"
+    },
+    {
+      "common_function": "motor-auto-tuning",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "tUn",
+      "name": "[Auto tuning]",
+      "description": "Auto-tuning of the motor. During auto-tuning the motor operates at nominal current. Auto-tuning may take 1 to 2 seconds.",
+      "unit": null,
+      "default_value": "[No] (nO)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Auto-tuning is only performed if no command has been activated.",
+      "options": [
+        {
+          "value": "nO",
+          "label": "[No]: Auto-tuning not performed"
+        },
+        {
+          "value": "YES",
+          "label": "[Yes]: Auto-tuning is performed as soon as possible, then the parameter automatically changes to [Done] (dOnE) or [No] (nO)"
+        },
+        {
+          "value": "dOnE",
+          "label": "[Done]: Use of the values given the last time auto-tuning was performed"
+        },
+        {
+          "value": "rUn",
+          "label": "[Drv running]: Auto-tuning is performed every time a run command is sent"
+        },
+        {
+          "value": "POn",
+          "label": "[Power on]: Auto-tuning is performed on every power-up"
+        },
+        {
+          "value": "LI1 to LI6",
+          "label": "[LI1] to [LI16]: Auto-tuning is performed on the transition from 0 to 1 of a logic input assigned to this function"
+        }
+      ],
+      "page_index": 43,
+      "printed_page": "43",
+      "section": "[MOTOR CONTROL] (drC-) menu",
+      "table_ref": null,
+      "evidence_quote": "v [No] (nO): Auto-tuning not performed v [Yes] (YES): Auto-tuning is performed as soon as possible, then the parameter automatically changes to [Done] (dOnE) or [No] (nO)"
+    },
+    {
+      "common_function": "control-mode",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "UFt",
+      "name": "[U/F mot 1 selected]",
+      "description": "Selection of the motor control ratio (U/F) for motor 1.",
+      "unit": null,
+      "default_value": "[SVC] (n)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameters can only be changed in stop mode, with no run command present (drC- menu)",
+      "options": [
+        {
+          "value": "L",
+          "label": "[Cst. torque]: Constant torque for motors connected in parallel or special motors"
+        },
+        {
+          "value": "P",
+          "label": "[Var. torque]: Variable torque for pump and fan applications"
+        },
+        {
+          "value": "n",
+          "label": "[SVC]: Sensorless flux vector control for constant torque applications"
+        },
+        {
+          "value": "nLd",
+          "label": "[Energy sav.]: Energy saving, for variable torque applications not requiring high dynamics"
+        }
+      ],
+      "page_index": 44,
+      "printed_page": "44",
+      "section": "[MOTOR CONTROL] (drC-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [U/F mot 1 selected] [SVC] (n) v [Cst. torque] (L): Constant torque for motors connected in parallel or special motors. v [Var. torque] (P): Variable torque for pump and fan applications. v [SVC] (n): Sensorless flux vector control for constant torque applications."
+    },
+    {
+      "common_function": "carrier-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "SFr",
+      "name": "[Switching freq.]",
+      "description": "The frequency can be adjusted to reduce the noise generated by the motor. If set higher than 4 kHz, in the event of excessive temperature rise, the drive will automatically reduce the switching frequency and increase it again once the temperature has returned to normal.",
+      "unit": "kHz",
+      "default_value": "4 kHz",
+      "min_value": "2.0",
+      "max_value": "16",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameters can only be changed in stop mode, with no run command present (drC- menu); also accessible in [SETTINGS] (SEt-) menu",
+      "options": [],
+      "page_index": 44,
+      "printed_page": "44",
+      "section": "[MOTOR CONTROL] (drC-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Switching freq.] (1) 2.0 to 16 kHz 4 kHz The frequency can be adjusted to reduce the noise generated by the motor."
+    },
+    {
+      "common_function": "maximum-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "tFr",
+      "name": "[Max frequency]",
+      "description": "The factory setting is 60 Hz, or preset to 72 Hz if [Standard mot. freq] (bFr) is set to 60 Hz.",
+      "unit": "Hz",
+      "default_value": "60 Hz",
+      "min_value": "10",
+      "max_value": "500",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameters can only be changed in stop mode, with no run command present (drC- menu)",
+      "options": [],
+      "page_index": 44,
+      "printed_page": "44",
+      "section": "[MOTOR CONTROL] (drC-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Max frequency] 10 to 500 Hz 60 Hz The factory setting is 60 Hz, or preset to 72 Hz if [Standard mot. freq] (bFr) is set to 60 Hz."
+    },
+    {
+      "common_function": "frequency-lower-limit",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Manual defines LSP as 'Motor frequency at min. reference'.",
+      "code": "LSP",
+      "name": "[Low speed]",
+      "description": "Motor frequency at min. reference",
+      "unit": null,
+      "default_value": "0",
+      "min_value": "0",
+      "max_value": "HSP",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "The adjustment parameters can be modified with the drive running or stopped (SEt- menu)",
+      "options": [],
+      "page_index": 33,
+      "printed_page": "33",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Low speed] Motor frequency at min. reference 0 to HSP 0"
+    },
+    {
+      "common_function": "frequency-upper-limit",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Manual defines HSP as 'Motor frequency at max. reference'; factory setting printed as bFr (depends on [Standard mot. freq]).",
+      "code": "HSP",
+      "name": "[High speed]",
+      "description": "Motor frequency at max. reference: Ensure that this setting is appropriate for the motor and the application.",
+      "unit": null,
+      "default_value": "bFr",
+      "min_value": "LSP",
+      "max_value": "tFr",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "The adjustment parameters can be modified with the drive running or stopped (SEt- menu)",
+      "options": [],
+      "page_index": 33,
+      "printed_page": "33",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [High speed] LSP to tFr bFr Motor frequency at max. reference: Ensure that this setting is appropriate for the motor and the application."
+    },
+    {
+      "common_function": "motor-overload-protection",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "ItH",
+      "name": "[Mot. therm. current]",
+      "description": "Set [Mot. therm. current] (ItH) to the nominal current indicated on the motor's rating plate. If you wish to suppress thermal protection, see [Overload fault mgt] (OLL), page 94.",
+      "unit": null,
+      "default_value": "In accordance with the drive rating",
+      "min_value": "0.2 In",
+      "max_value": "1.5 In",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "The adjustment parameters can be modified with the drive running or stopped (SEt- menu)",
+      "options": [],
+      "page_index": 33,
+      "printed_page": "33",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Mot. therm. current] 0.2 to 1.5 In (1) In accordance with the drive rating Set [Mot. therm. current] (ItH) to the nominal current indicated on the motor's rating plate."
+    },
+    {
+      "common_function": "motor-overload-protection",
+      "equivalence": "Partially Equivalent",
+      "equivalence_note": "Fault management behaviour for motor overload (not the thermal current setting).",
+      "code": "OLL",
+      "name": "[Overload fault mgt]",
+      "description": "If [Overload fault mgt] is set to nO, motor thermal protection is no longuer provided by the drive.",
+      "unit": null,
+      "default_value": "[Freewheel] (YES)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameters can only be modified when the drive is stopped and no run command is present (FLt- menu)",
+      "options": [
+        {
+          "value": "nO",
+          "label": "[Ignore]: Ignore"
+        },
+        {
+          "value": "YES",
+          "label": "[Freewheel]: Detected fault management with freewheel stop"
+        },
+        {
+          "value": "rMP",
+          "label": "[Ramp stop]: Detected fault management with stop on ramp"
+        },
+        {
+          "value": "FSt",
+          "label": "[Fast stop]: Detected fault management with fast stop"
+        }
+      ],
+      "page_index": 94,
+      "printed_page": "94",
+      "section": "[FAULT MANAGEMENT] (FLt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Overload fault mgt] [Freewheel] (YES) nO YES rNP FSt CAUTION RISK OF DAMAGE TO THE MOTOR If [Overload fault mgt] is set to nO, motor thermal protection is no longuer provided by the drive."
+    },
+    {
+      "common_function": "torque-boost",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Acts as IR compensation for UFt = SVC/Energy sav., and as voltage boost for UFt = Cst. torque/Var. torque.",
+      "code": "UFr",
+      "name": "[IR compensation]",
+      "description": "Used to optimize the torque at very low speed (increase [IR compensation] (UFr) if the torque is insufficient).",
+      "unit": "%",
+      "default_value": "20%",
+      "min_value": "0",
+      "max_value": "100",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "The adjustment parameters can be modified with the drive running or stopped (SEt- menu)",
+      "options": [],
+      "page_index": 33,
+      "printed_page": "33",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [IR compensation] 0 to 100% 20% - For [U/F mot 1 selected] (UFt) = [SVC] (n) or [Energy sav.] (nLd), page 44: IR compensation - For [U/F mot 1 selected] (UFt) = [Cst. torque] (L) or [Var. torque] (P), page 44: Voltage boost"
+    },
+    {
+      "common_function": "slip-compensation",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "SLP",
+      "name": "[Slip compensation]",
+      "description": "Adjusts the slip compensation around the value set by the nominal motor speed.",
+      "unit": "%",
+      "default_value": "100%",
+      "min_value": "0",
+      "max_value": "150",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameter can only be accessed if [U/F mot 1 selected] (UFt) = [SVC] (n) or [Energy sav.] (nLd)",
+      "options": [],
+      "page_index": 34,
+      "printed_page": "34",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Slip compensation] 0 to 150% 100% Parameter can only be accessed if [U/F mot 1 selected] (UFt) = [SVC] (n) or [Energy sav.] (nLd), page 44. Adjusts the slip compensation around the value set by the nominal motor speed."
+    },
+    {
+      "common_function": "acceleration-time-1",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "ACC",
+      "name": "[Acceleration]",
+      "description": "Defined to accelerate from 0 to the nominal frequency [Rated motor freq.] (FrS) in the [MOTOR CONTROL] (drC-) menu.",
+      "unit": "s",
+      "default_value": "3 s",
+      "min_value": null,
+      "max_value": null,
+      "resolution": "In accordance with Inr, page 63",
+      "access": "Read-Write",
+      "setting_conditions": "The adjustment parameters can be modified with the drive running or stopped (SEt- menu)",
+      "options": [],
+      "page_index": 32,
+      "printed_page": "32",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Acceleration] In accordance with 3 s Inr, page 63 Defined to accelerate from 0 to the nominal frequency [Rated motor freq.] (FrS) in the [MOTOR CONTROL] (drC-) menu."
+    },
+    {
+      "common_function": "deceleration-time-1",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "dEC",
+      "name": "[Deceleration]",
+      "description": "Defined to decelerate from the nominal frequency [Rated motor freq.] (FrS) to 0. Check that the value for [Deceleration] (dEC) is not too low in relation to the load to be stopped.",
+      "unit": "s",
+      "default_value": "3 s",
+      "min_value": null,
+      "max_value": null,
+      "resolution": "In accordance with Inr, page 63",
+      "access": "Read-Write",
+      "setting_conditions": "The adjustment parameters can be modified with the drive running or stopped (SEt- menu)",
+      "options": [],
+      "page_index": 32,
+      "printed_page": "32",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Deceleration] In accordance with 3 s Inr, page 63 Defined to decelerate from the nominal frequency [Rated motor freq.] (FrS) (parameter in the [MOTOR CONTROL] (drC-)) menu to 0."
+    },
+    {
+      "common_function": "acceleration-time-2",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "AC2",
+      "name": "[Acceleration 2]",
+      "description": "Parameter can be accessed if [Ramp 2 threshold] (Frt) > 0, page 64, or if [Ramp switch ass.] (rPS) is assigned, page 64.",
+      "unit": "s",
+      "default_value": "5 s",
+      "min_value": null,
+      "max_value": null,
+      "resolution": "In accordance with Inr, page 63",
+      "access": "Read-Write",
+      "setting_conditions": "Parameter can be accessed if [Ramp 2 threshold] (Frt) > 0 or if [Ramp switch ass.] (rPS) is assigned",
+      "options": [],
+      "page_index": 32,
+      "printed_page": "32",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Acceleration 2] In accordance with 5 s Inr, page 63 Parameter can be accessed if [Ramp 2 threshold] (Frt) > 0, page 64, or if [Ramp switch ass.] (rPS) is assigned, page 64."
+    },
+    {
+      "common_function": "deceleration-time-2",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "dE2",
+      "name": "[Deceleration 2]",
+      "description": "Parameter can be accessed if [Ramp 2 threshold] (Frt) > 0, page 64, or if [Ramp switch ass.] (rPS) is assigned, page 64.",
+      "unit": "s",
+      "default_value": "5 s",
+      "min_value": null,
+      "max_value": null,
+      "resolution": "In accordance with Inr, page 63",
+      "access": "Read-Write",
+      "setting_conditions": "Parameter can be accessed if [Ramp 2 threshold] (Frt) > 0 or if [Ramp switch ass.] (rPS) is assigned",
+      "options": [],
+      "page_index": 32,
+      "printed_page": "32",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Deceleration 2] In accordance with 5 s Inr, page 63 Parameter can be accessed if [Ramp 2 threshold] (Frt) > 0, page 64, or if [Ramp switch ass.] (rPS) is assigned, page 64."
+    },
+    {
+      "common_function": "s-curve",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Ramp shape selection (Linear / S / U / Customized); rounding for Customized set by tA1-tA4.",
+      "code": "rPt",
+      "name": "[Ramp type]",
+      "description": "Defines the shape of the acceleration and deceleration ramps",
+      "unit": null,
+      "default_value": "[Linear] (LIn)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "The parameters can only be modified when the drive is stopped and no run command is present (FUn- menu)",
+      "options": [
+        {
+          "value": "LIn",
+          "label": "[Linear]: Linear"
+        },
+        {
+          "value": "S",
+          "label": "[S ramp]: S ramp"
+        },
+        {
+          "value": "U",
+          "label": "[U ramp]: U ramp"
+        },
+        {
+          "value": "CUS",
+          "label": "[Customized]: Customized"
+        }
+      ],
+      "page_index": 62,
+      "printed_page": "62",
+      "section": "[APPLICATION FUNCT.] (FUn-) menu - [RAMPS]",
+      "table_ref": null,
+      "evidence_quote": "M [Ramp type] Defines the shape of the acceleration and deceleration ramps v [Linear] (LIn): Linear v [S ramp] (S): S ramp v [U ramp] (U): U ramp v [Customized] (CUS): Customized"
+    },
+    {
+      "common_function": "stop-method",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "Stt",
+      "name": "[Type of stop]",
+      "description": "Stop mode on disappearance of the run command or appearance of a stop command.",
+      "unit": null,
+      "default_value": "[Ramp stop] (rMP)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "The parameters can only be modified when the drive is stopped and no run command is present (FUn- menu)",
+      "options": [
+        {
+          "value": "rMP",
+          "label": "[Ramp stop]: On ramp"
+        },
+        {
+          "value": "FSt",
+          "label": "[Fast stop]: Fast stop"
+        },
+        {
+          "value": "nSt",
+          "label": "[Freewheel]: Freewheel stop"
+        },
+        {
+          "value": "dCI",
+          "label": "[DC injection]: DC injection stop"
+        }
+      ],
+      "page_index": 65,
+      "printed_page": "65",
+      "section": "[APPLICATION FUNCT.] (FUn-) menu - [STOP MODES]",
+      "table_ref": null,
+      "evidence_quote": "Stop mode on disappearance of the run command or appearance of a stop command. v [Ramp stop] (rMP): On ramp v [Fast stop] (FSt): Fast stop v [Freewheel] (nST): Freewheel stop v [DC injection] (dCI): DC injection stop"
+    },
+    {
+      "common_function": "emergency-deceleration",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Fast stop is a stop on a reduced ramp set by a ramp divider (not a time value).",
+      "code": "dCF",
+      "name": "[Ramp divider]",
+      "description": "The fast stop is a stop on a reduced ramp via the [Ramp divider] (dCF) parameter. The value 0 corresponds to the minimum ramp.",
+      "unit": null,
+      "default_value": "4",
+      "min_value": "0",
+      "max_value": "10",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameter can be accessed where [Type of stop] (Stt) = [Fast stop] (FSt), and where [Fast stop] (FSt) is not [No] (nO)",
+      "options": [],
+      "page_index": 66,
+      "printed_page": "66",
+      "section": "[APPLICATION FUNCT.] (FUn-) menu - [STOP MODES]",
+      "table_ref": null,
+      "evidence_quote": "M [Ramp divider] 0 to 10 4 Parameter can be accessed where [Type of stop] (Stt) = [Fast stop] (FSt), page 66, and where [Fast stop] (FSt) is not [No] (nO), page 66."
+    },
+    {
+      "common_function": "two-three-wire",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "tCC",
+      "name": "[2/3 wire control]",
+      "description": "Control configuration. [Local] (LOC) is invisible if [ACCESS LEVEL] (LAC) = [Level 3] (L3).",
+      "unit": null,
+      "default_value": "[2 wire] (2C)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Can only be modified when the drive is stopped and no run command is present; ENT must be pressed and held down (for 2 s) to change the assignment",
+      "options": [
+        {
+          "value": "2C",
+          "label": "[2 wire]: 2-wire control"
+        },
+        {
+          "value": "3C",
+          "label": "[3 wire]: 3-wire control"
+        },
+        {
+          "value": "LOC",
+          "label": "[Local]: Local control (RUN/STOP/RESET drive)"
+        }
+      ],
+      "page_index": 30,
+      "printed_page": "30",
+      "section": "Programming",
+      "table_ref": null,
+      "evidence_quote": "Control configuration: v [2 wire] (2C): 2-wire control v [3 wire] (3C): 3-wire control v [Local] (LOC): Local control (RUN/STOP/RESET drive)"
+    },
+    {
+      "common_function": "frequency-source",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "Fr1",
+      "name": "[Ref.1 channel]",
+      "description": "Reference 1 channel. Additional assignments UPdt/UPdH if LAC = L2 or L3; LCC/Mdb/nEt if LAC = L3.",
+      "unit": null,
+      "default_value": "[AI1] (AI1)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Can only be modified when the drive is stopped and no run command is present",
+      "options": [
+        {
+          "value": "AI1",
+          "label": "[AI1] - Analog input AI1"
+        },
+        {
+          "value": "AI2",
+          "label": "[AI2] - Analog input AI2"
+        },
+        {
+          "value": "AI3",
+          "label": "[AI3] - Analog input AI3"
+        },
+        {
+          "value": "AIV1",
+          "label": "[AI Virtual 1] - In terminal control mode, the jog dial functions as a potentiometer"
+        },
+        {
+          "value": "UPdt",
+          "label": "[+/- SPEED]: +/- speed reference via LI (LAC = L2 or L3)"
+        },
+        {
+          "value": "UPdH",
+          "label": "[+/-spd HMI]: +/- speed reference by turning the jog dial on the ATV312 keypad (LAC = L2 or L3)"
+        },
+        {
+          "value": "LCC",
+          "label": "[HMI] reference via the remote display terminal (LAC = L3)"
+        },
+        {
+          "value": "Mdb",
+          "label": "[Modbus]: Reference via Modbus (LAC = L3)"
+        },
+        {
+          "value": "nEt",
+          "label": "[Com. card]: Reference via network communication protocol (LAC = L3)"
+        }
+      ],
+      "page_index": 29,
+      "printed_page": "29",
+      "section": "Programming",
+      "table_ref": null,
+      "evidence_quote": "M [Ref.1 channel] v [AI1] (AI1) - Analog input AI1 v [AI2] (AI2) - Analog input AI2 v [AI3] (AI3) - Analog input AI3 v [AI Virtual 1] (AIV1) - In terminal control mode, the jog dial functions as a potentiometer. [AI1] (AI1)"
+    },
+    {
+      "common_function": "command-source",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "Cd1",
+      "name": "[Cmd channel 1]",
+      "description": "Command channel 1.",
+      "unit": null,
+      "default_value": "[Terminal] (tEr)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameter can be accessed if [Profile] (CHCF) = [Separate] (SEP), and [ACCESS LEVEL] (LAC) = [Level 3] (L3)",
+      "options": [
+        {
+          "value": "tEr",
+          "label": "[Terminal]: Control via terminals"
+        },
+        {
+          "value": "LOC",
+          "label": "[Local]: Control via keypad"
+        },
+        {
+          "value": "LCC",
+          "label": "[Remot. HMI]: Control via remote display terminal"
+        },
+        {
+          "value": "Mdb",
+          "label": "[Modbus]: Control via Modbus"
+        },
+        {
+          "value": "nEt",
+          "label": "[Com. card]: Control via the network"
+        }
+      ],
+      "page_index": 59,
+      "printed_page": "59",
+      "section": "[COMMAND] (CtL-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Cmd channel 1] [Terminal] (tEr) Parameter can be accessed if [Profile] (CHCF) = [Separate] (SEP), page 59, and [ACCESS LEVEL] (LAC) = [Level 3] (L3), page 58. v [Terminal] (tEr): Control via terminals v [Local] (LOC): Control via keypad v [Remot. HMI] (LCC): Control via remote display terminal v [Modbus] (Mdb): Control via Modbus"
+    },
+    {
+      "common_function": "reverse-prohibit",
+      "equivalence": "Partially Equivalent",
+      "equivalence_note": "Only sets the direction authorized for the RUN key on the keypad / remote display terminal; not a general reverse prohibit.",
+      "code": "rOt",
+      "name": "[Rotating direction]",
+      "description": "Direction of operation authorized for the RUN key on the keypad or the RUN key on the remote display terminal.",
+      "unit": null,
+      "default_value": "[Forward] (dFr)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Only visible if [Ref.1 channel] (Fr1) or [Ref.2 channel] (Fr2) are assigned to LCC or AI1",
+      "options": [
+        {
+          "value": "dFr",
+          "label": "[Forward]: Forward"
+        },
+        {
+          "value": "drS",
+          "label": "[Reverse]: Reverse"
+        },
+        {
+          "value": "bOt",
+          "label": "[Both]: Both directions are authorized"
+        }
+      ],
+      "page_index": 61,
+      "printed_page": "61",
+      "section": "[COMMAND] (CtL-) menu",
+      "table_ref": null,
+      "evidence_quote": "Direction of operation authorized for the RUN key on the keypad or the RUN key on the remote display terminal. v [Forward] (dFr): Forward v [Reverse] (drS): Reverse v [Both] (bOt): Both directions are authorized."
+    },
+    {
+      "common_function": "dc-injection-braking",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "IdC",
+      "name": "[DC inject. level 1]",
+      "description": "After 5 seconds, the injection current is limited to 0.5 [Mot. therm. current] (ItH) if set to a higher value. In corresponds to the nominal drive current.",
+      "unit": null,
+      "default_value": "0.7 In",
+      "min_value": "0",
+      "max_value": "In",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameter can be accessed if [Type of stop] (Stt) = [DC injection] (dCI), or if [DC injection assign.] (dCI) is not set to [No] (nO)",
+      "options": [],
+      "page_index": 34,
+      "printed_page": "34",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [DC inject. level 1] (2) 0 to In (1) 0.7 In (1)"
+    },
+    {
+      "common_function": "dc-injection-braking",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "tdC",
+      "name": "[DC injection time 2]",
+      "description": "DC injection time. Long periods of DC injection braking can cause overheating and damage the motor.",
+      "unit": "s",
+      "default_value": "0.5 s",
+      "min_value": "0.1",
+      "max_value": "30",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameter can be accessed if [Type of stop] (Stt) = [DC injection] (dCI)",
+      "options": [],
+      "page_index": 34,
+      "printed_page": "34",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [DC injection time 2] (2) 0.1 to 30 s 0.5 s"
+    },
+    {
+      "common_function": "skip-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "JPF",
+      "name": "[Skip Frequency]",
+      "description": "Helps to prevent prolonged operation at a frequency range of ± 1 Hz around [Skip Frequency] (JPF). Setting the function to 0 renders it inactive.",
+      "unit": "Hz",
+      "default_value": "0 Hz",
+      "min_value": "0",
+      "max_value": "500",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "The adjustment parameters can be modified with the drive running or stopped (SEt- menu)",
+      "options": [],
+      "page_index": 36,
+      "printed_page": "36",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Skip Frequency] 0 to 500 Hz 0 Hz"
+    },
+    {
+      "common_function": "jog-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "JGF",
+      "name": "[Jog frequency]",
+      "description": "Parameter can be accessed if [JOG] (JOG) is not set to [No] (nO).",
+      "unit": "Hz",
+      "default_value": "10 Hz",
+      "min_value": "0",
+      "max_value": "10",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameter can be accessed if [JOG] (JOG) is not set to [No] (nO)",
+      "options": [],
+      "page_index": 36,
+      "printed_page": "36",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Jog frequency] 0 to 10 Hz 10 Hz Parameter can be accessed if [JOG] (JOG) is not set to [No] (nO), page 76."
+    },
+    {
+      "common_function": "multi-step-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "SP2",
+      "name": "[Preset speed 2]",
+      "description": "Preset speed 2 (SP2 to SP16 available; see page 74).",
+      "unit": "Hz",
+      "default_value": "10 Hz",
+      "min_value": "0",
+      "max_value": "500",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 36,
+      "printed_page": "36",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Preset speed 2] 0 to 500 Hz 10 Hz See page 74."
+    },
+    {
+      "common_function": "multi-step-frequency",
+      "equivalence": "Partially Equivalent",
+      "equivalence_note": "Logic input assignment that activates the 2 preset speeds function.",
+      "code": "PS2",
+      "name": "[2 preset speeds]",
+      "description": "Selecting the assigned logic input activates the function.",
+      "unit": null,
+      "default_value": "[LI3] (LI3)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "The parameters can only be modified when the drive is stopped and no run command is present (FUn- menu)",
+      "options": [
+        {
+          "value": "nO",
+          "label": "[No]: Not assigned"
+        },
+        {
+          "value": "LI1-LI6",
+          "label": "[LI1]-[LI6]: Logic input LI1-LI6"
+        },
+        {
+          "value": "Cd11-Cd15",
+          "label": "[CD11]-[CD15]: Bit 11-15 of the control word from a communication network (LAC = L3)"
+        }
+      ],
+      "page_index": 73,
+      "printed_page": "73",
+      "section": "[APPLICATION FUNCT.] (FUn-) menu - [PRESET SPEEDS]",
+      "table_ref": null,
+      "evidence_quote": "M [2 preset speeds] [LI3] (LI3) Selecting the assigned logic input activates the function."
+    },
+    {
+      "common_function": "torque-limit",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Current limitation; manual states it is used to limit the torque and the temperature rise of the motor.",
+      "code": "CLI",
+      "name": "[Current Limitation]",
+      "description": "Used to limit the torque and the temperature rise of the motor.",
+      "unit": null,
+      "default_value": "1.5 In",
+      "min_value": "0.25 In",
+      "max_value": "1.5 In",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "The adjustment parameters can be modified with the drive running or stopped (SEt- menu)",
+      "options": [],
+      "page_index": 38,
+      "printed_page": "38",
+      "section": "[SETTINGS] (SEt-) menu",
+      "table_ref": null,
+      "evidence_quote": "Used to limit the torque and the temperature rise of the motor."
+    },
+    {
+      "common_function": "stall-prevention",
+      "equivalence": "Partially Equivalent",
+      "equivalence_note": "Deceleration ramp adaptation only (automatic adaptation of the deceleration ramp to load inertia).",
+      "code": "brA",
+      "name": "[Dec ramp adapt.]",
+      "description": "Activating this function automatically adapts the deceleration ramp, if this has been set at too low a value for the inertia of the load. Incompatible with positioning on a ramp and the use of a braking resistor.",
+      "unit": null,
+      "default_value": "[Yes] (YES)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Forced to [No] (nO) if brake control [Brake assignment] (bLC) is assigned",
+      "options": [
+        {
+          "value": "nO",
+          "label": "[No]: Function inactive"
+        },
+        {
+          "value": "YES",
+          "label": "[Yes]: Function active"
+        }
+      ],
+      "page_index": 64,
+      "printed_page": "64",
+      "section": "[APPLICATION FUNCT.] (FUn-) menu - [RAMPS]",
+      "table_ref": null,
+      "evidence_quote": "M [Dec ramp adapt.] [Yes] (YES) Activating this function automatically adapts the deceleration ramp, if this has been set at too low a value for the inertia of the load."
+    },
+    {
+      "common_function": "relay-output-function",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "r1",
+      "name": "[R1 Assignment]",
+      "description": "The relay is energized when the selected assignment is active, with the exception of [No drive flt] (FLt) (energized if the drive has not detected a fault).",
+      "unit": null,
+      "default_value": "[No drive flt] (FLt)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "This parameter is not visible when a communication card is connected to the product.",
+      "options": [
+        {
+          "value": "nO",
+          "label": "[No]: Not assigned"
+        },
+        {
+          "value": "FLt",
+          "label": "[No drive flt]: No drive detected fault"
+        },
+        {
+          "value": "rUn",
+          "label": "[Drv running]: Drive running"
+        },
+        {
+          "value": "FtA",
+          "label": "[Freq.Th.att.]: Frequency threshold reached"
+        },
+        {
+          "value": "FLA",
+          "label": "[HSP attain.]: [High speed] (HSP) reached"
+        },
+        {
+          "value": "CtA",
+          "label": "[I attained]: Current threshold reached"
+        },
+        {
+          "value": "SrA",
+          "label": "[Freq.ref.att]: Frequency reference reached"
+        },
+        {
+          "value": "tSA",
+          "label": "[Th.mot. att.]: Motor thermal threshold reached"
+        },
+        {
+          "value": "APL",
+          "label": "[4-20mA]: Loss of 4-20 mA signal"
+        },
+        {
+          "value": "LI1 to LI6",
+          "label": "[LI1] to [LI6]: Returns the value of the selected logic input"
+        }
+      ],
+      "page_index": 49,
+      "printed_page": "49",
+      "section": "[INPUTS / OUTPUTS CFG] (I-O-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [R1 Assignment] [No drive flt] (FLt) This parameter is not visible when a communication card is connected to the product."
+    },
+    {
+      "common_function": "relay-output-function",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "r2",
+      "name": "[R2 Assignment]",
+      "description": "Relay R2 assignment; options as R1 plus [Brk control] (bLC).",
+      "unit": null,
+      "default_value": "[No] (nO)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [],
+      "page_index": 49,
+      "printed_page": "49",
+      "section": "[INPUTS / OUTPUTS CFG] (I-O-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [R2 Assignment] [No] (nO) v [No] (nO): Not assigned v [No drive flt] (FLt): No drive detected fault v [Drv running] (rUn): Drive running"
+    },
+    {
+      "common_function": "analog-output-function",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "dO",
+      "name": "[Analog./logic output]",
+      "description": "Assignment of the analog output (some assignments transform it to a logic output).",
+      "unit": null,
+      "default_value": "[No] (nO)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "This parameter is not visible when a communication card is connected to the product.",
+      "options": [
+        {
+          "value": "nO",
+          "label": "[No]: Not assigned"
+        },
+        {
+          "value": "OCr",
+          "label": "[I motor]: Motor current. 20 mA or 10 V corresponds to twice the nominal drive current"
+        },
+        {
+          "value": "OFr",
+          "label": "[Motor freq.]: Motor frequency. 20 mA or 10 V corresponds to the maximum frequency [Max frequency] (tFr)"
+        },
+        {
+          "value": "Otr",
+          "label": "[Motor torq.]: Motor torque. 20 mA or 10 V corresponds to twice the nominal motor torque"
+        },
+        {
+          "value": "OPr",
+          "label": "[P. supplied]: Power supplied by the drive. 20 mA or 10 V corresponds to twice the nominal drive power"
+        }
+      ],
+      "page_index": 48,
+      "printed_page": "48",
+      "section": "[INPUTS / OUTPUTS CFG] (I-O-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Analog./logic output] [No] (nO) This parameter is not visible when a communication card is connected to the product. v [No] (nO): Not assigned v [I motor] (OCr): Motor current. 20 mA or 10 V corresponds to twice the nominal drive current."
+    },
+    {
+      "common_function": "auto-restart",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "Atr",
+      "name": "[Automatic restart]",
+      "description": "Automatic restart if the fault has been cleared and the other operating conditions permit the restart. Attempts separated by 1 s, 5 s, 10 s, then 1 min. Only active in 2-wire level control.",
+      "unit": null,
+      "default_value": "[No] (nO)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Active only in 2-wire level control ([2/3 wire control] (tCC) = [2 wire] (2C), and [2 wire type] (tCt) = [Level] (LEL) or [Fwd priority] (PFO))",
+      "options": [
+        {
+          "value": "nO",
+          "label": "[No]: Function inactive"
+        },
+        {
+          "value": "YES",
+          "label": "[Yes]: Automatic restart if the fault has been cleared and the other operating conditions permit the restart"
+        }
+      ],
+      "page_index": 91,
+      "printed_page": "91",
+      "section": "[FAULT MANAGEMENT] (FLt-) menu",
+      "table_ref": null,
+      "evidence_quote": "The restart is performed by a series of automatic attempts separated by increasingly longer waiting periods: 1 s, 5 s, 10 s, then 1 min for subsequent ones."
+    },
+    {
+      "common_function": "auto-restart",
+      "equivalence": "Partially Equivalent",
+      "equivalence_note": "Maximum duration of the automatic restart sequence.",
+      "code": "tAr",
+      "name": "[Max. restart time]",
+      "description": "It can be used to limit the number of consecutive restarts in the event of a recurrent detected fault.",
+      "unit": null,
+      "default_value": "[5 min] (5)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameter is only visible if [Automatic restart] (Atr) = [Yes] (YES)",
+      "options": [
+        {
+          "value": "5",
+          "label": "[5 min]: 5 minutes"
+        },
+        {
+          "value": "10",
+          "label": "[10 min]: 10 minutes"
+        },
+        {
+          "value": "30",
+          "label": "[30 min]: 30 minutes"
+        },
+        {
+          "value": "1h",
+          "label": "[1 hour]: 1 hour"
+        },
+        {
+          "value": "2h",
+          "label": "[2 hours]: 2 hours"
+        },
+        {
+          "value": "3h",
+          "label": "[3 hours]: 3 hours"
+        },
+        {
+          "value": "Ct",
+          "label": "[Unlimited]: Unlimited (except for OPF and PHF; max. duration limited to 3 hours)"
+        }
+      ],
+      "page_index": 92,
+      "printed_page": "92",
+      "section": "[FAULT MANAGEMENT] (FLt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Max. restart time] [5 min] (5) Parameter is only visible if [Automatic restart] (Atr) = [Yes] (YES). It can be used to limit the number of consecutive restarts in the event of a recurrent detected fault."
+    },
+    {
+      "common_function": "fault-reset-command",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "rSF",
+      "name": "[Fault reset]",
+      "description": "Logic input assigned to fault reset.",
+      "unit": null,
+      "default_value": "[No] (nO)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "The parameters can only be modified when the drive is stopped and no run command is present (FLt- menu)",
+      "options": [
+        {
+          "value": "nO",
+          "label": "[No]: Not assigned"
+        },
+        {
+          "value": "LI1-LI6",
+          "label": "[LI1]-[LI6]: Logic input LI1-LI6"
+        }
+      ],
+      "page_index": 92,
+      "printed_page": "92",
+      "section": "[FAULT MANAGEMENT] (FLt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Fault reset] v [No] (nO): Not assigned v [LI1] (LI1): Logic input LI1"
+    },
+    {
+      "common_function": "phase-loss-protection",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "OPL",
+      "name": "[Output Phase Loss]",
+      "description": "Motor phase loss management. Forced to [Yes] (YES) if [Brake assignment] (bLC) is not set to [No] (nO).",
+      "unit": null,
+      "default_value": "[Yes] (YES)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "nO",
+          "label": "[No]: Function inactive"
+        },
+        {
+          "value": "YES",
+          "label": "[Yes]: Tripping on the [MOTOR PHASE LOSS] (OPF)"
+        },
+        {
+          "value": "OAC",
+          "label": "[Output cut]: No tripping on a [MOTOR PHASE LOSS] (OPF), but management of the output voltage"
+        }
+      ],
+      "page_index": 94,
+      "printed_page": "94",
+      "section": "[FAULT MANAGEMENT] (FLt-) menu",
+      "table_ref": null,
+      "evidence_quote": "v [No] (nO): Function inactive v [Yes] (YES): Tripping on the [MOTOR PHASE LOSS] (OPF)"
+    },
+    {
+      "common_function": "phase-loss-protection",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "IPL",
+      "name": "[Input phase loss]",
+      "description": "This parameter is only accessible on 3-phase drives.",
+      "unit": null,
+      "default_value": "[Yes] (YES)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Only accessible on 3-phase drives",
+      "options": [
+        {
+          "value": "nO",
+          "label": "[No]: Ignore"
+        },
+        {
+          "value": "YES",
+          "label": "[Yes]: Detected fault management with fast stop"
+        }
+      ],
+      "page_index": 94,
+      "printed_page": "94",
+      "section": "[FAULT MANAGEMENT] (FLt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Input phase loss] [Yes] (YES) This parameter is only accessible on 3-phase drives. v [No] (nO): Ignore v [Yes] (YES): Detected fault management with fast stop"
+    },
+    {
+      "common_function": "slave-address",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "Add",
+      "name": "[Modbus Address]",
+      "description": "Modbus address for the drive.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": "1",
+      "max_value": "247",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Can only be modified when the drive is stopped and no run command is present; not taken into account until the drive has been switched off and back on again",
+      "options": [],
+      "page_index": 98,
+      "printed_page": "98",
+      "section": "[COMMUNICATION] (COM-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Modbus Address] Modbus address for the drive. Adjustment range 1 to 247 Factory setting 1"
+    },
+    {
+      "common_function": "baud-rate",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "tbr",
+      "name": "[Modbus baud rate]",
+      "description": "Modbus transmission speed",
+      "unit": null,
+      "default_value": "19,200 bps",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Can only be modified when the drive is stopped and no run command is present; not taken into account until the drive has been switched off and back on again",
+      "options": [
+        {
+          "value": "4.8",
+          "label": "[4.8 Kbps]: 4,800 bits/second"
+        },
+        {
+          "value": "9.6",
+          "label": "[9.6 Kbps]: 9,600 bits/second"
+        },
+        {
+          "value": "19.2",
+          "label": "[19.2 Kbps]: 19,200 bits/second (only value which supports the use of the remote display terminal)"
+        }
+      ],
+      "page_index": 98,
+      "printed_page": "98",
+      "section": "[COMMUNICATION] (COM-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Modbus baud rate] 19,200 bps Modbus transmission speed v [4.8 Kbps] (4.8): 4,800 bits/second v [9.6 Kbps] (9.6): 9,600 bits/second v [19.2 Kbps] (19.2): 19,200 bits/second"
+    },
+    {
+      "common_function": "parity-stop-bits",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "tFO",
+      "name": "[Modbus format]",
+      "description": "Modbus character format.",
+      "unit": null,
+      "default_value": "[8-E-1] (8E1)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Can only be modified when the drive is stopped and no run command is present; not taken into account until the drive has been switched off and back on again",
+      "options": [
+        {
+          "value": "8O1",
+          "label": "[8-O-1]: 8 data bits, odd parity, 1 stop bit"
+        },
+        {
+          "value": "8E1",
+          "label": "[8-E-1]: 8 data bits, even parity, 1 stop bit (only value which supports the use of the remote display terminal)"
+        },
+        {
+          "value": "8n1",
+          "label": "[8-N-1]: 8 data bits, no parity, 1 stop bit"
+        },
+        {
+          "value": "8n2",
+          "label": "[8-N-2]: 8 data bits, no parity, 2 stop bits"
+        }
+      ],
+      "page_index": 98,
+      "printed_page": "98",
+      "section": "[COMMUNICATION] (COM-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Modbus format] [8-E-1] (8E1) v [8-O-1] (8O1): 8 data bits, odd parity, 1 stop bit v [8-E-1] (8E1): 8 data bits, even parity, 1 stop bit"
+    },
+    {
+      "common_function": "comm-timeout",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "ttO",
+      "name": "[Modbus time out]",
+      "description": "Modbus time out.",
+      "unit": "s",
+      "default_value": "10 s",
+      "min_value": "0.1",
+      "max_value": "30",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Can only be modified when the drive is stopped and no run command is present",
+      "options": [],
+      "page_index": 98,
+      "printed_page": "98",
+      "section": "[COMMUNICATION] (COM-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Modbus time out] 0.1 to 30 s 10 s"
+    },
+    {
+      "common_function": "comm-loss-action",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "SLL",
+      "name": "[Modbus fault mgt]",
+      "description": "Drive behaviour on Modbus communication fault. This parameter does not apply to PowerSuite and SoMove software.",
+      "unit": null,
+      "default_value": "[Fast stop] (FSt)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "The parameters can only be modified when the drive is stopped and no run command is present (FLt- menu)",
+      "options": [
+        {
+          "value": "nO",
+          "label": "[Ignore]: Ignore"
+        },
+        {
+          "value": "YES",
+          "label": "[Freewheel]: Detected fault management with freewheel stop"
+        },
+        {
+          "value": "rMP",
+          "label": "[Ramp stop]: Detected fault management with stop on ramp"
+        },
+        {
+          "value": "FSt",
+          "label": "[Fast stop]: Detected fault management with fast stop"
+        }
+      ],
+      "page_index": 95,
+      "printed_page": "95",
+      "section": "[FAULT MANAGEMENT] (FLt-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [Modbus fault mgt] Adjustment range Factory setting [Fast stop] (FSt)"
+    },
+    {
+      "common_function": "parameter-reset",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "FCS",
+      "name": "[Restore config.]",
+      "description": "[Factory Set.] (InI): The current configuration is replaced by the configuration selected by the [Macro configuration] (CFG) parameter. bFr, LCC, COd, the COM- menu and SUP- menu parameters are not modified.",
+      "unit": null,
+      "default_value": "[No] (nO)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "ENT needs to be pressed and held down (for 2 s) to change the assignment",
+      "options": [
+        {
+          "value": "nO",
+          "label": "[No]: Function inactive"
+        },
+        {
+          "value": "rEC1",
+          "label": "[Internal 1]: The current configuration becomes identical to the backup configuration previously saved by [Saving config.] (SCS) = [Config 1] (Str1)"
+        },
+        {
+          "value": "InI",
+          "label": "[Factory Set.]: The current configuration is replaced by the configuration selected by the [Macro configuration] (CFG) parameter"
+        }
+      ],
+      "page_index": 46,
+      "printed_page": "46",
+      "section": "[MOTOR CONTROL] (drC-) menu",
+      "table_ref": null,
+      "evidence_quote": "v [Factory Set.] (InI): The current configuration is replaced by the configuration selected by the [Macro configuration] (CFG) parameter (2)."
+    },
+    {
+      "common_function": "parameter-lock",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "COd",
+      "name": "[PIN code 1]",
+      "description": "Enables the drive configuration to be protected using an access code. When access is locked by means of a code, only the parameters in the [MONITORING] (SUP-) and [SPEED REFERENCE] (rEF-) menus can be accessed. Code 2 to 9,999.",
+      "unit": null,
+      "default_value": null,
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "OFF",
+          "label": "[OFF]: No access locking codes"
+        },
+        {
+          "value": "On",
+          "label": "[ON]: A code is locking access (2 to 9,999)"
+        }
+      ],
+      "page_index": 103,
+      "printed_page": "103",
+      "section": "[MONITORING] (SUP-) menu",
+      "table_ref": null,
+      "evidence_quote": "M [PIN code 1] Enables the drive configuration to be protected using an access code. When access is locked by means of a code, only the parameters in the [MONITORING] (SUP-) and [SPEED REFERENCE] (rEF-) menus can be accessed."
+    },
+    {
+      "common_function": "pid-control",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "PIF",
+      "name": "[PID feedback ass.]",
+      "description": "Assignment of the PI regulator feedback; the PI function is enabled when not set to [No].",
+      "unit": null,
+      "default_value": "[No] (nO)",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "The PI regulator function is incompatible with several functions (see page 21)",
+      "options": [
+        {
+          "value": "nO",
+          "label": "[No]: Not assigned"
+        },
+        {
+          "value": "AI1",
+          "label": "[AI1]: Analog input AI1"
+        },
+        {
+          "value": "AI2",
+          "label": "[AI2]: Analog input AI2"
+        },
+        {
+          "value": "AI3",
+          "label": "[AI3]: Analog input AI3"
+        }
+      ],
+      "page_index": 81,
+      "printed_page": "81",
+      "section": "[APPLICATION FUNCT.] (FUn-) menu - [PI REGULATOR]",
+      "table_ref": null,
+      "evidence_quote": "M [PID feedback ass.] v [No] (nO): Not assigned v [AI1] (AI1): Analog input AI1 v [AI2] (AI2): Analog input AI2 v [AI3] (AI3): Analog input AI3 [No] (nO)"
+    },
+    {
+      "common_function": "pid-control",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "rPG",
+      "name": "[PID prop. gain]",
+      "description": "It provides dynamic performance when PI feedback is changing quickly.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": "0.01",
+      "max_value": "100",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameter is only visible if [PID feedback ass.] (PIF) is not set to [No] (nO)",
+      "options": [],
+      "page_index": 81,
+      "printed_page": "81",
+      "section": "[APPLICATION FUNCT.] (FUn-) menu - [PI REGULATOR]",
+      "table_ref": null,
+      "evidence_quote": "M [PID prop. gain] (1) 0.01 to 100 1 Parameter is only visible if [PID feedback ass.] (PIF) is not set to [No] (nO), page 81. It provides dynamic performance when PI feedback is changing quickly."
+    },
+    {
+      "common_function": "pid-control",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "rIG",
+      "name": "[PID integral gain]",
+      "description": "It provides static precision when PI feedback is changing slowly.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": "0.01",
+      "max_value": "100",
+      "resolution": null,
+      "access": "Read-Write",
+      "setting_conditions": "Parameter is only visible if [PID feedback ass.] (PIF) is not set to [No] (nO)",
+      "options": [],
+      "page_index": 81,
+      "printed_page": "81",
+      "section": "[APPLICATION FUNCT.] (FUn-) menu - [PI REGULATOR]",
+      "table_ref": null,
+      "evidence_quote": "M [PID integral gain] (1) 0.01 to 100 1 Parameter is only visible if [PID feedback ass.] (PIF) is not set to [No] (nO), page 81. It provides static precision when PI feedback is changing slowly."
+    }
+  ],
+  "modbus_registers": [],
+  "notes": [
+    "This programming manual (BBV46385) does not contain a Modbus register/address map, control/status word bit tables, or supported function codes. Page 7 states that communication details are in separate 'Manuals for Modbus, CANopen, etc.'. No modbus_registers records were created.",
+    "Page 25 only lists functions that can be assigned to bits 11 to 15 of the Network and Modbus control word (e.g. PS2, PS4, rPS, FSt, dCI, rFC, CCS); the control word address itself is not given.",
+    "No parameter logical (Modbus) addresses are printed in the parameter tables of this manual.",
+    "No base-frequency parameter separate from [Rated motor freq.] (FrS), no rated motor power parameter, and no protocol-selection parameter were found in this manual.",
+    "Page 98: the PDF text layer reads '[8-N-1] (8n2): 8 data bits, no parity, 1 stop bit', while the rendered page shows '(8n1)'. The rendered value (8n1) was used for the option; verify.",
+    "Page 43: the WARNING text lists '[Rated motor freq.] (nCr)'; nCr is used on page 41 for [Rated mot. current]. Code nCr was taken from page 41.",
+    "Printed page numbers equal PDF page indices in this file (footer 'BBV46385 06/2010 <n>').",
+    "Values expressed in 'In' refer to the nominal drive current indicated in the Installation Manual and on the drive nameplate.",
+    "Evidence quotes were taken from the PDF text layer; on some pages the code column is extracted separately from the description, so codes may not appear inside the quote."
+  ]
+}

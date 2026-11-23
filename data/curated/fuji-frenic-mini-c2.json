@@ -1,0 +1,1848 @@
+{
+  "document_file": "vfd-manuals/FRENIC/FRENIC-Mini-C2-instruction-manual.pdf",
+  "document_title": "Instruction Manual - Compact Inverter FRENIC-Mini",
+  "document_revision": "INR-SI47-1729a-E",
+  "brand": "Fuji Electric",
+  "model": "FRENIC-Mini (FRN0001 to 0020C2S-2, FRN0002 to 0011C2S-4, FRN0001 to 0012C2S-7)",
+  "model_evidence": {
+    "page_index": 1,
+    "evidence_quote": "Three-phase 400 V series: FRN0002 to 0011C2S-4"
+  },
+  "extraction_method": "ai-assisted-reading",
+  "parameters": [
+    {
+      "common_function": "parameter-lock",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F00",
+      "name": "Data Protection",
+      "description": "Data protection and digital reference protection selection.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0",
+          "label": "Disable both data protection and digital reference protection"
+        },
+        {
+          "value": "1",
+          "label": "Enable data protection and disable digital reference protection"
+        },
+        {
+          "value": "2",
+          "label": "Disable data protection and enable digital reference protection"
+        },
+        {
+          "value": "3",
+          "label": "Enable both data protection and digital reference protection"
+        }
+      ],
+      "page_index": 79,
+      "printed_page": "5-2",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F00 Data Protection 0: Disable both data protection and digital reference protection"
+    },
+    {
+      "common_function": "frequency-source",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F01",
+      "name": "Frequency Command 1",
+      "description": "Frequency command source selection.",
+      "unit": null,
+      "default_value": "4",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [
+        {
+          "value": "0",
+          "label": "UP/DOWN keys on keypad"
+        },
+        {
+          "value": "1",
+          "label": "Voltage input to terminal [12] (0 to +10 VDC)"
+        },
+        {
+          "value": "2",
+          "label": "Current input to terminal [C1] (4 to 20 mA DC)"
+        },
+        {
+          "value": "3",
+          "label": "Sum of voltage and current inputs to terminals [12] and [C1]"
+        },
+        {
+          "value": "4",
+          "label": "Built-in potentiometer (POT)"
+        },
+        {
+          "value": "7",
+          "label": "Terminal command UP/DOWN control"
+        }
+      ],
+      "page_index": 79,
+      "printed_page": "5-2",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F01 Frequency Command 1 0: UP/DOWN keys on keypad"
+    },
+    {
+      "common_function": "command-source",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F02",
+      "name": "Operation Method",
+      "description": "Run command source selection.",
+      "unit": null,
+      "default_value": "2",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [
+        {
+          "value": "0",
+          "label": "RUN/STOP keys on keypad (Motor rotational direction specified by terminal command FWD/REV)"
+        },
+        {
+          "value": "1",
+          "label": "Terminal command FWD or REV"
+        },
+        {
+          "value": "2",
+          "label": "RUN/STOP keys on keypad (forward)"
+        },
+        {
+          "value": "3",
+          "label": "RUN/STOP keys on keypad (reverse)"
+        }
+      ],
+      "page_index": 80,
+      "printed_page": "5-3",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F02 Operation Method 0: RUN/STOP keys on keypad (Motor rotational direction specified by terminal command FWD / REV )"
+    },
+    {
+      "common_function": "maximum-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F03",
+      "name": "Maximum Frequency 1",
+      "description": "Maximum frequency for motor 1. Default depends on shipping destination: A (Asia), C (China), E (Europe), U (USA).",
+      "unit": "Hz",
+      "default_value": "ACU:60.0 E:50.0",
+      "min_value": "25.0",
+      "max_value": "400.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [],
+      "page_index": 80,
+      "printed_page": "5-3",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F03 Maximum Frequency 1 25.0 to 400.0 0.1 Hz N Y ACU:60.0 E:50.0"
+    },
+    {
+      "common_function": "base-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F04",
+      "name": "Base Frequency 1",
+      "description": "Base frequency for motor 1. Default depends on shipping destination.",
+      "unit": "Hz",
+      "default_value": "AU:60.0 CE:50.0",
+      "min_value": "25.0",
+      "max_value": "400.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [],
+      "page_index": 80,
+      "printed_page": "5-3",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F04 Base Frequency 1 25.0 to 400.0 0.1 Hz N Y AU:60.0 CE:50.0"
+    },
+    {
+      "common_function": "rated-motor-voltage",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Fuji defines this as the output voltage at base frequency (V/f setting), not a separate motor nameplate voltage parameter.",
+      "code": "F05",
+      "name": "Rated Voltage at Base Frequency 1",
+      "description": "0: Output a voltage in proportion to input voltage; 80 to 240: Output an AVR-controlled voltage (for 200 V class series); 160 to 500: Output an AVR-controlled voltage (for 400 V class series). Default depends on shipping destination.",
+      "unit": "V",
+      "default_value": "ACE:0 U: 230/460",
+      "min_value": null,
+      "max_value": null,
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [],
+      "page_index": 80,
+      "printed_page": "5-3",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F05 Rated Voltage at Base Frequency 1 0: Output a voltage in proportion to input voltage 1 V N Y2 ACE:0"
+    },
+    {
+      "common_function": "maximum-output-voltage",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F06",
+      "name": "Maximum Output Voltage 1",
+      "description": "80 to 240: Output an AVR-controlled voltage (for 200 V class series); 160 to 500: Output an AVR-controlled voltage (for 400 V class series). Default depends on shipping destination.",
+      "unit": "V",
+      "default_value": "A: 220/380 C: 200/380 E: 230/400 U: 230/460",
+      "min_value": null,
+      "max_value": null,
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [],
+      "page_index": 80,
+      "printed_page": "5-3",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F06 Maximum Output Voltage 1 80 to 240: Output an AVR-controlled voltage (for 200 V class series)"
+    },
+    {
+      "common_function": "acceleration-time-1",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F07",
+      "name": "Acceleration Time 1",
+      "description": "Note: Entering 0.00 cancels the acceleration time, requiring external soft-start.",
+      "unit": "s",
+      "default_value": "6.00",
+      "min_value": "0.00",
+      "max_value": "3600",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 80,
+      "printed_page": "5-3",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F07 Acceleration Time 1 0.00 to 3600 0.01 s Y Y 6.00"
+    },
+    {
+      "common_function": "deceleration-time-1",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F08",
+      "name": "Deceleration Time 1",
+      "description": "Note: Entering 0.00 cancels the deceleration time, requiring external soft-start.",
+      "unit": "s",
+      "default_value": "6.00",
+      "min_value": "0.00",
+      "max_value": "3600",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 80,
+      "printed_page": "5-3",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F08 Deceleration Time 1 0.00 to 3600 0.01 s Y Y 6.00"
+    },
+    {
+      "common_function": "torque-boost",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F09",
+      "name": "Torque Boost 1",
+      "description": "0.0 to 20.0 (percentage with respect to \"F05: Rated Voltage at Base Frequency 1\"). Note: This setting takes effect when F37 = 0, 1, 3, or 4. Default ACE: See Table A; U: 0.0.",
+      "unit": "%",
+      "default_value": "ACE: See Table A. U:0.0",
+      "min_value": "0.0",
+      "max_value": "20.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 80,
+      "printed_page": "5-3",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F09 Torque Boost 1 0.0 to 20.0 (percentage with respect to \"F05: Rated Voltage at Base Frequency 1\")"
+    },
+    {
+      "common_function": "motor-overload-protection",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F10",
+      "name": "Electronic Thermal Overload Protection for Motor 1 (Motor characteristics)",
+      "description": "Motor characteristics selection for electronic thermal overload protection.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "1",
+          "label": "For a general-purpose motor and Fuji standard permanent magnet synchronous motor with shaft-driven cooling fan"
+        },
+        {
+          "value": "2",
+          "label": "For an inverter-driven motor with separately powered cooling fan"
+        }
+      ],
+      "page_index": 80,
+      "printed_page": "5-3",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F10 1: For a general-purpose motor and Fuji standard permanent magnet synchronous motor with shaft-driven cooling fan"
+    },
+    {
+      "common_function": "motor-overload-protection",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F11",
+      "name": "Electronic Thermal Overload Protection for Motor 1 (Overload detection level)",
+      "description": "0.00: Disable, 0.01 to 100.0. 1 to 135% of the rated current (allowable continuous drive current) of the motor. Default: See Table A.",
+      "unit": "A",
+      "default_value": "See Table A.",
+      "min_value": "0.01",
+      "max_value": "100.0",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0.00",
+          "label": "Disable"
+        }
+      ],
+      "page_index": 80,
+      "printed_page": "5-3",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F11 (Overload detection level) 0.00: Disable, 0.01 to 100.0 1 to 135% of the rated current (allowable continuous drive current) of the motor"
+    },
+    {
+      "common_function": "motor-overload-protection",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F12",
+      "name": "Electronic Thermal Overload Protection for Motor 1 (Thermal time constant)",
+      "description": "Thermal time constant.",
+      "unit": "min",
+      "default_value": "5.0",
+      "min_value": "0.5",
+      "max_value": "75.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 80,
+      "printed_page": "5-3",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F12 (Thermal time constant) 0.5 to 75.0 0.1 min Y Y 5.0"
+    },
+    {
+      "common_function": "auto-restart",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Restart after momentary power failure only; fault auto-reset is H04/H05.",
+      "code": "F14",
+      "name": "Restart Mode after Momentary Power Failure (Mode selection)",
+      "description": "Restart mode after momentary power failure. Default AC:1, EU:0. *1 (option 2) Available in the ROM version 0500 or later.",
+      "unit": null,
+      "default_value": "AC:1 EU:0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0",
+          "label": "Disable restart (Trip immediately)"
+        },
+        {
+          "value": "1",
+          "label": "Disable restart (Trip after a recovery from power failure)"
+        },
+        {
+          "value": "2",
+          "label": "Trip after decelerate-to-stop *1"
+        },
+        {
+          "value": "4",
+          "label": "Enable restart (Restart at the frequency at which the power failure occurred, for general loads)"
+        },
+        {
+          "value": "5",
+          "label": "Enable restart (Restart at the starting frequency)"
+        }
+      ],
+      "page_index": 80,
+      "printed_page": "5-3",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F14 – – Y Y AC:1 EU:0 5-31 0: Disable restart (Trip immediately)"
+    },
+    {
+      "common_function": "frequency-upper-limit",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F15",
+      "name": "Frequency Limiter (High)",
+      "description": "Frequency limiter high.",
+      "unit": "Hz",
+      "default_value": "70.0",
+      "min_value": "0.0",
+      "max_value": "400.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 80,
+      "printed_page": "5-3",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F15 Frequency Limiter (High) 0.0 to 400.0 0.1 Hz Y Y 70.0"
+    },
+    {
+      "common_function": "frequency-lower-limit",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F16",
+      "name": "Frequency Limiter (Low)",
+      "description": "Frequency limiter low.",
+      "unit": "Hz",
+      "default_value": "0.0",
+      "min_value": "0.0",
+      "max_value": "400.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 80,
+      "printed_page": "5-3",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F16 (Low) 0.0 to 400.0 0.1 Hz Y Y 0.0"
+    },
+    {
+      "common_function": "dc-injection-braking",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F20",
+      "name": "DC Braking 1 (Braking starting frequency)",
+      "description": "DC braking starting frequency.",
+      "unit": "Hz",
+      "default_value": "0.0",
+      "min_value": "0.0",
+      "max_value": "60.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 81,
+      "printed_page": "5-4",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F20 DC Braking 1 (Braking starting frequency) 0.0 to 60.0 0.1 Hz Y Y 0.0"
+    },
+    {
+      "common_function": "dc-injection-braking",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F21",
+      "name": "DC Braking 1 (Braking level)",
+      "description": "DC braking level.",
+      "unit": "%",
+      "default_value": "0",
+      "min_value": "0",
+      "max_value": "100",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 81,
+      "printed_page": "5-4",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F21 (Braking level) 0 to 100 1 % Y Y 0"
+    },
+    {
+      "common_function": "dc-injection-braking",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F22",
+      "name": "DC Braking 1 (Braking time)",
+      "description": "0.00 (Disable), 0.01 to 30.00.",
+      "unit": "s",
+      "default_value": "0.00",
+      "min_value": "0.01",
+      "max_value": "30.00",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0.00",
+          "label": "Disable"
+        }
+      ],
+      "page_index": 81,
+      "printed_page": "5-4",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F22 (Braking time) 0.00 (Disable), 0.01 to 30.00 0.01 s Y Y 0.00"
+    },
+    {
+      "common_function": "starting-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F23",
+      "name": "Starting Frequency 1",
+      "description": "Starting frequency.",
+      "unit": "Hz",
+      "default_value": "1.0",
+      "min_value": "0.1",
+      "max_value": "60.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 81,
+      "printed_page": "5-4",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F23 Starting Frequency 1 0.1 to 60.0 0.1 Hz Y Y 1.0"
+    },
+    {
+      "common_function": "carrier-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F26",
+      "name": "Motor Sound (Carrier frequency)",
+      "description": "Carrier frequency. Default ACU:2, E:15.",
+      "unit": "kHz",
+      "default_value": "ACU:2 E:15",
+      "min_value": "0.75",
+      "max_value": "16",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 81,
+      "printed_page": "5-4",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F26 Motor Sound (Carrier frequency) 0.75 to 16 1 kHz Y Y ACU:2 E:15"
+    },
+    {
+      "common_function": "torque-boost",
+      "equivalence": "Partially Equivalent",
+      "equivalence_note": "Combines load-type (V/f pattern) selection, auto-torque boost and auto energy saving in one code.",
+      "code": "F37",
+      "name": "Load Selection/Auto Torque Boost/Auto Energy Saving Operation 1",
+      "description": "Load selection / auto torque boost / auto energy saving operation selection.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [
+        {
+          "value": "0",
+          "label": "Variable torque load"
+        },
+        {
+          "value": "1",
+          "label": "Constant torque load"
+        },
+        {
+          "value": "2",
+          "label": "Auto-torque boost"
+        },
+        {
+          "value": "3",
+          "label": "Auto-energy saving operation (Variable torque load during ACC/DEC)"
+        },
+        {
+          "value": "4",
+          "label": "Auto-energy saving operation (Constant torque load during ACC/DEC)"
+        },
+        {
+          "value": "5",
+          "label": "Auto-energy saving operation (Auto-torque boost during ACC/DEC)"
+        }
+      ],
+      "page_index": 81,
+      "printed_page": "5-4",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F37 0: Variable torque load"
+    },
+    {
+      "common_function": "control-mode",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F42",
+      "name": "Control Mode Selection 1",
+      "description": "Control mode selection for motor 1. *1 (option 11) Available in the ROM version 0500 or later.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [
+        {
+          "value": "0",
+          "label": "V/f control with slip compensation inactive"
+        },
+        {
+          "value": "1",
+          "label": "Dynamic torque vector control"
+        },
+        {
+          "value": "2",
+          "label": "V/f control with slip compensation active"
+        },
+        {
+          "value": "11",
+          "label": "V/f control for PMSM drive *1"
+        }
+      ],
+      "page_index": 81,
+      "printed_page": "5-4",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F42 Control Mode Selection 1 0: V/f control with slip compensation inactive"
+    },
+    {
+      "common_function": "stall-prevention",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Fuji current limiter function.",
+      "code": "F43",
+      "name": "Current Limiter (Mode selection)",
+      "description": "Current limiter mode selection.",
+      "unit": null,
+      "default_value": "2",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0",
+          "label": "Disable (No current limiter works.)"
+        },
+        {
+          "value": "1",
+          "label": "Enable at constant speed (Disable during ACC/DEC)"
+        },
+        {
+          "value": "2",
+          "label": "Enable during ACC/constant speed operation"
+        }
+      ],
+      "page_index": 82,
+      "printed_page": "5-5",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F43 Current Limiter 0: Disable (No current limiter works.)"
+    },
+    {
+      "common_function": "stall-prevention",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Fuji current limiter level.",
+      "code": "F44",
+      "name": "Current Limiter (Level)",
+      "description": "20 to 180 (The data is interpreted as the rated output current of the inverter for 100%.)",
+      "unit": "%",
+      "default_value": "160",
+      "min_value": "20",
+      "max_value": "180",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 82,
+      "printed_page": "5-5",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F44 (Level) 20 to 180 (The data is interpreted as the rated output current of the inverter for 100%.)"
+    },
+    {
+      "common_function": "dynamic-braking",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "F50",
+      "name": "Electronic Thermal Overload Protection for Braking Resistor (Discharging capability)",
+      "description": "1 to 900, OFF (Cancel).",
+      "unit": "kWs",
+      "default_value": "OFF",
+      "min_value": "1",
+      "max_value": "900",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "OFF",
+          "label": "Cancel"
+        }
+      ],
+      "page_index": 82,
+      "printed_page": "5-5",
+      "section": "5.1 Function Code Tables - F codes: Fundamental Functions",
+      "table_ref": null,
+      "evidence_quote": "F50 Electronic Thermal Overload Protection for Braking Resistor 1 to 900, OFF (Cancel) 1 kWs"
+    },
+    {
+      "common_function": "digital-input-function",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "E01",
+      "name": "Terminal [X1] Function",
+      "description": "Selecting function code data assigns the corresponding function to terminals [X1] to [X3]. Setting the value in parentheses ( ) assigns a negative logic input (Active-OFF). E02 default 7, E03 default 8.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [
+        {
+          "value": "0 (1000)",
+          "label": "Select multistep frequency (SS1)"
+        },
+        {
+          "value": "1 (1001)",
+          "label": "Select multistep frequency (SS2)"
+        },
+        {
+          "value": "2 (1002)",
+          "label": "Select multistep frequency (SS4)"
+        },
+        {
+          "value": "3 (1003)",
+          "label": "Select multistep frequency (SS8)"
+        },
+        {
+          "value": "4 (1004)",
+          "label": "Select ACC/DEC time (RT1)"
+        },
+        {
+          "value": "6 (1006)",
+          "label": "Enable 3-wire operation (HLD)"
+        },
+        {
+          "value": "7 (1007)",
+          "label": "Coast to a stop (BX)"
+        },
+        {
+          "value": "8 (1008)",
+          "label": "Reset alarm (RST)"
+        },
+        {
+          "value": "9 (1009)",
+          "label": "Enable external alarm trip (THR)"
+        },
+        {
+          "value": "10 (1010)",
+          "label": "Ready for jogging (JOG)"
+        },
+        {
+          "value": "11 (1011)",
+          "label": "Select frequency command 2/1 (Hz2/Hz1)"
+        },
+        {
+          "value": "12 (1012)",
+          "label": "Select motor 2/motor 1 (M2/M1)"
+        },
+        {
+          "value": "13",
+          "label": "Enable DC braking (DCBRK)"
+        },
+        {
+          "value": "17 (1017)",
+          "label": "UP (Increase output frequency) (UP)"
+        },
+        {
+          "value": "18 (1018)",
+          "label": "DOWN (Decrease output frequency) (DOWN)"
+        },
+        {
+          "value": "19 (1019)",
+          "label": "Enable data change with keypad (WE-KP)"
+        },
+        {
+          "value": "20 (1020)",
+          "label": "Cancel PID control (Hz/PID)"
+        },
+        {
+          "value": "21 (1021)",
+          "label": "Switch normal/inverse operation (IVS)"
+        },
+        {
+          "value": "24 (1024)",
+          "label": "Enable communications link via RS-485 (LE)"
+        },
+        {
+          "value": "33 (1033)",
+          "label": "Reset PID integral and differential components (PID-RST)"
+        },
+        {
+          "value": "34 (1034)",
+          "label": "Hold PID integral component (PID-HLD)"
+        }
+      ],
+      "page_index": 83,
+      "printed_page": "5-6",
+      "section": "5.1 Function Code Tables - E codes: Extension Terminal Functions",
+      "table_ref": null,
+      "evidence_quote": "E01 Terminal [X1] Function Selecting function code data assigns the corresponding function to terminals [X1] to [X3] as listed below."
+    },
+    {
+      "common_function": "acceleration-time-2",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "E10",
+      "name": "Acceleration Time 2",
+      "description": "Note: Entering 0.00 cancels the acceleration time, requiring external soft-start and -stop.",
+      "unit": "s",
+      "default_value": "6.00",
+      "min_value": "0.00",
+      "max_value": "3600",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 83,
+      "printed_page": "5-6",
+      "section": "5.1 Function Code Tables - E codes: Extension Terminal Functions",
+      "table_ref": null,
+      "evidence_quote": "E10 Acceleration Time 2 0.00 to 3600"
+    },
+    {
+      "common_function": "deceleration-time-2",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "E11",
+      "name": "Deceleration Time 2",
+      "description": "Note: Entering 0.00 cancels the deceleration time, requiring external soft-start and -stop.",
+      "unit": "s",
+      "default_value": "6.00",
+      "min_value": "0.00",
+      "max_value": "3600",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 83,
+      "printed_page": "5-6",
+      "section": "5.1 Function Code Tables - E codes: Extension Terminal Functions",
+      "table_ref": null,
+      "evidence_quote": "E11 Deceleration Time 2 0.00 to 3600"
+    },
+    {
+      "common_function": "relay-output-function",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "E27",
+      "name": "Terminal [30A/B/C] Function",
+      "description": "Selecting function code data assigns the corresponding function to terminals [Y1] and [30A/B/C]. E20 (Terminal [Y1] Function) default 0. Includes 99 (1099): Alarm output (for any alarm) (ALM).",
+      "unit": null,
+      "default_value": "99",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [
+        {
+          "value": "0 (1000)",
+          "label": "Inverter running (RUN)"
+        },
+        {
+          "value": "1 (1001)",
+          "label": "Frequency arrival signal (FAR)"
+        },
+        {
+          "value": "2 (1002)",
+          "label": "Frequency detected (FDT)"
+        },
+        {
+          "value": "3 (1003)",
+          "label": "Undervoltage detected (Inverter stopped) (LU)"
+        },
+        {
+          "value": "5 (1005)",
+          "label": "Inverter output limiting (IOL)"
+        },
+        {
+          "value": "6 (1006)",
+          "label": "Auto-restarting after momentary power failure (IPF)"
+        },
+        {
+          "value": "7 (1007)",
+          "label": "Motor overload early warning (OL)"
+        },
+        {
+          "value": "26 (1026)",
+          "label": "Auto-resetting (TRY)"
+        },
+        {
+          "value": "30 (1030)",
+          "label": "Service lifetime alarm (LIFE)"
+        },
+        {
+          "value": "35 (1035)",
+          "label": "Inverter running 2 (RUN2)"
+        },
+        {
+          "value": "36 (1036)",
+          "label": "Overload prevention control (OLP)"
+        },
+        {
+          "value": "37 (1037)",
+          "label": "Current detected (ID)"
+        },
+        {
+          "value": "38 (1038)",
+          "label": "Current detected 2 (ID2)"
+        },
+        {
+          "value": "41 (1041)",
+          "label": "Low current detected (IDL)"
+        },
+        {
+          "value": "43 (1043)",
+          "label": "Under PID control (PID-CTL)"
+        },
+        {
+          "value": "44 (1044)",
+          "label": "Motor stopped due to slow flowrate under PID control (PID-STP)"
+        },
+        {
+          "value": "49 (1049)",
+          "label": "Switched to motor 2 (SWM2)"
+        },
+        {
+          "value": "56 (1056)",
+          "label": "Motor overheat detected by thermistor (THM)"
+        },
+        {
+          "value": "57 (1057)",
+          "label": "Brake signal (BRKS)"
+        },
+        {
+          "value": "59 (1059)",
+          "label": "Terminal [C1] wire break (C1OFF)"
+        },
+        {
+          "value": "84 (1084)",
+          "label": "Maintenance timer (MNT)"
+        },
+        {
+          "value": "87 (1087)",
+          "label": "Frequency arrival detected (FARFDT)"
+        },
+        {
+          "value": "99 (1099)",
+          "label": "Alarm output (for any alarm) (ALM)"
+        }
+      ],
+      "page_index": 84,
+      "printed_page": "5-7",
+      "section": "5.1 Function Code Tables - E codes: Extension Terminal Functions",
+      "table_ref": null,
+      "evidence_quote": "Selecting function code data assigns the corresponding function to terminals [Y1] and [30A/B/C] as listed below."
+    },
+    {
+      "common_function": "digital-input-function",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "E98",
+      "name": "Terminal [FWD] Function",
+      "description": "Selecting function code data assigns the corresponding function to terminals [FWD] and [REV]. Same list as E01 plus 98: Run forward (FWD), 99: Run reverse (REV). E99 (Terminal [REV] Function) default 99.",
+      "unit": null,
+      "default_value": "98",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [
+        {
+          "value": "98",
+          "label": "Run forward (FWD)"
+        },
+        {
+          "value": "99",
+          "label": "Run reverse (REV)"
+        }
+      ],
+      "page_index": 86,
+      "printed_page": "5-9",
+      "section": "5.1 Function Code Tables - E codes: Extension Terminal Functions",
+      "table_ref": null,
+      "evidence_quote": "E98 Terminal [FWD] Function Selecting function code data assigns the corresponding function to terminals [FWD] and [REV] as listed below."
+    },
+    {
+      "common_function": "skip-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "C01",
+      "name": "Jump Frequency 1",
+      "description": "Jump frequencies C01 to C03; C04 hysteresis width 0.0 to 30.0 Hz (default 3.0).",
+      "unit": "Hz",
+      "default_value": "0.0",
+      "min_value": "0.0",
+      "max_value": "400.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 87,
+      "printed_page": "5-10",
+      "section": "5.1 Function Code Tables - C codes: Control Functions",
+      "table_ref": null,
+      "evidence_quote": "C01 Jump Frequency 1 0.0 to 400.0 0.1 Hz Y Y 0.0"
+    },
+    {
+      "common_function": "multi-step-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "C05",
+      "name": "Multistep Frequency 1",
+      "description": "Multistep frequencies 1 to 15 are C05 to C19, each 0.00 to 400.00 Hz, default 0.00.",
+      "unit": "Hz",
+      "default_value": "0.00",
+      "min_value": "0.00",
+      "max_value": "400.00",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 87,
+      "printed_page": "5-10",
+      "section": "5.1 Function Code Tables - C codes: Control Functions",
+      "table_ref": null,
+      "evidence_quote": "C05 Multistep Frequency 1 0.00 to 400.00 *2 0.01 Hz Y Y 0.00"
+    },
+    {
+      "common_function": "jog-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "C20",
+      "name": "Jogging Frequency",
+      "description": "Jogging frequency.",
+      "unit": "Hz",
+      "default_value": "0.00",
+      "min_value": "0.00",
+      "max_value": "400.00",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 87,
+      "printed_page": "5-10",
+      "section": "5.1 Function Code Tables - C codes: Control Functions",
+      "table_ref": null,
+      "evidence_quote": "C20 Jogging Frequency 0.00 to 400.00 *2 0.01 Hz Y Y 0.00"
+    },
+    {
+      "common_function": "rated-motor-power",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "P02",
+      "name": "Motor 1 (Rated capacity)",
+      "description": "0.01 to 30.00 (kW when P99 = 0, 3, 4, 20 or 21); 0.01 to 30.00 (HP when P99 = 1). Default: See Table A.",
+      "unit": "kW / HP",
+      "default_value": "See Table A.",
+      "min_value": "0.01",
+      "max_value": "30.00",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [],
+      "page_index": 88,
+      "printed_page": "5-11",
+      "section": "5.1 Function Code Tables - P codes: Motor 1 Parameters",
+      "table_ref": null,
+      "evidence_quote": "P02 Motor 1 (Rated capacity) 0.01 to 30.00 (kW when P99 = 0, 3, 4, 20 or 21)"
+    },
+    {
+      "common_function": "rated-motor-current",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "P03",
+      "name": "Motor 1 (Rated current)",
+      "description": "Rated current. Default: Rated value of Fuji standard motor.",
+      "unit": "A",
+      "default_value": "Rated value of Fuji standard motor",
+      "min_value": "0.00",
+      "max_value": "100.0",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [],
+      "page_index": 88,
+      "printed_page": "5-11",
+      "section": "5.1 Function Code Tables - P codes: Motor 1 Parameters",
+      "table_ref": null,
+      "evidence_quote": "P03 (Rated current) 0.00 to 100.0 0.01 A N"
+    },
+    {
+      "common_function": "motor-auto-tuning",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "P04",
+      "name": "Motor 1 (Auto-tuning)",
+      "description": "Auto-tuning selection.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [
+        {
+          "value": "0",
+          "label": "Disable"
+        },
+        {
+          "value": "1",
+          "label": "Tune when the motor stops (%R1, %X)"
+        },
+        {
+          "value": "2",
+          "label": "Tune when the motor is rotating under V/f control (%R1, %X, no-load current, slip frequency)."
+        }
+      ],
+      "page_index": 88,
+      "printed_page": "5-11",
+      "section": "5.1 Function Code Tables - P codes: Motor 1 Parameters",
+      "table_ref": null,
+      "evidence_quote": "P04 (Auto-tuning) 0: Disable"
+    },
+    {
+      "common_function": "motor-no-load-current",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "P06",
+      "name": "Motor 1 (No-load current)",
+      "description": "No-load current. Default: Rated value of Fuji standard motor.",
+      "unit": "A",
+      "default_value": "Rated value of Fuji standard motor",
+      "min_value": "0.00",
+      "max_value": "50.00",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [],
+      "page_index": 88,
+      "printed_page": "5-11",
+      "section": "5.1 Function Code Tables - P codes: Motor 1 Parameters",
+      "table_ref": null,
+      "evidence_quote": "P06 (No-load current) 0.00 to 50.00 0.01 A N"
+    },
+    {
+      "common_function": "slip-compensation",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "P09",
+      "name": "Motor 1 (Slip compensation gain for driving)",
+      "description": "Slip compensation gain for driving.",
+      "unit": "%",
+      "default_value": "100.0",
+      "min_value": "0.0",
+      "max_value": "200.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Change when running: Y*",
+      "options": [],
+      "page_index": 88,
+      "printed_page": "5-11",
+      "section": "5.1 Function Code Tables - P codes: Motor 1 Parameters",
+      "table_ref": null,
+      "evidence_quote": "P09 (Slip compensation gain for driving) 0.0 to 200.0 0.1 % Y* Y 100.0"
+    },
+    {
+      "common_function": "motor-configuration",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "P99",
+      "name": "Motor 1 Selection",
+      "description": "Motor 1 selection.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [
+        {
+          "value": "0",
+          "label": "Motor characteristics 0 (Fuji standard IM, 8-series)"
+        },
+        {
+          "value": "1",
+          "label": "Motor characteristics 1 (HP rating IM)"
+        },
+        {
+          "value": "3",
+          "label": "Motor characteristics 3 (Fuji standard IM, 6-series)"
+        },
+        {
+          "value": "4",
+          "label": "Other motors (IM)"
+        },
+        {
+          "value": "20",
+          "label": "Other motors (PMSM)"
+        },
+        {
+          "value": "21",
+          "label": "Fuji standard PMSM without sensor"
+        }
+      ],
+      "page_index": 89,
+      "printed_page": "5-12",
+      "section": "5.1 Function Code Tables - P codes: Motor 1 Parameters",
+      "table_ref": null,
+      "evidence_quote": "P99 Motor 1 Selection 0: Motor characteristics 0 (Fuji standard IM, 8-series)"
+    },
+    {
+      "common_function": "parameter-reset",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "H03",
+      "name": "Data Initialization",
+      "description": "Data initialization.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [
+        {
+          "value": "0",
+          "label": "Disable initialization"
+        },
+        {
+          "value": "1",
+          "label": "Initialize all function code data to the factory defaults"
+        },
+        {
+          "value": "2",
+          "label": "Initialize motor 1 parameters"
+        },
+        {
+          "value": "3",
+          "label": "Initialize motor 2 parameters"
+        }
+      ],
+      "page_index": 90,
+      "printed_page": "5-13",
+      "section": "5.1 Function Code Tables - H codes: High Performance Functions",
+      "table_ref": null,
+      "evidence_quote": "H03 Data Initialization 0: Disable initialization"
+    },
+    {
+      "common_function": "auto-restart",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "H04",
+      "name": "Auto-reset (Times)",
+      "description": "0 (Disable), 1 to 10. H05 (Reset interval): 0.5 to 20.0 s, default 5.0.",
+      "unit": "times",
+      "default_value": "0",
+      "min_value": "1",
+      "max_value": "10",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0",
+          "label": "Disable"
+        }
+      ],
+      "page_index": 90,
+      "printed_page": "5-13",
+      "section": "5.1 Function Code Tables - H codes: High Performance Functions",
+      "table_ref": null,
+      "evidence_quote": "H04 Auto-reset (Times) 0 (Disable), 1 to 10 1 times Y Y 0"
+    },
+    {
+      "common_function": "s-curve",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "H07",
+      "name": "Acceleration/Deceleration Pattern",
+      "description": "Acceleration/deceleration pattern selection.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0",
+          "label": "Linear"
+        },
+        {
+          "value": "1",
+          "label": "S-curve (Weak)"
+        },
+        {
+          "value": "2",
+          "label": "S-curve (Strong)"
+        },
+        {
+          "value": "3",
+          "label": "Curvilinear"
+        }
+      ],
+      "page_index": 90,
+      "printed_page": "5-13",
+      "section": "5.1 Function Code Tables - H codes: High Performance Functions",
+      "table_ref": null,
+      "evidence_quote": "H07 0: Linear"
+    },
+    {
+      "common_function": "reverse-prohibit",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "H08",
+      "name": "Rotational Direction Limitation",
+      "description": "Rotational direction limitation.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [
+        {
+          "value": "0",
+          "label": "Disable"
+        },
+        {
+          "value": "1",
+          "label": "Enable (Reverse rotation inhibited)"
+        },
+        {
+          "value": "2",
+          "label": "Enable (Forward rotation inhibited)"
+        }
+      ],
+      "page_index": 90,
+      "printed_page": "5-13",
+      "section": "5.1 Function Code Tables - H codes: High Performance Functions",
+      "table_ref": null,
+      "evidence_quote": "H08 0: Disable"
+    },
+    {
+      "common_function": "stop-method",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "H11",
+      "name": "Deceleration Mode",
+      "description": "Deceleration mode.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0",
+          "label": "Normal deceleration"
+        },
+        {
+          "value": "1",
+          "label": "Coast-to-stop"
+        }
+      ],
+      "page_index": 90,
+      "printed_page": "5-13",
+      "section": "5.1 Function Code Tables - H codes: High Performance Functions",
+      "table_ref": null,
+      "evidence_quote": "H11 Deceleration Mode 0: Normal deceleration"
+    },
+    {
+      "common_function": "command-source",
+      "equivalence": "Partially Equivalent",
+      "equivalence_note": "Selects whether frequency/run commands come from F01/C30/F02 or the RS-485 link.",
+      "code": "H30",
+      "name": "Communications Link Function (Mode selection)",
+      "description": "Selects frequency command and run command sources between F01/C30, F02 and RS-485.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0",
+          "label": "Frequency command F01/C30, Run command F02"
+        },
+        {
+          "value": "1",
+          "label": "Frequency command RS-485, Run command F02"
+        },
+        {
+          "value": "2",
+          "label": "Frequency command F01/C30, Run command RS-485"
+        },
+        {
+          "value": "3",
+          "label": "Frequency command RS-485, Run command RS-485"
+        }
+      ],
+      "page_index": 90,
+      "printed_page": "5-13",
+      "section": "5.1 Function Code Tables - H codes: High Performance Functions",
+      "table_ref": null,
+      "evidence_quote": "H30 Frequency command Run command"
+    },
+    {
+      "common_function": "jog-accel-decel",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "H54",
+      "name": "ACC/DEC Time (Jogging operation)",
+      "description": "Acceleration/deceleration time for jogging operation.",
+      "unit": "s",
+      "default_value": "6.00",
+      "min_value": "0.00",
+      "max_value": "3600",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 91,
+      "printed_page": "5-14",
+      "section": "5.1 Function Code Tables - H codes: High Performance Functions",
+      "table_ref": null,
+      "evidence_quote": "H54 ACC/DEC Time (Jogging operation) 0.00 to 3600 0.01 s Y Y 6.00"
+    },
+    {
+      "common_function": "pid-control",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "J01",
+      "name": "PID Control (Mode selection)",
+      "description": "PID control mode selection.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [
+        {
+          "value": "0",
+          "label": "Disable"
+        },
+        {
+          "value": "1",
+          "label": "Enable (Process control, normal operation)"
+        },
+        {
+          "value": "2",
+          "label": "Enable (Process control, inverse operation)"
+        }
+      ],
+      "page_index": 95,
+      "printed_page": "5-18",
+      "section": "5.1 Function Code Tables - J codes: Application Functions",
+      "table_ref": null,
+      "evidence_quote": "J01 PID Control 0: Disable"
+    },
+    {
+      "common_function": "pid-control",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "J03",
+      "name": "PID Control P (Gain)",
+      "description": "Proportional gain.",
+      "unit": "times",
+      "default_value": "0.100",
+      "min_value": "0.000",
+      "max_value": "30.000",
+      "resolution": "0.001",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 95,
+      "printed_page": "5-18",
+      "section": "5.1 Function Code Tables - J codes: Application Functions",
+      "table_ref": null,
+      "evidence_quote": "J03 P (Gain) 0.000 to 30.000 *2 0.001 times Y Y 0.100"
+    },
+    {
+      "common_function": "pid-control",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "J04",
+      "name": "PID Control I (Integral time)",
+      "description": "Integral time.",
+      "unit": "s",
+      "default_value": "0.0",
+      "min_value": "0.0",
+      "max_value": "3600.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 95,
+      "printed_page": "5-18",
+      "section": "5.1 Function Code Tables - J codes: Application Functions",
+      "table_ref": null,
+      "evidence_quote": "J04 I (Integral time) 0.0 to 3600.0 *2 0.1 s Y Y 0.0"
+    },
+    {
+      "common_function": "slave-address",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "y01",
+      "name": "RS-485 Communication 1 (Station address)",
+      "description": "Station address.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": "1",
+      "max_value": "255",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": "Change when running: N",
+      "options": [],
+      "page_index": 96,
+      "printed_page": "5-19",
+      "section": "5.1 Function Code Tables - y codes: Link Functions",
+      "table_ref": null,
+      "evidence_quote": "(Station address) 1 to 255 1"
+    },
+    {
+      "common_function": "comm-loss-action",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "y02",
+      "name": "RS-485 Communication 1 (Communications error processing)",
+      "description": "Communications error processing.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0",
+          "label": "Immediately trip with alarm er8"
+        },
+        {
+          "value": "1",
+          "label": "Trip with alarm er8 after running for the period specified by timer y03"
+        },
+        {
+          "value": "2",
+          "label": "Retry during the period specified by timer y03. If the retry fails, trip with alarm er8. If it succeeds, continue to run."
+        },
+        {
+          "value": "3",
+          "label": "Continue to run"
+        }
+      ],
+      "page_index": 96,
+      "printed_page": "5-19",
+      "section": "5.1 Function Code Tables - y codes: Link Functions",
+      "table_ref": null,
+      "evidence_quote": "processing) 1: Trip with alarm er8 after running for the period specified by timer y03"
+    },
+    {
+      "common_function": "comm-timeout",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Timer applied after a communications error per y02 setting.",
+      "code": "y03",
+      "name": "RS-485 Communication 1 (Timer)",
+      "description": "Timer used by communications error processing (y02).",
+      "unit": "s",
+      "default_value": "2.0",
+      "min_value": "0.0",
+      "max_value": "60.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 96,
+      "printed_page": "5-19",
+      "section": "5.1 Function Code Tables - y codes: Link Functions",
+      "table_ref": null,
+      "evidence_quote": "y03 (Timer) 0.0 to 60.0 0.1 s Y Y 2.0"
+    },
+    {
+      "common_function": "baud-rate",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "y04",
+      "name": "RS-485 Communication 1 (Baud rate)",
+      "description": "Baud rate.",
+      "unit": null,
+      "default_value": "3",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0",
+          "label": "2400 bps"
+        },
+        {
+          "value": "1",
+          "label": "4800 bps"
+        },
+        {
+          "value": "2",
+          "label": "9600 bps"
+        },
+        {
+          "value": "3",
+          "label": "19200 bps"
+        },
+        {
+          "value": "4",
+          "label": "38400 bps"
+        }
+      ],
+      "page_index": 96,
+      "printed_page": "5-19",
+      "section": "5.1 Function Code Tables - y codes: Link Functions",
+      "table_ref": null,
+      "evidence_quote": "y04 (Baud rate) 0: 2400 bps"
+    },
+    {
+      "common_function": "parity-stop-bits",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "y05",
+      "name": "RS-485 Communication 1 (Data length)",
+      "description": "Data length.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0",
+          "label": "8 bits"
+        },
+        {
+          "value": "1",
+          "label": "7 bits"
+        }
+      ],
+      "page_index": 96,
+      "printed_page": "5-19",
+      "section": "5.1 Function Code Tables - y codes: Link Functions",
+      "table_ref": null,
+      "evidence_quote": "y05 (Data length) 0: 8 bits"
+    },
+    {
+      "common_function": "parity-stop-bits",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "y06",
+      "name": "RS-485 Communication 1 (Parity check)",
+      "description": "Parity check.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0",
+          "label": "None (2 stop bits for Modbus RTU)"
+        },
+        {
+          "value": "1",
+          "label": "Even parity (1 stop bit for Modbus RTU)"
+        },
+        {
+          "value": "2",
+          "label": "Odd parity (1 stop bit for Modbus RTU)"
+        },
+        {
+          "value": "3",
+          "label": "None (1 stop bit for Modbus RTU)"
+        }
+      ],
+      "page_index": 96,
+      "printed_page": "5-19",
+      "section": "5.1 Function Code Tables - y codes: Link Functions",
+      "table_ref": null,
+      "evidence_quote": "y06 (Parity check) 0: None (2 stop bits for Modbus RTU)"
+    },
+    {
+      "common_function": "parity-stop-bits",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "y07",
+      "name": "RS-485 Communication 1 (Stop bits)",
+      "description": "Stop bits.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0",
+          "label": "2 bits"
+        },
+        {
+          "value": "1",
+          "label": "1 bit"
+        }
+      ],
+      "page_index": 96,
+      "printed_page": "5-19",
+      "section": "5.1 Function Code Tables - y codes: Link Functions",
+      "table_ref": null,
+      "evidence_quote": "y07 (Stop bits) 0: 2 bits"
+    },
+    {
+      "common_function": "comm-timeout",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "y08",
+      "name": "RS-485 Communication 1 (No-response error detection time)",
+      "description": "0: No detection; 1 to 60.",
+      "unit": "s",
+      "default_value": "0",
+      "min_value": "1",
+      "max_value": "60",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0",
+          "label": "No detection"
+        }
+      ],
+      "page_index": 96,
+      "printed_page": "5-19",
+      "section": "5.1 Function Code Tables - y codes: Link Functions",
+      "table_ref": null,
+      "evidence_quote": "y08 0: No detection 1 s Y Y 0"
+    },
+    {
+      "common_function": "comm-response-delay",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "y09",
+      "name": "RS-485 Communication 1 (Response interval)",
+      "description": "Response interval.",
+      "unit": "s",
+      "default_value": "0.01",
+      "min_value": "0.00",
+      "max_value": "1.00",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [],
+      "page_index": 96,
+      "printed_page": "5-19",
+      "section": "5.1 Function Code Tables - y codes: Link Functions",
+      "table_ref": null,
+      "evidence_quote": "y09 (Response interval) 0.00 to 1.00 0.01 s Y Y 0.01"
+    },
+    {
+      "common_function": "comm-protocol",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "y10",
+      "name": "RS-485 Communication 1 (Protocol selection)",
+      "description": "Protocol selection.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Change when running: Y",
+      "options": [
+        {
+          "value": "0",
+          "label": "Modbus RTU protocol"
+        },
+        {
+          "value": "1",
+          "label": "SX protocol (FRENIC Loader protocol)"
+        },
+        {
+          "value": "2",
+          "label": "Fuji general-purpose inverter protocol"
+        }
+      ],
+      "page_index": 96,
+      "printed_page": "5-19",
+      "section": "5.1 Function Code Tables - y codes: Link Functions",
+      "table_ref": null,
+      "evidence_quote": "y10 (Protocol selection) 0: Modbus RTU protocol"
+    }
+  ],
+  "modbus_registers": [],
+  "notes": [
+    "This instruction manual contains no Modbus register map, communication data addresses (S/M codes) or parameter-to-register addressing rule; only the y-code RS-485 settings (page_index 96, printed 5-19) are documented. Other pages refer to the separate \"RS-485 Communication User's Manual\" for communication details, so modbus_registers is empty.",
+    "Default values with letters denote shipping destination: A (Asia), C (China), E (Europe), U (USA) (note on printed page 5-3 and others). Values \"See Table A.\" refer to Table A Fuji Standard Motor Parameters (page_index 97, printed 5-20), which lists per-model values (e.g. FRN0004C2S-4: torque boost 6.8 %, rated capacity 0.75 kW).",
+    "setting_conditions holds the \"Change when running\" column as printed: Y = possible, Y* = possible (\"the change will immediately take effect; however, the change is not saved into the inverter's memory\" until saved with the keypad), N = impossible (page_index 78, printed 5-1).",
+    "The manual does not define a separate rated motor voltage or rated motor frequency parameter; F05 (Rated Voltage at Base Frequency 1) and F04 (Base Frequency 1) are the closest documented codes. Motor 2 equivalents exist in A codes (A01-A26) but were not extracted.",
+    "Manual end page shows \"2013-06 (F13a/C13)\"."
+  ]
+}

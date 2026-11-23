@@ -1,0 +1,167 @@
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
+
+export const NOT_DOC = 'Not Documented';
+
+export function Val({ v, unit }: { v: any; unit?: string | null }) {
+  if (v === null || v === undefined || v === '') return <span className="faint" title="No value in the documentation">{NOT_DOC}</span>;
+  return (
+    <span>
+      {String(v)}
+      {unit ? <span className="muted"> {unit}</span> : null}
+    </span>
+  );
+}
+
+export function VerifBadge({ s }: { s: string }) {
+  const cls = s === 'Verified' ? 'solid' : s === 'Documentation Conflict' ? 'warn' : s === 'Rejected' ? 'dashed' : s === 'Requires Manual Verification' ? 'strong dashed' : 'dashed';
+  return <span className={`badge ${cls}`}>{s}</span>;
+}
+export function EvBadge({ s }: { s: string }) {
+  return <span className={`badge ${s === 'Explicitly Documented' ? 'strong' : s === 'Conflicting' ? 'warn' : 'dashed'}`}>{s}</span>;
+}
+export function EquivBadge({ s, note }: { s?: string | null; note?: string | null }) {
+  if (!s) return <span className="badge dashed" title="No equivalence classification recorded">Unclassified</span>;
+  return (
+    <span className={`badge ${s === 'Exact Equivalent' ? 'strong' : 'dashed'}`} title={note || undefined}>
+      {s}
+    </span>
+  );
+}
+
+export function QuoteBadge({ s }: { s?: string | null }) {
+  const map: Record<string, string> = {
+    exact: 'Quote matches page text',
+    normalized: 'Quote matches (whitespace-normalized)',
+    not_found: 'Quote NOT found on cited page',
+    no_text_layer: 'No text layer — check page image',
+    unchecked: 'Not checked',
+  };
+  const s2 = s || 'unchecked';
+  return <span className={`badge ${s2 === 'exact' || s2 === 'normalized' ? 'strong' : s2 === 'not_found' ? 'warn' : 'dashed'}`}>{map[s2] ?? s2}</span>;
+}
+
+export function Loading({ what = 'Loading' }: { what?: string }) {
+  return <div className="muted" role="status">{what}…</div>;
+}
+export function ErrorBox({ e }: { e: any }) {
+  if (!e) return null;
+  return <div className="err" role="alert">{e.message || String(e)}</div>;
+}
+
+export function Crumbs({ items }: { items: { label: string; to?: string }[] }) {
+  return (
+    <nav className="crumbs" aria-label="Breadcrumb">
+      {items.map((it, i) => (
+        <span key={i} style={{ display: 'contents' }}>
+          {i > 0 && <span className="sep">›</span>}
+          {it.to && i < items.length - 1 ? <Link to={it.to}>{it.label}</Link> : <span aria-current={i === items.length - 1 ? 'page' : undefined}>{it.label}</span>}
+        </span>
+      ))}
+    </nav>
+  );
+}
+
+/** ⓘ help icon with compact explanation and an "Explore More" link. */
+export function InfoIcon({ title, text, more }: { title?: string; text: ReactNode; more?: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && setOpen(false);
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('mousedown', close);
+    document.addEventListener('keydown', esc);
+    return () => {
+      document.removeEventListener('mousedown', close);
+      document.removeEventListener('keydown', esc);
+    };
+  }, [open]);
+  return (
+    <span className="pop-anchor" ref={ref}>
+      <button className="info-btn ghost" aria-label={`Help: ${title ?? 'explanation'}`} aria-expanded={open} onClick={() => setOpen(!open)} type="button">
+        ⓘ
+      </button>
+      {open && (
+        <div className="popover" role="dialog" style={{ top: '100%', left: 0 }}>
+          {title && <b>{title}</b>}
+          <div>{text}</div>
+          {more && (
+            <div style={{ marginTop: 8 }}>
+              <Link to={more} onClick={() => setOpen(false)}>Explore More →</Link>
+            </div>
+          )}
+        </div>
+      )}
+    </span>
+  );
+}
+
+export function Modal({ title, onClose, children, wide }: { title: string; onClose: () => void; children: ReactNode; wide?: boolean }) {
+  useEffect(() => {
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', esc);
+    return () => document.removeEventListener('keydown', esc);
+  }, [onClose]);
+  return (
+    <div className="modal-bg" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div className={`modal ${wide ? 'wide' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
+        <div className="row between" style={{ marginBottom: 10 }}>
+          <h2 style={{ margin: 0 }}>{title}</h2>
+          <button className="ghost small" onClick={onClose} aria-label="Close">✕</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]) {
+  const [data, setData] = useState<T | null>(null);
+  const [error, setError] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    fn()
+      .then((d) => alive && (setData(d), setError(null)))
+      .catch((e) => alive && setError(e))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...deps, tick]);
+  return { data, error, loading, reload: () => setTick((t) => t + 1), setData };
+}
+
+export function Pager({ page, limit, total, onPage }: { page: number; limit: number; total: number; onPage: (p: number) => void }) {
+  const pages = Math.max(1, Math.ceil(total / limit));
+  return (
+    <div className="row" style={{ marginTop: 10 }}>
+      <button disabled={page <= 1} onClick={() => onPage(page - 1)}>← Prev</button>
+      <span className="muted small-text">Page {page} of {pages} · {total} records</span>
+      <button disabled={page >= pages} onClick={() => onPage(page + 1)}>Next →</button>
+    </div>
+  );
+}
+
+export const download = (url: string) => {
+  const a = document.createElement('a');
+  a.href = '/api' + url;
+  a.click();
+};
+
+export function ConfirmButton({ label, confirmText, onConfirm, className = 'danger small' }: { label: string; confirmText: string; onConfirm: () => void; className?: string }) {
+  return (
+    <button
+      className={className}
+      onClick={() => {
+        if (window.confirm(confirmText)) onConfirm();
+      }}
+    >
+      {label}
+    </button>
+  );
+}

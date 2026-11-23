@@ -1,0 +1,2221 @@
+{
+  "document_file": "vfd-manuals/Delta/Delta-VFD-EL-Series-Users-Manual.pdf",
+  "document_title": "VFD-EL Series User Manual",
+  "document_revision": "Revision 2016/03, 6ELE, V1.14",
+  "brand": "Delta",
+  "model": "VFD-EL",
+  "model_evidence": {
+    "page_index": 1,
+    "evidence_quote": "VFD-EL Series User Manual"
+  },
+  "extraction_method": "ai-assisted-reading",
+  "parameters": [
+    {
+      "common_function": "parameter-reset",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "00.02",
+      "name": "Parameter Reset",
+      "description": "This parameter allows the user to reset all parameters to the factory settings except the fault records (Pr.06.08 ~ Pr.06.12).",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Parameter can be read/written"
+        },
+        {
+          "value": "1",
+          "label": "All parameters are read-only"
+        },
+        {
+          "value": "8",
+          "label": "Keypad lock"
+        },
+        {
+          "value": "9",
+          "label": "All parameters are reset to factory settings (50Hz, 230V/400V or 220V/380V depends on Pr.00.12)"
+        },
+        {
+          "value": "10",
+          "label": "All parameters are reset to factory settings (60Hz, 115V/220V/440V)"
+        }
+      ],
+      "page_index": 54,
+      "printed_page": "4-25",
+      "section": "Group 0: User Parameters",
+      "table_ref": null,
+      "evidence_quote": "9 All parameters are reset to factory settings (50Hz, 230V/400V or 220V/380V depends on Pr.00.12) 10 All parameters are reset to factory settings (60Hz, 115V/220V/440V)"
+    },
+    {
+      "common_function": "parameter-lock",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Lock is provided by settings 1 and 8 of the Parameter Reset parameter.",
+      "code": "00.02",
+      "name": "Parameter Reset",
+      "description": "Setting 1: All parameters are read-only; setting 8: Keypad lock.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Parameter can be read/written"
+        },
+        {
+          "value": "1",
+          "label": "All parameters are read-only"
+        },
+        {
+          "value": "8",
+          "label": "Keypad lock"
+        }
+      ],
+      "page_index": 54,
+      "printed_page": "4-25",
+      "section": "Group 0: User Parameters",
+      "table_ref": null,
+      "evidence_quote": "When Pr.00.02=1, all parameters are read-only. To write all parameters, set Pr.00.02=0."
+    },
+    {
+      "common_function": "parameter-lock",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Password protection of parameter settings; password input is Pr.00.08.",
+      "code": "00.09",
+      "name": "Password Set",
+      "description": "To set a password to protect your parameter settings.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": "0",
+      "max_value": "9999",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 55,
+      "printed_page": null,
+      "section": "Group 0: User Parameters",
+      "table_ref": null,
+      "evidence_quote": "00.09 Password Set Unit: 1 Factory Setting: 0 Settings 0 to 9999"
+    },
+    {
+      "common_function": "control-mode",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "00.10",
+      "name": "Control Mode",
+      "description": "This parameter determines how the motor drive is controlled.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Voltage Frequency Control"
+        },
+        {
+          "value": "1",
+          "label": "Vector Control"
+        }
+      ],
+      "page_index": 56,
+      "printed_page": "4-27",
+      "section": "Group 0: User Parameters",
+      "table_ref": null,
+      "evidence_quote": "00.10 Control Mode Factory Setting: 0 Display 0 Voltage Frequency Control 1 Vector Control"
+    },
+    {
+      "common_function": "maximum-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.00",
+      "name": "Maximum Output Frequency (Fmax)",
+      "description": "This parameter determines the AC motor drive's Maximum Output Frequency.",
+      "unit": "Hz",
+      "default_value": "60.00",
+      "min_value": "50.00",
+      "max_value": "599.0",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 58,
+      "printed_page": "4-29",
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "01.00 Maximum Output Frequency (Fmax) Unit: 0.01 Settings 50.00 to 599.0 Hz Factory Setting: 60.00"
+    },
+    {
+      "common_function": "base-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.01",
+      "name": "Maximum Voltage Frequency (Fbase)",
+      "description": "This value should be set according to the rated frequency of the motor as indicated on the motor nameplate. Maximum Voltage Frequency determines the v/f curve ratio.",
+      "unit": "Hz",
+      "default_value": "60.00",
+      "min_value": "0.10",
+      "max_value": "599.0",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "This parameter value must be equal to or greater than the Mid-Point Frequency (Pr.01.03).",
+      "options": null,
+      "page_index": 58,
+      "printed_page": "4-29",
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "01.01 Maximum Voltage Frequency (Fbase) Unit: 0.01 Settings 0.10 to 599.0Hz Factory Setting: 60.00"
+    },
+    {
+      "common_function": "rated-motor-frequency",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "No dedicated rated motor frequency parameter; manual says Fbase is set according to the motor nameplate rated frequency.",
+      "code": "01.01",
+      "name": "Maximum Voltage Frequency (Fbase)",
+      "description": null,
+      "unit": "Hz",
+      "default_value": "60.00",
+      "min_value": "0.10",
+      "max_value": "599.0",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 58,
+      "printed_page": "4-29",
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "This value should be set according to the rated frequency of the motor as indicated on the motor nameplate."
+    },
+    {
+      "common_function": "maximum-output-voltage",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.02",
+      "name": "Maximum Output Voltage (Vmax)",
+      "description": "The Maximum Output Voltage setting must be smaller than or equal to the rated voltage of the motor as indicated on the motor nameplate.",
+      "unit": "V",
+      "default_value": "115V/230V series: 220.0; 460V series: 440.0",
+      "min_value": "0.1",
+      "max_value": "115V/230V series: 255.0; 460V series: 510.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Values depend on voltage series. Must be equal to or greater than the Mid-Point Voltage (Pr.01.04).",
+      "options": null,
+      "page_index": 58,
+      "printed_page": "4-29",
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "01.02 Maximum Output Voltage (Vmax) Unit: 0.1 Settings 115V/230V series 0.1 to 255.0V Factory Setting: 220.0 460V series 0.1 to 510.0V Factory Setting: 440.0"
+    },
+    {
+      "common_function": "rated-motor-voltage",
+      "equivalence": "Partially Equivalent",
+      "equivalence_note": "No dedicated rated motor voltage parameter; Vmax is limited by the motor nameplate rated voltage.",
+      "code": "01.02",
+      "name": "Maximum Output Voltage (Vmax)",
+      "description": null,
+      "unit": "V",
+      "default_value": "115V/230V series: 220.0; 460V series: 440.0",
+      "min_value": "0.1",
+      "max_value": "115V/230V series: 255.0; 460V series: 510.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 58,
+      "printed_page": "4-29",
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "The Maximum Output Voltage setting must be smaller than or equal to the rated voltage of the motor as indicated on the motor nameplate."
+    },
+    {
+      "common_function": "minimum-frequency",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Minimum output frequency point of the V/f curve.",
+      "code": "01.05",
+      "name": "Minimum Output Frequency (Fmin)",
+      "description": "This parameter sets the Minimum Output Frequency of the AC motor drive.",
+      "unit": "Hz",
+      "default_value": "1.50",
+      "min_value": "0.10",
+      "max_value": "599.0",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "This parameter must be equal to or less than Mid-Point Frequency (Pr.01.03).",
+      "options": null,
+      "page_index": 58,
+      "printed_page": "4-29",
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "01.05 Minimum Output Frequency (Fmin) Unit: 0.01 Settings 0.10 to 599.0Hz Factory Setting: 1.50"
+    },
+    {
+      "common_function": "minimum-output-voltage",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.06",
+      "name": "Minimum Output Voltage (Vmin)",
+      "description": null,
+      "unit": "V",
+      "default_value": "115V/230V series: 10.0; 460V series: 20.0",
+      "min_value": "0.1",
+      "max_value": "115V/230V series: 255.0; 460V series: 510.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Values depend on voltage series. Must be equal to or less than Mid-Point Voltage (Pr.01.04).",
+      "options": null,
+      "page_index": 58,
+      "printed_page": "4-29",
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "01.06 Minimum Output Voltage (Vmin) Unit: 0.1 Settings 115V/230V series 0.1 to 255.0V Factory Setting: 10.0 460V series 0.1 to 510.0V Factory Setting: 20.0"
+    },
+    {
+      "common_function": "frequency-upper-limit",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.07",
+      "name": "Output Frequency Upper Limit",
+      "description": "The Maximum Output Frequency (Pr.01.00) is regarded as 100%.",
+      "unit": "%",
+      "default_value": "110.0",
+      "min_value": "0.1",
+      "max_value": "120.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "This parameter must be equal to or greater than the Output Frequency Lower Limit (Pr.01.08).",
+      "options": null,
+      "page_index": 58,
+      "printed_page": "4-29",
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "01.07 Output Frequency Upper Limit Unit: 0.1 Settings 0.1 to 120.0% Factory Setting: 110.0"
+    },
+    {
+      "common_function": "frequency-lower-limit",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.08",
+      "name": "Output Frequency Lower Limit",
+      "description": "The Output Frequency Lower Limit value = (Pr.01.00 * Pr.01.08) /100.",
+      "unit": "%",
+      "default_value": "0.0",
+      "min_value": "0.0",
+      "max_value": "100.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "This parameter must be equal to or less than the Output Frequency Upper Limit (Pr.01.07).",
+      "options": null,
+      "page_index": 59,
+      "printed_page": null,
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "01.08 Output Frequency Lower Limit Unit: 0.1 Settings 0.0 to 100.0% Factory Setting: 0.0"
+    },
+    {
+      "common_function": "acceleration-time-1",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.09",
+      "name": "Acceleration Time 1 (Taccel 1)",
+      "description": "The Acceleration Time is used to determine the time required for the AC motor drive to ramp from 0 Hz to Maximum Output Frequency (Pr.01.00).",
+      "unit": "sec",
+      "default_value": "10.0",
+      "min_value": "0.1 / 0.01",
+      "max_value": "600.0",
+      "resolution": "0.1/0.01",
+      "access": null,
+      "setting_conditions": "Settings 0.1 to 600.0 sec / 0.01 to 600.0 sec (unit per Pr.01.19). Pr.01.09-01.12 share this settings line. Accel/decel time 1 or 2 switched by multi-function input set to 7.",
+      "options": null,
+      "page_index": 59,
+      "printed_page": null,
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "Settings 0.1 to 600.0 sec / 0.01 to 600.0 sec Factory Setting: 10.0"
+    },
+    {
+      "common_function": "deceleration-time-1",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.10",
+      "name": "Deceleration Time 1 (Tdecel 1)",
+      "description": "The Deceleration Time is used to determine the time required for the AC motor drive to decelerate from the Maximum Output Frequency (Pr.01.00) down to 0 Hz.",
+      "unit": "sec",
+      "default_value": "10.0",
+      "min_value": "0.1 / 0.01",
+      "max_value": "600.0",
+      "resolution": "0.1/0.01",
+      "access": null,
+      "setting_conditions": "Settings 0.1 to 600.0 sec / 0.01 to 600.0 sec (unit per Pr.01.19). Pr.01.09-01.12 share this settings line. Accel/decel time 1 or 2 switched by multi-function input set to 7.",
+      "options": null,
+      "page_index": 59,
+      "printed_page": null,
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "Settings 0.1 to 600.0 sec / 0.01 to 600.0 sec Factory Setting: 10.0"
+    },
+    {
+      "common_function": "acceleration-time-2",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.11",
+      "name": "Acceleration Time 2 (Taccel 2)",
+      "description": "The Acceleration Time is used to determine the time required for the AC motor drive to ramp from 0 Hz to Maximum Output Frequency (Pr.01.00).",
+      "unit": "sec",
+      "default_value": "10.0",
+      "min_value": "0.1 / 0.01",
+      "max_value": "600.0",
+      "resolution": "0.1/0.01",
+      "access": null,
+      "setting_conditions": "Settings 0.1 to 600.0 sec / 0.01 to 600.0 sec (unit per Pr.01.19). Pr.01.09-01.12 share this settings line. Accel/decel time 1 or 2 switched by multi-function input set to 7.",
+      "options": null,
+      "page_index": 59,
+      "printed_page": null,
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "Settings 0.1 to 600.0 sec / 0.01 to 600.0 sec Factory Setting: 10.0"
+    },
+    {
+      "common_function": "deceleration-time-2",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.12",
+      "name": "Deceleration Time 2 (Tdecel 2)",
+      "description": "The Deceleration Time is used to determine the time required for the AC motor drive to decelerate from the Maximum Output Frequency (Pr.01.00) down to 0 Hz.",
+      "unit": "sec",
+      "default_value": "10.0",
+      "min_value": "0.1 / 0.01",
+      "max_value": "600.0",
+      "resolution": "0.1/0.01",
+      "access": null,
+      "setting_conditions": "Settings 0.1 to 600.0 sec / 0.01 to 600.0 sec (unit per Pr.01.19). Pr.01.09-01.12 share this settings line. Accel/decel time 1 or 2 switched by multi-function input set to 7.",
+      "options": null,
+      "page_index": 59,
+      "printed_page": null,
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "Settings 0.1 to 600.0 sec / 0.01 to 600.0 sec Factory Setting: 10.0"
+    },
+    {
+      "common_function": "jog-accel-decel",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.13",
+      "name": "Jog Acceleration Time",
+      "description": null,
+      "unit": "sec",
+      "default_value": "1.0",
+      "min_value": "0.1/0.01",
+      "max_value": "600.0",
+      "resolution": "0.1/0.01",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 60,
+      "printed_page": "4-31",
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "01.13 Jog Acceleration Time Unit: 0.1/0.01 Settings 0.1 to 600.0/0.01 to 600.0 sec Factory Setting: 1.0"
+    },
+    {
+      "common_function": "jog-accel-decel",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.14",
+      "name": "Jog Deceleration Time",
+      "description": null,
+      "unit": "sec",
+      "default_value": "1.0",
+      "min_value": "0.1/0.01",
+      "max_value": "600.0",
+      "resolution": "0.1/0.01",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 60,
+      "printed_page": "4-31",
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "01.14 Jog Deceleration Time Unit: 0.1/0.01 Settings 0.1 to 600.0/0.01 to 600.0 sec Factory Setting: 1.0"
+    },
+    {
+      "common_function": "jog-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.15",
+      "name": "Jog Frequency",
+      "description": "Only external terminal JOG (MI3 to MI12) can be used.",
+      "unit": "Hz",
+      "default_value": "6.00",
+      "min_value": "0.10",
+      "max_value": "Fmax (Pr.01.00)",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Before using the JOG command, the drive must be stopped first.",
+      "options": null,
+      "page_index": 60,
+      "printed_page": "4-31",
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "01.15 Jog Frequency Unit: 0.01 Settings 0.10 to Fmax (Pr.01.00)Hz Factory Setting: 6.00"
+    },
+    {
+      "common_function": "s-curve",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.17",
+      "name": "Acceleration S-Curve",
+      "description": "This parameter is used to ensure smooth acceleration and deceleration via S-curve.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": "0.0",
+      "max_value": "10.0/10.00",
+      "resolution": "0.1/0.01",
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0.0",
+          "label": "S-curve disabled"
+        },
+        {
+          "value": "0.1 to 10.0/0.01 to 10.00",
+          "label": "S-curve enabled (10.0/10.00 is the smoothest)"
+        }
+      ],
+      "page_index": 61,
+      "printed_page": null,
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "Settings 0.0 S-curve disabled 0.1 to 10.0/0.01 to 10.00 S-curve enabled (10.0/10.00 is the smoothest)"
+    },
+    {
+      "common_function": "s-curve",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "01.18",
+      "name": "Deceleration S-Curve",
+      "description": "This parameter is used to ensure smooth acceleration and deceleration via S-curve.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": "0.0",
+      "max_value": "10.0/10.00",
+      "resolution": "0.1/0.01",
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0.0",
+          "label": "S-curve disabled"
+        },
+        {
+          "value": "0.1 to 10.0/0.01 to 10.00",
+          "label": "S-curve enabled (10.0/10.00 is the smoothest)"
+        }
+      ],
+      "page_index": 61,
+      "printed_page": null,
+      "section": "Group 1: Basic Parameters",
+      "table_ref": null,
+      "evidence_quote": "Settings 0.0 S-curve disabled 0.1 to 10.0/0.01 to 10.00 S-curve enabled (10.0/10.00 is the smoothest)"
+    },
+    {
+      "common_function": "frequency-source",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "02.00",
+      "name": "Source of First Master Frequency Command",
+      "description": "These parameters set the Master Frequency Command Source of the AC motor drive.",
+      "unit": null,
+      "default_value": "1",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Digital keypad UP/DOWN keys or Multi-function Inputs UP/DOWN. Last used frequency saved. (Digital keypad is optional)"
+        },
+        {
+          "value": "1",
+          "label": "0 to +10V from AVI"
+        },
+        {
+          "value": "2",
+          "label": "4 to 20mA from ACI"
+        },
+        {
+          "value": "3",
+          "label": "RS-485 (RJ-45) communication"
+        },
+        {
+          "value": "4",
+          "label": "Digital keypad potentiometer"
+        }
+      ],
+      "page_index": 65,
+      "printed_page": null,
+      "section": "Group 2: Operation Method Parameters",
+      "table_ref": null,
+      "evidence_quote": "02.00 Source of First Master Frequency Command Factory Setting: 1"
+    },
+    {
+      "common_function": "frequency-source",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "02.09",
+      "name": "Source of Second Master Frequency Command",
+      "description": "The first /second frequency/operation command is enabled/disabled by Multi Function Input Terminals.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Digital keypad UP/DOWN keys or Multi-function Inputs UP/DOWN. Last used frequency saved. (Digital keypad is optional)"
+        },
+        {
+          "value": "1",
+          "label": "0 to +10V from AVI"
+        },
+        {
+          "value": "2",
+          "label": "4 to 20mA from ACI"
+        },
+        {
+          "value": "3",
+          "label": "RS-485 (RJ-45) communication"
+        },
+        {
+          "value": "4",
+          "label": "Digital keypad potentiometer"
+        }
+      ],
+      "page_index": 65,
+      "printed_page": null,
+      "section": "Group 2: Operation Method Parameters",
+      "table_ref": null,
+      "evidence_quote": "02.09 Source of Second Master Frequency Command Factory Setting: 0"
+    },
+    {
+      "common_function": "command-source",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "02.01",
+      "name": "Source of First Operation Command",
+      "description": null,
+      "unit": null,
+      "default_value": "1",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Digital keypad (Digital keypad is optional)"
+        },
+        {
+          "value": "1",
+          "label": "External terminals. Keypad STOP/RESET enabled."
+        },
+        {
+          "value": "2",
+          "label": "External terminals. Keypad STOP/RESET disabled."
+        },
+        {
+          "value": "3",
+          "label": "RS-485 (RJ-45)/USB communication. Keypad STOP/RESET enabled."
+        },
+        {
+          "value": "4",
+          "label": "RS-485 (RJ-45)/USB communication. Keypad STOP/RESET disabled."
+        }
+      ],
+      "page_index": 65,
+      "printed_page": null,
+      "section": "Group 2: Operation Method Parameters",
+      "table_ref": null,
+      "evidence_quote": "02.01 Source of First Operation Command Factory Setting: 1"
+    },
+    {
+      "common_function": "stop-method",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "02.02",
+      "name": "Stop Method",
+      "description": "The parameter determines how the motor is stopped when the AC motor drive receives a valid stop command or detects External Fault.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "STOP: ramp to stop E.F.: coast to stop"
+        },
+        {
+          "value": "1",
+          "label": "STOP: coast to stop E.F.: coast to stop"
+        },
+        {
+          "value": "2",
+          "label": "STOP: ramp to stop E.F.: ramp to stop"
+        },
+        {
+          "value": "3",
+          "label": "STOP: coast to stop E.F.: ramp to stop"
+        },
+        {
+          "value": "4",
+          "label": "Simple positioning stop E.F.: coast to stoip"
+        }
+      ],
+      "page_index": 65,
+      "printed_page": null,
+      "section": "Group 2: Operation Method Parameters",
+      "table_ref": null,
+      "evidence_quote": "02.02 Stop Method Factory Setting: 0 Settings 0 STOP: ramp to stop E.F.: coast to stop"
+    },
+    {
+      "common_function": "carrier-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "02.03",
+      "name": "PWM Carrier Frequency Selections",
+      "description": "This parameter determines the PWM carrier frequency of the AC motor drive.",
+      "unit": "kHz",
+      "default_value": "8",
+      "min_value": "2",
+      "max_value": "12",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": "Table applies to 115V/230V/460V Series, Power 0.25 to 5hp (0.2kW to 3.7kW). The PWM carrier frequency will be decreased automatically by the ambient temperature and output current.",
+      "options": null,
+      "page_index": 66,
+      "printed_page": "4-37",
+      "section": "Group 2: Operation Method Parameters",
+      "table_ref": null,
+      "evidence_quote": "Setting Range 2 to 12 kHz Factory Setting 8 kHz"
+    },
+    {
+      "common_function": "reverse-prohibit",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "02.04",
+      "name": "Motor Direction Control",
+      "description": null,
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Forward/Reverse operation enabled"
+        },
+        {
+          "value": "1",
+          "label": "Reverse operation disabled"
+        },
+        {
+          "value": "2",
+          "label": "Forward operation disabled"
+        }
+      ],
+      "page_index": 67,
+      "printed_page": null,
+      "section": "Group 2: Operation Method Parameters",
+      "table_ref": null,
+      "evidence_quote": "02.04 Motor Direction Control Factory Setting: 0 Settings 0 Forward/Reverse operation enabled 1 Reverse operation disabled 2 Forward operation disabled"
+    },
+    {
+      "common_function": "keypad-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "02.11",
+      "name": "Keypad Frequency Command",
+      "description": null,
+      "unit": "Hz",
+      "default_value": "60.00",
+      "min_value": "0.00",
+      "max_value": "599.00",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 69,
+      "printed_page": null,
+      "section": "Group 2: Operation Method Parameters",
+      "table_ref": null,
+      "evidence_quote": "02.11 Keypad Frequency Command Unit: 0.01 Settings 0.00 to 599.00Hz Factory Setting: 60.00"
+    },
+    {
+      "common_function": "comm-frequency-reference",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "02.12",
+      "name": "Communication Frequency Command",
+      "description": "This parameter can be used to set frequency command or read communication frequency command.",
+      "unit": "Hz",
+      "default_value": "60.00",
+      "min_value": "0.00",
+      "max_value": "599.00",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 69,
+      "printed_page": null,
+      "section": "Group 2: Operation Method Parameters",
+      "table_ref": null,
+      "evidence_quote": "02.12 Communication Frequency Command Unit: 0.01 Settings 0.00 to 599.00Hz Factory Setting: 60.00"
+    },
+    {
+      "common_function": "relay-output-function",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "03.00",
+      "name": "Multi-function Output Relay (RA1, RB1, RC1)",
+      "description": null,
+      "unit": null,
+      "default_value": "8",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "No Function"
+        },
+        {
+          "value": "1",
+          "label": "AC Drive Operational"
+        },
+        {
+          "value": "2",
+          "label": "Master Frequency Attained"
+        },
+        {
+          "value": "3",
+          "label": "Zero Speed"
+        },
+        {
+          "value": "4",
+          "label": "Over-Torque Detection"
+        },
+        {
+          "value": "5",
+          "label": "Baseblock (B.B.) Indication"
+        },
+        {
+          "value": "6",
+          "label": "Low-Voltage Indication"
+        },
+        {
+          "value": "7",
+          "label": "Operation Mode Indication"
+        },
+        {
+          "value": "8",
+          "label": "Fault Indication"
+        },
+        {
+          "value": "9",
+          "label": "Desired Frequency Attained"
+        },
+        {
+          "value": "10",
+          "label": "Terminal Count Value Attained"
+        },
+        {
+          "value": "11",
+          "label": "Preliminary Count Value Attained"
+        },
+        {
+          "value": "12",
+          "label": "Over Voltage Stall supervision"
+        },
+        {
+          "value": "13",
+          "label": "Over Current Stall supervision"
+        },
+        {
+          "value": "14",
+          "label": "Heat Sink Overheat Warning"
+        },
+        {
+          "value": "15",
+          "label": "Over Voltage supervision"
+        },
+        {
+          "value": "16",
+          "label": "PID supervision"
+        },
+        {
+          "value": "17",
+          "label": "Forward command"
+        },
+        {
+          "value": "18",
+          "label": "Reverse command"
+        },
+        {
+          "value": "19",
+          "label": "Zero Speed Output Signal"
+        },
+        {
+          "value": "20",
+          "label": "Communication Warning (FbE,Cexx, AoL2, AUE, SAvE)"
+        },
+        {
+          "value": "21",
+          "label": "Brake Control (Desired Frequency Attained)"
+        },
+        {
+          "value": "22",
+          "label": "AC Motor Drive Ready"
+        },
+        {
+          "value": "23",
+          "label": "Multi-pump system error display (only master)"
+        }
+      ],
+      "page_index": 72,
+      "printed_page": "4-43",
+      "section": "Group 3: Output Function Parameters",
+      "table_ref": null,
+      "evidence_quote": "03.00 Multi-function Output Relay (RA1, RB1, RC1) Factory Setting: 8"
+    },
+    {
+      "common_function": "two-three-wire",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "04.04",
+      "name": "Multi-function Input Terminal (MI1, MI2) 2-wire/ 3-wire Operation Control Modes",
+      "description": null,
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "2-wire: FWD/STOP, REV/STOP"
+        },
+        {
+          "value": "1",
+          "label": "2-wire: FWD/REV, RUN/STOP"
+        },
+        {
+          "value": "2",
+          "label": "3-wire Operation"
+        }
+      ],
+      "page_index": 80,
+      "printed_page": "4-51",
+      "section": "Group 4: Input Function Parameters",
+      "table_ref": null,
+      "evidence_quote": "Settings 0 2-wire: FWD/STOP, REV/STOP 1 2-wire: FWD/REV, RUN/STOP 2 3-wire Operation"
+    },
+    {
+      "common_function": "digital-input-function",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Summary table text is column-scrambled; factory setting 1 for MI3 also confirmed in section 4.3 (p.80: '04.05 Multi-function Input Terminal (MI3) Factory Setting: 1').",
+      "code": "04.05",
+      "name": "Multi-function Input Terminal (MI3)",
+      "description": null,
+      "unit": null,
+      "default_value": "1",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": "Same setting list applies to 04.06 (MI4), 04.07 (MI5), 04.08 (MI6).",
+      "options": [
+        {
+          "value": "0",
+          "label": "No function"
+        },
+        {
+          "value": "1",
+          "label": "Multi-Step speed command 1"
+        },
+        {
+          "value": "2",
+          "label": "Multi-Step speed command 2"
+        },
+        {
+          "value": "3",
+          "label": "Multi-Step speed command 3"
+        },
+        {
+          "value": "4",
+          "label": "Multi-Step speed command 4"
+        },
+        {
+          "value": "5",
+          "label": "External reset"
+        },
+        {
+          "value": "6",
+          "label": "Accel/Decel inhibit"
+        },
+        {
+          "value": "7",
+          "label": "Accel/Decel time selection command"
+        },
+        {
+          "value": "8",
+          "label": "Jog Operation"
+        },
+        {
+          "value": "9",
+          "label": "External base block"
+        },
+        {
+          "value": "10",
+          "label": "Up: Increment master frequency"
+        },
+        {
+          "value": "11",
+          "label": "Down: Decrement master frequency"
+        },
+        {
+          "value": "12",
+          "label": "Counter Trigger Signal"
+        },
+        {
+          "value": "13",
+          "label": "Counter reset"
+        },
+        {
+          "value": "14",
+          "label": "E.F. External Fault Input"
+        },
+        {
+          "value": "15",
+          "label": "PID function disabled"
+        },
+        {
+          "value": "16",
+          "label": "Output shutoff stop"
+        },
+        {
+          "value": "17",
+          "label": "Parameter lock enable"
+        },
+        {
+          "value": "18",
+          "label": "Operation command selection (external terminals)"
+        },
+        {
+          "value": "19",
+          "label": "Operation command selection(keypad)"
+        },
+        {
+          "value": "20",
+          "label": "Operation command selection(communication)"
+        },
+        {
+          "value": "21",
+          "label": "FWD/REV command"
+        },
+        {
+          "value": "22",
+          "label": "Source of second frequency command"
+        },
+        {
+          "value": "23",
+          "label": "Simple position stop by forward limit"
+        },
+        {
+          "value": "24",
+          "label": "Simple position stop by reverse limit"
+        },
+        {
+          "value": "25",
+          "label": "Multi-pumps switch by Hand / Auto mode."
+        }
+      ],
+      "page_index": 39,
+      "printed_page": null,
+      "section": "Group 4 Input Function Parameters",
+      "table_ref": "4.1 Summary of Parameter Settings",
+      "evidence_quote": "04.05 Multi-function Input Terminal (MI3) 0: No function 1"
+    },
+    {
+      "common_function": "multi-step-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "05.00",
+      "name": "1st Step Speed Frequency",
+      "description": "The Multi-function Input Terminals (refer to Pr.04.05 to 04.08) are used to select one of the AC motor drive Multi-step speeds. The speeds (frequencies) are determined by Pr.05.00 to 05.14.",
+      "unit": "Hz",
+      "default_value": "0.00",
+      "min_value": "0.00",
+      "max_value": "599.0",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "Same settings line applies to 05.00 to 05.14 (1st to 15th Step Speed Frequency).",
+      "options": null,
+      "page_index": 86,
+      "printed_page": "4-57",
+      "section": "Group 5: Multi-step speeds parameters",
+      "table_ref": null,
+      "evidence_quote": "Settings 0.00 to 599.0Hz Factory Setting: 0.00"
+    },
+    {
+      "common_function": "stall-prevention",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "06.00",
+      "name": "Over-Voltage Stall Prevention",
+      "description": null,
+      "unit": "V",
+      "default_value": "115V/230V series: 390.0; 460V series: 780.0",
+      "min_value": "115V/230V series: 330.0; 460V series: 660.0",
+      "max_value": "115V/230V series: 410.0; 460V series: 820.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "Over-Voltage Stall Prevention must be disabled (Pr.06.00=0) when a brake unit or brake resistor is used.",
+      "options": [
+        {
+          "value": "0",
+          "label": "Disable Over-voltage Stall Prevention (with brake unit or brake resistor)"
+        }
+      ],
+      "page_index": 88,
+      "printed_page": "4-59",
+      "section": "Group 6: Protection Parameters",
+      "table_ref": null,
+      "evidence_quote": "Settings 115V/230V series 330.0 to 410.0V Factory Setting: 390.0 460V series 660.0 to 820.0V Factory Setting: 780.0"
+    },
+    {
+      "common_function": "stall-prevention",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "06.01",
+      "name": "Over-Current Stall Prevention during Acceleration",
+      "description": "A setting of 100% is equal to the Rated Output Current of the drive.",
+      "unit": "%",
+      "default_value": "170",
+      "min_value": "20",
+      "max_value": "250",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "disable"
+        }
+      ],
+      "page_index": 88,
+      "printed_page": "4-59",
+      "section": "Group 6: Protection Parameters",
+      "table_ref": null,
+      "evidence_quote": "06.01 Over-Current Stall Prevention during Acceleration Unit: 1 Settings 20 to 250% Factory Setting: 170 0: disable"
+    },
+    {
+      "common_function": "stall-prevention",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "06.02",
+      "name": "Over-current Stall Prevention during Operation",
+      "description": null,
+      "unit": "%",
+      "default_value": "170",
+      "min_value": "20",
+      "max_value": "250",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "disable"
+        }
+      ],
+      "page_index": 89,
+      "printed_page": null,
+      "section": "Group 6: Protection Parameters",
+      "table_ref": null,
+      "evidence_quote": "06.02 Over-current Stall Prevention during Operation Unit: 1 Settings 20 to 250% Factory Setting: 170 0: disable"
+    },
+    {
+      "common_function": "motor-overload-protection",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "06.06",
+      "name": "Electronic Thermal Overload Relay Selection (OL1)",
+      "description": "This function is used to protect the motor from overloading or overheating.",
+      "unit": null,
+      "default_value": "2",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Operate with a Standard Motor (self-cooled by fan)"
+        },
+        {
+          "value": "1",
+          "label": "Operate with a Special Motor (forced external cooling)"
+        },
+        {
+          "value": "2",
+          "label": "Operation disabled"
+        }
+      ],
+      "page_index": 90,
+      "printed_page": "4-61",
+      "section": "Group 6: Protection Parameters",
+      "table_ref": null,
+      "evidence_quote": "06.06 Electronic Thermal Overload Relay Selection (OL1) Factory Setting: 2 Settings 0 Operate with a Standard Motor (self-cooled by fan)"
+    },
+    {
+      "common_function": "motor-overload-protection",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "06.07",
+      "name": "Electronic Thermal Characteristic",
+      "description": "The parameter determines the time required for activating the I2t electronic thermal protection function.",
+      "unit": "sec",
+      "default_value": "60",
+      "min_value": "30",
+      "max_value": "600",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 90,
+      "printed_page": "4-61",
+      "section": "Group 6: Protection Parameters",
+      "table_ref": null,
+      "evidence_quote": "06.07 Electronic Thermal Characteristic Unit: 1 Settings 30 to 600 sec Factory Setting: 60"
+    },
+    {
+      "common_function": "fault-history",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "06.08",
+      "name": "Present Fault Record",
+      "description": "06.08 to 06.12: Present, Second, Third, Fourth and Fifth Most Recent Fault Record.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 90,
+      "printed_page": "4-61",
+      "section": "Group 6: Protection Parameters",
+      "table_ref": null,
+      "evidence_quote": "06.08 Present Fault Record 06.09 Second Most Recent Fault Record"
+    },
+    {
+      "common_function": "rated-motor-current",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "07.00",
+      "name": "Motor Rated Current",
+      "description": "(Motor Current / AC Drive Current) x 100%",
+      "unit": "% FLA",
+      "default_value": "FLA",
+      "min_value": "30% FLA",
+      "max_value": "120% FLA",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": "Entered as a percentage: Motor Current / AC Drive Current (see Pr.00.01) x 100%.",
+      "options": null,
+      "page_index": 92,
+      "printed_page": "4-63",
+      "section": "Group 7: Motor Parameters",
+      "table_ref": null,
+      "evidence_quote": "07.00 Motor Rated Current Unit: 1 Factory Setting: FLA Settings 30% FLA to 120% FLA"
+    },
+    {
+      "common_function": "motor-no-load-current",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": "Summary table (p.44) shows 0%FLA to 99% FLA; detailed description (this page) shows 0% FLA to 90% FLA.",
+      "code": "07.01",
+      "name": "Motor No-load Current",
+      "description": null,
+      "unit": "% FLA",
+      "default_value": "0.4*FLA",
+      "min_value": "0% FLA",
+      "max_value": "90% FLA",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": "The setting value must be less than Pr.07.00 (Motor Rated Current).",
+      "options": null,
+      "page_index": 92,
+      "printed_page": "4-63",
+      "section": "Group 7: Motor Parameters",
+      "table_ref": null,
+      "evidence_quote": "07.01 Motor No-load Current Unit: 1 Settings 0% FLA to 90% FLA Factory Setting: 0.4*FLA"
+    },
+    {
+      "common_function": "torque-boost",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "07.02",
+      "name": "Torque Compensation",
+      "description": "This parameter may be set so that the AC drive will increase its voltage output to obtain a higher torque.",
+      "unit": null,
+      "default_value": "0.0",
+      "min_value": "0.0",
+      "max_value": "10.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 92,
+      "printed_page": "4-63",
+      "section": "Group 7: Motor Parameters",
+      "table_ref": null,
+      "evidence_quote": "07.02 Torque Compensation Unit: 0.1 Settings 0.0 to 10.0 Factory Setting: 0.0"
+    },
+    {
+      "common_function": "slip-compensation",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "07.03",
+      "name": "Slip Compensation Gain",
+      "description": "This parameter may be used to compensate the slip by increasing the output frequency.",
+      "unit": null,
+      "default_value": "0.00",
+      "min_value": "0.00",
+      "max_value": "10.00",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 92,
+      "printed_page": "4-63",
+      "section": "Group 7: Motor Parameters",
+      "table_ref": null,
+      "evidence_quote": "07.03 Slip Compensation Gain Unit: 0.01 Settings 0.00 to 10.00 Factory Setting: 0.00"
+    },
+    {
+      "common_function": "motor-auto-tuning",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "07.04",
+      "name": "Motor Parameters Auto Tuning",
+      "description": null,
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Disable"
+        },
+        {
+          "value": "1",
+          "label": "Auto-tuning R1(Motor doesn't run)"
+        },
+        {
+          "value": "2",
+          "label": "Auto-tuning R1 + No-load current(with running motor)"
+        }
+      ],
+      "page_index": 92,
+      "printed_page": "4-63",
+      "section": "Group 7: Motor Parameters",
+      "table_ref": null,
+      "evidence_quote": "07.04 Motor Parameters Auto Tuning Settings 0: Disable Factory Setting: 0"
+    },
+    {
+      "common_function": "dc-injection-braking",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "08.00",
+      "name": "DC Brake Current Level",
+      "description": "When setting DC Brake Current, the Rated Current (Pr.00.01) is regarded as 100%.",
+      "unit": "%",
+      "default_value": "0",
+      "min_value": "0",
+      "max_value": "100",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 96,
+      "printed_page": "4-67",
+      "section": "Group 8: Special Parameters",
+      "table_ref": null,
+      "evidence_quote": "08.00 DC Brake Current Level Unit: 1 Settings 0 to 100% Factory Setting: 0"
+    },
+    {
+      "common_function": "dc-injection-braking",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "08.01",
+      "name": "DC Brake Time during Start-up",
+      "description": null,
+      "unit": "sec",
+      "default_value": "0.0",
+      "min_value": "0.0",
+      "max_value": "60.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 96,
+      "printed_page": "4-67",
+      "section": "Group 8: Special Parameters",
+      "table_ref": null,
+      "evidence_quote": "08.01 DC Brake Time during Start-up Unit: 0.1 Settings 0.0 to 60.0 sec Factory Setting: 0.0"
+    },
+    {
+      "common_function": "dc-injection-braking",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "08.02",
+      "name": "DC Brake Time during Stopping",
+      "description": null,
+      "unit": "sec",
+      "default_value": "0.0",
+      "min_value": "0.0",
+      "max_value": "60.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": "If stopping with DC Brake is desired, Pr.02.02 Stop Method must be set to 0 or 2 for Ramp to Stop.",
+      "options": null,
+      "page_index": 96,
+      "printed_page": "4-67",
+      "section": "Group 8: Special Parameters",
+      "table_ref": null,
+      "evidence_quote": "08.02 DC Brake Time during Stopping Unit: 0.1 Settings 0.0 to 60.0 sec Factory Setting: 0.0"
+    },
+    {
+      "common_function": "dc-injection-braking",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "08.03",
+      "name": "Start-Point for DC Brake",
+      "description": null,
+      "unit": "Hz",
+      "default_value": "0.00",
+      "min_value": "0.00",
+      "max_value": "599.0",
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 96,
+      "printed_page": "4-67",
+      "section": "Group 8: Special Parameters",
+      "table_ref": null,
+      "evidence_quote": "08.03 Start-Point for DC Brake Unit: 0.01 Factory Setting: 0.00 Settings 0.00 to 599.0Hz"
+    },
+    {
+      "common_function": "auto-restart",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Restart behaviour after momentary power loss (not fault retry).",
+      "code": "08.04",
+      "name": "Momentary Power Loss Operation Selection",
+      "description": null,
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Operation stops (coast to stop) after momentary power loss."
+        },
+        {
+          "value": "1",
+          "label": "Operation continues after momentary power loss, speed search starts with the Master Frequency reference value."
+        },
+        {
+          "value": "2",
+          "label": "Operation continues after momentary power loss, speed search starts with the minimum frequency."
+        }
+      ],
+      "page_index": 96,
+      "printed_page": "4-67",
+      "section": "Group 8: Special Parameters",
+      "table_ref": null,
+      "evidence_quote": "08.04 Momentary Power Loss Operation Selection Factory Setting: 0"
+    },
+    {
+      "common_function": "skip-frequency",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "08.09",
+      "name": "Skip Frequency 1 Upper Limit",
+      "description": null,
+      "unit": "Hz",
+      "default_value": null,
+      "min_value": null,
+      "max_value": null,
+      "resolution": "0.01",
+      "access": null,
+      "setting_conditions": "08.09 to 08.14: Skip Frequency 1/2/3 Upper/Lower Limit (summary table range 0.00 to 599.0 Hz).",
+      "options": null,
+      "page_index": 98,
+      "printed_page": "4-69",
+      "section": "Group 8: Special Parameters",
+      "table_ref": null,
+      "evidence_quote": "08.09 Skip Frequency 1 Upper Limit Unit: 0.01"
+    },
+    {
+      "common_function": "auto-restart",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "08.15",
+      "name": "Auto Restart After Fault",
+      "description": "Only after an over-current OC or over-voltage OV fault occurs, the AC motor drive can be reset/restarted automatically up to 10 times.",
+      "unit": null,
+      "default_value": "0",
+      "min_value": "0",
+      "max_value": "10",
+      "resolution": "1",
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Disable"
+        }
+      ],
+      "page_index": 98,
+      "printed_page": "4-69",
+      "section": "Group 8: Special Parameters",
+      "table_ref": null,
+      "evidence_quote": "08.15 Auto Restart After Fault Unit: 1 Settings 0 to 10 Factory Setting: 0 0 Disable"
+    },
+    {
+      "common_function": "avr",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "08.18",
+      "name": "Automatic Voltage Regulation (AVR)",
+      "description": null,
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "AVR function enabled"
+        },
+        {
+          "value": "1",
+          "label": "AVR function disabled"
+        },
+        {
+          "value": "2",
+          "label": "AVR function disabled for deceleration"
+        },
+        {
+          "value": "3",
+          "label": "AVR function disabled for stop"
+        }
+      ],
+      "page_index": 99,
+      "printed_page": null,
+      "section": "Group 8: Special Parameters",
+      "table_ref": null,
+      "evidence_quote": "08.18 Automatic Voltage Regulation (AVR) Factory Setting: 0 Settings 0 AVR function enabled 1 AVR function disabled"
+    },
+    {
+      "common_function": "slave-address",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "09.00",
+      "name": "Communication Address",
+      "description": null,
+      "unit": null,
+      "default_value": "1",
+      "min_value": "1",
+      "max_value": "254",
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 102,
+      "printed_page": "4-73",
+      "section": "Group 9: Communication Parameters",
+      "table_ref": null,
+      "evidence_quote": "09.00 Communication Address Settings 1 to 254 Factory Setting: 1"
+    },
+    {
+      "common_function": "baud-rate",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "09.01",
+      "name": "Transmission Speed",
+      "description": null,
+      "unit": null,
+      "default_value": "1",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Baud rate 4800 bps (bits / second)"
+        },
+        {
+          "value": "1",
+          "label": "Baud rate 9600 bps"
+        },
+        {
+          "value": "2",
+          "label": "Baud rate 19200 bps"
+        },
+        {
+          "value": "3",
+          "label": "Baud rate 38400 bps"
+        }
+      ],
+      "page_index": 102,
+      "printed_page": "4-73",
+      "section": "Group 9: Communication Parameters",
+      "table_ref": null,
+      "evidence_quote": "09.01 Transmission Speed Factory Setting: 1 Settings 0 Baud rate 4800 bps (bits / second)"
+    },
+    {
+      "common_function": "comm-loss-action",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "09.02",
+      "name": "Transmission Fault Treatment",
+      "description": null,
+      "unit": null,
+      "default_value": "3",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Warn and keep operating"
+        },
+        {
+          "value": "1",
+          "label": "Warn and RAMP to stop"
+        },
+        {
+          "value": "2",
+          "label": "Warn and COAST to stop"
+        },
+        {
+          "value": "3",
+          "label": "No warning and keep operating"
+        }
+      ],
+      "page_index": 102,
+      "printed_page": "4-73",
+      "section": "Group 9: Communication Parameters",
+      "table_ref": null,
+      "evidence_quote": "09.02 Transmission Fault Treatment Factory Setting: 3 Settings 0 Warn and keep operating 1 Warn and RAMP to stop 2 Warn and COAST to stop 3 No warning and keep operating"
+    },
+    {
+      "common_function": "comm-timeout",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "09.03",
+      "name": "Time-out Detection",
+      "description": "If Pr.09.03 is not equal to 0.0, Pr.09.02=0~2, and there is no communication on the bus during the Time Out detection period (set by Pr.09.03), \"cE10\" will be shown on the keypad.",
+      "unit": "sec",
+      "default_value": "0.0",
+      "min_value": "0.0",
+      "max_value": "120.0",
+      "resolution": "0.1",
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0.0",
+          "label": "Disable"
+        }
+      ],
+      "page_index": 102,
+      "printed_page": "4-73",
+      "section": "Group 9: Communication Parameters",
+      "table_ref": null,
+      "evidence_quote": "09.03 Time-out Detection Unit: 0.1 Settings 0.0 to 120.0 sec Factory Setting: 0.0 0.0 Disable"
+    },
+    {
+      "common_function": "comm-protocol",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "09.04",
+      "name": "Communication Protocol",
+      "description": null,
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Modbus ASCII mode, protocol <7,N,2>"
+        },
+        {
+          "value": "1",
+          "label": "Modbus ASCII mode, protocol <7,E,1>"
+        },
+        {
+          "value": "2",
+          "label": "Modbus ASCII mode, protocol <7,O,1>"
+        },
+        {
+          "value": "3",
+          "label": "Modbus RTU mode, protocol <8,N,2>"
+        },
+        {
+          "value": "4",
+          "label": "Modbus RTU mode, protocol <8,E,1>"
+        },
+        {
+          "value": "5",
+          "label": "Modbus RTU mode, protocol <8,O,1>"
+        },
+        {
+          "value": "6",
+          "label": "Modbus RTU mode, protocol <8,N,1>"
+        },
+        {
+          "value": "7",
+          "label": "Modbus RTU mode, protocol <8,E,2>"
+        },
+        {
+          "value": "8",
+          "label": "Modbus RTU mode, protocol <8,O,2>"
+        },
+        {
+          "value": "9",
+          "label": "Modbus ASCII mode, protocol <7,N,1>"
+        },
+        {
+          "value": "10",
+          "label": "Modbus ASCII mode, protocol <7,E,2>"
+        },
+        {
+          "value": "11",
+          "label": "Modbus ASCII mode, protocol <7,O,2>"
+        }
+      ],
+      "page_index": 102,
+      "printed_page": "4-73",
+      "section": "Group 9: Communication Parameters",
+      "table_ref": null,
+      "evidence_quote": "09.04 Communication Protocol Factory Setting: 0 Settings 0 Modbus ASCII mode, protocol <7,N,2>"
+    },
+    {
+      "common_function": "parity-stop-bits",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "Character format (data bits, parity, stop bits) is selected together with ASCII/RTU mode in Pr.09.04.",
+      "code": "09.04",
+      "name": "Communication Protocol",
+      "description": null,
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Modbus ASCII mode, protocol <7,N,2>"
+        },
+        {
+          "value": "1",
+          "label": "Modbus ASCII mode, protocol <7,E,1>"
+        },
+        {
+          "value": "2",
+          "label": "Modbus ASCII mode, protocol <7,O,1>"
+        },
+        {
+          "value": "3",
+          "label": "Modbus RTU mode, protocol <8,N,2>"
+        },
+        {
+          "value": "4",
+          "label": "Modbus RTU mode, protocol <8,E,1>"
+        },
+        {
+          "value": "5",
+          "label": "Modbus RTU mode, protocol <8,O,1>"
+        },
+        {
+          "value": "6",
+          "label": "Modbus RTU mode, protocol <8,N,1>"
+        },
+        {
+          "value": "7",
+          "label": "Modbus RTU mode, protocol <8,E,2>"
+        },
+        {
+          "value": "8",
+          "label": "Modbus RTU mode, protocol <8,O,2>"
+        },
+        {
+          "value": "9",
+          "label": "Modbus ASCII mode, protocol <7,N,1>"
+        },
+        {
+          "value": "10",
+          "label": "Modbus ASCII mode, protocol <7,E,2>"
+        },
+        {
+          "value": "11",
+          "label": "Modbus ASCII mode, protocol <7,O,2>"
+        }
+      ],
+      "page_index": 102,
+      "printed_page": "4-73",
+      "section": "Group 9: Communication Parameters",
+      "table_ref": null,
+      "evidence_quote": "3 Modbus RTU mode, protocol <8,N,2> 4 Modbus RTU mode, protocol <8,E,1>"
+    },
+    {
+      "common_function": "comm-response-delay",
+      "equivalence": "Exact Equivalent",
+      "equivalence_note": null,
+      "code": "09.07",
+      "name": "Response Delay Time",
+      "description": "This parameter is the response delay time after AC drive receives communication command. 1 unit = 2 msec.",
+      "unit": "2ms",
+      "default_value": "1",
+      "min_value": "0",
+      "max_value": "200 (400msec)",
+      "resolution": "2ms",
+      "access": null,
+      "setting_conditions": null,
+      "options": null,
+      "page_index": 112,
+      "printed_page": "4-83",
+      "section": "Group 9: Communication Parameters",
+      "table_ref": null,
+      "evidence_quote": "09.07 Response Delay Time Unit: 2ms Settings 0 ~ 200 (400msec) Factory Setting: 1"
+    },
+    {
+      "common_function": "pid-control",
+      "equivalence": "Functionally Similar",
+      "equivalence_note": "PID is enabled/disabled through the set point source selection (0 = Disable).",
+      "code": "10.00",
+      "name": "PID Set Point Selection",
+      "description": null,
+      "unit": null,
+      "default_value": "0",
+      "min_value": null,
+      "max_value": null,
+      "resolution": null,
+      "access": null,
+      "setting_conditions": null,
+      "options": [
+        {
+          "value": "0",
+          "label": "Disable"
+        },
+        {
+          "value": "1",
+          "label": "Digital keypad UP/DOWN keys"
+        },
+        {
+          "value": "2",
+          "label": "AVI 0 ~ +10VDC"
+        },
+        {
+          "value": "3",
+          "label": "ACI 4 ~ 20mA"
+        },
+        {
+          "value": "4",
+          "label": "PID set point (Pr.10.11)"
+        }
+      ],
+      "page_index": 113,
+      "printed_page": null,
+      "section": "Group 10: PID Control",
+      "table_ref": null,
+      "evidence_quote": "10.00 PID Set Point Selection Factory Setting: 0 Settings 0 Disable"
+    }
+  ],
+  "modbus_registers": [
+    {
+      "common_function": "reg-parameter-access",
+      "name": "AC drive Parameters",
+      "original_address": "GGnnH",
+      "address_format": "Parameter-derived",
+      "register_type": null,
+      "function_codes": null,
+      "access": null,
+      "data_length_words": null,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": null,
+      "description": "GG means parameter group, nn means parameter number, for example, the address of Pr 04.01 is 0401H. When reading parameter by command code 03H, only one parameter can be read at one time.",
+      "page_index": 108,
+      "printed_page": "4-79",
+      "section": "3.5 Address list",
+      "table_ref": null,
+      "evidence_quote": "AC drive GGnnH GG means parameter group, nn means parameter number, for"
+    },
+    {
+      "common_function": "modbus-function-codes",
+      "name": "Function codes",
+      "original_address": "03H, 06H, 08H",
+      "address_format": "HEX",
+      "register_type": null,
+      "function_codes": "03H, 06H, 08H",
+      "access": null,
+      "data_length_words": null,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": null,
+      "description": "03H: read data from register; 06H: write single register; 08H: loop detection",
+      "page_index": 105,
+      "printed_page": null,
+      "section": "3.3 Function (Function code) and DATA (data characters)",
+      "table_ref": null,
+      "evidence_quote": "03H: read data from register 06H: write single register 08H: loop detection"
+    },
+    {
+      "common_function": "reg-control-word",
+      "name": "Command",
+      "original_address": "2000H",
+      "address_format": "HEX",
+      "register_type": null,
+      "function_codes": null,
+      "access": "Write",
+      "data_length_words": null,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": [
+        {
+          "bit": "0-1",
+          "meaning": "00B: No function; 01B: Stop; 10B: Run; 11B: Jog + Run"
+        },
+        {
+          "bit": "2-3",
+          "meaning": "Reserved"
+        },
+        {
+          "bit": "4-5",
+          "meaning": "00B: No function; 01B: FWD; 10B: REV; 11B: Change direction"
+        },
+        {
+          "bit": "6-7",
+          "meaning": "00B: Comm. forced 1st accel/decel; 01B: Comm. forced 2nd accel/decel"
+        },
+        {
+          "bit": "8-15",
+          "meaning": "Reserved"
+        }
+      ],
+      "description": "Command, Write only",
+      "page_index": 108,
+      "printed_page": "4-79",
+      "section": "3.5 Address list",
+      "table_ref": null,
+      "evidence_quote": "Bit 0-1 00B: No function 01B: Stop 10B: Run 11B: Jog + Run"
+    },
+    {
+      "common_function": "reg-frequency-command",
+      "name": "Frequency command",
+      "original_address": "2001H",
+      "address_format": "HEX",
+      "register_type": null,
+      "function_codes": null,
+      "access": "Write",
+      "data_length_words": null,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": null,
+      "description": "Command, Write only",
+      "page_index": 108,
+      "printed_page": "4-79",
+      "section": "3.5 Address list",
+      "table_ref": null,
+      "evidence_quote": "2001H Frequency command"
+    },
+    {
+      "common_function": "reg-control-word",
+      "name": "Command (EF / Reset)",
+      "original_address": "2002H",
+      "address_format": "HEX",
+      "register_type": null,
+      "function_codes": null,
+      "access": "Write",
+      "data_length_words": null,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": [
+        {
+          "bit": "0",
+          "meaning": "1: EF (external fault) on"
+        },
+        {
+          "bit": "1",
+          "meaning": "1: Reset"
+        },
+        {
+          "bit": "2-15",
+          "meaning": "Reserved"
+        }
+      ],
+      "description": "Command, Write only",
+      "page_index": 108,
+      "printed_page": "4-79",
+      "section": "3.5 Address list",
+      "table_ref": null,
+      "evidence_quote": "Bit 0 1: EF (external fault) on 2002H Bit 1 1: Reset"
+    },
+    {
+      "common_function": "reg-fault-code",
+      "name": "Error code",
+      "original_address": "2100H",
+      "address_format": "HEX",
+      "register_type": null,
+      "function_codes": null,
+      "access": "Read",
+      "data_length_words": null,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": null,
+      "description": "Status monitor, Read only. 0: No error occurred; 1: Over-current (oc); 2: Over-voltage (ov); ... list continues on next page (codes up to 34: Motor PTC overheat protection (PtC1)).",
+      "page_index": 108,
+      "printed_page": "4-79",
+      "section": "3.5 Address list",
+      "table_ref": null,
+      "evidence_quote": "2100H Error code:"
+    },
+    {
+      "common_function": "reg-status-word",
+      "name": "Status of AC drive",
+      "original_address": "2101H",
+      "address_format": "HEX",
+      "register_type": null,
+      "function_codes": null,
+      "access": "Read",
+      "data_length_words": null,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": [
+        {
+          "bit": "0-1",
+          "meaning": "00B: RUN LED is off, STOP LED is on (The AC motor Drive stops); 01B: RUN LED blinks, STOP LED is on (When AC motor drive decelerates to stop); 10B: RUN LED is on, STOP LED blinks (When AC motor drive is standby); 11B: RUN LED is on, STOP LED is off (When AC motor drive runs)"
+        },
+        {
+          "bit": "2",
+          "meaning": "1: JOG command"
+        },
+        {
+          "bit": "3-4",
+          "meaning": "00B: FWD LED is on, REV LED is off (When AC motor drive runs forward); 01B: FWD LED is on, REV LED blinks (When AC motor drive runs from reverse to forward); 10B: FWD LED blinks, REV LED is on (When AC motor drive runs from forward to reverse); 11B: FWD LED is off, REV LED is on (When AC motor drive runs reverse)"
+        },
+        {
+          "bit": "5-7",
+          "meaning": "Reserved"
+        },
+        {
+          "bit": "8",
+          "meaning": "1: Master frequency Controlled by communication interface"
+        },
+        {
+          "bit": "9",
+          "meaning": "1: Master frequency controlled by analog signal"
+        },
+        {
+          "bit": "10",
+          "meaning": "1: Operation command controlled by communication interface"
+        },
+        {
+          "bit": "11-15",
+          "meaning": "Reserved"
+        }
+      ],
+      "description": "Status monitor, Read only. Bits 10 and 11-15 are printed on the following page (page_index 110).",
+      "page_index": 109,
+      "printed_page": null,
+      "section": "3.5 Address list",
+      "table_ref": null,
+      "evidence_quote": "Bit 2 1: JOG command"
+    },
+    {
+      "common_function": "reg-frequency-command",
+      "name": "Frequency command (F)",
+      "original_address": "2102H",
+      "address_format": "HEX",
+      "register_type": null,
+      "function_codes": null,
+      "access": "Read",
+      "data_length_words": null,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": null,
+      "description": "Status monitor, Read only",
+      "page_index": 110,
+      "printed_page": "4-81",
+      "section": "3.5 Address list",
+      "table_ref": null,
+      "evidence_quote": "2102H Frequency command (F)"
+    },
+    {
+      "common_function": "reg-output-frequency",
+      "name": "Output frequency (H)",
+      "original_address": "2103H",
+      "address_format": "HEX",
+      "register_type": null,
+      "function_codes": null,
+      "access": "Read",
+      "data_length_words": null,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": null,
+      "description": "Status monitor, Read only",
+      "page_index": 110,
+      "printed_page": "4-81",
+      "section": "3.5 Address list",
+      "table_ref": null,
+      "evidence_quote": "2103H Output frequency (H)"
+    },
+    {
+      "common_function": "reg-output-current",
+      "name": "Output current (AXX.X)",
+      "original_address": "2104H",
+      "address_format": "HEX",
+      "register_type": null,
+      "function_codes": null,
+      "access": "Read",
+      "data_length_words": null,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": null,
+      "description": "Status monitor, Read only",
+      "page_index": 110,
+      "printed_page": "4-81",
+      "section": "3.5 Address list",
+      "table_ref": null,
+      "evidence_quote": "2104H Output current (AXX.X)"
+    },
+    {
+      "common_function": "reg-dc-bus-voltage",
+      "name": "DC-BUS Voltage (UXXX.X)",
+      "original_address": "2108H",
+      "address_format": "HEX",
+      "register_type": null,
+      "function_codes": null,
+      "access": "Read",
+      "data_length_words": null,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": null,
+      "description": "Status monitor, Read only",
+      "page_index": 110,
+      "printed_page": "4-81",
+      "section": "3.5 Address list",
+      "table_ref": null,
+      "evidence_quote": "2108H DC-BUS Voltage (UXXX.X)"
+    },
+    {
+      "common_function": "reg-output-voltage",
+      "name": "Output voltage (EXXX.X)",
+      "original_address": "2109H",
+      "address_format": "HEX",
+      "register_type": null,
+      "function_codes": null,
+      "access": "Read",
+      "data_length_words": null,
+      "data_type": null,
+      "scaling": null,
+      "unit": null,
+      "bit_definitions": null,
+      "description": "Status monitor, Read only",
+      "page_index": 110,
+      "printed_page": "4-81",
+      "section": "3.5 Address list",
+      "table_ref": null,
+      "evidence_quote": "2109H Output voltage (EXXX.X)"
+    }
+  ],
+  "notes": [
+    "printed_page set only where the page number appeared in the extracted page text (footer 'Revision 2016/03, 6ELE, V1.14 4-xx'); other pages left null.",
+    "Summary table (4.1) is column-scrambled in text extraction; values taken from section 4.3 detailed descriptions except Pr.04.05 option list.",
+    "Pr.07.01 range conflict: summary table 0%FLA to 99% FLA vs detailed description 0% FLA to 90% FLA.",
+    "Pr.02.06 factory setting: summary table vs detailed description appear different (not extracted).",
+    "No dedicated rated motor voltage, rated motor power or rated motor speed parameters found; rated-motor-frequency/voltage records are Fbase/Vmax with nameplate wording.",
+    "Register scaling not stated in the address list; display format strings (e.g. AXX.X) kept in names, scaling left null.",
+    "Accel/decel and S-curve resolution depend on Pr.01.19 (0: Unit 0.1 sec, 1: Unit 0.01 sec).",
+    "Evidence quotes on table pages are taken from layout text; reading order may differ from other PDF extractors."
+  ]
+}

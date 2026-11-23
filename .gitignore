@@ -1,1 +1,14 @@
 prompt.md
+node_modules/
+dist/
+dist-server/
+.env
+database/*.db
+database/*.db-*
+database/backups/
+storage/
+scripts/npm-install.log
+test-results/
+playwright-report/
+scripts/*.log
+scripts/import-run.json

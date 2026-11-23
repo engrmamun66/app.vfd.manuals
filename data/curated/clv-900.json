@@ -1,0 +1,709 @@
+{
+  "document_file": "vfd-manuals/Clvdrives/900 series Inverter User Guide.pdf",
+  "document_title": "900 Series AC Drive User Manual",
+  "document_revision": "V900.22.04.28.E",
+  "brand": "Clvdrives",
+  "model": "900 series",
+  "model_evidence": { "page_index": 6, "evidence_quote": "900 series inverters are named following rules below: X900-0075 G 3 EE 0001 *" },
+  "extraction_method": "ai-assisted-reading",
+  "parameters": [
+    {
+      "common_function": "command-source", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F0-00", "name": "Command Source Selection",
+      "description": "Selects panel, terminal or communication (Modbus RTU RS485) run command control.",
+      "unit": null, "default_value": "0", "min_value": "0", "max_value": "2", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [
+        { "value": "0", "label": "Panel control. Press the RUN key of the inverter to run, and press the STOP key to stop." },
+        { "value": "1", "label": "Terminal control. It is directly controlled by the inverter control terminal. By default, DI1 controls forward rotation and DI2 controls reverse rotation." },
+        { "value": "2", "label": "Communication control. It is controlled by Modbus RTU (RS485)." }
+      ],
+      "page_index": 23, "printed_page": "23", "section": "5.1.1 F0 Parameter Group – Basic Parameters", "table_ref": null,
+      "evidence_quote": "F0-00 Command Source Selection 0 0 2 - ☆ 0: Panel control. Press the RUN key of the inverter to run, and press the STOP key to stop."
+    },
+    {
+      "common_function": "frequency-source", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F0-01", "name": "Main Frequency Source Selection",
+      "description": "Selects the main frequency source.",
+      "unit": null, "default_value": "1", "min_value": "0", "max_value": "9", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [
+        { "value": "0", "label": "function code setting, power-off memory" },
+        { "value": "1", "label": "panel potentiometer" },
+        { "value": "2", "label": "AI1" },
+        { "value": "3", "label": "AI2 (reserved)" },
+        { "value": "4", "label": "Multi-segment command" },
+        { "value": "5", "label": "PLC" },
+        { "value": "6", "label": "Constant pressure water supply" },
+        { "value": "7", "label": "General PID" },
+        { "value": "8", "label": "Communication Settings" },
+        { "value": "9", "label": "Pulse setting (DI5)" }
+      ],
+      "page_index": 23, "printed_page": "23", "section": "5.1.1 F0 Parameter Group – Basic Parameters", "table_ref": null,
+      "evidence_quote": "F0-01 Main Frequency Source Selection 0 1 9 - ★ 0: function code setting, power-off memory 1: panel potentiometer 2: AI1 3: AI2 (reserved) 4: Multi-segment command 5: PLC 6: Constant pressure water supply 7: General PID 8: Communication Settings 9: Pulse setting (DI5)"
+    },
+    {
+      "common_function": "acceleration-time-1", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F0-04", "name": "Acceleration Time",
+      "description": "The acceleration time required for the inverter to accelerate from 0 Hz to the upper limit frequency (F0-09).",
+      "unit": "second", "default_value": "Depends on model", "min_value": "0", "max_value": "500.0", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 23, "printed_page": "23", "section": "5.1.1 F0 Parameter Group – Basic Parameters", "table_ref": null,
+      "evidence_quote": "F0-04 Acceleration Time 0 Depends on model 500.0 second ☆"
+    },
+    {
+      "common_function": "deceleration-time-1", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F0-05", "name": "Deceleration Time",
+      "description": "The deceleration time required for the inverter to decelerate from the upper limit frequency (F0-09) to 0 Hz.",
+      "unit": "second", "default_value": "Depends on model", "min_value": "0", "max_value": "500.0", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 24, "printed_page": "24", "section": "5.1.1 F0 Parameter Group – Basic Parameters", "table_ref": null,
+      "evidence_quote": "F0-05 Deceleration Time 0 Depends on model 500.0 second ☆ The deceleration time required for the inverter to decelerate from the upper limit frequency (F0-09) to 0 Hz."
+    },
+    {
+      "common_function": "stop-method", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F0-08", "name": "Stop Mode",
+      "description": "Ramp to stop or coast to stop.",
+      "unit": null, "default_value": "1", "min_value": "0", "max_value": "1", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [
+        { "value": "0", "label": "Ramp to stop. After the shutdown command is effective, the inverter reduces the output frequency according to the deceleration time, and stops after the frequency drops to 0." },
+        { "value": "1", "label": "Coast to stop. After the shutdown command is effective, the inverter immediately stops the output, and the motor stops freely according to the mechanical inertia." }
+      ],
+      "page_index": 24, "printed_page": "24", "section": "5.1.1 F0 Parameter Group – Basic Parameters", "table_ref": null,
+      "evidence_quote": "F0-08 Stop Mode 0 1 1 - ☆ 0: Ramp to stop. After the shutdown command is effective, the inverter reduces the output frequency according to the deceleration time, and stops after the frequency drops to 0."
+    },
+    {
+      "common_function": "frequency-upper-limit", "equivalence": "Functionally Similar", "equivalence_note": "The manual names this 'Frequency Upper limit' and describes it as 'Inverter maximum output frequency'; no separate maximum-frequency parameter was found in the F0 group.",
+      "code": "F0-09", "name": "Frequency Upper limit",
+      "description": "Inverter maximum output frequency",
+      "unit": "Hz", "default_value": "50.0", "min_value": "F0-10", "max_value": "500.0", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 24, "printed_page": "24", "section": "5.1.1 F0 Parameter Group – Basic Parameters", "table_ref": null,
+      "evidence_quote": "F0-09 Frequency Upper limit F0-10 50.0 500.0 Hz ☆ Inverter maximum output frequency"
+    },
+    {
+      "common_function": "frequency-lower-limit", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F0-10", "name": "Frequency Lower limit",
+      "description": "Inverter minimum output frequency",
+      "unit": "Hz", "default_value": "0.0", "min_value": "0.0", "max_value": "F0-09", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 24, "printed_page": "24", "section": "5.1.1 F0 Parameter Group – Basic Parameters", "table_ref": null,
+      "evidence_quote": "F0-10 Frequency Lower limit 0.0 0.0 F0-09 Hz ☆ Inverter minimum output frequency"
+    },
+    {
+      "common_function": "torque-boost", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F0-11", "name": "Torque Boost",
+      "description": "Under the V/F control mode, increases output torque in low frequency operation.",
+      "unit": "%", "default_value": "4.0", "min_value": "0", "max_value": "30.0", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 24, "printed_page": "24", "section": "5.1.1 F0 Parameter Group – Basic Parameters", "table_ref": null,
+      "evidence_quote": "F0-11 Torque Boost 0 4.0 30.0 % ☆ Under the V/F control mode, the output torque of the motor is relatively low in low frequency operation, which can increase the value of this parameter"
+    },
+    {
+      "common_function": "carrier-frequency", "equivalence": "Exact Equivalent", "equivalence_note": "Manual calls it 'Switching Frequency'.",
+      "code": "F0-13", "name": "Switching Frequency",
+      "description": "This function adjusts the switching frequency of the inverter.",
+      "unit": "kHz", "default_value": "Depends on model", "min_value": "1.0", "max_value": "16.0", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 24, "printed_page": "24", "section": "5.1.1 F0 Parameter Group – Basic Parameters", "table_ref": null,
+      "evidence_quote": "F0-13 Switching Frequency 1.0 Depends on model 16.0 kHz ☆ This function adjusts the switching frequency of the inverter."
+    },
+    {
+      "common_function": "keypad-frequency", "equivalence": "Functionally Similar", "equivalence_note": "Initial value of the target frequency when 'Digital Setting' is selected.",
+      "code": "F0-16", "name": "Preset Frequency",
+      "description": "When the target frequency setting mode is selected as \"Digital Setting\", this parameter sets the initial value for the target frequency of the inverter.",
+      "unit": "Hz", "default_value": "50.0", "min_value": "0.0", "max_value": "F0-09", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 25, "printed_page": "25", "section": "5.1.1 F0 Parameter Group – Basic Parameters", "table_ref": null,
+      "evidence_quote": "F0-16 Preset Frequency 0.0 50.0 F0-09 Hz ☆ When the target frequency setting mode is selected as \"Digital Setting\", this parameter sets the initial value for the target frequency of the inverter."
+    },
+    {
+      "common_function": "jog-frequency", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F0-21", "name": "Jog Running Frequency",
+      "description": "F0-21-F0-23 defines the given frequency and acceleration and deceleration time of the inverter when jogging.",
+      "unit": "Hz", "default_value": "2.0", "min_value": "0.0", "max_value": "F0-09", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 26, "printed_page": "26", "section": "5.1.1 F0 Parameter Group – Basic Parameters", "table_ref": null,
+      "evidence_quote": "F0-21 Jog Running Frequency 0.0 2.0 F0-09 Hz ☆"
+    },
+    {
+      "common_function": "jog-accel-decel", "equivalence": "Exact Equivalent", "equivalence_note": "Jog deceleration time is F0-23 (0.0 / 20.0 / 6500.0 second, ☆).",
+      "code": "F0-22", "name": "Jog Acceleration Time",
+      "description": "F0-21-F0-23 defines the given frequency and acceleration and deceleration time of the inverter when jogging.",
+      "unit": "second", "default_value": "20.0", "min_value": "0.0", "max_value": "6500.0", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 26, "printed_page": "26", "section": "5.1.1 F0 Parameter Group – Basic Parameters", "table_ref": null,
+      "evidence_quote": "F0-22 Jog Acceleration Time 0.0 20.0 6500.0 second ☆ F0-23 Jog Deceleration Time 0.0 20.0 6500.0 second ☆"
+    },
+    {
+      "common_function": "parameter-reset", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F0-24", "name": "Reset to Factory Parameters",
+      "description": "1: Reset the factory settings.",
+      "unit": null, "default_value": "0", "min_value": "0", "max_value": "65535", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [{ "value": "1", "label": "Reset the factory settings." }],
+      "page_index": 26, "printed_page": "26", "section": "5.1.1 F0 Parameter Group – Basic Parameters", "table_ref": null,
+      "evidence_quote": "F0-24 Reset to Factory Parameters 0 0 65535 - ★ 1: Reset the factory settings."
+    },
+    {
+      "common_function": "digital-input-function", "equivalence": "Exact Equivalent", "equivalence_note": "F1-01..F1-04 (DI2..DI5) are 'Same as DI1' with defaults 2, 8, 9, 10.",
+      "code": "F1-00", "name": "DI1 Terminal Function Selection",
+      "description": "Function assigned to DI1 terminal (options 0-31).",
+      "unit": null, "default_value": "1", "min_value": "0", "max_value": "31", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [
+        { "value": "0", "label": "No function" },
+        { "value": "1", "label": "Forward running FWD" },
+        { "value": "2", "label": "Reverse running REV" },
+        { "value": "3", "label": "Three-wire mode running control" },
+        { "value": "4", "label": "Two-wire/three-wire switching" },
+        { "value": "5", "label": "Forward jog" },
+        { "value": "6", "label": "Reverse jog" },
+        { "value": "7", "label": "Fault reset" },
+        { "value": "8", "label": "Multi-segment command terminal 1" },
+        { "value": "9", "label": "Multi-segment command terminal 2" },
+        { "value": "10", "label": "Multi-segment command terminal 3" },
+        { "value": "11", "label": "External stop terminal, which is only valid for panel control." },
+        { "value": "12", "label": "Coast stop, that is, blocking PWM output." },
+        { "value": "13", "label": "External terminal shutdown (deceleration time 2, which is valid at any time)" },
+        { "value": "14", "label": "Emergency stop" },
+        { "value": "15", "label": "DC braking" },
+        { "value": "16", "label": "Deceleration DC braking" },
+        { "value": "17", "label": "External fault input (normally open)" },
+        { "value": "18", "label": "External fault normally closed input" },
+        { "value": "19", "label": "Running Command switch terminal 1" },
+        { "value": "20", "label": "Command source switching terminal 2" },
+        { "value": "21", "label": "Terminal UP" },
+        { "value": "22", "label": "Terminal DOWN" },
+        { "value": "23", "label": "UP/DOWN setting is cleared." },
+        { "value": "24", "label": "Frequency source switching" },
+        { "value": "25", "label": "Switch between the main frequency source and the preset frequency." },
+        { "value": "26", "label": "Switch between auxiliary frequency source and preset frequency." },
+        { "value": "27", "label": "Effective terminal for frequency setting." },
+        { "value": "28", "label": "Acceleration and deceleration are prohibited." },
+        { "value": "29", "label": "Acceleration and deceleration time selection terminal 1" },
+        { "value": "30", "label": "PLC status reset" },
+        { "value": "31", "label": "Speed control/torque control switching" }
+      ],
+      "page_index": 26, "printed_page": "26", "section": "5.1.2 F1 Parameter Group – Terminal IO Function Selection", "table_ref": null,
+      "evidence_quote": "F1-00 DI1 Terminal Function Selection 0 1 31 - ★ 0: No function 1: Forward running FWD 2: Reverse running REV 3: Three-wire mode running control"
+    },
+    {
+      "common_function": "two-three-wire", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F1-06", "name": "Terminal Command Mode",
+      "description": "Two-wire / three-wire terminal command mode.",
+      "unit": null, "default_value": "0", "min_value": "0", "max_value": "3", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [
+        { "value": "0", "label": "Two-wire mode 1" },
+        { "value": "1", "label": "Two-wire mode 2" },
+        { "value": "2", "label": "Three-wire mode 1" },
+        { "value": "3", "label": "Three-wire mode 2" }
+      ],
+      "page_index": 27, "printed_page": "27", "section": "5.1.2 F1 Parameter Group – Terminal IO Function Selection", "table_ref": null,
+      "evidence_quote": "F1-06 Terminal Command Mode 0 0 3 - ★ 0: Two-wire mode 1 1: Two-wire mode 2 2: Three-wire mode 1 3: Three-wire mode 2"
+    },
+    {
+      "common_function": "relay-output-function", "equivalence": "Exact Equivalent", "equivalence_note": "F1-09 (Relay 2, default 2), F1-10 (DO1, default 1), F1-11 (DO2, default 2) are 'Same as F1-08'.",
+      "code": "F1-08", "name": "Relay 1 Output Function Selection",
+      "description": "The output terminal of each relay can provide 14 kinds of functions.",
+      "unit": null, "default_value": "1", "min_value": "0", "max_value": "15", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [
+        { "value": "0", "label": "No function." },
+        { "value": "1", "label": "The inverter is running." },
+        { "value": "2", "label": "Inverter fault." },
+        { "value": "3", "label": "Ready for running." },
+        { "value": "4", "label": "The upper limit frequency arrives." },
+        { "value": "5", "label": "The lower limit frequency arrives." },
+        { "value": "6", "label": "Torque limit." },
+        { "value": "7", "label": "Communication control." },
+        { "value": "8", "label": "Motor overload pre-alarm." },
+        { "value": "9", "label": "Inverter overload pre-alarm." },
+        { "value": "10", "label": "Timed time exceeded." },
+        { "value": "11", "label": "The frequency reaches 1." },
+        { "value": "12", "label": "The frequency reaches 2." },
+        { "value": "13", "label": "The current reaches 1." },
+        { "value": "14", "label": "The current reaches 2." },
+        { "value": "15", "label": "AI1 input exceeds the upper or lower limits." }
+      ],
+      "page_index": 28, "printed_page": "28", "section": "5.1.2 F1 Parameter Group – Terminal IO Function Selection", "table_ref": null,
+      "evidence_quote": "F1-08 Relay 1 Output Function Selection 0 1 15 - ☆ The output terminal of each relay can provide 14 kinds of functions, these functions are: 0: No function. 1. The inverter is running."
+    },
+    {
+      "common_function": "analog-input-scaling", "equivalence": "Exact Equivalent", "equivalence_note": "AI1 offset is F1-25 (-10.0 / 0 / 10.0 V, ★). 'Internal calculated value of AI1 = actual input *F1-24+F1-25'.",
+      "code": "F1-24", "name": "AI 1 Gain",
+      "description": "Analog input AI1 signal gain multiple, maximum gain up to 20 times.",
+      "unit": null, "default_value": "1.00", "min_value": "0", "max_value": "20.00", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [],
+      "page_index": 29, "printed_page": "29", "section": "5.1.2 F1 Parameter Group – Terminal IO Function Selection", "table_ref": null,
+      "evidence_quote": "F1-24 AI 1 Gain 0 1.00 20.00 - ★ Analog input AI1 signal gain multiple, maximum gain up to 20 times."
+    },
+    {
+      "common_function": "vf-pattern", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F2-00", "name": "VF curve setting",
+      "description": "Note: F2-00 ~F2-10 is only valid when F8-06 selects \"V/F Control\".",
+      "unit": null, "default_value": "0", "min_value": "0", "max_value": "2", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [
+        { "value": "0", "label": "straight line v/f." },
+        { "value": "1", "label": "multipoint v/f." },
+        { "value": "2", "label": "square v/f." }
+      ],
+      "page_index": 30, "printed_page": "30", "section": "5.1.3 F2 Parameter Group - VF Curve", "table_ref": null,
+      "evidence_quote": "F2-00 VF curve setting 0 0 2 - ★ 0: straight line v/f. 1: multipoint v/f. 2: square v/f. Note: F2-00 ~F2-10 is only valid when F8-06 selects \"V/F Control\"."
+    },
+    {
+      "common_function": "stall-prevention", "equivalence": "Exact Equivalent", "equivalence_note": "Over-current stall during V/F. F2-11 is the action current (50 / 150 / 200 %, ★).",
+      "code": "F2-12", "name": "VF Over-current Stall Enable",
+      "description": "VF over-current stall enable.",
+      "unit": null, "default_value": "1", "min_value": "0", "max_value": "1", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [],
+      "page_index": 31, "printed_page": "31", "section": "5.1.3 F2 Parameter Group - VF Curve", "table_ref": null,
+      "evidence_quote": "F2-11 VF Over-current Stall Action Current 50 150 200 % ★ F2-12 VF Over-current Stall Enable 0 1 1 - ★"
+    },
+    {
+      "common_function": "overvoltage-protection", "equivalence": "Functionally Similar", "equivalence_note": "Overvoltage stall function; F2-16 VF Overvoltage Stall Action Voltage (200.0 / Depend on model / 2000.0 V, ★).",
+      "code": "F2-17", "name": "VF Overvoltage Stall Enable",
+      "description": "VF overvoltage stall enable.",
+      "unit": null, "default_value": "1", "min_value": "0", "max_value": "1", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [{ "value": "0", "label": "Disable" }, { "value": "1", "label": "Enable" }],
+      "page_index": 32, "printed_page": "32", "section": "5.1.3 F2 Parameter Group - VF Curve", "table_ref": null,
+      "evidence_quote": "F2-17 VF Overvoltage Stall Enable 0 1 1 - ★ 0: Disable 1: Enable"
+    },
+    {
+      "common_function": "starting-frequency", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F3-00", "name": "Start Frequency",
+      "description": "To ensure the motor torque at start, please set the appropriate start frequency.",
+      "unit": "Hz", "default_value": "0.0", "min_value": "0.0", "max_value": "10.0", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 32, "printed_page": "32", "section": "5.1.4 F3 Parameter Group – Start/Stop Process Control", "table_ref": null,
+      "evidence_quote": "F3-00 Start Frequency 0.0 0.0 10.0 Hz ☆ To ensure the motor torque at start, please set the appropriate start frequency."
+    },
+    {
+      "common_function": "dc-injection-braking", "equivalence": "Exact Equivalent", "equivalence_note": "Related: F3-04 DC Braking Initial Frequency at Stop, F3-07 DC Braking Time (0.0 / 0.0 / 100.0 second). Start DC braking: F3-02, F3-03.",
+      "code": "F3-06", "name": "DC Braking Current at Stop",
+      "description": "DC braking current at stop, as a percentage relative to a base value (motor or inverter rated current, as described).",
+      "unit": "%", "default_value": "0", "min_value": "0", "max_value": "100", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 33, "printed_page": "33", "section": "5.1.4 F3 Parameter Group – Start/Stop Process Control", "table_ref": null,
+      "evidence_quote": "F3-06 DC Braking Current at Stop 0 0 100 % ☆ There are two situations of DC braking current relative to the basic value."
+    },
+    {
+      "common_function": "s-curve", "equivalence": "Exact Equivalent", "equivalence_note": "S-curve proportions: F3-09 initial (0.0 / 30.0 / 100.0 %), F3-10 end (0.0 / 30.0 / 100.0 %).",
+      "code": "F3-08", "name": "Acceleration and Deceleration Mode",
+      "description": "Linear or S curve acceleration and deceleration.",
+      "unit": null, "default_value": "0", "min_value": "0", "max_value": "1", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [
+        { "value": "0", "label": "linear acceleration and deceleration." },
+        { "value": "1", "label": "S curve acceleration and deceleration." }
+      ],
+      "page_index": 33, "printed_page": "33", "section": "5.1.4 F3 Parameter Group – Start/Stop Process Control", "table_ref": null,
+      "evidence_quote": "F3-08 Acceleration and Deceleration Mode 0 0 1 - ★ 0: linear acceleration and deceleration. The output frequency increases or decreases in a straight line."
+    },
+    {
+      "common_function": "acceleration-time-2", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F3-11", "name": "Acceleration Time 2",
+      "description": "Acceleration Time 2",
+      "unit": "second", "default_value": "Depends on model", "min_value": "0.0", "max_value": "6500.0", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 33, "printed_page": "33", "section": "5.1.4 F3 Parameter Group – Start/Stop Process Control", "table_ref": null,
+      "evidence_quote": "F3-11 Acceleration Time 2 0.0 Depends on model 6500.0 second ☆"
+    },
+    {
+      "common_function": "deceleration-time-2", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F3-12", "name": "Deceleration Time 2",
+      "description": "Deceleration Time 2",
+      "unit": "second", "default_value": "Depends on model", "min_value": "0.0", "max_value": "6500.0", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 33, "printed_page": "33", "section": "5.1.4 F3 Parameter Group – Start/Stop Process Control", "table_ref": null,
+      "evidence_quote": "F3-12 Deceleration Time 2 0.0 Depends on model 6500.0 second ☆"
+    },
+    {
+      "common_function": "skip-frequency", "equivalence": "Exact Equivalent", "equivalence_note": "Bandwidth is F3-15 (0.0 / 0.0 / F0-09 Hz).",
+      "code": "F3-14", "name": "Skip Frequency",
+      "description": "This parameter is the reference value of skip frequency, and the range is set by F3-15.",
+      "unit": "Hz", "default_value": "0.0", "min_value": "0.0", "max_value": "F0-09", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 33, "printed_page": "33", "section": "5.1.4 F3 Parameter Group – Start/Stop Process Control", "table_ref": null,
+      "evidence_quote": "F3-14 Skip Frequency 0.0 0.0 F0-09 Hz ☆"
+    },
+    {
+      "common_function": "reverse-prohibit", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F3-17", "name": "Reverse Control",
+      "description": "Reverse allowed / prohibited.",
+      "unit": null, "default_value": null, "min_value": null, "max_value": null, "resolution": null,
+      "access": null, "setting_conditions": null,
+      "options": [
+        { "value": "0", "label": "Reverse is allowed." },
+        { "value": "1", "label": "Reverse is prohibited." }
+      ],
+      "page_index": 34, "printed_page": "34", "section": "5.1.4 F3 Parameter Group – Start/Stop Process Control", "table_ref": null,
+      "evidence_quote": "F3-17 Reverse Control Inversion control Inversion control Inversion control Inversion control Inversion control 0: Reverse is allowed. 1: Reverse is prohibited."
+    },
+    {
+      "common_function": "multi-step-frequency", "equivalence": "Exact Equivalent", "equivalence_note": "F4-01..F4-08 = Multi-segment Command 0..7 Frequency, all -F0-09 / 0.0 / F0-09 Hz, ☆. F4-00 selects the source of segment 0.",
+      "code": "F4-02", "name": "Multi-segment Command 1 Frequency",
+      "description": "Multi-segment command frequency.",
+      "unit": "Hz", "default_value": "0.0", "min_value": "-F0-09", "max_value": "F0-09", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 35, "printed_page": "35", "section": "5.1.5 F4 Parameter Group – Multi-segment Command", "table_ref": null,
+      "evidence_quote": "F4-02 Multi-segment Command 1 Frequency -F0-09 0.0 F0-09 Hz ☆"
+    },
+    {
+      "common_function": "pid-control", "equivalence": "Partially Equivalent", "equivalence_note": "PID reference source; PID is enabled as a frequency source via F0-01 = 6 or 7. PID feedback source is F5-02.",
+      "code": "F5-00", "name": "PID Reference Source",
+      "description": "This parameter is used to select the target quantity given channel during PID control.",
+      "unit": null, "default_value": "0", "min_value": "0", "max_value": "4", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [
+        { "value": "0", "label": "F5-01 setting" },
+        { "value": "1", "label": "AI1" },
+        { "value": "2", "label": "AI2" },
+        { "value": "3", "label": "Panel potentiometer" },
+        { "value": "4", "label": "Communication" }
+      ],
+      "page_index": 37, "printed_page": "37", "section": "5.1.6 F5 Parameter Group – PID & Constant Pressure Water Supply Parameters", "table_ref": null,
+      "evidence_quote": "F5-00 PID Reference Source 0 0 4 - ☆ This parameter is used to select the target quantity given channel during PID control. 0: F5-01 setting 1: AI1 2: AI2 3: Panel potentiometer 4: Communication"
+    },
+    {
+      "common_function": "parameter-lock", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F6-01", "name": "Parameter Modification Attribute",
+      "description": "When this parameter is set to 1, the inverter is forbidden to modify the parameter, and it must be set to 0 before it can be changed.",
+      "unit": null, "default_value": "0", "min_value": "0", "max_value": "1", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [
+        { "value": "0", "label": "Allow modification." },
+        { "value": "1", "label": "No modification is allowed." }
+      ],
+      "page_index": 40, "printed_page": "40", "section": "5.1.7 F6 Parameter Group – Extend Parameter", "table_ref": null,
+      "evidence_quote": "F6-01 Parameter Modification Attribute 0 0 1 - ☆ 0: Allow modification. 1. No modification is allowed."
+    },
+    {
+      "common_function": "parameter-lock", "equivalence": "Functionally Similar", "equivalence_note": "User password protection for entering the parameter interface.",
+      "code": "F6-03", "name": "User Password",
+      "description": "When F6-03 is SET to non-zero, it is the user password.",
+      "unit": null, "default_value": "0", "min_value": "0", "max_value": "65535", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [],
+      "page_index": 40, "printed_page": "40", "section": "5.1.7 F6 Parameter Group – Extend Parameter", "table_ref": null,
+      "evidence_quote": "F6-03 User Password 0 0 65535 - ★ The inverter provides the user password protection function. When F6-03 is SET to non-zero, it is the user password."
+    },
+    {
+      "common_function": "motor-overload-factor", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F6-12", "name": "Motor Overload Protection Gain",
+      "description": "Used to adjust the gain multiple of the set value of overload current in the inverter.",
+      "unit": null, "default_value": "1.00", "min_value": "0.20", "max_value": "10.00", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 41, "printed_page": "41", "section": "5.1.7 F6 Parameter Group – Extend Parameter", "table_ref": null,
+      "evidence_quote": "F6-12 Motor Overload Protection Gain 0.20 1.00 10.00 - ☆ Used to adjust the gain multiple of the set value of overload current in the inverter."
+    },
+    {
+      "common_function": "motor-overload-protection", "equivalence": "Partially Equivalent", "equivalence_note": "Motor overload protection is enabled by the units digit ('Bit') of this multi-digit parameter.",
+      "code": "F6-17", "name": "Fault Enable Selection 2",
+      "description": "Bit: Motor overload protection selection; Ten bit: AI input lower limit protection selection; others Reserved.",
+      "unit": null, "default_value": "00001", "min_value": "00000", "max_value": "11111", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [{ "value": "0", "label": "Protection is Prohibited." }, { "value": "1", "label": "Enable protection" }],
+      "page_index": 41, "printed_page": "41", "section": "5.1.7 F6 Parameter Group – Extend Parameter", "table_ref": null,
+      "evidence_quote": "F6-17 Fault Enable Selection 2 00000 00001 11111 - ☆ 0: Protection is Prohibited. 1: Enable protection Bit: Motor overload protection selection"
+    },
+    {
+      "common_function": "phase-loss-protection", "equivalence": "Partially Equivalent", "equivalence_note": "Ten bit: output open-phase; Hundred bit: input open-phase; Thousand bit: power-on short-circuit protection to ground.",
+      "code": "F6-16", "name": "Fault Enable Selection 1",
+      "description": "Bit: Relay closing fault; Ten bit: Output open-phase protection; Hundred bit: Input open-phase protection; Thousand bit: Power-on short-circuit protection to ground; Ten thousand bits: output detection before operation.",
+      "unit": null, "default_value": "01111", "min_value": "00000", "max_value": "11111", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [{ "value": "0", "label": "Protection is prohibited." }, { "value": "1", "label": "Enable protection" }],
+      "page_index": 41, "printed_page": "41", "section": "5.1.7 F6 Parameter Group – Extend Parameter", "table_ref": null,
+      "evidence_quote": "F6-16 Fault Enable Selection 1 00000 01111 11111 - ☆ 0: Protection is prohibited. 1: Enable protection Bit: Relay closing fault Ten bit: Output open-phase protection. Hundred bit: Input open-phase protection."
+    },
+    {
+      "common_function": "auto-restart", "equivalence": "Exact Equivalent", "equivalence_note": "Interval is F6-19 Fault Auto Reset Interval Time (0.1 / 1.0 / 100.0 second).",
+      "code": "F6-18", "name": "Fault Auto Reset Times",
+      "description": "Inverter can automatically reset after fault alarm. When set to 0, the automatic reset function is not enabled.",
+      "unit": "time", "default_value": "0", "min_value": "0", "max_value": "20", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 41, "printed_page": "41", "section": "5.1.7 F6 Parameter Group – Extend Parameter", "table_ref": null,
+      "evidence_quote": "F6-18 Fault Auto Reset Times 0 0 20 time ☆ Inverter can automatically reset after fault alarm."
+    },
+    {
+      "common_function": "slave-address", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F7-00", "name": "Inverter Address",
+      "description": "The local address when using the communication function of the inverter. When this value is set to 0, it is the broadcast address.",
+      "unit": null, "default_value": "1", "min_value": "1", "max_value": "249", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 42, "printed_page": "42", "section": "5.1.8 F7 Parameter Group – Communication Parameters", "table_ref": null,
+      "evidence_quote": "F7-00 Inverter Address 1 1 249 - ☆ The local address when using the communication function of the inverter. When this value is set to 0, it is the broadcast address"
+    },
+    {
+      "common_function": "baud-rate", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F7-01", "name": "Baud Rate",
+      "description": "Communication baud rate.",
+      "unit": null, "default_value": "0", "min_value": "0", "max_value": "4", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [
+        { "value": "0", "label": "9600bps" },
+        { "value": "1", "label": "19200bps" },
+        { "value": "2", "label": "38400bps" },
+        { "value": "3", "label": "57600bps" },
+        { "value": "4", "label": "115200bps" }
+      ],
+      "page_index": 42, "printed_page": "42", "section": "5.1.8 F7 Parameter Group – Communication Parameters", "table_ref": null,
+      "evidence_quote": "F7-01 Baud Rate 0 0 4 - ☆ 0：9600bps 1：19200bps 2：38400bps 3：57600bps 4：115200bps"
+    },
+    {
+      "common_function": "parity-stop-bits", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F7-02", "name": "Data Format",
+      "description": "Parity and stop bits.",
+      "unit": null, "default_value": "3", "min_value": "0", "max_value": "3", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [
+        { "value": "0", "label": "No check -2 stop bits (8-N-2)" },
+        { "value": "1", "label": "Even check -1 stop bit (8-E-1)" },
+        { "value": "2", "label": "Odd check -1 stop bit (8-O-1)" },
+        { "value": "3", "label": "No check -1 stop bit (8-N-1)" }
+      ],
+      "page_index": 42, "printed_page": "42", "section": "5.1.8 F7 Parameter Group – Communication Parameters", "table_ref": null,
+      "evidence_quote": "F7-02 Data Format 0 3 3 - ☆ 0: No check -2 stop bits (8-N-2) 1: Even check -1 stop bit (8-E-1) 2: Odd check -1 stop bit (8-O-1) 3: No check -1 stop bit (8-N-1)"
+    },
+    {
+      "common_function": "comm-timeout", "equivalence": "Exact Equivalent", "equivalence_note": "On timeout the inverter reports communication failure Err16; no separate comm-loss action parameter was found.",
+      "code": "F7-03", "name": "Communication Timeout",
+      "description": "When this parameter is set to 0.0 second, no communication timeout detection is performed. When set to more than 0.1 second, if the interval between one communication and the next exceeds the timeout, the inverter will report a communication failure (Err16).",
+      "unit": "second", "default_value": "0.0", "min_value": "0.0", "max_value": "60.0", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 42, "printed_page": "42", "section": "5.1.8 F7 Parameter Group – Communication Parameters", "table_ref": null,
+      "evidence_quote": "F7-03 Communication Timeout 0.0 0.0 60.0 second ☆ When this parameter is set to 0.0 second, no communication timeout detection is performed."
+    },
+    {
+      "common_function": "rated-motor-power", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F8-00", "name": "Motor Rated Power",
+      "description": "This parameter is set to the rated power of the motor (nameplate).",
+      "unit": "Kw", "default_value": "Depends on model", "min_value": "0.1", "max_value": "1000.0", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [],
+      "page_index": 42, "printed_page": "42", "section": "5.1.9 F8 Parameter Group – Motor Control Mode", "table_ref": null,
+      "evidence_quote": "F8-00 Motor Rated Power 0.1 Depends on model 1000.0 Kw ★ This parameter is set to the rated power of the motor (nameplate)."
+    },
+    {
+      "common_function": "rated-motor-voltage", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F8-01", "name": "Motor Rated Voltage",
+      "description": "This parameter is set to the rated voltage of the motor (nameplate).",
+      "unit": "V", "default_value": "Depends on model", "min_value": "1", "max_value": "500", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [],
+      "page_index": 42, "printed_page": "42", "section": "5.1.9 F8 Parameter Group – Motor Control Mode", "table_ref": null,
+      "evidence_quote": "F8-01 Motor Rated Voltage 1 Depends on model 500 V ★ This parameter is set to the rated voltage of the motor (nameplate)."
+    },
+    {
+      "common_function": "rated-motor-current", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F8-02", "name": "Motor Rated Current",
+      "description": "This parameter is set to the rated current of the motor (nameplate).",
+      "unit": "A", "default_value": "Depends on model", "min_value": "0.01", "max_value": "655.35", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [],
+      "page_index": 42, "printed_page": "42", "section": "5.1.9 F8 Parameter Group – Motor Control Mode", "table_ref": null,
+      "evidence_quote": "F8-02 Motor Rated Current 0.01 Depends on model 655.35 A ★ This parameter is set to the rated current of the motor (nameplate)."
+    },
+    {
+      "common_function": "rated-motor-frequency", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F8-03", "name": "Motor Rated Frequency",
+      "description": "This parameter is set to the rated frequency of the motor (nameplate).",
+      "unit": "Hz", "default_value": "50.0", "min_value": "0", "max_value": "500.0", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [],
+      "page_index": 42, "printed_page": "42", "section": "5.1.9 F8 Parameter Group – Motor Control Mode", "table_ref": null,
+      "evidence_quote": "F8-03 Motor Rated Frequency 0 50.0 500.0 Hz ★ This parameter is set to the rated frequency of the motor (nameplate)."
+    },
+    {
+      "common_function": "rated-motor-speed", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F8-04", "name": "Motor Rated Speed",
+      "description": "This parameter is set to the rated speed of the motor (nameplate).",
+      "unit": "Rpm", "default_value": "1460", "min_value": "1", "max_value": "65535", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [],
+      "page_index": 42, "printed_page": "42", "section": "5.1.9 F8 Parameter Group – Motor Control Mode", "table_ref": null,
+      "evidence_quote": "F8-04 Motor Rated Speed 1 1460 65535 Rpm ★ This parameter is set to the rated speed of the motor (nameplate)."
+    },
+    {
+      "common_function": "control-mode", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F8-06", "name": "Motor Control Mode",
+      "description": "Selects V/F or vector speed control.",
+      "unit": null, "default_value": "0", "min_value": "0", "max_value": "2", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [
+        { "value": "0", "label": "V/F control." },
+        { "value": "1", "label": "Vector speed control (IMSVC) of asynchronous motor. F8-07 parameter identification is required after SVC control is selected." },
+        { "value": "2", "label": "Vector speed control (FMSVC) of synchronous motor. F8-07 parameter identification is required after SVC control is selected." }
+      ],
+      "page_index": 42, "printed_page": "42", "section": "5.1.9 F8 Parameter Group – Motor Control Mode", "table_ref": null,
+      "evidence_quote": "F8-06 Motor Control Mode 0 0 2 - ★ 0: V/F control."
+    },
+    {
+      "common_function": "motor-auto-tuning", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F8-07", "name": "Motor Parameter Autotune",
+      "description": "Motor parameter identification.",
+      "unit": null, "default_value": "0", "min_value": "0", "max_value": "3", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "★: cannot be modified when the inverter is in the running state",
+      "options": [
+        { "value": "0", "label": "No operation." },
+        { "value": "1", "label": "Static parameter identification." },
+        { "value": "2", "label": "Dynamic parameter identification." }
+      ],
+      "page_index": 43, "printed_page": "43", "section": "5.1.9 F8 Parameter Group – Motor Control Mode", "table_ref": null,
+      "evidence_quote": "F8-07 Motor Parameter Autotune 0 0 3 - ★ 0: No operation. 1: Static parameter identification."
+    },
+    {
+      "common_function": "slip-compensation", "equivalence": "Exact Equivalent", "equivalence_note": null,
+      "code": "F9-07", "name": "Slip Compensation Coefficient",
+      "description": "For speed sensorless vector control, this parameter is used to adjust the steady speed accuracy of the motor.",
+      "unit": "%", "default_value": "100", "min_value": "50", "max_value": "200", "resolution": null,
+      "access": "Read-Write", "setting_conditions": "☆: can be modified when the inverter is in either stop or running state",
+      "options": [],
+      "page_index": 45, "printed_page": "45", "section": "5.1.10 F9 Parameter Group – Motor Control Advanced Parameter", "table_ref": null,
+      "evidence_quote": "F9-07 Slip Compensation Coefficient 50 100 200 % ☆ For speed sensorless vector control, this parameter is used to adjust the steady speed accuracy of the motor"
+    }
+  ],
+  "modbus_registers": [
+    {
+      "common_function": "modbus-function-codes", "name": "Supported function codes",
+      "original_address": null, "address_format": null, "register_type": "Holding", "function_codes": "0x03, 0x06",
+      "access": null, "data_length_words": null, "data_type": null, "scaling": null, "unit": null,
+      "bit_definitions": [],
+      "description": "The controller can read consecutive addresses at one time, with a maximum of 12 addresses. Read command 0x03; write command 0x06; reading and writing of bytes or bits not supported. Error types: 01 Command code error, 02 Address error, 03 Data error, 04 Command cannot handl[e] (printed truncated).",
+      "page_index": 50, "printed_page": "50", "section": "6.1 Modbus-RTU Communication Protocol", "table_ref": null,
+      "evidence_quote": "The controller can read consecutive addresses at one time, with a maximum of 12 addresses, but it should be noted that it cannot exceed the last address, otherwise it will make an error. The read operation command is 0x03; The write command is 0x06, which does not support reading and writing of bytes or bits."
+    },
+    {
+      "common_function": "reg-frequency-command", "name": "Set communication frequency",
+      "original_address": "0x01", "address_format": "HEX", "register_type": "Holding", "function_codes": "06",
+      "access": "Write", "data_length_words": 1, "data_type": null,
+      "scaling": "10000 refers to 100% corresponding to the maximum frequency, 0 refers to 0% corresponding to the minimum frequency", "unit": null,
+      "bit_definitions": [],
+      "description": "Range -10000~10000. 10000 refers to 100% corresponding to the maximum frequency, 0 refers to 0% corresponding to the minimum frequency, when set to negative direction. Used when F0-01 is set for communication.",
+      "page_index": 51, "printed_page": "51", "section": "6.2 Modbus Register Definition", "table_ref": null,
+      "evidence_quote": "0x01 - 06 Set communication frequency -10000~10000 10000 refers to 100% corresponding to the maximum frequency, 0 refers to 0% corresponding to the minimum frequency, when set to negative direction."
+    },
+    {
+      "common_function": "reg-control-word", "name": "Control command",
+      "original_address": "0x02", "address_format": "HEX", "register_type": "Holding", "function_codes": "06",
+      "access": "Write", "data_length_words": 1, "data_type": null, "scaling": null, "unit": null,
+      "bit_definitions": [
+        { "bit": "value 1", "meaning": "forward running" },
+        { "bit": "value 2", "meaning": "reverse running" },
+        { "bit": "value 3", "meaning": "forward jogging" },
+        { "bit": "value 4", "meaning": "reverse jogging" },
+        { "bit": "value 5", "meaning": "free stop" },
+        { "bit": "value 6", "meaning": "ramp to stop" },
+        { "bit": "value 7", "meaning": "fault reset" }
+      ],
+      "description": "Range 1~7; enumerated values, not bit flags. Used when F0-00 = 2 (communication control).",
+      "page_index": 51, "printed_page": "51", "section": "6.2 Modbus Register Definition", "table_ref": null,
+      "evidence_quote": "0x02 - 06 Control command 1~7 1：forward running 2：reverse running 3：forward jogging 4：reverse jogging 5：free stop 6：ramp to stop 7：fault reset"
+    },
+    {
+      "common_function": "reg-parameter-access", "name": "Parameter register addressing (F0-00 to F9-40, U0-00 to U0-71)",
+      "original_address": "0xF001 to 0xF928; 0x1000 to 0x1047", "address_format": "Parameter-derived", "register_type": "Holding", "function_codes": "03",
+      "access": "Read-Write", "data_length_words": 1, "data_type": null, "scaling": null, "unit": null,
+      "bit_definitions": [],
+      "description": "All user-configurable parameters can be read or written from the hold register. Register numbers of F0-00 to F9-40 are defined as 0xF001 to 0xF928; U0-00 to U0-71 as 0x1000 to 0x1047. The table rows on the same page list 0xF000 = F0-00 and 0xF924 = F9-36 (function code 03), which conflicts with the 0xF001 start stated in the text.",
+      "page_index": 51, "printed_page": "51", "section": "6.2 Modbus Register Definition", "table_ref": null,
+      "evidence_quote": "All user-configurable parameters can be read or written from the hold register by the appropriate Modbus command. The register numbers of parameters F0-00 to F9-40 are defined as 0xF001 to 0xF928. The register numbers of parameters U0-00 to U0-71 are defined as 0x1000 to 0x1047."
+    },
+    {
+      "common_function": "reg-status-word", "name": "Inverter Running State (U0-00)",
+      "original_address": "1000H", "address_format": "HEX", "register_type": "Holding", "function_codes": "03",
+      "access": "Read", "data_length_words": 1, "data_type": null, "scaling": null, "unit": null,
+      "bit_definitions": [
+        { "bit": "value 1", "meaning": "forward" },
+        { "bit": "value 2", "meaning": "reverse" },
+        { "bit": "value 3", "meaning": "stop" }
+      ],
+      "description": "Enumerated running state, not a bit-mapped status word.",
+      "page_index": 48, "printed_page": "48", "section": "5.2 Monitoring Parameter", "table_ref": null,
+      "evidence_quote": "U0-00 Inverter Running State 1: forward 2: reverse 3: stop - 1000H"
+    },
+    {
+      "common_function": "reg-fault-code", "name": "Fault Code (U0-01)",
+      "original_address": "1001H", "address_format": "HEX", "register_type": "Holding", "function_codes": "03",
+      "access": "Read", "data_length_words": 1, "data_type": null, "scaling": null, "unit": null,
+      "bit_definitions": [],
+      "description": "Fault Code",
+      "page_index": 48, "printed_page": "48", "section": "5.2 Monitoring Parameter", "table_ref": null,
+      "evidence_quote": "U0-01 Fault Code - 1001H"
+    },
+    {
+      "common_function": "reg-output-frequency", "name": "Running Frequency (U0-03)",
+      "original_address": "1003H", "address_format": "HEX", "register_type": "Holding", "function_codes": "03",
+      "access": "Read", "data_length_words": 1, "data_type": null, "scaling": "0.1Hz", "unit": "Hz",
+      "bit_definitions": [],
+      "description": "Running Frequency. (U0-02 Set Frequency is 1002H, 0.1Hz.)",
+      "page_index": 48, "printed_page": "48", "section": "5.2 Monitoring Parameter", "table_ref": null,
+      "evidence_quote": "U0-03 Running Frequency 0.1Hz 1003H"
+    },
+    {
+      "common_function": "reg-output-voltage", "name": "Output Voltage (U0-05)",
+      "original_address": "1005H", "address_format": "HEX", "register_type": "Holding", "function_codes": "03",
+      "access": "Read", "data_length_words": 1, "data_type": null, "scaling": "V", "unit": "V",
+      "bit_definitions": [],
+      "description": "Output Voltage",
+      "page_index": 48, "printed_page": "48", "section": "5.2 Monitoring Parameter", "table_ref": null,
+      "evidence_quote": "U0-05 Output Voltage V 1005H"
+    },
+    {
+      "common_function": "reg-output-current", "name": "Output Current (U0-06)",
+      "original_address": "1006H", "address_format": "HEX", "register_type": "Holding", "function_codes": "03",
+      "access": "Read", "data_length_words": 1, "data_type": null, "scaling": "0.1A", "unit": "A",
+      "bit_definitions": [],
+      "description": "Output Current",
+      "page_index": 48, "printed_page": "48", "section": "5.2 Monitoring Parameter", "table_ref": null,
+      "evidence_quote": "U0-06 Output Current 0.1A 1006H"
+    },
+    {
+      "common_function": "reg-dc-bus-voltage", "name": "DC Bus Voltage (U0-08)",
+      "original_address": "1008H", "address_format": "HEX", "register_type": "Holding", "function_codes": "03",
+      "access": "Read", "data_length_words": 1, "data_type": null, "scaling": "V", "unit": "V",
+      "bit_definitions": [],
+      "description": "DC Bus Voltage",
+      "page_index": 48, "printed_page": "48", "section": "5.2 Monitoring Parameter", "table_ref": null,
+      "evidence_quote": "U0-08 DC Bus Voltage V 1008H"
+    }
+  ],
+  "notes": [
+    "Source PDF is a fully scanned document (no text layer on any of its 60 pages). All evidence_quote values were transcribed by reading rendered page images and cannot be machine-checked against PDF text; verify against the page images.",
+    "page_index equals the printed page number for every page used (PDF page N shows '- N -').",
+    "Brand 'Clvdrives' is NOT printed in the pages read (cover/TOC, ch.2, ch.5, ch.6, warranty page). It is taken from the folder name and the nameplate photo (WhatsApp Image ... (2).jpeg shows 'Clvdrives' MODEL: V900-0015G1). The manual names the product only as '900 Series AC Drive' / '900 series'. The manual's model table (p.6) lists models as '900-0007G1' etc. without the 'V' prefix; naming rule example 'X900-0075 G 3 EE 0001 *'.",
+    "Page 23 legend: '☆' modifiable in stop or run; '★' cannot be modified in running state; '▲' and '*' factory parameter. The U0 monitoring table marks all rows '▲', while section 5.2 says monitoring parameters 'can only be read and cannot be modified'; access set to Read.",
+    "F3-17 Reverse Control (p.34): the Minimum/Default/Maximum/Unit/Change Permission cells all print 'Inversion control'; default/range therefore recorded as null.",
+    "Conflict p.51: text says F0-00..F9-40 map to 0xF001..0xF928, but the register table shows 0xF000 = F0-00 and 0xF924 = F9-36.",
+    "Conflict p.52 vs p.23: section 6.3.2 says set F0-01 = 6 for communication frequency setting, but the F0-01 option list on p.23 gives 6 = 'Constant pressure water supply' and 8 = 'Communication Settings'.",
+    "F8-07 range is 0..3 but only options 0, 1, 2 are described.",
+    "No maximum-frequency parameter separate from F0-09 'Frequency Upper limit' (described as 'Inverter maximum output frequency'); no base-frequency, motor-poles, comm-protocol selection, response-delay or comm-loss-action parameters found in the pages read. Pages 36, 38, 46 (PLC segments, PID gains, F9-13..F9-25) were not reviewed in detail.",
+    "Modbus register 0x02 'Control command' and U0-00 'Inverter Running State' are enumerated values; listed in bit_definitions as 'value N' entries, not bit positions."
+  ]
+}
