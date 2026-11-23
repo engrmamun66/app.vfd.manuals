@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Link, NavLink, Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Link, NavLink, Navigate, Outlet, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { get } from './lib/api';
 import { AuthProvider, useAuth } from './lib/auth';
 import { escSnippet, AddressConverter, CommSettings, PlcIntegration } from './pages/ModbusTools';
@@ -11,6 +11,8 @@ import { DocumentPage, ImportPage, Library, RevisionViewer } from './pages/Libra
 import { VerificationCenter } from './pages/Verification';
 import { AdminContent, AdminLogs, AdminSettings, AdminUsers, MySettings } from './pages/Admin';
 import { Loading, useAsync } from './components/ui';
+import { ModelsProvider, useModels } from './lib/models';
+import { SettingsModal } from './components/SettingsModal';
 
 function Nav({ to, children, sub }: { to: string; children: React.ReactNode; sub?: boolean }) {
   return <NavLink to={to} end className={({ isActive }) => `nav-link ${sub ? 'sub' : ''} ${isActive ? 'active' : ''}`}>{children}</NavLink>;
@@ -19,7 +21,8 @@ function Nav({ to, children, sub }: { to: string; children: React.ReactNode; sub
 function GlobalSearch() {
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
-  const { data } = useAsync(() => (q.trim().length >= 1 ? get('/search', { q }) : Promise.resolve(null)), [q]);
+  const { selected } = useModels();
+  const { data } = useAsync(() => (q.trim().length >= 1 ? get('/search', { q, model: selected }) : Promise.resolve(null)), [q, selected]);
   const nav = useNavigate();
   const go = (to: string) => { setOpen(false); setQ(''); nav(to); };
   return (
@@ -43,15 +46,24 @@ function GlobalSearch() {
 }
 
 function Shell() {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  return <ModelsProvider><ShellInner /></ModelsProvider>;
+}
+
+function ShellInner() {
   const { user, logout } = useAuth();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem('sidebar-collapsed') === '1'; } catch { return false; } });
+  const toggleSidebar = () => setCollapsed((c) => { try { localStorage.setItem('sidebar-collapsed', c ? '0' : '1'); } catch { /* ignore */ } return !c; });
   const { data: tax } = useAsync(() => get('/taxonomy'), []);
   const isAdmin = user?.role === 'super_admin';
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return null;
   if (user.mustChangePassword) return <ChangePassword forced />;
   const kbCats = (tax ?? []).filter((c: any) => c.show_nav);
   return (
-    <div className="app">
-      <aside className="sidebar" aria-label="Main navigation">
+    <div className={`app ${collapsed ? 'collapsed' : ''}`}>
+      <aside className="sidebar" aria-label="Main navigation" aria-hidden={collapsed}>
         <div className="brand"><b>VFD Knowledge Base</b><span>Technical Research Explorer</span></div>
         <Nav to="/">Dashboard</Nav>
         <div className="nav-group">Knowledge Base</div>
@@ -63,16 +75,23 @@ function Shell() {
         <Nav to="/compare">Multi-Brand Comparison</Nav><Nav to="/bookmarks">Research Bookmarks</Nav><Nav to="/annotations">My Annotations</Nav>
         <div className="nav-group">Documentation Library</div>
         <Nav to="/library">Manuals</Nav>{isAdmin && <Nav to="/library/import">Import Documents</Nav>}
-        {isAdmin && (<><div className="nav-group">Administration</div><Nav to="/verification">Verification Center</Nav><Nav to="/admin/content">Content & Order</Nav><Nav to="/admin/users">Users & Monitoring</Nav><Nav to="/admin/logs">Activity & Audit</Nav><Nav to="/admin/settings">App Settings & Backups</Nav></>)}
+        {isAdmin && (<><div className="nav-group">Administration</div><Nav to="/verification">Verification Center</Nav><Nav to="/admin/content">Content & Order</Nav><Nav to="/admin/users">Users & Monitoring</Nav><Nav to="/admin/logs">Activity & Audit</Nav></>)}
         <div className="grow" />
         <div className="userbox">
           <div title={user.email} style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.displayName ?? user.email}</div>
           <div className="small-text">{isAdmin ? 'Super Admin' : 'Normal User'}</div>
-          <div className="row" style={{ marginTop: 6 }}><Link to="/settings" className="btn small">Settings</Link><button className="small" onClick={logout}>Sign out</button></div>
+          <div className="row" style={{ marginTop: 6 }}><button className="small" onClick={logout}>Sign out</button></div>
         </div>
       </aside>
       <div className="main">
-        <div className="topbar"><GlobalSearch /><span className="spacer" /></div>
+        <div className="topbar">
+          <button className="ghost icon-btn" onClick={toggleSidebar} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!collapsed} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>☰</button>
+          <GlobalSearch /><span className="spacer" />
+          <button className="ghost icon-btn" onClick={() => setSettingsOpen(true)} aria-label="Settings" title="Settings">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
+          </button>
+        </div>
+        {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
         <Outlet />
       </div>
     </div>
@@ -80,8 +99,8 @@ function Shell() {
 }
 
 function CategoryRoute() {
-  const slug = location.pathname.split('/').pop()!;
-  return <Parameters key={slug} category={slug} />;
+  const { slug } = useParams();
+  return <Parameters key={slug} category={slug!} />;
 }
 
 export default function App() {

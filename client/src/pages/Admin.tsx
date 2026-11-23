@@ -182,15 +182,15 @@ export function AdminLogs() {
 }
 
 // ============ Settings & backups ============
-export function AdminSettings() {
+export function AdminSettings({ embedded }: { embedded?: boolean } = {}) {
   const { data: s, reload, setData: setS } = useAsync(() => get('/admin/settings'), []);
   const { data: backups, reload: reloadB } = useAsync<any[]>(() => get('/admin/backups'), []);
   const [msg, setMsg] = useState<any>(null);
   const [busy, setBusy] = useState(false);
   return (
-    <div className="page">
-      <Crumbs items={[{ label: 'Admin' }, { label: 'Application Settings' }]} />
-      <h1>Application Settings</h1>
+    <div className={embedded ? '' : 'page'}>
+      {!embedded && <Crumbs items={[{ label: 'Admin' }, { label: 'Application Settings' }]} />}
+      {!embedded && <h1>Application Settings</h1>}
       <ErrorBox e={msg instanceof Error ? msg : null} />
       {s && (
         <div className="card" style={{ maxWidth: 640 }}>
@@ -211,21 +211,21 @@ export function AdminSettings() {
 }
 
 // ============ User settings (self) ============
-export function MySettings() {
+export function MySettings({ embedded }: { embedded?: boolean } = {}) {
   const { user, settings, updateSettings, refresh } = useAuth();
   const { data: st } = useAsync(() => get('/me/storage'), []);
   const { data: sessions, reload } = useAsync<any[]>(() => get('/auth/sessions'), []);
   const [p, setP] = useState({ displayName: user?.displayName ?? '', phone: user?.phone ?? '', company: user?.company ?? '', designation: user?.designation ?? '' });
   const [msg, setMsg] = useState<any>(null);
   return (
-    <div className="page">
-      <Crumbs items={[{ label: 'Home', to: '/' }, { label: 'Settings' }]} />
-      <h1>Settings</h1>
+    <div className={embedded ? '' : 'page'}>
+      {!embedded && <Crumbs items={[{ label: 'Home', to: '/' }, { label: 'Settings' }]} />}
+      {!embedded && <h1>Settings</h1>}
       <div className="grid2">
         <div className="card"><h2>Profile</h2><p className="muted small-text">{user?.email}</p>
           {(['displayName', 'phone', 'company', 'designation'] as const).map((k) => <div className="field" key={k}><label>{k}</label><input value={(p as any)[k]} onChange={(e) => setP({ ...p, [k]: e.target.value })} /></div>)}
           <ErrorBox e={msg instanceof Error ? msg : null} />
-          <div className="row"><button className="primary" onClick={async () => { try { await patch('/auth/profile', p); setMsg({ ok: true }); refresh(); } catch (e) { setMsg(e); } }}>Save profile</button><Link className="btn" to="/settings/password">Change password</Link></div></div>
+          <div className="row"><button className="primary" onClick={async () => { try { await patch('/auth/profile', p); setMsg({ ok: true }); refresh(); } catch (e) { setMsg(e); } }}>Save profile</button>{!embedded && <Link className="btn" to="/settings/password">Change password</Link>}</div></div>
         <div className="card"><h2>Preferences</h2>
           <div className="field"><label>Language of explanations</label><select value={settings?.language} onChange={(e) => updateSettings({ language: e.target.value as any })}><option value="en">English</option><option value="bn">English + বাংলা</option></select></div>
           <div className="field"><label>Theme</label><select value={settings?.theme} onChange={(e) => updateSettings({ theme: e.target.value as any })}><option value="light">Light (black & white)</option><option value="dark">Dark</option></select></div>

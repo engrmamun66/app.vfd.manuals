@@ -226,6 +226,32 @@ describe('multi-user isolation (IDOR) and public/private annotations', () => {
     expect((await r(bob, '/me/settings')).body.annotation_display.showOthersPublic).toBe(true); // default Show
     expect((await w(bob, 'patch', '/me/settings').send({ user_id: alice.id, theme: 'dark' })).status).toBe(400);
   });
+
+  it('selected model and model aliases are per-user, validated, and filter queries', async () => {
+    const { ensureBrandModel } = await import('../server/src/services/ingestion/DocumentIngestionService.js');
+    const id = ensureBrandModel(db, 'AliasBrand', 'AL-1').modelId;
+    const models = [{ name: 'AL-1' }];
+    expect((await w(alice, 'patch', '/me/settings').send({ selected_model: 999999 })).status).toBe(400);
+    expect((await w(alice, 'patch', '/me/settings').send({ selected_model: id, model_aliases: { [id]: ' A ' } })).status).toBe(200);
+    const mine = (await r(alice, '/me/settings')).body;
+    expect(mine.selected_model).toBe(id);
+    expect(mine.model_aliases[String(id)]).toBe('A');
+    expect((await r(bob, '/me/settings')).body.selected_model).toBe(null);
+    expect((await w(alice, 'patch', '/me/settings').send({ model_order: [id, 7, 7, 'x'] })).body.model_order).toEqual([id, 7]);
+    expect((await r(bob, '/me/settings')).body.model_order).toEqual([]);
+    expect((await w(alice, 'patch', '/me/settings').send({ model_order: 'nope' })).status).toBe(400);
+    expect((await w(alice, 'patch', '/me/settings').send({ model_aliases: { [id]: 'x'.repeat(17) } })).status).toBe(400);
+    expect((await w(alice, 'patch', '/me/settings').send({ model_aliases: { abc: 'A' } })).status).toBe(400);
+    await w(alice, 'patch', '/me/settings').send({ model_aliases: { [id]: '' } }); // empty alias = removed
+    expect((await r(alice, '/me/settings')).body.model_aliases[String(id)]).toBeUndefined();
+    const rows = (await r(alice, `/parameters?model=${id}&limit=200`)).body.rows as any[];
+    expect(rows.every((p) => p.model_id === id || p.model === models[0].name)).toBe(true);
+    await w(alice, 'patch', '/me/settings').send({ selected_model: null });
+    const brandId = (db.prepare('SELECT brand_id FROM models WHERE id = ?').get(id) as any).brand_id;
+    db.prepare("DELETE FROM content_display WHERE (entity_type = 'model' AND entity_id = ?) OR (entity_type = 'brand' AND entity_id = ?)").run(id, brandId);
+    db.prepare('DELETE FROM models WHERE id = ?').run(id);
+    db.prepare('DELETE FROM brands WHERE id = ?').run(brandId);
+  });
 });
 
 describe('bookmarks & folders', () => {

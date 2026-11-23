@@ -641,6 +641,7 @@ kbRouter.get(
     if (!q) return res.json({ q, functions: [], parameters: [], registers: [], models: [], pages: [] });
     const like = `%${q}%`;
     const hidden = includeHidden(req);
+    const modelId = Number.isInteger(Number(req.query.model)) && Number(req.query.model) > 0 ? Number(req.query.model) : null;
     const functions = db
       .prepare(
         `SELECT f.id, f.slug, f.name, f.name_bn, c.name category FROM common_functions f JOIN categories c ON c.id=f.category_id ${cdJoin('common_function', 'f', 'cd')}
@@ -651,16 +652,16 @@ kbRouter.get(
       .prepare(
         `SELECT p.id, p.code, p.name, p.verification_status, m.name model, b.name brand, f.name function_name ${PARAM_FROM}
          WHERE ${hidden ? '1=1' : `${cdVisible('cdp', 'search')} AND ${cdVisible('cdm')} AND ${cdVisible('cdb')}`}
-         AND (p.code LIKE ? OR p.name LIKE ? OR p.description_en LIKE ? OR p.description_bn LIKE ?) ORDER BY (p.code = ?) DESC, b.name LIMIT 50`,
+         AND (p.code LIKE ? OR p.name LIKE ? OR p.description_en LIKE ? OR p.description_bn LIKE ?) AND (? IS NULL OR m.id = ?) ORDER BY (p.code = ?) DESC, b.name LIMIT 50`,
       )
-      .all(like, like, like, like, q);
+      .all(like, like, like, like, modelId, modelId, q);
     const registers = db
       .prepare(
         `SELECT r.id, r.original_address, r.name, r.verification_status, m.name model, b.name brand ${REG_FROM}
          WHERE ${hidden ? '1=1' : `${cdVisible('cdr', 'search')} AND ${cdVisible('cdm')}`}
-         AND (r.original_address LIKE ? OR r.name LIKE ? OR r.description LIKE ? OR EXISTS (SELECT 1 FROM modbus_address_conversions mc WHERE mc.register_id=r.id AND mc.value LIKE ?)) LIMIT 50`,
+         AND (r.original_address LIKE ? OR r.name LIKE ? OR r.description LIKE ? OR EXISTS (SELECT 1 FROM modbus_address_conversions mc WHERE mc.register_id=r.id AND mc.value LIKE ?)) AND (? IS NULL OR m.id = ?) LIMIT 50`,
       )
-      .all(like, like, like, like);
+      .all(like, like, like, like, modelId, modelId);
     const models = db
       .prepare(`SELECT m.id, m.name, b.name brand FROM models m JOIN brands b ON b.id=m.brand_id ${cdJoin('model', 'm', 'cd')} WHERE ${hidden ? '1=1' : cdVisible('cd', 'search')} AND (m.name LIKE ? OR b.name LIKE ?) LIMIT 20`)
       .all(like, like);

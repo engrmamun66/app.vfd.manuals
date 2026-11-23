@@ -591,6 +591,56 @@ test.describe('theme & accessibility basics', () => {
     }
   });
 
+  test('model tabs: selection persists across reload and pages; alias set in full-screen settings; sidebar collapses', async () => {
+    await admin.goto('/parameters');
+    const tabs = admin.locator('.model-tabs button');
+    await expect(tabs.nth(1)).toBeVisible();
+    const total = async () => (await admin.locator('.row span.small-text').first().textContent())!.match(/(\d+) records/)![1];
+    const all = Number(await total());
+    await tabs.nth(1).click();
+    await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+    await expect.poll(async () => Number(await total())).toBeLessThan(all);
+    await admin.reload();
+    await expect(admin.locator('.model-tabs button[aria-selected="true"]')).toHaveText(await tabs.nth(1).textContent() as string);
+    await admin.goto('/modbus/registers'); // selection applies on other pages too
+    await expect(admin.locator('.model-tabs button').nth(1)).toHaveAttribute('aria-selected', 'true');
+    // alias in the full-screen settings modal
+    await admin.getByRole('button', { name: 'Settings', exact: true }).click();
+    const dlg = admin.getByRole('dialog', { name: 'Settings' });
+    await expect(dlg).toBeVisible();
+    await dlg.getByRole('tab', { name: 'Model aliases' }).click();
+    const alias = dlg.locator('input[aria-label^="Alias for"]').first();
+    await alias.fill('Q9');
+    await alias.blur();
+    const firstRow = async () => (await dlg.locator('tbody tr').first().locator('td').nth(2).textContent())!;
+    const before = await firstRow();
+    await dlg.getByRole('button', { name: /^Move .* down$/ }).first().click();
+    await expect.poll(firstRow).not.toBe(before);
+    await dlg.getByRole('button', { name: 'Close settings' }).click();
+    await expect(admin.locator('.model-tabs button').nth(2)).toHaveText('Q9'); // moved-down model is now the 2nd model tab
+    const selTip = await admin.locator('.model-tabs button[aria-selected="true"]').getAttribute('title'); // page title = tab tooltip
+    await expect(admin).toHaveTitle(`${selTip} · VFD Knowledge Base`);
+    await admin.getByRole('button', { name: 'Settings', exact: true }).click();
+    await dlg.getByRole('tab', { name: 'Model aliases' }).click();
+    await dlg.getByRole('button', { name: /^Move .* up$/ }).nth(1).click(); // back to the original order
+    await expect.poll(firstRow).toBe(before);
+    const sw = dlg.getByRole('switch').nth(1);
+    await expect(dlg.locator('tbody tr').nth(1).locator('.badge')).toHaveText('On');
+    await sw.click();
+    await expect(dlg.locator('tbody tr').nth(1).locator('.badge')).toHaveText('Off');
+    await sw.click();
+    await expect(dlg.locator('tbody tr').nth(1).locator('.badge')).toHaveText('On');
+    await dlg.getByRole('button', { name: 'Close settings' }).click();
+    await expect(admin.locator('.model-tabs button', { hasText: 'Q9' })).toBeVisible();
+    // sidebar collapse persists
+    await admin.getByRole('button', { name: 'Collapse sidebar' }).click();
+    await expect.poll(async () => admin.locator('.sidebar').evaluate((e) => e.getBoundingClientRect().width)).toBe(0);
+    await admin.reload();
+    await expect(admin.getByRole('button', { name: 'Expand sidebar' })).toBeVisible();
+    await admin.getByRole('button', { name: 'Expand sidebar' }).click();
+    await admin.locator('.model-tabs button').first().click(); // back to All
+  });
+
   test('keyboard: help icon opens on Enter and closes on Escape; dialogs are labelled', async () => {
     await admin.goto(paramUrl);
     const info = admin.getByRole('button', { name: /Help:/ }).first();

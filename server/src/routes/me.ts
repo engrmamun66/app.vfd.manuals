@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { ah, badRequest } from '../lib/http.js';
+import { getDb } from '../db/index.js';
 import { getUserSettings, setUserSetting, USER_SETTING_DEFAULTS } from '../services/settings.js';
 import { storageUsage } from '../services/storage.js';
 import { userLimits } from '../services/settings.js';
@@ -36,6 +37,30 @@ function validate(key: string, v: any) {
     case 'explanation_levels_open':
       if (!Array.isArray(v)) throw badRequest('must be an array');
       return v.filter((x) => typeof x === 'string').slice(0, 10);
+    case 'selected_model': {
+      if (v === null) return null;
+      const id = Number(v);
+      if (!Number.isInteger(id) || !getDb().prepare('SELECT 1 FROM models WHERE id = ?').get(id)) throw badRequest('unknown model');
+      return id;
+    }
+    case 'model_order':
+      if (!Array.isArray(v)) throw badRequest('model_order must be an array');
+      return [...new Set(v.map(Number).filter((n) => Number.isInteger(n) && n > 0))].slice(0, 500);
+    case 'hidden_models':
+      if (!Array.isArray(v)) throw badRequest('hidden_models must be an array');
+      return [...new Set(v.map(Number).filter((n) => Number.isInteger(n) && n > 0))].slice(0, 500);
+    case 'model_aliases': {
+      if (typeof v !== 'object' || v === null || Array.isArray(v)) throw badRequest('model_aliases must be an object');
+      const out: Record<string, string> = {};
+      for (const [k, a] of Object.entries(v)) {
+        if (!/^\d+$/.test(k)) throw badRequest('invalid model id');
+        const alias = String(a ?? '').trim();
+        if (!alias) continue; // empty = no alias (tab shows the model name)
+        if (alias.length > 16) throw badRequest('alias must be at most 16 characters');
+        out[k] = alias;
+      }
+      return out;
+    }
     default:
       throw badRequest(`Unknown setting: ${key}`);
   }

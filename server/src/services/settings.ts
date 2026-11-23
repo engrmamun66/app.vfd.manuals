@@ -38,6 +38,10 @@ export const USER_SETTING_DEFAULTS: Record<string, unknown> = {
   language: 'en',
   theme: 'light',
   explanation_levels_open: ['short'],
+  selected_model: null, // model id used as the global filter on every page (null = all models)
+  model_aliases: {}, // { [modelId]: short tab label }
+  model_order: [], // personal tab/list order: model ids, first = leftmost
+  hidden_models: [], // model ids switched Off (not shown as tabs)
 };
 
 export function getUserSettings(userId: number) {

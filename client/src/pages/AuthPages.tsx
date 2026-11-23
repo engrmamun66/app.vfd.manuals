@@ -114,7 +114,7 @@ export function Register() {
   );
 }
 
-export function ChangePassword({ forced }: { forced?: boolean }) {
+export function ChangePassword({ forced, embedded }: { forced?: boolean; embedded?: boolean }) {
   const { setPasswordChanged, logout } = useAuth();
   const nav = useNavigate();
   const [f, setF] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -143,5 +143,5 @@ export function ChangePassword({ forced }: { forced?: boolean }) {
       <div className="row"><button className="primary">Change password</button>{forced && <button type="button" onClick={logout}>Sign out</button>}</div>
     </form>
   );
-  return forced ? <Wrap title="Change password">{form}</Wrap> : <div className="page narrow"><h1>Change password</h1>{form}</div>;
+  return forced ? <Wrap title="Change password">{form}</Wrap> : embedded ? <div style={{ maxWidth: 460 }}>{form}</div> : <div className="page narrow"><h1>Change password</h1>{form}</div>;
 }

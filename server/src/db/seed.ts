@@ -45,8 +45,27 @@ export function seedTaxonomy(db: DB) {
  * Never resets an existing account or password. Password comes from env, never logged.
  */
 export async function bootstrapSuperAdmin(db: DB): Promise<{ created: boolean; message: string }> {
-  const existing = db.prepare("SELECT id FROM users WHERE role = 'super_admin' LIMIT 1").get();
-  if (existing) return { created: false, message: 'Super Admin already exists' };
+  const existing = db.prepare("SELECT id, email_normalized, password_hash FROM users WHERE role = 'super_admin' ORDER BY id LIMIT 1").get() as
+    | { id: number; email_normalized: string; password_hash: string }
+    | undefined;
+  if (existing) {
+    // Owner request: .env credentials are the source of truth for the first Super Admin (synced on every start).
+    const e = config.initialAdminEmail;
+    const p = config.initialAdminPassword;
+    if (e && p && isValidEmail(normalizeEmail(e)) && !passwordProblems(p).length) {
+      const norm = normalizeEmail(e);
+      const other = db.prepare('SELECT id FROM users WHERE email_normalized = ? AND id <> ?').get(norm, existing.id);
+      const { verifyPassword } = await import('../auth/password.js');
+      const pwSame = await verifyPassword(existing.password_hash, p);
+      if (!other && (existing.email_normalized !== norm || !pwSame)) {
+        db.prepare(
+          "UPDATE users SET email = ?, email_normalized = ?, password_hash = ?, must_change_password = 0, status = 'enabled' WHERE id = ?",
+        ).run(e.trim(), norm, pwSame ? existing.password_hash : await hashPassword(p), existing.id);
+        return { created: false, message: `Super Admin credentials synced from .env (${norm})` };
+      }
+    }
+    return { created: false, message: 'Super Admin already exists' };
+  }
   const email = config.initialAdminEmail;
   const pw = config.initialAdminPassword;
   if (!email || !isValidEmail(normalizeEmail(email)))

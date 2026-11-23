@@ -214,3 +214,44 @@ mark.snip, .snippet mark { background: var(--inv-bg); color: var(--inv-fg); padd
 .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .8rem; color: var(--fg-muted); }
 .scroll-x { overflow-x: auto; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- model tabs ---------- */
+.model-tabs { display: flex; gap: 2px; overflow-x: auto; border-bottom: 1px solid var(--line); margin: 0 0 14px; }
+.model-tabs button { border: 1px solid transparent; border-bottom: none; background: none; padding: 6px 14px; white-space: nowrap; cursor: pointer; color: var(--fg-muted); font-weight: 600; margin-bottom: -1px; }
+.model-tabs button:hover { background: var(--bg-hover); }
+.model-tabs button.active { background: var(--bg); color: var(--fg); border-color: var(--line-strong); border-bottom: 1px solid var(--bg); }
+
+/* ---------- sidebar (grey, collapsible) ---------- */
+:root { --sidebar-bg: #dcdcdc; --sidebar-hover: #cdcdcd; }
+:root[data-theme='dark'] { --sidebar-bg: #232323; --sidebar-hover: #2f2f2f; }
+.sidebar { background: var(--sidebar-bg); }
+.nav-link:hover { background: var(--sidebar-hover); }
+.app { transition: grid-template-columns .15s ease; }
+.app.collapsed { grid-template-columns: 0 1fr; }
+.app.collapsed .sidebar { visibility: hidden; overflow: hidden; border-right: none; padding: 0; }
+.topbar .icon-btn { padding: 4px 9px; font-size: 1.15rem; line-height: 1; }
+
+/* ---------- full-screen settings ---------- */
+.fs-modal { position: fixed; inset: 0; background: var(--bg); z-index: 120; display: flex; flex-direction: column; }
+.fs-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 24px; border-bottom: 1px solid var(--line); }
+.fs-head h2 { margin: 0; }
+.fs-body { flex: 1; display: grid; grid-template-columns: 220px 1fr; min-height: 0; }
+.fs-tabs { border-right: 1px solid var(--line); background: var(--bg-alt); padding: 12px 0; overflow: auto; }
+.fs-tabs button { display: block; width: 100%; text-align: left; border: none; border-left: 3px solid transparent; background: none; padding: 9px 20px; cursor: pointer; }
+.fs-tabs button:hover { background: var(--bg-hover); }
+.fs-tabs button.active { border-left-color: var(--fg); font-weight: 650; background: var(--bg); }
+.fs-content { overflow: auto; padding: 8px 8px 40px; }
+@media (max-width: 720px) { .fs-body { grid-template-columns: 1fr; } .fs-tabs { display: flex; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--line); padding: 0; } .fs-tabs button { width: auto; white-space: nowrap; } }
+
+/* ---------- on/off switch ---------- */
+.switch { width: 40px; height: 22px; padding: 2px; border: 1px solid var(--line-strong); border-radius: 11px; background: var(--bg); cursor: pointer; display: inline-flex; align-items: center; }
+.switch span { width: 16px; height: 16px; border-radius: 50%; background: var(--fg-faint); transition: transform .12s ease; }
+.switch.on { background: var(--inv-bg); }
+.switch.on span { background: var(--inv-fg); transform: translateX(18px); }
+
+/* ---------- settings modal open / close animation ---------- */
+@keyframes fs-in { from { opacity: 0; transform: translateY(24px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes fs-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(24px) scale(.985); } }
+.fs-modal { animation: fs-in .22s ease-out both; }
+.fs-modal.closing { animation: fs-out .2s ease-in both; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .fs-modal, .fs-modal.closing { animation: none; } }

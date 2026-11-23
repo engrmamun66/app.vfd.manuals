@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { get, patch, post, fmtDate } from '../lib/api';
 import { useAuth } from '../lib/auth';
+import { ModelTabs } from '../components/ModelTabs';
+import { useModels } from '../lib/models';
 import { Crumbs, ErrorBox, EquivBadge, EvBadge, InfoIcon, Loading, Pager, QuoteBadge, Val, VerifBadge, download, useAsync } from '../components/ui';
 import { PageViewer, SplitToggle, SplitView } from '../components/Viewer';
 import { Annotatable, AnnotationDisplayControl, AnnotationScope } from '../components/Annotatable';
@@ -52,9 +54,9 @@ export function Parameters({ category }: { category?: string }) {
   const [sp, setSp] = useSearchParams();
   const q = Object.fromEntries(sp.entries());
   const page = Number(q.page) || 1;
-  const { data: models } = useAsync(() => get('/models'), []);
+  const { selected } = useModels();
   const { data: tax } = useAsync(() => get('/taxonomy'), []);
-  const { data, error, loading } = useAsync(() => get('/parameters', { ...q, category: category ?? q.category, page, limit: 50 }), [sp.toString(), category]);
+  const { data, error, loading } = useAsync(() => get('/parameters', { ...q, model: selected, category: category ?? q.category, page, limit: 50 }), [sp.toString(), category, selected]);
   const set = (k: string, v: string) => {
     const n = new URLSearchParams(sp);
     if (v) n.set(k, v); else n.delete(k);
@@ -67,9 +69,9 @@ export function Parameters({ category }: { category?: string }) {
       <Crumbs items={[{ label: 'Knowledge Base', to: '/parameters' }, { label: catName ?? 'All Parameters' }]} />
       <div className="row between"><h1>{catName ?? 'All Parameters'}</h1>
         <div className="row"><button className="small" onClick={() => download(`/export?scope=parameters&format=csv${category ? '&category=' + category : ''}`)}>Export CSV</button><button className="small" onClick={() => download(`/export?scope=parameters&format=json${category ? '&category=' + category : ''}`)}>Export JSON</button></div></div>
+      <ModelTabs />
       <div className="row" style={{ marginBottom: 12 }}>
         <input placeholder="Search code, name, description (EN/বাংলা)…" value={q.q ?? ''} onChange={(e) => set('q', e.target.value)} style={{ minWidth: 280 }} aria-label="Search parameters" />
-        <select value={q.model ?? ''} onChange={(e) => set('model', e.target.value)} aria-label="Model"><option value="">All models</option>{models?.map((m: any) => <option key={m.id} value={m.id}>{m.brand} {m.name}</option>)}</select>
         {!category && <select value={q.category ?? ''} onChange={(e) => set('category', e.target.value)} aria-label="Category"><option value="">All categories</option>{tax?.map((c: any) => <option key={c.slug} value={c.slug}>{c.name}</option>)}</select>}
         <select value={q.verification ?? ''} onChange={(e) => set('verification', e.target.value)} aria-label="Verification status"><option value="">Any verification</option>{['Verified', 'Unverified', 'Requires Manual Verification', 'Documentation Conflict'].map((s) => <option key={s}>{s}</option>)}</select>
         <select value={q.evidence ?? ''} onChange={(e) => set('evidence', e.target.value)} aria-label="Evidence status"><option value="">Any evidence</option>{['Explicitly Documented', 'Calculated from Documented Data', 'Cross-Referenced', 'Unverified', 'Conflicting'].map((s) => <option key={s}>{s}</option>)}</select>
@@ -100,7 +102,9 @@ export function Parameters({ category }: { category?: string }) {
 // ============ Common function → brand implementations ============
 export function FunctionPage() {
   const { slug: fslug } = useParams();
-  const { data, error, loading } = useAsync(() => get(`/functions/${fslug}`), [fslug]);
+  const { data: raw, error, loading } = useAsync(() => get(`/functions/${fslug}`), [fslug]);
+  const { selected } = useModels();
+  const data = raw && selected ? { ...raw, parameters: raw.parameters.filter((p: any) => p.model_id === selected), registers: raw.registers.filter((r: any) => r.model_id === selected) } : raw;
   if (error) return <div className="page"><ErrorBox e={error} /></div>;
   if (!data) return <div className="page"><Loading /></div>;
   return (
@@ -109,6 +113,7 @@ export function FunctionPage() {
       <h1>{data.name} <InfoIcon title={data.name} text={data.short_description || 'No description recorded.'} /></h1>
       {data.name_bn && <div className="muted" style={{ marginBottom: 6 }}>{data.name_bn}</div>}
       {data.short_description && <p className="muted prose">{data.short_description} <span className="badge dashed">generic concept — not a manufacturer fact</span></p>}
+      <ModelTabs />
       <h2>Brand-specific implementations</h2>
       <div className="table-wrap"><table>
         <thead><tr><th>Brand / Model</th><th>Code</th><th>Manufacturer name</th><th>Default</th><th>Range</th><th>Equivalence</th><th>Verification</th><th>Source</th></tr></thead>
@@ -471,16 +476,16 @@ export function Compare() {
 export function Registers() {
   const [sp, setSp] = useSearchParams();
   const q = Object.fromEntries(sp.entries());
-  const { data: models } = useAsync(() => get('/models'), []);
-  const { data, error, loading } = useAsync(() => get('/registers', { ...q, page: q.page || 1, limit: 100 }), [sp.toString()]);
+  const { selected } = useModels();
+  const { data, error, loading } = useAsync(() => get('/registers', { ...q, model: selected, page: q.page || 1, limit: 100 }), [sp.toString(), selected]);
   const set = (k: string, v: string) => { const n = new URLSearchParams(sp); v ? n.set(k, v) : n.delete(k); n.delete('page'); setSp(n, { replace: true }); };
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Modbus & RS485' }, { label: 'Register Explorer' }]} />
       <div className="row between"><h1>Modbus Register Explorer</h1><div className="row"><button className="small" onClick={() => download('/export?scope=registers&format=csv')}>Export CSV</button><button className="small" onClick={() => download('/export?scope=registers&format=json')}>Export JSON</button></div></div>
+      <ModelTabs />
       <div className="row" style={{ marginBottom: 12 }}>
         <input placeholder="Address (e.g. 2103, 0x2103, 40100), name…" value={q.q ?? ''} onChange={(e) => set('q', e.target.value)} style={{ minWidth: 300 }} aria-label="Search registers" />
-        <select value={q.model ?? ''} onChange={(e) => set('model', e.target.value)} aria-label="Model"><option value="">All models</option>{models?.map((m: any) => <option key={m.id} value={m.id}>{m.brand} {m.name}</option>)}</select>
         <select value={q.access ?? ''} onChange={(e) => set('access', e.target.value)} aria-label="Access"><option value="">Read / Write</option><option>Read</option><option>Write</option></select>
         <select value={q.verification ?? ''} onChange={(e) => set('verification', e.target.value)} aria-label="Verification"><option value="">Any verification</option>{['Verified', 'Unverified', 'Requires Manual Verification', 'Documentation Conflict'].map((s) => <option key={s}>{s}</option>)}</select>
       </div>
