@@ -670,4 +670,24 @@ ALTER TABLE feedback_requests ADD COLUMN contact_phone TEXT;
 ALTER TABLE feedback_requests ADD COLUMN contact_email TEXT;
 `,
   },
+  {
+    version: 6,
+    name: 'user_categories',
+    sql: /* sql */ `
+CREATE TABLE user_categories (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  name_key TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+  UNIQUE (user_id, name_key)
+);
+CREATE TABLE parameter_user_categories (
+  user_category_id INTEGER NOT NULL REFERENCES user_categories(id) ON DELETE CASCADE,
+  parameter_id INTEGER NOT NULL REFERENCES parameters(id) ON DELETE CASCADE,
+  PRIMARY KEY (user_category_id, parameter_id)
+);
+CREATE INDEX idx_puc_parameter ON parameter_user_categories(parameter_id);
+`,
+  },
 ];

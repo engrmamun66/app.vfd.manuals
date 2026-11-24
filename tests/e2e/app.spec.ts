@@ -736,6 +736,54 @@ test.describe('theme & accessibility basics', () => {
     expect((await alice.request.get('/api/feedback')).status()).toBe(403);
   });
 
+  test('personal categories: private per user, same name allowed across users, system names rejected, assign from table and details', async () => {
+    const sys = (await (await alice.request.get('/api/taxonomy')).json())[0].name as string;
+    await alice.goto('/parameters');
+    await alice.getByRole('button', { name: '+ Add category' }).click();
+    const dlg = alice.getByRole('dialog', { name: 'My categories' });
+    await dlg.getByLabel('New category name').fill(sys.toUpperCase()); // case-insensitive clash with a system category
+    await dlg.getByRole('button', { name: 'Add', exact: true }).click();
+    await expect(dlg.getByRole('alert')).toContainText('system category');
+    await dlg.getByLabel('New category name').fill('My Favourites');
+    await dlg.getByRole('button', { name: 'Add', exact: true }).click();
+    await expect(dlg.locator('.mycat')).toHaveCount(1);
+    await dlg.getByLabel('New category name').fill('my   favourites'); // duplicate for the same user
+    await dlg.getByRole('button', { name: 'Add', exact: true }).click();
+    await expect(dlg.getByRole('alert')).toContainText('already have');
+    await dlg.getByRole('button', { name: 'Close', exact: true }).last().click();
+    // sidebar shows it highlighted
+    const navItem = alice.locator('.sidebar a.nav-link.mine', { hasText: 'My Favourites' });
+    await expect(navItem).toBeVisible();
+    // another user can create the same name and does not see alice's
+    const bobCat = await bob.request.post('/api/my-categories', { data: { name: 'My Favourites' }, headers: { 'X-CSRF-Token': (await (await bob.request.get('/api/auth/me')).json()).csrfToken } });
+    expect(bobCat.status()).toBe(201);
+    const bobList = (await (await bob.request.get('/api/my-categories')).json()).rows;
+    expect(bobList).toHaveLength(1);
+    // assign from the Action column of the table
+    await alice.reload();
+    const row = alice.locator('tbody tr').first();
+    await row.getByRole('button', { name: /^Add|\d/ }).last().click();
+    await alice.getByRole('dialog', { name: 'My categories' }).getByLabel(/My Favourites/).check();
+    await expect(row.locator('.cat-btn.has')).toBeVisible();
+    await alice.keyboard.press('Escape');
+    // list filtered by the personal category
+    await navItem.click();
+    await expect(alice).toHaveURL(/\/my\/\d+$/);
+    await expect(alice.locator('tbody tr')).toHaveCount(1);
+    // details view can assign too
+    await alice.locator('tbody tr a').first().click();
+    await expect(alice.getByLabel(/My Favourites/)).toBeChecked();
+    // bob's own category list is separate and his filter for alice's category id returns nothing
+    const aliceCatId = (await (await alice.request.get('/api/my-categories')).json()).rows[0].id;
+    const asBob = await (await bob.request.get(`/api/parameters?ucat=${aliceCatId}`)).json();
+    expect(asBob.total).toBe(0);
+    // cleanup
+    const csrfA = (await (await alice.request.get('/api/auth/me')).json()).csrfToken;
+    await alice.request.delete(`/api/my-categories/${aliceCatId}`, { headers: { 'X-CSRF-Token': csrfA } });
+    const csrfB = (await (await bob.request.get('/api/auth/me')).json()).csrfToken;
+    await bob.request.delete(`/api/my-categories/${bobList[0].id}`, { headers: { 'X-CSRF-Token': csrfB } });
+  });
+
   test('model tabs: selection persists across reload and pages; alias set in full-screen settings; sidebar collapses', async () => {
     await admin.goto('/parameters');
     const tabs = admin.locator('.model-tabs button');

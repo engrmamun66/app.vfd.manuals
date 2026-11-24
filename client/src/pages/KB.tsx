@@ -12,6 +12,8 @@ import { Crumbs, ModelName, Tip, truncate, ErrorBox, EquivBadge, EvBadge, InfoIc
 import { PageViewer, SplitToggle, SplitView } from '../components/Viewer';
 import { Annotatable, AnnotationDisplayControl, AnnotationScope } from '../components/Annotatable';
 import { SaveBookmarkButton } from './Bookmarks';
+import { useMyCategories } from '../lib/myCategories';
+import { CategoryPicker, MineIcon, ParameterMyCategories } from '../components/MyCategories';
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
@@ -59,14 +61,15 @@ export function Dashboard() {
 }
 
 // ============ Parameters explorer ============
-export function Parameters({ category }: { category?: string }) {
+export function Parameters({ category, userCategory }: { category?: string; userCategory?: number }) {
   const [sp, setSp] = useSearchParams();
   const q = Object.fromEntries(sp.entries());
   const page = Number(q.page) || 1;
   const { selected } = useModels();
   const { showVerification, showEvidence, showExportCsv, showExportJson, showStars, accessButtons } = useUiSettings();
   const { data: tax } = useAsync(() => get('/taxonomy'), []);
-  const { data, error, loading } = useAsync(() => get('/parameters', { ...q, verification: showVerification ? q.verification : undefined, evidence: showEvidence ? q.evidence : undefined, model: selected, category: category ?? q.category, page, limit: 50 }), [sp.toString(), category, selected, showVerification, showEvidence]);
+  const mineCats = useMyCategories();
+  const { data, error, loading, setData, reload } = useAsync(() => get('/parameters', { ...q, verification: showVerification ? q.verification : undefined, evidence: showEvidence ? q.evidence : undefined, model: selected, category: category ?? q.category, ucat: userCategory ?? q.ucat, page, limit: 50 }), [sp.toString(), category, userCategory, selected, showVerification, showEvidence]);
   const set = (k: string, v: string) => {
     const n = new URLSearchParams(sp);
     if (v) n.set(k, v); else n.delete(k);
@@ -76,17 +79,24 @@ export function Parameters({ category }: { category?: string }) {
   const { settings } = useAuth();
   const split = !!settings?.split_view?.enabled;
   const [preview, setPreview] = useState<number | null>(null);
-  const catName = category && tax ? tax.find((c: any) => c.slug === category)?.name : null;
+  const myName = userCategory ? mineCats.categories.find((c) => c.id === userCategory)?.name ?? (mineCats.loaded ? 'Category not found' : '…') : null;
+  const catName = myName ?? (category && tax ? tax.find((c: any) => c.slug === category)?.name : null);
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Knowledge Base', to: '/parameters' }, { label: catName ?? 'All Parameters' }]} />
-      <div className="row between"><h1>{catName ?? 'All Parameters'}</h1>
+      <div className="row between"><h1>{myName && <><MineIcon size={20} /> </>}{catName ?? 'All Parameters'}</h1>
         <div className="row"><SplitToggle />{showExportCsv && <button className="small" onClick={() => download(`/export?scope=parameters&format=csv${category ? '&category=' + category : ''}`)}>Export CSV</button>}{showExportJson && <button className="small" onClick={() => download(`/export?scope=parameters&format=json${category ? '&category=' + category : ''}`)}>Export JSON</button>}<OriginalPdfButton /></div></div>
       <ModelTabs />
       <SplitView enabled={split} leftTitle="Parameters" rightTitle="Record preview" right={<RecordPreview kind="parameter" id={preview} />} left={<>
       <div className="row" style={{ marginBottom: 12 }}>
         <SearchBox icon="filter" placeholder="Filter this list: code, name, description…" value={q.q ?? ''} onChange={(v) => set('q', v)} style={{ minWidth: 300 }} aria-label="Search parameters" />
-        {!category && <select value={q.category ?? ''} onChange={(e) => set('category', e.target.value)} aria-label="Category"><option value="">All categories</option>{tax?.map((c: any) => <option key={c.slug} value={c.slug}>{c.name}</option>)}</select>}
+        {!category && !userCategory && <select value={q.ucat ? `my:${q.ucat}` : q.category ?? ''} aria-label="Category" onChange={(e) => {
+          const v = e.target.value;
+          const n = new URLSearchParams(sp);
+          n.delete('category'); n.delete('ucat'); n.delete('page');
+          if (v.startsWith('my:')) n.set('ucat', v.slice(3)); else if (v) n.set('category', v);
+          setSp(n, { replace: true });
+        }}><option value="">All categories</option>{tax?.map((c: any) => <option key={c.slug} value={c.slug}>{c.name}</option>)}{mineCats.categories.length > 0 && <optgroup label="★ My categories">{mineCats.categories.map((c) => <option key={c.id} value={`my:${c.id}`} className="opt-mine">● {c.name}</option>)}</optgroup>}</select>}
         {showStars && <div className="star-group" role="radiogroup" aria-label="Importance">{([['', 'All', 0], ['Important', '3 stars — Important', 3], ['Medium', '2 stars — Medium', 2], ['Optional', '1 star — Optional', 1]] as [string, string, number][]).map(([v, label, n]) => <button key={v} role="radio" aria-checked={(q.importance ?? '') === v} title={label} className={(q.importance ?? '') === v ? 'active' : ''} onClick={() => set('importance', v)}>{n === 0 ? 'All' : Array.from({ length: n }, (_, i) => <StarIcon key={i} />)}</button>)}</div>}
         {!showStars && <select value={q.importance ?? ''} onChange={(e) => set('importance', e.target.value)} aria-label="Importance"><option value="">Any importance</option><option>Important</option><option>Medium</option><option>Optional</option></select>}
         {showEvidence && <select value={q.evidence ?? ''} onChange={(e) => set('evidence', e.target.value)} aria-label="Evidence status"><option value="">Any evidence</option>{['Explicitly Documented', 'Calculated from Documented Data', 'Cross-Referenced', 'Unverified', 'Conflicting'].map((s) => <option key={s}>{s}</option>)}</select>}
@@ -98,7 +108,7 @@ export function Parameters({ category }: { category?: string }) {
       {loading && !data ? <Loading /> : (
         <>
           <div className="table-wrap"><table>
-            <thead><tr><th>Brand / Model</th><th>Code</th><th>Name</th><th>Common function</th><th>Unit</th><th>Default</th><th>Range</th><th>Importance</th><th>Verification</th></tr></thead>
+            <thead><tr><th>Brand / Model</th><th>Code</th><th>Name</th><th>Common function</th><th>Unit</th><th>Default</th><th>Range</th><th>Importance</th><th>Verification</th><th>Action</th></tr></thead>
             <tbody>{data?.rows.map((p: any) => (
               <tr key={p.id} className={split && preview === p.id ? 'sel' : ''} style={split ? { cursor: 'pointer' } : undefined} onClick={(e) => { if (split && !(e.target as HTMLElement).closest('a')) setPreview(p.id); }}>
                 <td>{p.brand}<div className="small-text muted"><ModelName name={p.model} brand={p.brand} /></div></td>
@@ -109,6 +119,7 @@ export function Parameters({ category }: { category?: string }) {
                 <td>{p.min_value || p.max_value ? `${p.min_value ?? '?'} … ${p.max_value ?? '?'}` : <Val v={null} />}</td>
                 <td><ImportanceBadge v={p.importance} /></td>
                 <td><VerifBadge s={p.verification_status} /></td>
+                <td onClick={(e) => e.stopPropagation()}><CategoryPicker parameterId={p.id} value={p.my_category_ids ?? []} onChange={(ids) => { if (userCategory && !ids.includes(userCategory)) reload(); else data && setData({ ...data, rows: data.rows.map((r: any) => (r.id === p.id ? { ...r, my_category_ids: ids } : r)) }); }} /></td>
               </tr>))}
               {!data?.rows.length && <tr><td colSpan={9} className="empty">No parameters match. Parameters appear after staged import records are approved in the Verification Center.</td></tr>}</tbody></table></div>
           {data && <Pager page={data.page} limit={data.limit} total={data.total} onPage={(p) => { const n = new URLSearchParams(sp); n.set('page', String(p)); setSp(n); }} />}
@@ -346,6 +357,7 @@ export function ParameterResearch() {
                 <Field k="Unit"><Val v={d.unit} /></Field><Field k="Default value" help="Exactly as printed in the manual. Destination/capacity-dependent defaults keep the manual's wording."><Val v={d.default_value} /></Field>
                 <Field k="Minimum"><Val v={d.min_value} /></Field><Field k="Maximum"><Val v={d.max_value} /></Field><Field k="Resolution"><Val v={d.resolution} /></Field>
                 <Field k="Access"><Val v={d.access_type} /></Field>
+                <Field k="My categories" help="Your own private categories. Only you can see them."><ParameterMyCategories parameterId={d.id} /></Field>
               </tbody></table></div>
               {d.equivalence_note && <div className="ok-box"><b>Equivalence note:</b> {d.equivalence_note}</div>}
               {user?.role === 'super_admin' && <ParameterEditor d={d} onSaved={reload} />}

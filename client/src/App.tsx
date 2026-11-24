@@ -11,6 +11,8 @@ import { AnnotationsPage } from './pages/AnnotationsPage';
 import { DocumentPage, ImportPage, Library, RevisionViewer } from './pages/Library';
 import { VerificationCenter } from './pages/Verification';
 import { FeedbackAdmin } from './pages/Feedback';
+import { MyCategoriesProvider, useMyCategories } from './lib/myCategories';
+import { MineIcon, MyCategoriesModal } from './components/MyCategories';
 import { FeedbackModal } from './components/FeedbackModal';
 import { AdminContent, AdminLogs, AdminSettings, AdminUsers, MySettings } from './pages/Admin';
 import { Loading, SearchBox, useAsync } from './components/ui';
@@ -22,10 +24,10 @@ import { DialogProvider } from './components/dialogs';
 
 const HotkeyCtx = createContext<{ keys: Map<string, string>; show: boolean }>({ keys: new Map(), show: false });
 
-function Nav({ to, children, sub }: { to: string; children: React.ReactNode; sub?: boolean }) {
+function Nav({ to, children, sub, mine }: { to: string; children: React.ReactNode; sub?: boolean; mine?: boolean }) {
   const { keys, show } = useContext(HotkeyCtx);
   const k = keys.get(to);
-  return <NavLink to={to} end className={({ isActive }) => `nav-link ${sub ? 'sub' : ''} ${isActive ? 'active' : ''}`}>{children}{show && k && <kbd className="key-badge" aria-hidden="true">{k.toUpperCase()}</kbd>}</NavLink>;
+  return <NavLink to={to} end className={({ isActive }) => `nav-link ${sub ? 'sub' : ''} ${mine ? 'mine' : ''} ${isActive ? 'active' : ''}`}>{children}{show && k && <kbd className="key-badge" aria-hidden="true">{k.toUpperCase()}</kbd>}</NavLink>;
 }
 
 /** Assigns each nav item a unique letter: word initials first, then any remaining letter of its label, then digits. */
@@ -80,7 +82,7 @@ function GlobalSearch() {
 function Shell() {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
-  return <ModelsProvider><ShellInner /></ModelsProvider>;
+  return <ModelsProvider><MyCategoriesProvider><ShellInner /></MyCategoriesProvider></ModelsProvider>;
 }
 
 function ShellInner() {
@@ -95,6 +97,7 @@ function ShellInner() {
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem('sidebar-collapsed') === '1'; } catch { return false; } });
   const toggleSidebar = () => setCollapsed((c) => { try { localStorage.setItem('sidebar-collapsed', c ? '0' : '1'); } catch { /* ignore */ } return !c; });
   const { data: tax } = useAsync(() => get('/taxonomy'), []);
+  const mine = useMyCategories();
   const isAdmin = user?.role === 'super_admin';
   const nav = useNavigate();
   const sections = useMemo(() => {
@@ -170,6 +173,13 @@ function ShellInner() {
             {sec.title && <div className="nav-group">{sec.title}</div>}
             {sec.items.map(([to, label, sub]) => {
               if (sub && !catsOpen) return null;
+              if (to === '/knowledge') return (
+                <Fragment key={to}>
+                  {catsOpen && mine.categories.map((c) => <Nav key={`my${c.id}`} to={`/my/${c.id}`} sub mine><MineIcon /> {c.name}</Nav>)}
+                  {catsOpen && <button type="button" className="nav-add ghost" onClick={mine.openManager} title="Create or manage your own categories">+ Add category</button>}
+                  <Nav to={to} sub={sub}>{label}</Nav>
+                </Fragment>
+              );
               if (to !== '/parameters') return <Nav key={to} to={to} sub={sub}>{label}</Nav>;
               return (
                 <div key={to} className="nav-parent">
@@ -206,6 +216,7 @@ function ShellInner() {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
           </button>
         </div>
+        <MyCategoriesModal />
         {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
         {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
         <div key={loc.pathname} className={settings?.page_transition && settings.page_transition !== 'none' ? `pt-${settings.page_transition}` : undefined} style={{ '--pt-ms': `${settings?.page_transition_ms ?? 300}ms` } as React.CSSProperties}><ErrorBoundary resetKey={loc.pathname}><Outlet /></ErrorBoundary></div>
@@ -213,6 +224,11 @@ function ShellInner() {
     </div>
     </HotkeyCtx.Provider>
   );
+}
+
+function MyCategoryRoute() {
+  const { id } = useParams();
+  return <Parameters key={`my${id}`} userCategory={Number(id)} />;
 }
 
 function CategoryRoute() {
@@ -231,6 +247,7 @@ export default function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/parameters" element={<Parameters />} />
         <Route path="/kb/:slug" element={<CategoryRoute />} />
+        <Route path="/my/:id" element={<MyCategoryRoute />} />
         <Route path="/knowledge" element={<KnowledgePage />} />
         <Route path="/function/:slug" element={<FunctionPage />} />
         <Route path="/model/:id" element={<ModelPage />} />

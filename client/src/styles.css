@@ -417,3 +417,20 @@ a.brand:focus-visible { outline: 2px solid var(--fg); outline-offset: -2px; }
 .nav-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); padding: 3px 5px; border: 0; line-height: 0; color: var(--fg-muted); }
 .nav-toggle:hover { background: var(--bg-hover); color: var(--fg); }
 .nav-parent .key-badge { right: 36px; }
+
+/* ---------- personal (user-created) categories: marked by an icon, a left border and a tinted background ---------- */
+.mine-icon { flex: none; vertical-align: -2px; opacity: .8; }
+.nav-link.mine { border-left: 3px solid var(--fg); background: color-mix(in srgb, var(--fg) 7%, transparent); display: flex; align-items: center; gap: 6px; }
+.nav-link.mine.active { background: color-mix(in srgb, var(--fg) 14%, var(--bg)); }
+.nav-add { display: block; width: 100%; text-align: left; padding: 5px 16px 5px 34px; border: 0; background: none; color: var(--fg-muted); font-size: .8rem; cursor: pointer; }
+.nav-add:hover { color: var(--fg); background: var(--sidebar-hover); }
+.mycat { border-left: 3px solid var(--fg); background: color-mix(in srgb, var(--fg) 7%, transparent); padding: 5px 8px; display: flex; align-items: center; gap: 8px; }
+.mycat-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.cat-checklist { display: grid; gap: 4px; min-width: 200px; }
+.cat-opt { cursor: pointer; font-weight: 400; color: var(--fg); margin: 0; }
+.cat-opt.on { background: color-mix(in srgb, var(--fg) 14%, transparent); font-weight: 600; }
+.cat-opt input { margin: 0; }
+.cat-btn { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.cat-btn.has { border-left: 3px solid var(--fg); }
+.cat-pop { z-index: 60; padding: 10px; background: var(--bg); border: 1px solid var(--line); box-shadow: 0 6px 18px rgba(0,0,0,.2); }
+option.opt-mine { font-weight: 600; }

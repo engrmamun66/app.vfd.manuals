@@ -220,6 +220,11 @@ function paramFilters(q: any, req: any) {
     if (ids.length) where.push(`p.model_id IN (${ids.map(() => '?').join(',')})`), args.push(...ids);
   }
   if (q.category) (where.push('c.slug = ?'), args.push(String(q.category)));
+  if (q.ucat && req.user) {
+    // personal category (only the owner's own categories can match)
+    where.push('EXISTS (SELECT 1 FROM parameter_user_categories puc JOIN user_categories uc ON uc.id = puc.user_category_id WHERE puc.parameter_id = p.id AND uc.id = ? AND uc.user_id = ?)');
+    args.push(Number(q.ucat) || 0, req.user.id);
+  }
   if (q.function) (where.push('f.slug = ?'), args.push(String(q.function)));
   if (q.verification) (where.push('p.verification_status = ?'), args.push(String(q.verification)));
   if (q.evidence) (where.push('p.evidence_status = ?'), args.push(String(q.evidence)));
@@ -251,8 +256,15 @@ kbRouter.get(
            m.id model_id, m.name model, b.name brand, b.slug brand_slug, f.slug function_slug, f.name function_name, f.name_bn function_name_bn, c.slug category_slug, c.name category
          ${PARAM_FROM} WHERE ${where} ORDER BY ${cdOrder('cdb')}, b.name, ${cdOrder('cdm')}, m.name, ${cdOrder('cdp')}, CASE p.importance WHEN 'Important' THEN 0 WHEN 'Medium' THEN 1 WHEN 'Optional' THEN 2 ELSE 3 END, p.code LIMIT ? OFFSET ?`,
       )
-      .all(...args, limit, offset);
-    res.json({ total, page, limit, rows });
+      .all(...args, limit, offset) as any[];
+    // the caller's own personal categories per row (never other users')
+    const mine = new Map<number, number[]>();
+    if (rows.length && req.user) {
+      const ph = rows.map(() => '?').join(',');
+      for (const m of db.prepare(`SELECT puc.parameter_id pid, puc.user_category_id cid FROM parameter_user_categories puc JOIN user_categories uc ON uc.id = puc.user_category_id WHERE uc.user_id = ? AND puc.parameter_id IN (${ph})`).all(req.user.id, ...rows.map((r) => r.id)) as any[])
+        (mine.get(m.pid) ?? mine.set(m.pid, []).get(m.pid)!).push(m.cid);
+    }
+    res.json({ total, page, limit, rows: rows.map((r) => ({ ...r, my_category_ids: mine.get(r.id) ?? [] })) });
   }),
 );
 
