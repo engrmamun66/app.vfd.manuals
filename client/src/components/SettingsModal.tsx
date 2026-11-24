@@ -91,12 +91,12 @@ function ModelAliases() {
 
 function UiSettings() {
   const { settings, updateSettings } = useAuth();
-  const u = (settings?.ui_settings ?? {}) as { show_verification_filter?: boolean; show_evidence_filter?: boolean; show_export_csv?: boolean; show_export_json?: boolean };
+  const u = (settings?.ui_settings ?? {}) as { show_verification_filter?: boolean; show_evidence_filter?: boolean; show_export_csv?: boolean; show_export_json?: boolean; importance_filter_style?: 'dropdown' | 'stars'; access_filter_style?: 'dropdown' | 'buttons' };
   const [err, setErr] = useState<string | null>(null);
-  const set = async (k: keyof typeof u, v: boolean) => {
-    try { setErr(null); await updateSettings({ ui_settings: { show_verification_filter: u.show_verification_filter === true, show_evidence_filter: u.show_evidence_filter === true, show_export_csv: u.show_export_csv === true, show_export_json: u.show_export_json === true, [k]: v } }); } catch (e: any) { setErr(e.message); }
+  const set = async (k: keyof typeof u, v: boolean | string) => {
+    try { setErr(null); await updateSettings({ ui_settings: { ...u, [k]: v } } as any); } catch (e: any) { setErr(e.message); }
   };
-  const rows: [keyof typeof u, string, string][] = [
+  const rows: [Exclude<keyof typeof u, 'importance_filter_style' | 'access_filter_style'>, string, string][] = [
     ['show_verification_filter', 'Show verification dropdown', 'Adds the "Any verification" filter to the Parameters and Modbus Register lists.'],
     ['show_evidence_filter', 'Show evidence dropdown', 'Adds the "Any evidence" filter to the Parameters list.'],
     ['show_export_csv', 'Show Export CSV button', 'Shows the "Export CSV" button on the Parameters, Modbus Register and Compare pages.'],
@@ -110,6 +110,20 @@ function UiSettings() {
       <div className="table-wrap"><table>
         <thead><tr><th>Setting</th><th>Status</th><th>Switch</th></tr></thead>
         <tbody>
+          <tr>
+            <td><b>Importance filter style</b><div className="small-text muted">How the importance filter appears on the Parameters list: a dropdown, or an All / 3 / 2 / 1 star button group (3 = Important, 2 = Medium, 1 = Optional).</div></td>
+            <td><span className="badge strong">{u.importance_filter_style === 'stars' ? 'Stars' : 'Dropdown'}</span></td>
+            <td><div className="seg" role="radiogroup" aria-label="Importance filter style">
+              {([['dropdown', 'Dropdown'], ['stars', 'Stars']] as const).map(([k, l]) => <button key={k} role="radio" aria-checked={(u.importance_filter_style ?? 'dropdown') === k} className={(u.importance_filter_style ?? 'dropdown') === k ? 'active' : ''} onClick={() => set('importance_filter_style', k)}>{l}</button>)}
+            </div></td>
+          </tr>
+          <tr>
+            <td><b>Access filter style</b><div className="small-text muted">How the Read / Write filter appears on the Parameters and Modbus Register lists: a dropdown, or an All / Read / Write button group.</div></td>
+            <td><span className="badge strong">{u.access_filter_style === 'buttons' ? 'Buttons' : 'Dropdown'}</span></td>
+            <td><div className="seg" role="radiogroup" aria-label="Access filter style">
+              {([['dropdown', 'Dropdown'], ['buttons', 'Buttons']] as const).map(([k, l]) => <button key={k} role="radio" aria-checked={(u.access_filter_style ?? 'dropdown') === k} className={(u.access_filter_style ?? 'dropdown') === k ? 'active' : ''} onClick={() => set('access_filter_style', k)}>{l}</button>)}
+            </div></td>
+          </tr>
           {rows.map(([k, label, hint]) => {
             const on = u[k] === true;
             return (

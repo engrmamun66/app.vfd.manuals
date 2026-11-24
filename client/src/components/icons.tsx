@@ -19,3 +19,6 @@ export const MoonIcon = () => (
 export const MonitorIcon = () => (
   <svg {...base} width={15} height={15}><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
 );
+export const StarIcon = ({ filled = true, size = 14 }: { filled?: boolean; size?: number }) => (
+  <svg {...base} width={size} height={size} fill={filled ? 'currentColor' : 'none'}><path d="M12 2.5l2.94 5.96 6.56.95-4.75 4.63 1.12 6.54L12 17.5l-5.87 3.08 1.12-6.54L2.5 9.41l6.56-.95z" /></svg>
+);

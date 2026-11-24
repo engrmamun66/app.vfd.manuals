@@ -53,7 +53,7 @@ function validate(key: string, v: any) {
     }
     case 'ui_settings': {
       if (typeof v !== 'object' || v === null || Array.isArray(v)) throw badRequest('ui_settings must be an object');
-      return { show_verification_filter: v.show_verification_filter === true, show_evidence_filter: v.show_evidence_filter === true, show_export_csv: v.show_export_csv === true, show_export_json: v.show_export_json === true };
+      return { show_verification_filter: v.show_verification_filter === true, show_evidence_filter: v.show_evidence_filter === true, show_export_csv: v.show_export_csv === true, show_export_json: v.show_export_json === true, importance_filter_style: v.importance_filter_style === 'stars' ? 'stars' : 'dropdown', access_filter_style: v.access_filter_style === 'buttons' ? 'buttons' : 'dropdown' };
     }
     case 'model_order':
       if (!Array.isArray(v)) throw badRequest('model_order must be an array');

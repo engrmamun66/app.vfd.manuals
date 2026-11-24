@@ -4,6 +4,7 @@ import { get, patch, post, fmtDate } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { ModelTabs } from '../components/ModelTabs';
 import { OriginalPdfButton } from '../components/OriginalPdfButton';
+import { StarIcon } from '../components/icons';
 import { ImportanceBadge } from './Knowledge';
 import { useModels } from '../lib/models';
 import { useUiSettings } from '../lib/auth';
@@ -58,7 +59,7 @@ export function Parameters({ category }: { category?: string }) {
   const q = Object.fromEntries(sp.entries());
   const page = Number(q.page) || 1;
   const { selected } = useModels();
-  const { showVerification, showEvidence, showExportCsv, showExportJson } = useUiSettings();
+  const { showVerification, showEvidence, showExportCsv, showExportJson, showStars, accessButtons } = useUiSettings();
   const { data: tax } = useAsync(() => get('/taxonomy'), []);
   const { data, error, loading } = useAsync(() => get('/parameters', { ...q, verification: showVerification ? q.verification : undefined, evidence: showEvidence ? q.evidence : undefined, model: selected, category: category ?? q.category, page, limit: 50 }), [sp.toString(), category, selected, showVerification, showEvidence]);
   const set = (k: string, v: string) => {
@@ -81,10 +82,12 @@ export function Parameters({ category }: { category?: string }) {
       <div className="row" style={{ marginBottom: 12 }}>
         <SearchBox icon="filter" placeholder="Filter this list: code, name, description…" value={q.q ?? ''} onChange={(v) => set('q', v)} style={{ minWidth: 300 }} aria-label="Search parameters" />
         {!category && <select value={q.category ?? ''} onChange={(e) => set('category', e.target.value)} aria-label="Category"><option value="">All categories</option>{tax?.map((c: any) => <option key={c.slug} value={c.slug}>{c.name}</option>)}</select>}
-        <select value={q.importance ?? ''} onChange={(e) => set('importance', e.target.value)} aria-label="Importance"><option value="">Any importance</option><option>Important</option><option>Medium</option><option>Optional</option></select>
-        {showVerification && <select value={q.verification ?? ''} onChange={(e) => set('verification', e.target.value)} aria-label="Verification status"><option value="">Any verification</option>{['Verified', 'Unverified', 'Requires Manual Verification', 'Documentation Conflict'].map((s) => <option key={s}>{s}</option>)}</select>}
+        {showStars && <div className="star-group" role="radiogroup" aria-label="Importance">{([['', 'All', 0], ['Important', '3 stars — Important', 3], ['Medium', '2 stars — Medium', 2], ['Optional', '1 star — Optional', 1]] as [string, string, number][]).map(([v, label, n]) => <button key={v} role="radio" aria-checked={(q.importance ?? '') === v} title={label} className={(q.importance ?? '') === v ? 'active' : ''} onClick={() => set('importance', v)}>{n === 0 ? 'All' : Array.from({ length: n }, (_, i) => <StarIcon key={i} />)}</button>)}</div>}
+        {!showStars && <select value={q.importance ?? ''} onChange={(e) => set('importance', e.target.value)} aria-label="Importance"><option value="">Any importance</option><option>Important</option><option>Medium</option><option>Optional</option></select>}
         {showEvidence && <select value={q.evidence ?? ''} onChange={(e) => set('evidence', e.target.value)} aria-label="Evidence status"><option value="">Any evidence</option>{['Explicitly Documented', 'Calculated from Documented Data', 'Cross-Referenced', 'Unverified', 'Conflicting'].map((s) => <option key={s}>{s}</option>)}</select>}
-        <select value={q.access ?? ''} onChange={(e) => set('access', e.target.value)} aria-label="Access type"><option value="">Read / Write</option><option>Read</option><option>Write</option></select>
+        {accessButtons && <div className="star-group" role="radiogroup" aria-label="Access">{([['', 'All'], ['Read', 'Read'], ['Write', 'Write']] as [string, string][]).map(([v, l]) => <button key={v} role="radio" aria-checked={(q.access ?? '') === v} className={(q.access ?? '') === v ? 'active' : ''} onClick={() => set('access', v)}>{l}</button>)}</div>}
+        {!accessButtons && <select value={q.access ?? ''} onChange={(e) => set('access', e.target.value)} aria-label="Access type"><option value="">Read / Write</option><option>Read</option><option>Write</option></select>}
+        {showVerification && <select value={q.verification ?? ''} onChange={(e) => set('verification', e.target.value)} aria-label="Verification status"><option value="">Any verification</option>{['Verified', 'Unverified', 'Requires Manual Verification', 'Documentation Conflict'].map((s) => <option key={s}>{s}</option>)}</select>}
       </div>
       <ErrorBox e={error} />
       {loading && !data ? <Loading /> : (
@@ -523,7 +526,7 @@ export function Registers() {
   const [sp, setSp] = useSearchParams();
   const q = Object.fromEntries(sp.entries());
   const { selected } = useModels();
-  const { showVerification, showExportCsv, showExportJson } = useUiSettings();
+  const { showVerification, showExportCsv, showExportJson, accessButtons } = useUiSettings();
   const { data, error, loading } = useAsync(() => get('/registers', { ...q, verification: showVerification ? q.verification : undefined, model: selected, page: q.page || 1, limit: 100 }), [sp.toString(), selected, showVerification]);
   const { settings } = useAuth();
   const split = !!settings?.split_view?.enabled;
@@ -537,7 +540,8 @@ export function Registers() {
       <SplitView enabled={split} leftTitle="Registers" rightTitle="Record preview" right={<RecordPreview kind="register" id={preview} />} left={<>
       <div className="row" style={{ marginBottom: 12 }}>
         <SearchBox icon="filter" placeholder="Filter this list: address (2103, 0x2103, 40100) or name…" value={q.q ?? ''} onChange={(v) => set('q', v)} style={{ minWidth: 340 }} aria-label="Search registers" />
-        <select value={q.access ?? ''} onChange={(e) => set('access', e.target.value)} aria-label="Access"><option value="">Read / Write</option><option>Read</option><option>Write</option></select>
+        {accessButtons && <div className="star-group" role="radiogroup" aria-label="Access">{([['', 'All'], ['Read', 'Read'], ['Write', 'Write']] as [string, string][]).map(([v, l]) => <button key={v} role="radio" aria-checked={(q.access ?? '') === v} className={(q.access ?? '') === v ? 'active' : ''} onClick={() => set('access', v)}>{l}</button>)}</div>}
+        {!accessButtons && <select value={q.access ?? ''} onChange={(e) => set('access', e.target.value)} aria-label="Access"><option value="">Read / Write</option><option>Read</option><option>Write</option></select>}
         {showVerification && <select value={q.verification ?? ''} onChange={(e) => set('verification', e.target.value)} aria-label="Verification"><option value="">Any verification</option>{['Verified', 'Unverified', 'Requires Manual Verification', 'Documentation Conflict'].map((s) => <option key={s}>{s}</option>)}</select>}
       </div>
       <p className="muted small-text">Search matches only addresses present in the database (original text and stored mathematical conversions).</p>

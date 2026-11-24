@@ -228,8 +228,8 @@ describe('multi-user isolation (IDOR) and public/private annotations', () => {
   });
 
   it('ui_settings default to off, are per-user and validated', async () => {
-    expect((await r(alice, '/me/settings')).body.ui_settings).toEqual({ show_verification_filter: false, show_evidence_filter: false, show_export_csv: false, show_export_json: false });
-    expect((await w(alice, 'patch', '/me/settings').send({ ui_settings: { show_verification_filter: true, show_evidence_filter: 'yes' } })).body.ui_settings).toEqual({ show_verification_filter: true, show_evidence_filter: false, show_export_csv: false, show_export_json: false });
+    expect((await r(alice, '/me/settings')).body.ui_settings).toEqual({ show_verification_filter: false, show_evidence_filter: false, show_export_csv: false, show_export_json: false, importance_filter_style: 'dropdown', access_filter_style: 'dropdown' });
+    expect((await w(alice, 'patch', '/me/settings').send({ ui_settings: { show_verification_filter: true, show_evidence_filter: 'yes' } })).body.ui_settings).toEqual({ show_verification_filter: true, show_evidence_filter: false, show_export_csv: false, show_export_json: false, importance_filter_style: 'dropdown', access_filter_style: 'dropdown' });
     expect((await r(bob, '/me/settings')).body.ui_settings.show_verification_filter).toBe(false);
     expect((await w(alice, 'patch', '/me/settings').send({ ui_settings: 'x' })).status).toBe(400);
     await w(alice, 'patch', '/me/settings').send({ ui_settings: { show_verification_filter: false, show_evidence_filter: false } });
