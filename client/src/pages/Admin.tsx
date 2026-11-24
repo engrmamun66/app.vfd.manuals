@@ -228,7 +228,7 @@ export function MySettings({ embedded }: { embedded?: boolean } = {}) {
           <ErrorBox e={msg instanceof Error ? msg : null} />
           <div className="row"><button className="primary" onClick={async () => { try { await patch('/auth/profile', p); setMsg({ ok: true }); refresh(); } catch (e) { setMsg(e); } }}>Save profile</button>{!embedded && <Link className="btn" to="/settings/password">Change password</Link>}</div></div>
         <div className="card"><h2>Preferences</h2>
-          <div className="field"><label>Language of explanations</label><select value={settings?.language} onChange={(e) => updateSettings({ language: e.target.value as any })}><option value="en">English</option><option value="bn">English + বাংলা</option></select></div>
+          <div className="field"><label>Language of explanations</label><select value={settings?.language} onChange={(e) => updateSettings({ language: e.target.value as any })}><option value="en">English</option></select></div>
           <div className="field"><label>Theme</label><select value={settings?.theme} onChange={(e) => updateSettings({ theme: e.target.value as any })}><option value="light">Light (black & white)</option><option value="dark">Dark</option></select></div>
           <h3>Your storage</h3>{st && <div className="small-text">{fmtBytes(st.total)} of {fmtBytes(st.quota)} used ({st.percent}%) · {st.files} files · max file {fmtBytes(st.maxFileBytes)}</div>}</div>
       </div>

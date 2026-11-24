@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { get } from '../lib/api';
-import { Crumbs, InfoIcon, useAsync } from '../components/ui';
+import { Crumbs, InfoIcon, useAsync, ModelName } from '../components/ui';
 import { ModelTabs } from '../components/ModelTabs';
 import { useModels } from '../lib/models';
 
@@ -58,7 +58,6 @@ export function AddressConverter() {
         <tr><td><b>3xxxx / 4xxxx reference</b></td><td>A legacy notation combining object type and a number (e.g. “4xxxx” holding registers).</td><td>Only where a manual explicitly uses it</td></tr>
         <tr><td><b>PLC instruction address</b></td><td>What you type into the PLC communication instruction (e.g. a data pointer / starting address parameter). Its numbering convention is defined by the PLC vendor.</td><td>PLC vendor documentation</td></tr>
       </tbody></table></div>
-      <p className="muted small-text">See <Link to="/modbus/plc">PLC Integration</Link> for what is documented about Siemens S7-1200 communication instructions in the imported documents.</p>
     </div>
   );
 }
@@ -76,33 +75,12 @@ export function CommSettings() {
       <p className="muted">Slave address, baud rate, parity/stop bits, timeouts and loss behavior — only parameters from approved records.</p>
       <ModelTabs />
       <div className="table-wrap"><table><thead><tr><th>Function</th><th>Brand / Model</th><th>Code</th><th>Name</th><th>Default</th><th>Range</th><th>Verification</th></tr></thead><tbody>
-        {rows.map((p: any) => <tr key={p.id}><td>{p.function_name ?? '—'}</td><td>{p.brand} <span className="muted">{p.model}</span></td><td className="code"><Link to={`/parameter/${p.id}`}>{p.code}</Link></td><td>{p.name}</td><td>{p.default_value ?? <span className="faint">Not Documented</span>}</td><td>{p.min_value || p.max_value ? `${p.min_value ?? '?'} … ${p.max_value ?? '?'}` : <span className="faint">Not Documented</span>}</td><td><span className="badge dashed">{p.verification_status}</span></td></tr>)}
+        {rows.map((p: any) => <tr key={p.id}><td>{p.function_name ?? '—'}</td><td>{p.brand} <span className="muted"><ModelName name={p.model} /></span></td><td className="code"><Link to={`/parameter/${p.id}`}>{p.code}</Link></td><td>{p.name}</td><td>{p.default_value ?? <span className="faint">Not Documented</span>}</td><td>{p.min_value || p.max_value ? `${p.min_value ?? '?'} … ${p.max_value ?? '?'}` : <span className="faint">Not Documented</span>}</td><td><span className="badge dashed">{p.verification_status}</span></td></tr>)}
         {!rows.length && <tr><td colSpan={7} className="empty">No communication parameters approved yet.</td></tr>}
       </tbody></table></div>
     </div>
   );
 }
 
-const S7_TOPICS = ['MB_COMM_LOAD', 'MB_MASTER', 'Modbus RTU communication module configuration (CM 1241 RS485 / CB 1241)', 'Register addressing convention (MODE / DATA_ADDR)', 'Function code selection', 'Data pointer (DATA_PTR) configuration', 'Data type handling', 'Read / write operations', 'Communication status (DONE / BUSY / ERROR / STATUS)', 'Error handling', 'TIA Portal / firmware version differences'];
-
-export function PlcIntegration() {
-  const [term, setTerm] = useState('MB_MASTER');
-  const { data } = useAsync(() => get('/search', { q: term }), [term]);
-  return (
-    <div className="page">
-      <Crumbs items={[{ label: 'Modbus & RS485' }, { label: 'PLC Integration (Siemens S7-1200)' }]} />
-      <h1>PLC Integration — Siemens S7-1200</h1>
-      <div className="ok-box prose"><b>No Siemens S7-1200 / TIA Portal documentation has been imported into this database.</b> To avoid inventing instruction parameters or address conventions, none are shown here. Import the relevant Siemens PLC communication manuals (Documentation Library → Import) and they become searchable below, with page references.</div>
-      <h2>Topics to document (status)</h2>
-      <div className="table-wrap"><table><thead><tr><th>Topic</th><th>Status</th></tr></thead><tbody>{S7_TOPICS.map((t) => <tr key={t}><td>{t}</td><td><span className="badge dashed">Not Documented</span></td></tr>)}</tbody></table></div>
-      <h2 style={{ marginTop: 20 }}>Search imported documents</h2>
-      <div className="row"><input value={term} onChange={(e) => setTerm(e.target.value)} aria-label="Search imported documents" style={{ minWidth: 280 }} /></div>
-      <div className="stack" style={{ marginTop: 10 }}>
-        {data?.pages?.map((p: any) => <div className="card" key={p.page_id}><Link to={`/library/revision/${p.revision_id}/page/${p.page_index}`}>{p.document_title} — page {p.page_index}</Link> <span className="badge dashed">{p.text_source}</span><div className="snippet small-text" dangerouslySetInnerHTML={{ __html: esc(p.snippet) }} /></div>)}
-        {data && !data.pages?.length && <p className="muted">No page in the imported documents mentions “{term}”.</p>}
-      </div>
-    </div>
-  );
-}
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\[\[/g, '<mark>').replace(/\]\]/g, '</mark>');
 export const escSnippet = esc;

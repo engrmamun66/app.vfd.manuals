@@ -350,7 +350,7 @@ kbRouter.get(
     const siblings = p.common_function_id
       ? db
           .prepare(
-            `SELECT p2.id, p2.code, p2.name, p2.equivalence, m.name model, b.name brand FROM parameters p2 JOIN models m ON m.id=p2.model_id JOIN brands b ON b.id=m.brand_id
+            `SELECT p2.id, p2.code, p2.name, p2.equivalence, m.id model_id, m.name model, b.name brand FROM parameters p2 JOIN models m ON m.id=p2.model_id JOIN brands b ON b.id=m.brand_id
              WHERE p2.common_function_id = ? AND p2.id != ? ORDER BY b.name, m.name`,
           )
           .all(p.common_function_id, id)
@@ -516,7 +516,7 @@ kbRouter.get(
       sameModelRegisters: db.prepare('SELECT id, original_address, name FROM modbus_registers WHERE model_id = ? AND id != ? ORDER BY original_address LIMIT 100').all(r.model_id, id),
       otherBrandImplementations: r.common_function_id
         ? db
-            .prepare('SELECT r2.id, r2.original_address, r2.name, m.name model, b.name brand FROM modbus_registers r2 JOIN models m ON m.id=r2.model_id JOIN brands b ON b.id=m.brand_id WHERE r2.common_function_id = ? AND r2.id != ?')
+            .prepare('SELECT r2.id, r2.original_address, r2.name, m.id model_id, m.name model, b.name brand FROM modbus_registers r2 JOIN models m ON m.id=r2.model_id JOIN brands b ON b.id=m.brand_id WHERE r2.common_function_id = ? AND r2.id != ?')
             .all(r.common_function_id, id)
         : [],
       communicationParameters: db

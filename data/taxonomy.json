@@ -4,159 +4,149 @@
     {
       "slug": "motor-electrical",
       "name": "Motor & Electrical Configuration",
-      "name_bn": "মোটর ও ইলেকট্রিক্যাল কনফিগারেশন",
       "functions": [
-        ["rated-motor-voltage", "Rated Motor Voltage", "মোটরের নির্ধারিত ভোল্টেজ", "Nameplate voltage of the connected motor, entered so the drive can model the motor."],
-        ["rated-motor-current", "Rated Motor Current", "মোটরের নির্ধারিত কারেন্ট", "Nameplate full-load current of the connected motor; commonly used for motor overload protection."],
-        ["rated-motor-frequency", "Rated Motor Frequency", "মোটরের নির্ধারিত ফ্রিকোয়েন্সি", "Nameplate frequency of the connected motor."],
-        ["rated-motor-power", "Rated Motor Power", "মোটরের নির্ধারিত পাওয়ার", "Nameplate output power of the connected motor."],
-        ["rated-motor-speed", "Rated Motor Speed (RPM)", "মোটরের নির্ধারিত গতি (RPM)", "Nameplate speed of the connected motor at rated load."],
-        ["motor-power-factor", "Motor Power Factor", "মোটরের পাওয়ার ফ্যাক্টর", "Nameplate power factor (cos φ) of the connected motor."],
-        ["motor-no-load-current", "Motor No-Load Current", "মোটরের নো-লোড কারেন্ট", "Magnetizing / no-load current of the motor."],
-        ["maximum-output-voltage", "Maximum Output Voltage", "সর্বোচ্চ আউটপুট ভোল্টেজ", "Upper limit of drive output voltage."],
-        ["minimum-output-voltage", "Minimum Output Voltage", "সর্বনিম্ন আউটপুট ভোল্টেজ", "Lower output voltage point of the V/f characteristic, where documented."],
-        ["maximum-output-current", "Maximum Output Current", "সর্বোচ্চ আউটপুট কারেন্ট", "Upper limit of drive output current."],
-        ["motor-overload-factor", "Motor Overload Factor", "মোটর ওভারলোড ফ্যাক্টর", "Setting that scales motor overload capability or protection level."],
-        ["motor-poles", "Number of Motor Poles", "মোটরের পোল সংখ্যা", "Number of motor poles used for speed calculation."],
-        ["motor-configuration", "Motor Configuration", "মোটর কনফিগারেশন", "Motor type / connection / selection settings."],
-        ["motor-auto-tuning", "Motor Identification / Auto-Tuning", "মোটর অটো-টিউনিং", "Procedure in which the drive measures motor electrical constants."]
+        ["rated-motor-voltage", "Rated Motor Voltage", null, "Nameplate voltage of the connected motor, entered so the drive can model the motor."],
+        ["rated-motor-current", "Rated Motor Current", null, "Nameplate full-load current of the connected motor; commonly used for motor overload protection."],
+        ["rated-motor-frequency", "Rated Motor Frequency", null, "Nameplate frequency of the connected motor."],
+        ["rated-motor-power", "Rated Motor Power", null, "Nameplate output power of the connected motor."],
+        ["rated-motor-speed", "Rated Motor Speed (RPM)", null, "Nameplate speed of the connected motor at rated load."],
+        ["motor-power-factor", "Motor Power Factor", null, "Nameplate power factor (cos φ) of the connected motor."],
+        ["motor-no-load-current", "Motor No-Load Current", null, "Magnetizing / no-load current of the motor."],
+        ["maximum-output-voltage", "Maximum Output Voltage", null, "Upper limit of drive output voltage."],
+        ["minimum-output-voltage", "Minimum Output Voltage", null, "Lower output voltage point of the V/f characteristic, where documented."],
+        ["maximum-output-current", "Maximum Output Current", null, "Upper limit of drive output current."],
+        ["motor-overload-factor", "Motor Overload Factor", null, "Setting that scales motor overload capability or protection level."],
+        ["motor-poles", "Number of Motor Poles", null, "Number of motor poles used for speed calculation."],
+        ["motor-configuration", "Motor Configuration", null, "Motor type / connection / selection settings."],
+        ["motor-auto-tuning", "Motor Identification / Auto-Tuning", null, "Procedure in which the drive measures motor electrical constants."]
       ]
     },
     {
       "slug": "frequency",
       "name": "Frequency Configuration",
-      "name_bn": "ফ্রিকোয়েন্সি কনফিগারেশন",
       "functions": [
-        ["minimum-frequency", "Minimum Frequency", "সর্বনিম্ন ফ্রিকোয়েন্সি", "Lowest output frequency allowed during operation."],
-        ["maximum-frequency", "Maximum Frequency", "সর্বোচ্চ ফ্রিকোয়েন্সি", "The maximum frequency defines the upper frequency limit allowed by the drive."],
-        ["base-frequency", "Base / Rated Frequency", "বেস ফ্রিকোয়েন্সি", "Frequency at which the drive reaches rated output voltage in V/f operation."],
-        ["frequency-upper-limit", "Frequency Upper Limit", "ফ্রিকোয়েন্সি আপার লিমিট", "Upper clamp applied to the frequency reference."],
-        ["frequency-lower-limit", "Frequency Lower Limit", "ফ্রিকোয়েন্সি লোয়ার লিমিট", "Lower clamp applied to the frequency reference."],
-        ["frequency-resolution", "Frequency Resolution", "ফ্রিকোয়েন্সি রেজোলিউশন", "Smallest frequency setting / output step."],
-        ["multi-step-frequency", "Multi-Step / Preset Frequency", "মাল্টি-স্টেপ ফ্রিকোয়েন্সি", "Fixed frequencies selected through digital inputs."],
-        ["skip-frequency", "Skip Frequency", "স্কিপ ফ্রিকোয়েন্সি", "Frequency bands avoided to prevent mechanical resonance."],
-        ["jog-frequency", "Jog Frequency", "জগ ফ্রিকোয়েন্সি", "Output frequency used during jog operation."],
-        ["starting-frequency", "Starting Frequency", "স্টার্টিং ফ্রিকোয়েন্সি", "Frequency at which output starts when a run command is given."]
+        ["minimum-frequency", "Minimum Frequency", null, "Lowest output frequency allowed during operation."],
+        ["maximum-frequency", "Maximum Frequency", null, "The maximum frequency defines the upper frequency limit allowed by the drive."],
+        ["base-frequency", "Base / Rated Frequency", null, "Frequency at which the drive reaches rated output voltage in V/f operation."],
+        ["frequency-upper-limit", "Frequency Upper Limit", null, "Upper clamp applied to the frequency reference."],
+        ["frequency-lower-limit", "Frequency Lower Limit", null, "Lower clamp applied to the frequency reference."],
+        ["frequency-resolution", "Frequency Resolution", null, "Smallest frequency setting / output step."],
+        ["multi-step-frequency", "Multi-Step / Preset Frequency", null, "Fixed frequencies selected through digital inputs."],
+        ["skip-frequency", "Skip Frequency", null, "Frequency bands avoided to prevent mechanical resonance."],
+        ["jog-frequency", "Jog Frequency", null, "Output frequency used during jog operation."],
+        ["starting-frequency", "Starting Frequency", null, "Frequency at which output starts when a run command is given."]
       ]
     },
     {
       "slug": "accel-decel",
       "name": "Acceleration & Deceleration",
-      "name_bn": "অ্যাক্সেলারেশন ও ডিসেলারেশন",
       "functions": [
-        ["acceleration-time-1", "Acceleration Time 1", "গতি বৃদ্ধির সময় ১", "Time for output frequency to ramp up, per the manufacturer's reference definition."],
-        ["deceleration-time-1", "Deceleration Time 1", "গতি কমানোর সময় ১", "Time for output frequency to ramp down, per the manufacturer's reference definition."],
-        ["acceleration-time-2", "Acceleration Time 2", "গতি বৃদ্ধির সময় ২", "Second (alternate) acceleration time."],
-        ["deceleration-time-2", "Deceleration Time 2", "গতি কমানোর সময় ২", "Second (alternate) deceleration time."],
-        ["s-curve", "S-Curve Acceleration / Deceleration", "এস-কার্ভ", "Rounding of the ramp at start/end of acceleration and deceleration."],
-        ["emergency-deceleration", "Emergency / Fast Stop Deceleration", "ইমার্জেন্সি ডিসেলারেশন", "Deceleration time used for emergency or fast stop."],
-        ["jog-accel-decel", "Jog Acceleration / Deceleration", "জগ অ্যাক্সেল/ডিসেল", "Ramp times used in jog mode."],
-        ["stop-method", "Stop Method", "স্টপ পদ্ধতি", "Selection between ramp stop and coast stop (or others)."]
+        ["acceleration-time-1", "Acceleration Time 1", null, "Time for output frequency to ramp up, per the manufacturer's reference definition."],
+        ["deceleration-time-1", "Deceleration Time 1", null, "Time for output frequency to ramp down, per the manufacturer's reference definition."],
+        ["acceleration-time-2", "Acceleration Time 2", null, "Second (alternate) acceleration time."],
+        ["deceleration-time-2", "Deceleration Time 2", null, "Second (alternate) deceleration time."],
+        ["s-curve", "S-Curve Acceleration / Deceleration", null, "Rounding of the ramp at start/end of acceleration and deceleration."],
+        ["emergency-deceleration", "Emergency / Fast Stop Deceleration", null, "Deceleration time used for emergency or fast stop."],
+        ["jog-accel-decel", "Jog Acceleration / Deceleration", null, "Ramp times used in jog mode."],
+        ["stop-method", "Stop Method", null, "Selection between ramp stop and coast stop (or others)."]
       ]
     },
     {
       "slug": "operation-command",
       "name": "Operation & Command Control",
-      "name_bn": "অপারেশন ও কমান্ড কন্ট্রোল",
       "functions": [
-        ["command-source", "Run Command Source Selection", "রান কমান্ড সোর্স", "Selects where start/stop/direction commands come from (keypad, terminals, communication)."],
-        ["reverse-prohibit", "Reverse Operation Enable / Prohibit", "রিভার্স নিষেধ", "Allows or blocks reverse rotation."],
-        ["local-remote", "Local / Remote Selection", "লোকাল / রিমোট", "Switching between local (keypad) and remote control."],
-        ["two-three-wire", "2-Wire / 3-Wire Control", "২-ওয়্যার / ৩-ওয়্যার", "Terminal run-command wiring mode."],
-        ["fault-reset-command", "Reset Command", "রিসেট কমান্ড", "Method for resetting a fault."]
+        ["command-source", "Run Command Source Selection", null, "Selects where start/stop/direction commands come from (keypad, terminals, communication)."],
+        ["reverse-prohibit", "Reverse Operation Enable / Prohibit", null, "Allows or blocks reverse rotation."],
+        ["local-remote", "Local / Remote Selection", null, "Switching between local (keypad) and remote control."],
+        ["two-three-wire", "2-Wire / 3-Wire Control", null, "Terminal run-command wiring mode."],
+        ["fault-reset-command", "Reset Command", null, "Method for resetting a fault."]
       ]
     },
     {
       "slug": "frequency-reference",
       "name": "Frequency Reference & Input Sources",
-      "name_bn": "ফ্রিকোয়েন্সি রেফারেন্স ও ইনপুট সোর্স",
       "functions": [
-        ["frequency-source", "Frequency Reference Source Selection", "ফ্রিকোয়েন্সি সোর্স নির্বাচন", "Selects where the frequency reference comes from."],
-        ["keypad-frequency", "Keypad / Digital Frequency Reference", "কীপ্যাড ফ্রিকোয়েন্সি", "Frequency reference set from the operator panel."],
-        ["analog-voltage-input", "Analog Input 0–10 V", "অ্যানালগ ইনপুট ০–১০V", "Voltage analog input used as a reference."],
-        ["analog-current-input", "Analog Input 4–20 mA", "অ্যানালগ ইনপুট ৪–২০mA", "Current analog input used as a reference."],
-        ["pulse-input-reference", "Pulse Input Frequency Reference", "পালস ইনপুট রেফারেন্স", "Pulse-train input used as a frequency reference."],
-        ["comm-frequency-reference", "Communication (RS485/Modbus) Frequency Reference", "কমিউনিকেশন ফ্রিকোয়েন্সি রেফারেন্স", "Frequency reference written over serial communication."]
+        ["frequency-source", "Frequency Reference Source Selection", null, "Selects where the frequency reference comes from."],
+        ["keypad-frequency", "Keypad / Digital Frequency Reference", null, "Frequency reference set from the operator panel."],
+        ["analog-voltage-input", "Analog Input 0–10 V", null, "Voltage analog input used as a reference."],
+        ["analog-current-input", "Analog Input 4–20 mA", null, "Current analog input used as a reference."],
+        ["pulse-input-reference", "Pulse Input Frequency Reference", null, "Pulse-train input used as a frequency reference."],
+        ["comm-frequency-reference", "Communication (RS485/Modbus) Frequency Reference", null, "Frequency reference written over serial communication."]
       ]
     },
     {
       "slug": "torque-motor-control",
       "name": "Torque & Motor Control",
-      "name_bn": "টর্ক ও মোটর কন্ট্রোল",
       "functions": [
-        ["control-mode", "Motor Control Mode (V/f, Sensorless Vector, ...)", "মোটর কন্ট্রোল মোড", "Selects the motor control method."],
-        ["torque-boost", "Torque Boost / Torque Compensation", "টর্ক বুস্ট", "Voltage boost at low frequency to increase torque."],
-        ["slip-compensation", "Slip Compensation", "স্লিপ কম্পেনসেশন", "Raises output frequency with load to compensate motor slip."],
-        ["torque-limit", "Torque Limit", "টর্ক লিমিট", "Limits motor torque."],
-        ["vf-pattern", "V/f Pattern", "V/f প্যাটার্ন", "Voltage-to-frequency characteristic selection / points."],
-        ["dc-injection-braking", "DC Injection Braking", "ডিসি ইনজেকশন ব্রেকিং", "DC current injected into the motor to brake / hold."],
-        ["dynamic-braking", "Dynamic Braking / Braking Resistor", "ডাইনামিক ব্রেকিং", "Braking transistor / resistor configuration."]
+        ["control-mode", "Motor Control Mode (V/f, Sensorless Vector, ...)", null, "Selects the motor control method."],
+        ["torque-boost", "Torque Boost / Torque Compensation", null, "Voltage boost at low frequency to increase torque."],
+        ["slip-compensation", "Slip Compensation", null, "Raises output frequency with load to compensate motor slip."],
+        ["torque-limit", "Torque Limit", null, "Limits motor torque."],
+        ["vf-pattern", "V/f Pattern", null, "Voltage-to-frequency characteristic selection / points."],
+        ["dc-injection-braking", "DC Injection Braking", null, "DC current injected into the motor to brake / hold."],
+        ["dynamic-braking", "Dynamic Braking / Braking Resistor", null, "Braking transistor / resistor configuration."]
       ]
     },
     {
       "slug": "protection",
       "name": "Protection & Fault Management",
-      "name_bn": "প্রোটেকশন ও ফল্ট ম্যানেজমেন্ট",
       "functions": [
-        ["motor-overload-protection", "Motor Overload / Electronic Thermal Protection", "মোটর ওভারলোড প্রোটেকশন", "Electronic thermal protection of the motor."],
-        ["stall-prevention", "Stall Prevention", "স্টল প্রিভেনশন", "Limits current/voltage during accel, decel or run to avoid trips."],
-        ["overvoltage-protection", "Overvoltage Protection", "ওভারভোল্টেজ প্রোটেকশন", "Response to excessive DC bus voltage."],
-        ["undervoltage-protection", "Undervoltage Protection", "আন্ডারভোল্টেজ প্রোটেকশন", "Response to low supply / DC bus voltage."],
-        ["phase-loss-protection", "Phase Loss Protection", "ফেজ লস প্রোটেকশন", "Detection of input or output phase loss."],
-        ["ground-fault-protection", "Ground Fault Protection", "গ্রাউন্ড ফল্ট প্রোটেকশন", "Detection of ground fault on output."],
-        ["auto-restart", "Automatic Restart / Fault Retry", "অটো রিস্টার্ট", "Automatic reset and restart after a fault or power loss."],
-        ["fault-history", "Fault History", "ফল্ট হিস্ট্রি", "Record of past faults."],
-        ["fault-codes", "Fault / Alarm Codes", "ফল্ট কোড", "Fault and alarm code list."]
+        ["motor-overload-protection", "Motor Overload / Electronic Thermal Protection", null, "Electronic thermal protection of the motor."],
+        ["stall-prevention", "Stall Prevention", null, "Limits current/voltage during accel, decel or run to avoid trips."],
+        ["overvoltage-protection", "Overvoltage Protection", null, "Response to excessive DC bus voltage."],
+        ["undervoltage-protection", "Undervoltage Protection", null, "Response to low supply / DC bus voltage."],
+        ["phase-loss-protection", "Phase Loss Protection", null, "Detection of input or output phase loss."],
+        ["ground-fault-protection", "Ground Fault Protection", null, "Detection of ground fault on output."],
+        ["auto-restart", "Automatic Restart / Fault Retry", null, "Automatic reset and restart after a fault or power loss."],
+        ["fault-history", "Fault History", null, "Record of past faults."],
+        ["fault-codes", "Fault / Alarm Codes", null, "Fault and alarm code list."]
       ]
     },
     {
       "slug": "io",
       "name": "Digital & Analog I/O",
-      "name_bn": "ডিজিটাল ও অ্যানালগ I/O",
       "functions": [
-        ["digital-input-function", "Digital Input Function Assignment", "ডিজিটাল ইনপুট ফাংশন", "Function assigned to a multi-function digital input."],
-        ["digital-input-logic", "Input Logic (Sink / Source)", "ইনপুট লজিক", "NPN/PNP or sink/source selection."],
-        ["relay-output-function", "Relay / Digital Output Function", "রিলে আউটপুট ফাংশন", "Function assigned to a relay or digital output."],
-        ["analog-output-function", "Analog Output Function", "অ্যানালগ আউটপুট ফাংশন", "Signal assigned to an analog output."],
-        ["analog-input-scaling", "Analog Input Gain / Bias / Scaling", "অ্যানালগ ইনপুট স্কেলিং", "Gain, bias or scaling of analog inputs."]
+        ["digital-input-function", "Digital Input Function Assignment", null, "Function assigned to a multi-function digital input."],
+        ["digital-input-logic", "Input Logic (Sink / Source)", null, "NPN/PNP or sink/source selection."],
+        ["relay-output-function", "Relay / Digital Output Function", null, "Function assigned to a relay or digital output."],
+        ["analog-output-function", "Analog Output Function", null, "Signal assigned to an analog output."],
+        ["analog-input-scaling", "Analog Input Gain / Bias / Scaling", null, "Gain, bias or scaling of analog inputs."]
       ]
     },
     {
       "slug": "modbus-rs485",
       "name": "Modbus RTU / RS485 Communication",
-      "name_bn": "Modbus RTU / RS485 কমিউনিকেশন",
       "functions": [
-        ["comm-protocol", "Communication Protocol Selection", "কমিউনিকেশন প্রোটোকল", "Selects the serial protocol / data format."],
-        ["slave-address", "Slave (Station) Address", "স্লেভ অ্যাড্রেস", "Node address of the drive on the RS485 network."],
-        ["baud-rate", "Baud Rate", "বড রেট", "Serial transmission speed."],
-        ["parity-stop-bits", "Data Bits / Parity / Stop Bits", "প্যারিটি / স্টপ বিট", "Serial character format."],
-        ["comm-timeout", "Communication Timeout / Loss Detection", "কমিউনিকেশন টাইমআউট", "Time after which loss of communication is detected."],
-        ["comm-loss-action", "Communication Loss Behavior", "কমিউনিকেশন লস আচরণ", "Drive action when communication is lost."],
-        ["comm-response-delay", "Response Delay / Wait Time", "রেসপন্স ডিলে", "Delay before the drive replies."],
-        ["modbus-function-codes", "Supported Modbus Function Codes", "Modbus ফাংশন কোড", "Function codes supported by the drive."],
-        ["reg-control-word", "Control Word / Run Command Register", "কন্ট্রোল ওয়ার্ড রেজিস্টার", "Register written to start/stop/reverse/reset the drive."],
-        ["reg-frequency-command", "Frequency Command Register", "ফ্রিকোয়েন্সি কমান্ড রেজিস্টার", "Register written with the frequency reference."],
-        ["reg-status-word", "Status Word Register", "স্ট্যাটাস রেজিস্টার", "Register reporting drive running / fault / ready state."],
-        ["reg-output-frequency", "Output Frequency Register", "আউটপুট ফ্রিকোয়েন্সি রেজিস্টার", "Register reporting actual output frequency."],
-        ["reg-output-current", "Output Current Register", "আউটপুট কারেন্ট রেজিস্টার", "Register reporting output current."],
-        ["reg-output-voltage", "Output Voltage Register", "আউটপুট ভোল্টেজ রেজিস্টার", "Register reporting output voltage."],
-        ["reg-dc-bus-voltage", "DC Bus Voltage Register", "ডিসি বাস ভোল্টেজ রেজিস্টার", "Register reporting DC bus voltage."],
-        ["reg-fault-code", "Fault / Error Code Register", "ফল্ট কোড রেজিস্টার", "Register reporting the current fault code."],
-        ["reg-parameter-access", "Parameter Register Addressing Rule", "প্যারামিটার রেজিস্টার অ্যাড্রেসিং", "Documented rule mapping parameter numbers to register addresses."]
+        ["comm-protocol", "Communication Protocol Selection", null, "Selects the serial protocol / data format."],
+        ["slave-address", "Slave (Station) Address", null, "Node address of the drive on the RS485 network."],
+        ["baud-rate", "Baud Rate", null, "Serial transmission speed."],
+        ["parity-stop-bits", "Data Bits / Parity / Stop Bits", null, "Serial character format."],
+        ["comm-timeout", "Communication Timeout / Loss Detection", null, "Time after which loss of communication is detected."],
+        ["comm-loss-action", "Communication Loss Behavior", null, "Drive action when communication is lost."],
+        ["comm-response-delay", "Response Delay / Wait Time", null, "Delay before the drive replies."],
+        ["modbus-function-codes", "Supported Modbus Function Codes", null, "Function codes supported by the drive."],
+        ["reg-control-word", "Control Word / Run Command Register", null, "Register written to start/stop/reverse/reset the drive."],
+        ["reg-frequency-command", "Frequency Command Register", null, "Register written with the frequency reference."],
+        ["reg-status-word", "Status Word Register", null, "Register reporting drive running / fault / ready state."],
+        ["reg-output-frequency", "Output Frequency Register", null, "Register reporting actual output frequency."],
+        ["reg-output-current", "Output Current Register", null, "Register reporting output current."],
+        ["reg-output-voltage", "Output Voltage Register", null, "Register reporting output voltage."],
+        ["reg-dc-bus-voltage", "DC Bus Voltage Register", null, "Register reporting DC bus voltage."],
+        ["reg-fault-code", "Fault / Error Code Register", null, "Register reporting the current fault code."],
+        ["reg-parameter-access", "Parameter Register Addressing Rule", null, "Documented rule mapping parameter numbers to register addresses."]
       ]
     },
     {
       "slug": "advanced",
       "name": "Advanced Configuration",
-      "name_bn": "অ্যাডভান্সড কনফিগারেশন",
       "functions": [
-        ["carrier-frequency", "Carrier (PWM) Frequency", "ক্যারিয়ার ফ্রিকোয়েন্সি", "Switching frequency of the output PWM."],
-        ["energy-saving", "Energy Saving", "এনার্জি সেভিং", "Energy-saving operation."],
-        ["pid-control", "PID Control", "PID কন্ট্রোল", "Process PID control."],
-        ["sleep-wakeup", "Sleep / Wake-up", "স্লিপ / ওয়েক-আপ", "Sleep and wake functions, commonly with PID."],
+        ["carrier-frequency", "Carrier (PWM) Frequency", null, "Switching frequency of the output PWM."],
+        ["energy-saving", "Energy Saving", null, "Energy-saving operation."],
+        ["pid-control", "PID Control", null, "Process PID control."],
+        ["sleep-wakeup", "Sleep / Wake-up", null, "Sleep and wake functions, commonly with PID."],
         ["avr", "Automatic Voltage Regulation (AVR)", "AVR", "Compensation of output voltage for supply variation."],
-        ["parameter-reset", "Parameter Initialization / Factory Reset", "প্যারামিটার রিসেট", "Restores parameters to factory defaults."],
-        ["parameter-lock", "Parameter Write Protection / Lock", "প্যারামিটার লক", "Prevents parameter modification."]
+        ["parameter-reset", "Parameter Initialization / Factory Reset", null, "Restores parameters to factory defaults."],
+        ["parameter-lock", "Parameter Write Protection / Lock", null, "Prevents parameter modification."]
       ]
     }
   ]

@@ -1,3 +1,4 @@
+import { EyeIcon } from './icons';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { api, del, get, patch, post } from '../lib/api';
 import { useAuth } from '../lib/auth';
@@ -440,7 +441,7 @@ export function AnnotationDisplayControl() {
   return (
     <span className="pop-anchor" ref={ref}>
       <button className="small" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(!open)} title={`Annotations: ${anyShown ? 'shown' : 'hidden'}`}>
-        {anyShown ? '👁' : '⊘'} Notes
+        <EyeIcon off={!anyShown} /> Notes
       </button>
       {open && (
         <div className="popover" role="dialog" aria-label="Annotation Display Settings" style={{ top: '100%', right: 0 }}>

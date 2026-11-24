@@ -1,3 +1,4 @@
+import { BookmarkIcon } from '../components/icons';
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiError, del, get, patch, post } from '../lib/api';
@@ -28,7 +29,7 @@ export function SaveBookmarkButton({ title, context }: { title: string; context:
   const loc = useLocation();
   return (
     <>
-      <button className="small" onClick={() => setOpen(true)} title="Save Research Bookmark">★ Save</button>
+      <button className="small" onClick={() => setOpen(true)} title="Save Research Bookmark"><BookmarkIcon /> Save</button>
       {open && <SaveDialog title={title} url={loc.pathname + loc.search} context={context} onClose={() => setOpen(false)} />}
     </>
   );

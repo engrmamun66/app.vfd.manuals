@@ -1,7 +1,7 @@
 import { Fragment, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { get } from '../lib/api';
-import { Crumbs, ErrorBox, Loading, Pager, SearchBox, VerifBadge, useAsync } from '../components/ui';
+import { Crumbs, ErrorBox, Loading, Pager, SearchBox, VerifBadge, useAsync, ModelName } from '../components/ui';
 import { ModelTabs } from '../components/ModelTabs';
 import { useModels } from '../lib/models';
 
@@ -62,7 +62,7 @@ export function KnowledgePage() {
               {data?.rows.map((r: any) => (
                 <Fragment key={r.id}>
                   <tr onClick={() => setOpen(open === r.id ? null : r.id)} style={{ cursor: 'pointer' }}>
-                    <td>{r.brand}<div className="small-text muted">{r.model}</div></td>
+                    <td>{r.brand}<div className="small-text muted"><ModelName name={r.model} brand={r.brand} /></div></td>
                     <td>{KIND_LABELS[r.kind] ?? r.kind}</td>
                     <td className="code">{r.code ?? <span className="faint">—</span>}</td>
                     <td><b>{r.title}</b>{r.description && <div className="small-text muted" style={{ maxWidth: 520 }}>{open === r.id ? r.description : r.description.slice(0, 120) + (r.description.length > 120 ? '…' : '')}</div>}</td>

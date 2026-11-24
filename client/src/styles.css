@@ -284,3 +284,11 @@ button.icon-only.danger:hover { background: var(--inv-bg); color: var(--inv-fg);
 @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
 .spinner.sm { width: 16px; height: 16px; border-width: 2px; }
 .loading-inline { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+
+/* ---------- Alt-key navigation badges ---------- */
+.nav-link { position: relative; }
+.key-badge { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); min-width: 15px; height: 15px; padding: 0 3px; display: inline-flex; align-items: center; justify-content: center; font: 700 .62rem/1 ui-monospace, monospace; background: var(--inv-bg); color: var(--inv-fg); border-radius: 3px; box-shadow: 0 0 0 1px var(--bg); }
+.model-tabs button.current:not(.active)::after { content: ''; display: inline-block; width: 6px; height: 6px; margin-left: 7px; border-radius: 50%; background: var(--fg-muted); vertical-align: middle; }
+.model-tabs button.dim { opacity: .5; }
+.model-tabs button.dim:hover, .model-tabs button.dim.active { opacity: 1; }
+tr.sel td { background: var(--bg-alt); }

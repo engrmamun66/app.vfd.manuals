@@ -91,14 +91,16 @@ function ModelAliases() {
 
 function UiSettings() {
   const { settings, updateSettings } = useAuth();
-  const u = (settings?.ui_settings ?? {}) as { show_verification_filter?: boolean; show_evidence_filter?: boolean };
+  const u = (settings?.ui_settings ?? {}) as { show_verification_filter?: boolean; show_evidence_filter?: boolean; show_export_csv?: boolean; show_export_json?: boolean };
   const [err, setErr] = useState<string | null>(null);
-  const set = async (k: 'show_verification_filter' | 'show_evidence_filter', v: boolean) => {
-    try { setErr(null); await updateSettings({ ui_settings: { show_verification_filter: u.show_verification_filter === true, show_evidence_filter: u.show_evidence_filter === true, [k]: v } }); } catch (e: any) { setErr(e.message); }
+  const set = async (k: keyof typeof u, v: boolean) => {
+    try { setErr(null); await updateSettings({ ui_settings: { show_verification_filter: u.show_verification_filter === true, show_evidence_filter: u.show_evidence_filter === true, show_export_csv: u.show_export_csv === true, show_export_json: u.show_export_json === true, [k]: v } }); } catch (e: any) { setErr(e.message); }
   };
   const rows: [keyof typeof u, string, string][] = [
     ['show_verification_filter', 'Show verification dropdown', 'Adds the "Any verification" filter to the Parameters and Modbus Register lists.'],
     ['show_evidence_filter', 'Show evidence dropdown', 'Adds the "Any evidence" filter to the Parameters list.'],
+    ['show_export_csv', 'Show Export CSV button', 'Shows the "Export CSV" button on the Parameters, Modbus Register and Compare pages.'],
+    ['show_export_json', 'Show Export JSON button', 'Shows the "Export JSON" button on the Parameters, Modbus Register and Compare pages.'],
   ];
   return (
     <div style={{ maxWidth: 720 }}>

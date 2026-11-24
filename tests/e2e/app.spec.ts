@@ -219,6 +219,9 @@ test.describe('dashboard & knowledge base', () => {
   });
 
   test('comparison: two brands side by side, gaps are "Not Documented", exports work', async () => {
+    // export buttons are an optional UI setting (hidden by default): switch them on for this user
+    const csrf = (await (await admin.request.get('/api/auth/me')).json()).csrfToken;
+    await admin.request.patch('/api/me/settings', { data: { ui_settings: { show_export_csv: true, show_export_json: true } }, headers: { 'X-CSRF-Token': csrf } });
     await admin.goto('/compare');
     const boxes = admin.locator('input[type=checkbox]');
     await boxes.nth(0).click();
@@ -230,12 +233,6 @@ test.describe('dashboard & knowledge base', () => {
     await expect(admin.locator('table.cmp')).toContainText('Not Documented');
     const [dl] = await Promise.all([admin.waitForEvent('download'), admin.getByRole('button', { name: 'Export CSV' }).click()]);
     expect(dl.suggestedFilename()).toMatch(/\.csv$/);
-  });
-
-  test('PLC page does not invent Siemens S7-1200 data', async () => {
-    await admin.goto('/modbus/plc');
-    await expect(admin.getByText(/No Siemens S7-1200 \/ TIA Portal documentation has been imported/)).toBeVisible();
-    await expect(admin.locator('tbody .badge', { hasText: 'Not Documented' }).first()).toBeVisible();
   });
 
   test('global search finds parameters and manual page text', async () => {
@@ -292,11 +289,10 @@ test.describe('layout: full width, split view', () => {
 });
 
 test.describe('curation by Super Admin', () => {
-  test('Bengali description and explanation are saved, cited, and shown to normal users; manufacturer values stay untouched', async () => {
+  test('Metadata and explanation are saved, cited, and shown to normal users; manufacturer values stay untouched', async () => {
     const before = await (await admin.request.get(`/api/parameters/${paramId}`)).json();
     await admin.goto(paramUrl);
     await admin.getByText('Edit metadata (Super Admin)').click();
-    await admin.locator('#pe-bn').fill('এটি পরীক্ষামূলক বাংলা বিবরণ');
     await admin.getByRole('button', { name: 'Save metadata' }).click();
     await expect(admin.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible();
     await admin.getByLabel('Explanation text').fill('E2E documented explanation text.');
@@ -304,7 +300,6 @@ test.describe('curation by Super Admin', () => {
     await expect(admin.getByRole('status').filter({ hasText: 'Explanation added' })).toBeVisible();
     // normal user sees it
     await alice.goto(paramUrl);
-    await expect(alice.getByText('এটি পরীক্ষামূলক বাংলা বিবরণ')).toBeVisible();
     await alice.getByRole('tab', { name: 'Detailed explanation' }).click();
     await expect(alice.getByText('E2E documented explanation text.')).toBeVisible();
     // technical values unchanged
@@ -315,6 +310,43 @@ test.describe('curation by Super Admin', () => {
     const csrf = (await (await alice.request.get('/api/auth/me')).json()).csrfToken;
     expect((await alice.request.patch(`/api/parameters/${paramId}`, { data: { description_bn: 'x' }, headers: { 'X-CSRF-Token': csrf } })).status()).toBe(403);
     await expect(alice.getByText('Edit metadata (Super Admin)')).toHaveCount(0);
+  });
+
+  test('model tabs on a record page open the equivalent record of that model', async () => {
+    const list = await (await admin.request.get('/api/parameters?limit=300')).json();
+    let target: any = null;
+    for (const p of list.rows) {
+      const d = await (await admin.request.get(`/api/parameters/${p.id}`)).json();
+      if (d.otherBrandImplementations.length) { target = d; break; }
+    }
+    expect(target).toBeTruthy();
+    const other = target.otherBrandImplementations[0];
+    await admin.goto(`/parameter/${target.id}`);
+    await expect(admin.getByRole('heading', { level: 1 })).toContainText(target.code);
+    const tabs = admin.locator('.model-tabs');
+    await expect(tabs).toBeVisible(); // tabs are shown on research pages too
+    await expect(tabs.locator('button.current')).toHaveCount(1);
+    await tabs.locator('button', { hasText: other.model.replace(/\s*\(.*$/, '') }).click();
+    await expect(admin).toHaveURL(new RegExp(`/research/parameters/.+/${other.id}$`));
+    await expect(admin.getByRole('heading', { level: 1 })).toContainText(other.code);
+    await admin.locator('.model-tabs button').first().click(); // back to "All"
+  });
+
+  test('split view on list pages: clicking a record opens it in the right pane instead of navigating', async () => {
+    await admin.goto('/parameters');
+    const toggle = admin.getByRole('button', { name: /Split/ });
+    if ((await toggle.getAttribute('aria-pressed')) !== 'true') await toggle.click();
+    const link = admin.locator('tbody td.code a').first();
+    const code = (await link.textContent())!;
+    await link.click();
+    await expect(admin).toHaveURL(/\/parameters$/);
+    const right = admin.locator('.split > .pane').nth(1);
+    await expect(right).toContainText(code);
+    await expect(right.locator('.page-img-wrap img, .evidence-quote').first()).toBeVisible({ timeout: 45_000 });
+    await toggle.click(); // split off: links navigate again
+    await expect(admin.locator('.split')).toHaveCount(0);
+    await admin.locator('tbody td.code a').first().click();
+    await expect(admin).toHaveURL(/\/research\/parameters\//);
   });
 
   test('split view can show another implementation next to this record', async () => {
@@ -347,7 +379,7 @@ test.describe('annotations: comments, highlights, public/private, display settin
     await selectText(host, phrase);
     await alice.getByRole('button', { name: 'Add Comment' }).click();
     await alice.locator('#ann-comment').fill('Alice private note about this');
-    await alice.getByRole('button', { name: 'Save', exact: true }).click();
+    await alice.getByRole('button', { name: 'Save', exact: true }).last().click();
     const mark = host.locator('.annot').first();
     await expect(mark).toBeVisible();
     await expect(mark).toHaveClass(/c-yellow/);
@@ -379,7 +411,7 @@ test.describe('annotations: comments, highlights, public/private, display settin
     await expect(dlg.getByRole('button', { name: 'Edit' })).toHaveCount(0); // read-only for others
     await bob.keyboard.press('Escape');
     // bob's display setting hides other users' public content, only for bob
-    await bob.getByRole('button', { name: /Annotations: shown/ }).click();
+    await bob.getByTitle(/Annotations: shown/).click();
     await bob.getByLabel(/Other users' public content/).uncheck();
     await expect(bob.locator('.annot')).toHaveCount(0);
     await bob.keyboard.press('Escape');
@@ -388,7 +420,7 @@ test.describe('annotations: comments, highlights, public/private, display settin
     await alice.goto(`${paramUrl}/detailed`);
     await expect(alice.locator('.annot').first()).toBeVisible(); // alice unaffected
     // restore bob's preference and then alice goes private again
-    await bob.getByRole('button', { name: /Annotations/ }).click();
+    await bob.getByTitle(/Annotations:/).click();
     await bob.getByLabel(/Other users' public content/).check();
     await expect(bob.locator('.annot').first()).toBeVisible();
     await alice.goto('/annotations');
@@ -426,7 +458,7 @@ test.describe('bookmarks', () => {
     await alice.getByPlaceholder('New subfolder name here…').fill('Parameters');
     await alice.getByRole('button', { name: 'Create folder' }).click();
     await alice.locator('#bm-name').fill('My custom bookmark name');
-    await alice.getByRole('button', { name: 'Save', exact: true }).click();
+    await alice.getByRole('dialog', { name: 'Save Research Bookmark' }).getByRole('button', { name: 'Save', exact: true }).click();
     await expect(alice.getByRole('dialog', { name: 'Save Research Bookmark' })).toBeHidden(); // the modal closes after a successful save
     await alice.goto('/bookmarks');
     await expect(alice.locator('.tree')).toContainText('Delta');

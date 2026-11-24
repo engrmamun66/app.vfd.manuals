@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { get, patch, post } from '../lib/api';
-import { Crumbs, ErrorBox, Loading, Pager, QuoteBadge, useAsync } from '../components/ui';
+import { Crumbs, ErrorBox, Loading, Pager, QuoteBadge, useAsync, ModelName } from '../components/ui';
 import { PageViewer } from '../components/Viewer';
 import { confirmDialog, promptDialog } from '../components/dialogs';
 
@@ -118,7 +118,7 @@ function VerifyLive({ onDone }: { onDone: (m: any) => void }) {
         <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }}>{['Unverified', 'Requires Manual Verification', 'Documentation Conflict', 'Verified'].map((s) => <option key={s}>{s}</option>)}</select>
       </div>
       <div className="table-wrap"><table><thead><tr><th>Brand / Model</th><th>Code / Address</th><th>Name</th><th>Status</th><th></th></tr></thead><tbody>
-        {data?.rows.map((r: any) => <tr key={r.id}><td>{r.brand} <span className="muted">{r.model}</span></td><td className="code"><Link to={`/${type === 'parameters' ? 'parameter' : 'register'}/${r.id}`}>{r.code ?? r.original_address}</Link></td><td>{r.name}</td><td>{r.verification_status}</td>
+        {data?.rows.map((r: any) => <tr key={r.id}><td>{r.brand} <span className="muted"><ModelName name={r.model} /></span></td><td className="code"><Link to={`/${type === 'parameters' ? 'parameter' : 'register'}/${r.id}`}>{r.code ?? r.original_address}</Link></td><td>{r.name}</td><td>{r.verification_status}</td>
           <td><div className="row"><button className="small primary" onClick={() => set(r.id, 'Verified')}>Mark Verified</button><button className="small" onClick={() => set(r.id, 'Requires Manual Verification')}>Needs check</button><button className="small danger" onClick={() => set(r.id, 'Rejected')}>Reject</button></div></td></tr>)}
         {!data?.rows.length && <tr><td colSpan={5} className="empty">No records with this status.</td></tr>}</tbody></table></div>
       {data && <Pager page={page} limit={50} total={data.total} onPage={setPage} />}

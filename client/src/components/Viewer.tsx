@@ -1,3 +1,4 @@
+import { SplitIcon } from './icons';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { get } from '../lib/api';
@@ -69,7 +70,7 @@ export function SplitToggle() {
   const sv = settings?.split_view ?? { enabled: false, ratio: 0.55, collapsed: null };
   return (
     <button className="small" aria-pressed={sv.enabled} title={`Split view: ${sv.enabled ? 'ON' : 'OFF'}`} onClick={() => updateSettings({ split_view: { ...sv, enabled: !sv.enabled, collapsed: null } } as any)}>
-      {sv.enabled ? '▥' : '▯'} Split
+      <SplitIcon on={sv.enabled} /> Split
     </button>
   );
 }

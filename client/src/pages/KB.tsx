@@ -7,7 +7,7 @@ import { OriginalPdfButton } from '../components/OriginalPdfButton';
 import { ImportanceBadge } from './Knowledge';
 import { useModels } from '../lib/models';
 import { useUiSettings } from '../lib/auth';
-import { Crumbs, ErrorBox, EquivBadge, EvBadge, InfoIcon, Loading, Pager, QuoteBadge, SearchBox, Val, VerifBadge, download, useAsync } from '../components/ui';
+import { Crumbs, ModelName, Tip, truncate, ErrorBox, EquivBadge, EvBadge, InfoIcon, Loading, Pager, QuoteBadge, SearchBox, Val, VerifBadge, download, useAsync } from '../components/ui';
 import { PageViewer, SplitToggle, SplitView } from '../components/Viewer';
 import { Annotatable, AnnotationDisplayControl, AnnotationScope } from '../components/Annotatable';
 import { SaveBookmarkButton } from './Bookmarks';
@@ -34,7 +34,7 @@ export function Dashboard() {
         <div>
           <h2>Models</h2>
           <div className="table-wrap"><table><thead><tr><th>Brand</th><th>Model</th><th>Parameters</th><th>Registers</th></tr></thead>
-            <tbody>{data.models.map((m: any) => <tr key={m.id}><td>{m.brand}</td><td><Link to={`/model/${m.id}`}>{m.name}</Link></td><td className="num">{m.params}</td><td className="num">{m.registers}</td></tr>)}
+            <tbody>{data.models.map((m: any) => <tr key={m.id}><td>{m.brand}</td><td><Link to={`/model/${m.id}`}><ModelName name={m.name} brand={m.brand} /></Link></td><td className="num">{m.params}</td><td className="num">{m.registers}</td></tr>)}
               {!data.models.length && <tr><td colSpan={4} className="muted">No models yet — import documents in Documentation Library → Import.</td></tr>}</tbody></table></div>
         </div>
         <div>
@@ -58,7 +58,7 @@ export function Parameters({ category }: { category?: string }) {
   const q = Object.fromEntries(sp.entries());
   const page = Number(q.page) || 1;
   const { selected } = useModels();
-  const { showVerification, showEvidence } = useUiSettings();
+  const { showVerification, showEvidence, showExportCsv, showExportJson } = useUiSettings();
   const { data: tax } = useAsync(() => get('/taxonomy'), []);
   const { data, error, loading } = useAsync(() => get('/parameters', { ...q, verification: showVerification ? q.verification : undefined, evidence: showEvidence ? q.evidence : undefined, model: selected, category: category ?? q.category, page, limit: 50 }), [sp.toString(), category, selected, showVerification, showEvidence]);
   const set = (k: string, v: string) => {
@@ -67,15 +67,19 @@ export function Parameters({ category }: { category?: string }) {
     n.delete('page');
     setSp(n, { replace: true });
   };
+  const { settings } = useAuth();
+  const split = !!settings?.split_view?.enabled;
+  const [preview, setPreview] = useState<number | null>(null);
   const catName = category && tax ? tax.find((c: any) => c.slug === category)?.name : null;
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Knowledge Base', to: '/parameters' }, { label: catName ?? 'All Parameters' }]} />
       <div className="row between"><h1>{catName ?? 'All Parameters'}</h1>
-        <div className="row"><button className="small" onClick={() => download(`/export?scope=parameters&format=csv${category ? '&category=' + category : ''}`)}>Export CSV</button><button className="small" onClick={() => download(`/export?scope=parameters&format=json${category ? '&category=' + category : ''}`)}>Export JSON</button><OriginalPdfButton /></div></div>
+        <div className="row"><SplitToggle />{showExportCsv && <button className="small" onClick={() => download(`/export?scope=parameters&format=csv${category ? '&category=' + category : ''}`)}>Export CSV</button>}{showExportJson && <button className="small" onClick={() => download(`/export?scope=parameters&format=json${category ? '&category=' + category : ''}`)}>Export JSON</button>}<OriginalPdfButton /></div></div>
       <ModelTabs />
+      <SplitView enabled={split} leftTitle="Parameters" rightTitle="Record preview" right={<RecordPreview kind="parameter" id={preview} />} left={<>
       <div className="row" style={{ marginBottom: 12 }}>
-        <SearchBox icon="filter" placeholder="Filter this list: code, name, description (EN/বাংলা)…" value={q.q ?? ''} onChange={(v) => set('q', v)} style={{ minWidth: 300 }} aria-label="Search parameters" />
+        <SearchBox icon="filter" placeholder="Filter this list: code, name, description…" value={q.q ?? ''} onChange={(v) => set('q', v)} style={{ minWidth: 300 }} aria-label="Search parameters" />
         {!category && <select value={q.category ?? ''} onChange={(e) => set('category', e.target.value)} aria-label="Category"><option value="">All categories</option>{tax?.map((c: any) => <option key={c.slug} value={c.slug}>{c.name}</option>)}</select>}
         <select value={q.importance ?? ''} onChange={(e) => set('importance', e.target.value)} aria-label="Importance"><option value="">Any importance</option><option>Important</option><option>Medium</option><option>Optional</option></select>
         {showVerification && <select value={q.verification ?? ''} onChange={(e) => set('verification', e.target.value)} aria-label="Verification status"><option value="">Any verification</option>{['Verified', 'Unverified', 'Requires Manual Verification', 'Documentation Conflict'].map((s) => <option key={s}>{s}</option>)}</select>}
@@ -88,11 +92,11 @@ export function Parameters({ category }: { category?: string }) {
           <div className="table-wrap"><table>
             <thead><tr><th>Brand / Model</th><th>Code</th><th>Name</th><th>Common function</th><th>Unit</th><th>Default</th><th>Range</th><th>Importance</th><th>Verification</th></tr></thead>
             <tbody>{data?.rows.map((p: any) => (
-              <tr key={p.id}>
-                <td>{p.brand}<div className="small-text muted">{p.model}</div></td>
-                <td className="code"><Link to={`/parameter/${p.id}`}>{p.code}</Link></td>
+              <tr key={p.id} className={split && preview === p.id ? 'sel' : ''} style={split ? { cursor: 'pointer' } : undefined} onClick={(e) => { if (split && !(e.target as HTMLElement).closest('a')) setPreview(p.id); }}>
+                <td>{p.brand}<div className="small-text muted"><ModelName name={p.model} brand={p.brand} /></div></td>
+                <td className="code"><Link to={`/parameter/${p.id}`} onClick={(e) => { if (split) { e.preventDefault(); setPreview(p.id); } }}>{p.code}</Link></td>
                 <td>{p.name ?? <Val v={null} />}</td>
-                <td>{p.function_slug ? <Link to={`/function/${p.function_slug}`}>{p.function_name}</Link> : <span className="faint">Unmapped</span>}{p.function_name_bn && <div className="small-text muted">{p.function_name_bn}</div>}</td>
+                <td>{p.function_slug ? <Link to={`/function/${p.function_slug}`}>{p.function_name}</Link> : <span className="faint">Unmapped</span>}</td>
                 <td><Val v={p.unit} /></td><td><Val v={p.default_value} /></td>
                 <td>{p.min_value || p.max_value ? `${p.min_value ?? '?'} … ${p.max_value ?? '?'}` : <Val v={null} />}</td>
                 <td><ImportanceBadge v={p.importance} /></td>
@@ -101,6 +105,7 @@ export function Parameters({ category }: { category?: string }) {
               {!data?.rows.length && <tr><td colSpan={9} className="empty">No parameters match. Parameters appear after staged import records are approved in the Verification Center.</td></tr>}</tbody></table></div>
           {data && <Pager page={data.page} limit={data.limit} total={data.total} onPage={(p) => { const n = new URLSearchParams(sp); n.set('page', String(p)); setSp(n); }} />}
         </>)}
+      </>} />
     </div>
   );
 }
@@ -117,7 +122,6 @@ export function FunctionPage() {
     <div className="page">
       <Crumbs items={[{ label: 'Knowledge Base', to: '/parameters' }, { label: data.category, to: `/kb/${data.category_slug}` }, { label: data.name }]} />
       <h1>{data.name} <InfoIcon title={data.name} text={data.short_description || 'No description recorded.'} /></h1>
-      {data.name_bn && <div className="muted" style={{ marginBottom: 6 }}>{data.name_bn}</div>}
       {data.short_description && <p className="muted prose">{data.short_description} <span className="badge dashed">generic concept — not a manufacturer fact</span></p>}
       <ModelTabs />
       <h2>Brand-specific implementations</h2>
@@ -125,7 +129,7 @@ export function FunctionPage() {
         <thead><tr><th>Brand / Model</th><th>Code</th><th>Manufacturer name</th><th>Default</th><th>Range</th><th>Equivalence</th><th>Verification</th><th>Source</th></tr></thead>
         <tbody>{data.parameters.map((p: any) => (
           <tr key={p.id}>
-            <td>{p.brand}<div className="small-text muted">{p.model}</div></td>
+            <td>{p.brand}<div className="small-text muted"><ModelName name={p.model} brand={p.brand} /></div></td>
             <td className="code"><Link to={`/parameter/${p.id}`}>{p.code}</Link></td><td>{p.name}</td>
             <td><Val v={p.default_value} unit={p.unit} /></td><td>{p.min_value || p.max_value ? `${p.min_value ?? '?'} … ${p.max_value ?? '?'}` : <Val v={null} />}</td>
             <td><EquivBadge s={p.equivalence} note={p.equivalence_note} />{p.equivalence_note && <div className="small-text muted" style={{ maxWidth: 280 }}>{p.equivalence_note}</div>}</td>
@@ -135,7 +139,7 @@ export function FunctionPage() {
           {!data.parameters.length && <tr><td colSpan={8} className="muted">Not Documented — no approved parameter is mapped to this function yet.</td></tr>}</tbody></table></div>
       {data.registers.length > 0 && (<><h2 style={{ marginTop: 20 }}>Modbus registers</h2>
         <div className="table-wrap"><table><thead><tr><th>Brand / Model</th><th>Original address</th><th>Name</th><th>Access</th><th>Scaling</th><th>Verification</th></tr></thead>
-          <tbody>{data.registers.map((r: any) => <tr key={r.id}><td>{r.brand}<div className="small-text muted">{r.model}</div></td><td className="code"><Link to={`/register/${r.id}`}>{r.original_address}</Link></td><td>{r.name}</td><td><Val v={r.access} /></td><td><Val v={r.scaling} /></td><td><VerifBadge s={r.verification_status} /></td></tr>)}</tbody></table></div></>)}
+          <tbody>{data.registers.map((r: any) => <tr key={r.id}><td>{r.brand}<div className="small-text muted"><ModelName name={r.model} brand={r.brand} /></div></td><td className="code"><Link to={`/register/${r.id}`}>{r.original_address}</Link></td><td>{r.name}</td><td><Val v={r.access} /></td><td><Val v={r.scaling} /></td><td><VerifBadge s={r.verification_status} /></td></tr>)}</tbody></table></div></>)}
       {data.modelsWithoutRecord.length > 0 && <p className="muted small-text" style={{ marginTop: 14 }}>No record for this function (shown as <i>Not Documented</i> in comparison): {data.modelsWithoutRecord.map((m: any) => `${m.brand} ${m.name}`).join(', ')}.</p>}
     </div>
   );
@@ -189,7 +193,7 @@ function Related({ d, kind }: { d: any; kind: 'parameter' | 'register' }) {
       {kind === 'parameter' && d.sameModelSameFunction?.length > 0 && <div><h3>Other parameters of this model with the same common function</h3>{d.sameModelSameFunction.map((s: any) => <div key={s.id}><Link to={`/parameter/${s.id}`}>{s.code}</Link> {s.name} <EquivBadge s={s.equivalence} /></div>)}</div>}
       {kind === 'parameter' && d.registers?.length > 0 && <div><h3>Modbus registers mapped to the same function (this model)</h3>{d.registers.map((r: any) => <div key={r.id}><Link to={`/register/${r.id}`} className="code">{r.original_address}</Link> {r.name}</div>)}</div>}
       {kind === 'register' && d.communicationParameters?.length > 0 && <div><h3>Communication parameters of this model</h3>{d.communicationParameters.map((p: any) => <div key={p.id}><Link to={`/parameter/${p.id}`} className="code">{p.code}</Link> {p.name} <span className="muted small-text">({p.function_name})</span></div>)}</div>}
-      {d.otherBrandImplementations?.length > 0 && <div><h3>Same function in other brands/models</h3>{d.otherBrandImplementations.map((s: any) => <div key={s.id}>{s.brand} {s.model} — <Link to={`/${kind}/${s.id}`} className="code">{s.code ?? s.original_address}</Link> {s.name} {s.equivalence && <EquivBadge s={s.equivalence} />}</div>)}</div>}
+      {d.otherBrandImplementations?.length > 0 && <div><h3>Same function in other brands/models</h3>{d.otherBrandImplementations.map((s: any) => <div key={s.id}>{s.brand} <ModelName name={s.model} /> — <Link to={`/${kind}/${s.id}`} className="code">{s.code ?? s.original_address}</Link> {s.name} {s.equivalence && <EquivBadge s={s.equivalence} />}</div>)}</div>}
       {kind === 'register' && d.sameModelRegisters?.length > 0 && <details><summary>Other registers of this model ({d.sameModelRegisters.length})</summary>{d.sameModelRegisters.map((r: any) => <div key={r.id}><Link to={`/register/${r.id}`} className="code">{r.original_address}</Link> {r.name}</div>)}</details>}
     </div>
   );
@@ -210,7 +214,7 @@ function RecordSummary({ id }: { id: number }) {
   if (!d) return <Loading />;
   return (
     <div className="stack">
-      <h3><Link to={`/parameter/${d.id}`}>{d.brand} {d.model} — <span className="mono">{d.code}</span></Link></h3>
+      <h3><Link to={`/parameter/${d.id}`}>{d.brand} <ModelName name={d.model} /> — <span className="mono">{d.code}</span></Link></h3>
       <div className="row"><VerifBadge s={d.verification_status} /><EquivBadge s={d.equivalence} note={d.equivalence_note} /></div>
       <div className="table-wrap"><table><tbody>
         <Field k="Name">{d.name ?? <Val v={null} />}</Field><Field k="Unit"><Val v={d.unit} /></Field><Field k="Default"><Val v={d.default_value} /></Field>
@@ -223,7 +227,36 @@ function RecordSummary({ id }: { id: number }) {
   );
 }
 
-function ResearchFrame({ crumbs, title, subtitle, level, base, evidence, children, entity, contextExtra, others }: any) {
+/** Right-pane preview used by list pages in split view: record summary + the original manual page. */
+function RecordPreview({ kind, id }: { kind: 'parameter' | 'register'; id: number | null }) {
+  const { data: d, error } = useAsync(() => (id ? get(kind === 'parameter' ? `/parameters/${id}` : `/registers/${id}`) : Promise.resolve(null)), [kind, id]);
+  const [po, setPo] = useState<number | null>(null);
+  useEffect(() => setPo(null), [id]);
+  if (!id) return <div className="empty">Click a record on the left to open it here.</div>;
+  if (error) return <ErrorBox e={error} />;
+  if (!d) return <Loading />;
+  const ev = d.evidence?.[0];
+  return (
+    <div className="stack">
+      <h3><Link to={`/${kind}/${d.id}`}>{d.brand} <ModelName name={d.model} /> — <span className="mono">{kind === 'parameter' ? d.code : d.original_address}</span></Link> <span className="small-text muted">(open full page)</span></h3>
+      <div className="row"><VerifBadge s={d.verification_status} />{kind === 'parameter' && <><EvBadge s={d.evidence_status} /><EquivBadge s={d.equivalence} note={d.equivalence_note} /></>}</div>
+      <div className="table-wrap"><table><tbody>
+        {kind === 'parameter' ? (<>
+          <Field k="Name">{d.name ?? <Val v={null} />}</Field><Field k="Unit"><Val v={d.unit} /></Field><Field k="Default"><Val v={d.default_value} /></Field>
+          <Field k="Minimum"><Val v={d.min_value} /></Field><Field k="Maximum"><Val v={d.max_value} /></Field><Field k="Access"><Val v={d.access_type} /></Field>
+          <Field k="Description">{d.description_en ?? <Val v={null} />}</Field>
+        </>) : (<>
+          <Field k="Name">{d.name ?? <Val v={null} />}</Field><Field k="Function code(s)"><Val v={d.function_codes} /></Field><Field k="Access"><Val v={d.access} /></Field>
+          <Field k="Data type"><Val v={d.data_type} /></Field><Field k="Scaling"><Val v={d.scaling} /></Field><Field k="Unit"><Val v={d.unit} /></Field>
+          <Field k="Description">{d.description ?? <Val v={null} />}</Field>
+        </>)}
+      </tbody></table></div>
+      {ev ? <PageViewer revisionId={ev.revision_id} page={po ?? ev.page_index ?? 1} onPage={setPo} quoteMatch={ev.quote_match} highlightQuote={ev.extracted_text} /> : <p className="muted small-text">No source page is linked to this record.</p>}
+    </div>
+  );
+}
+
+function ResearchFrame({ crumbs, title, subtitle, level, base, evidence, children, entity, contextExtra, others, modelTabs }: any) {
   const { settings } = useAuth();
   const loc = useLocation();
   const nav = useNavigate();
@@ -247,6 +280,7 @@ function ResearchFrame({ crumbs, title, subtitle, level, base, evidence, childre
           <div><h1 style={{ marginBottom: 2 }}>{title}</h1><div className="muted">{subtitle}</div></div>
           <div className="row"><SplitToggle /><AnnotationDisplayControl /><SaveBookmarkButton title={typeof title === 'string' ? title : ''} context={{ ...contextExtra, depth: level }} /></div>
         </div>
+        {modelTabs && <ModelTabs record={modelTabs} />}
         <SplitView
           enabled={!!split && (!!ev || rightMode !== 'source')}
           leftTitle="Research"
@@ -254,7 +288,7 @@ function ResearchFrame({ crumbs, title, subtitle, level, base, evidence, childre
             <span className="row">
               <select value={String(rightMode)} onChange={(e) => setRightMode(e.target.value === 'source' ? 'source' : Number(e.target.value))} aria-label="Right pane content">
                 <option value="source">Original manual page{ev ? ` (p.${pageOverride ?? ev.page_index})` : ''}</option>
-                {(others ?? []).map((o: any) => <option key={o.id} value={o.id}>Compare: {o.brand} {o.model} {o.code}</option>)}
+                {(others ?? []).map((o: any) => <option key={o.id} value={o.id}>Compare: {o.brand} {truncate(o.model)} {o.code}</option>)}
               </select>
             </span>
           }
@@ -278,14 +312,14 @@ export function ParameterResearch() {
   if (error) return <div className="page"><ErrorBox e={error} /><p>The referenced parameter is unavailable. You are not being redirected to a different record.</p></div>;
   if (!d) return <div className="page"><Loading /></div>;
   const base = `/research/parameters/${brand}/${model}/${id}`;
-  const lang = settings?.language;
   return (
     <ResearchFrame
       level={level} base={base} evidence={d.evidence} others={d.otherBrandImplementations.concat(d.sameModelSameFunction)}
-      crumbs={[{ label: 'Home', to: '/' }, { label: d.category ?? 'Parameters', to: d.category_slug ? `/kb/${d.category_slug}` : '/parameters' }, ...(d.function_slug ? [{ label: d.function_name, to: `/function/${d.function_slug}` }] : []), { label: `${d.brand} ${d.model}`, to: `/model/${d.model_id}` }, { label: `Parameter ${d.code}` }, { label: LEVELS.find(([k]) => k === level)![1] }]}
+      crumbs={[{ label: 'Home', to: '/' }, { label: d.category ?? 'Parameters', to: d.category_slug ? `/kb/${d.category_slug}` : '/parameters' }, ...(d.function_slug ? [{ label: d.function_name, to: `/function/${d.function_slug}` }] : []), { label: <>{d.brand} <ModelName name={d.model} /></>, to: `/model/${d.model_id}` }, { label: `Parameter ${d.code}` }, { label: LEVELS.find(([k]) => k === level)![1] }]}
       title={<span><span className="mono">{d.code}</span> — {d.name ?? 'Unnamed in extraction'} <InfoIcon title={d.function_name ?? d.code} text={d.function_short || d.description_en || 'No short description recorded.'} more={`${base}/detailed`} /></span>}
-      subtitle={<>{d.brand} {d.model} · {d.function_name ? <>common function: <Link to={`/function/${d.function_slug}`}>{d.function_name}</Link>{lang === 'bn' && d.function_name_bn ? ` (${d.function_name_bn})` : ''}</> : 'not mapped to a common function'}</>}
+      subtitle={<>{d.brand} <ModelName name={d.model} /> · {d.function_name ? <>common function: <Link to={`/function/${d.function_slug}`}>{d.function_name}</Link></> : 'not mapped to a common function'}</>}
       entity={d}
+      modelTabs={{ kind: 'parameter', modelId: d.model_id, counterparts: d.otherBrandImplementations }}
       contextExtra={{ entityType: 'parameter', entityId: d.id, parameterId: d.id, brandId: d.brand_id, modelId: d.model_id }}
     >
       {({ sel, setSel }: any) => (
@@ -296,7 +330,6 @@ export function ParameterResearch() {
               <div className="table-wrap"><table><tbody>
                 <Field k="Manufacturer parameter">{d.code}</Field><Field k="Manufacturer name">{d.name ?? <Val v={null} />}</Field>
                 <Field k="Description (English)">{d.description_en ? <Annotatable as="span" contentKey={`param:${d.id}:desc`} text={d.description_en} /> : <Val v={null} />}</Field>
-                <Field k="বাংলা বিবরণ">{d.description_bn ?? <span className="faint">Bengali description not yet added</span>}</Field>
                 <Field k="Unit"><Val v={d.unit} /></Field><Field k="Default value" help="Exactly as printed in the manual. Destination/capacity-dependent defaults keep the manual's wording."><Val v={d.default_value} /></Field>
                 <Field k="Minimum"><Val v={d.min_value} /></Field><Field k="Maximum"><Val v={d.max_value} /></Field><Field k="Resolution"><Val v={d.resolution} /></Field>
                 <Field k="Access"><Val v={d.access_type} /></Field>
@@ -320,7 +353,7 @@ export function ParameterResearch() {
             <div className="stack">
               <h3>Advanced technical explanation</h3><Explanations items={d.explanations.filter((x: any) => x.level === 'advanced' || x.level === 'manufacturer')} />
               <h3>Differences between brands / models</h3>
-              {d.otherBrandImplementations.length ? <div className="table-wrap"><table><thead><tr><th>Brand / Model</th><th>Code</th><th>Equivalence</th><th>Explanation</th></tr></thead><tbody>{d.otherBrandImplementations.map((s: any) => <tr key={s.id}><td>{s.brand} {s.model}</td><td className="code"><Link to={`/parameter/${s.id}`}>{s.code}</Link></td><td><EquivBadge s={s.equivalence} /></td><td className="small-text">{s.name}</td></tr>)}</tbody></table></div> : <p className="muted">No other implementation of this function is recorded.</p>}
+              {d.otherBrandImplementations.length ? <div className="table-wrap"><table><thead><tr><th>Brand / Model</th><th>Code</th><th>Equivalence</th><th>Explanation</th></tr></thead><tbody>{d.otherBrandImplementations.map((s: any) => <tr key={s.id}><td>{s.brand} <ModelName name={s.model} /></td><td className="code"><Link to={`/parameter/${s.id}`}>{s.code}</Link></td><td><EquivBadge s={s.equivalence} /></td><td className="small-text">{s.name}</td></tr>)}</tbody></table></div> : <p className="muted">No other implementation of this function is recorded.</p>}
               <h3>Communication implications</h3>
               {d.registers.length ? d.registers.map((r: any) => <div key={r.id}><Link to={`/register/${r.id}`} className="code">{r.original_address}</Link> {r.name}</div>) : <p className="muted">Not Documented</p>}
               <h3>Verification history</h3>
@@ -387,11 +420,12 @@ function RegisterBody({ d, base, level, nav }: any) {
   );
   return (
     <div className="page">
-      <Crumbs items={[{ label: 'Home', to: '/' }, { label: 'Modbus', to: '/modbus/registers' }, { label: d.brand, to: `/modbus/registers?brand=${d.brand_slug}` }, { label: d.model, to: `/model/${d.model_id}` }, { label: `Register ${d.original_address}` }, { label: level }]} />
+      <Crumbs items={[{ label: 'Home', to: '/' }, { label: 'Modbus', to: '/modbus/registers' }, { label: d.brand, to: `/modbus/registers?brand=${d.brand_slug}` }, { label: <ModelName name={d.model} brand={d.brand} />, to: `/model/${d.model_id}` }, { label: `Register ${d.original_address}` }, { label: level }]} />
       <div className="row between" style={{ marginBottom: 8 }}>
         <div><h1 style={{ marginBottom: 2 }}><span className="mono">{d.original_address}</span> — {d.name} <InfoIcon title={d.name} text={d.description || 'No description recorded.'} more={`${base}/purpose`} /></h1><div className="muted">{d.brand} {d.model}</div></div>
         <div className="row"><SplitToggle /><AnnotationDisplayControl /><SaveBookmarkButton title={`${d.brand} ${d.model} — ${d.original_address} ${d.name}`} context={{ entityType: 'modbus_register', entityId: d.id, brandId: d.brand_id, modelId: d.model_id, depth: level }} /></div>
       </div>
+      <ModelTabs record={{ kind: 'register', modelId: d.model_id, counterparts: d.otherBrandImplementations ?? [] }} />
       <SplitView enabled={!!split && !!ev} leftTitle="Research" rightTitle={<span>Original manual {ev ? `· p.${po ?? ev.page_index}` : ''}</span>} left={body}
         right={ev ? <PageViewer revisionId={ev.revision_id} page={po ?? ev.page_index ?? 1} onPage={setPo} quoteMatch={ev.quote_match} highlightQuote={ev.extracted_text} /> : null} />
       <span hidden>{loc.key}</span>
@@ -410,7 +444,7 @@ export function ModelPage() {
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Knowledge Base', to: '/parameters' }, { label: m.brand }, { label: m.name }]} />
-      <h1>{m.brand} {m.name}</h1>
+      <h1>{m.brand} <ModelName name={m.name} /></h1>
       <div className="row"><span className={`badge ${m.identification_status === 'verified' ? 'solid' : 'dashed'}`}>Identification: {m.identification_status.replace('_', ' ')}</span></div>
       <h2 style={{ marginTop: 16 }}>Source documents</h2>
       <div className="table-wrap"><table><thead><tr><th>Document</th><th>Revision</th><th>Pages</th><th>Link status</th></tr></thead><tbody>{m.documents.map((d: any) => <tr key={d.id}><td><Link to={`/library/document/${d.id}`}>{d.title}</Link><div className="small-text muted">{d.original_filename}</div></td><td>{d.revision_label ?? <Val v={null} />}</td><td className="num">{d.page_count}</td><td><span className="badge dashed">{d.relation_status}</span></td></tr>)}{!m.documents.length && <tr><td colSpan={4} className="muted">No linked document.</td></tr>}</tbody></table></div>
@@ -424,6 +458,7 @@ export function ModelPage() {
 
 // ============ Comparison ============
 export function Compare() {
+  const { showExportCsv, showExportJson } = useUiSettings();
   const { data: models } = useAsync(() => get('/models'), []);
   const { data: tax } = useAsync(() => get('/taxonomy'), []);
   const [sp, setSp] = useSearchParams();
@@ -444,17 +479,17 @@ export function Compare() {
         <div className="row" style={{ marginTop: 10 }}>
           <select value={category} onChange={(e) => { upd('category', e.target.value); upd('function', ''); }} aria-label="Category"><option value="">All categories</option>{tax?.map((c: any) => <option key={c.slug} value={c.slug}>{c.name}</option>)}</select>
           <select value={fn} onChange={(e) => upd('function', e.target.value)} aria-label="Common function"><option value="">All functions</option>{fns.map((f: any) => <option key={f.slug} value={f.slug}>{f.name}</option>)}</select>
-          {sel.length > 0 && <><button className="small" onClick={() => download(`/compare?models=${sel.join(',')}&category=${category}&function=${fn}&format=csv`)}>Export CSV</button><button className="small" onClick={() => download(`/compare?models=${sel.join(',')}&category=${category}&function=${fn}&format=json`)}>Export JSON</button></>}
+          {sel.length > 0 && <>{showExportCsv && <button className="small" onClick={() => download(`/compare?models=${sel.join(',')}&category=${category}&function=${fn}&format=csv`)}>Export CSV</button>}{showExportJson && <button className="small" onClick={() => download(`/compare?models=${sel.join(',')}&category=${category}&function=${fn}&format=json`)}>Export JSON</button>}</>}
         </div>
       </div>
       <div className="legend" style={{ marginBottom: 8 }}><span>Cells show only approved, documented records. “Not Documented” = no record for that model.</span><span><span className="badge strong">Exact Equivalent</span> grouped as direct equivalents; others explained.</span></div>
       <ErrorBox e={error} />
       {!sel.length ? <div className="empty">Choose at least one model to start.</div> : loading ? <Loading /> : data && (
         <div className="table-wrap"><table className="cmp">
-          <thead><tr><th>Category / Function</th>{data.models.map((m: any) => <th className="model" key={m.id}>{m.brand}<br />{m.name}</th>)}</tr></thead>
+          <thead><tr><th>Category / Function</th>{data.models.map((m: any) => <th className="model" key={m.id}>{m.brand}<br /><ModelName name={m.name} brand={m.brand} /></th>)}</tr></thead>
           <tbody>{data.rows.map((r: any) => (
             <tr key={r.function.id}>
-              <td><div className="small-text muted">{r.function.category}</div><Link to={`/function/${r.function.slug}`}><b>{r.function.name}</b></Link> <InfoIcon title={r.function.name} text={r.function.short_description || ''} more={`/function/${r.function.slug}`} />{r.function.name_bn && <div className="small-text muted">{r.function.name_bn}</div>}</td>
+              <td><div className="small-text muted">{r.function.category}</div><Link to={`/function/${r.function.slug}`}><b>{r.function.name}</b></Link> <InfoIcon title={r.function.name} text={r.function.short_description || ''} more={`/function/${r.function.slug}`} /></td>
               {data.models.map((m: any) => {
                 const cell = r.cells[m.id] ?? [];
                 if (!cell.length) return <td key={m.id} className="missing">Not Documented</td>;
@@ -483,14 +518,18 @@ export function Registers() {
   const [sp, setSp] = useSearchParams();
   const q = Object.fromEntries(sp.entries());
   const { selected } = useModels();
-  const { showVerification } = useUiSettings();
+  const { showVerification, showExportCsv, showExportJson } = useUiSettings();
   const { data, error, loading } = useAsync(() => get('/registers', { ...q, verification: showVerification ? q.verification : undefined, model: selected, page: q.page || 1, limit: 100 }), [sp.toString(), selected, showVerification]);
+  const { settings } = useAuth();
+  const split = !!settings?.split_view?.enabled;
+  const [preview, setPreview] = useState<number | null>(null);
   const set = (k: string, v: string) => { const n = new URLSearchParams(sp); v ? n.set(k, v) : n.delete(k); n.delete('page'); setSp(n, { replace: true }); };
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Modbus & RS485' }, { label: 'Register Explorer' }]} />
-      <div className="row between"><h1>Modbus Register Explorer</h1><div className="row"><button className="small" onClick={() => download('/export?scope=registers&format=csv')}>Export CSV</button><button className="small" onClick={() => download('/export?scope=registers&format=json')}>Export JSON</button><OriginalPdfButton /></div></div>
+      <div className="row between"><h1>Modbus Register Explorer</h1><div className="row"><SplitToggle />{showExportCsv && <button className="small" onClick={() => download('/export?scope=registers&format=csv')}>Export CSV</button>}{showExportJson && <button className="small" onClick={() => download('/export?scope=registers&format=json')}>Export JSON</button>}<OriginalPdfButton /></div></div>
       <ModelTabs />
+      <SplitView enabled={split} leftTitle="Registers" rightTitle="Record preview" right={<RecordPreview kind="register" id={preview} />} left={<>
       <div className="row" style={{ marginBottom: 12 }}>
         <SearchBox icon="filter" placeholder="Filter this list: address (2103, 0x2103, 40100) or name…" value={q.q ?? ''} onChange={(v) => set('q', v)} style={{ minWidth: 340 }} aria-label="Search registers" />
         <select value={q.access ?? ''} onChange={(e) => set('access', e.target.value)} aria-label="Access"><option value="">Read / Write</option><option>Read</option><option>Write</option></select>
@@ -501,12 +540,13 @@ export function Registers() {
       {loading && !data ? <Loading /> : (<>
         <div className="table-wrap"><table><thead><tr><th>Brand / Model</th><th>Original address</th><th>Math. conversion</th><th>Name</th><th>FC</th><th>Access</th><th>Type</th><th>Scaling</th><th>Verification</th></tr></thead>
           <tbody>{data?.rows.map((r: any) => (
-            <tr key={r.id}><td>{r.brand}<div className="small-text muted">{r.model}</div></td>
-              <td className="code"><Link to={`/register/${r.id}`}>{r.original_address}</Link><div className="small-text faint">{r.address_format ?? ''}</div></td>
+            <tr key={r.id} className={split && preview === r.id ? 'sel' : ''} style={split ? { cursor: 'pointer' } : undefined} onClick={(e) => { if (split && !(e.target as HTMLElement).closest('a')) setPreview(r.id); }}><td>{r.brand}<div className="small-text muted"><ModelName name={r.model} brand={r.brand} /></div></td>
+              <td className="code"><Link to={`/register/${r.id}`} onClick={(e) => { if (split) { e.preventDefault(); setPreview(r.id); } }}>{r.original_address}</Link><div className="small-text faint">{r.address_format ?? ''}</div></td>
               <td className="code small-text">{r.conversions.length ? r.conversions.map((c: any) => <div key={c.representation}>{c.representation}: {c.value}</div>) : <span className="faint">—</span>}</td>
               <td>{r.name}{r.function_name && <div className="small-text muted">{r.function_name}</div>}</td><td className="code"><Val v={r.function_codes} /></td><td><Val v={r.access} /></td><td><Val v={r.data_type} /></td><td><Val v={r.scaling} /></td><td><VerifBadge s={r.verification_status} /></td></tr>))}
             {!data?.rows.length && <tr><td colSpan={9} className="empty">No registers match.</td></tr>}</tbody></table></div>
         {data && <Pager page={data.page} limit={data.limit} total={data.total} onPage={(p) => { const n = new URLSearchParams(sp); n.set('page', String(p)); setSp(n); }} />}</>)}
+      </>} />
     </div>
   );
 }
@@ -514,7 +554,6 @@ export function Registers() {
 /** Super Admin: Bengali description, common-function mapping, equivalence, explanations. Manufacturer values are never edited here. */
 function ParameterEditor({ d, onSaved }: { d: any; onSaved: () => void }) {
   const { data: tax } = useAsync(() => get('/taxonomy'), []);
-  const [bn, setBn] = useState(d.description_bn ?? '');
   const [cf, setCf] = useState<string>(d.common_function_id ? String(d.common_function_id) : '');
   const [eq, setEq] = useState(d.equivalence ?? '');
   const [note, setNote] = useState(d.equivalence_note ?? '');
@@ -522,7 +561,7 @@ function ParameterEditor({ d, onSaved }: { d: any; onSaved: () => void }) {
   const [msg, setMsg] = useState<any>(null);
   const save = async () => {
     try {
-      await patch(`/parameters/${d.id}`, { description_bn: bn, common_function_id: cf ? Number(cf) : null, equivalence: eq || null, equivalence_note: note });
+      await patch(`/parameters/${d.id}`, { common_function_id: cf ? Number(cf) : null, equivalence: eq || null, equivalence_note: note });
       setMsg({ ok: 'Saved' });
       onSaved();
     } catch (e) { setMsg(e); }
@@ -539,7 +578,6 @@ function ParameterEditor({ d, onSaved }: { d: any; onSaved: () => void }) {
     <details className="card alt">
       <summary><b>Edit metadata (Super Admin)</b> <span className="muted small-text">— manufacturer values are not editable here</span></summary>
       <div className="stack" style={{ marginTop: 10 }}>
-        <div className="field"><label htmlFor="pe-bn">বাংলা বিবরণ (Bengali description)</label><textarea id="pe-bn" value={bn} onChange={(e) => setBn(e.target.value)} /></div>
         <div className="grid2">
           <div className="field"><label htmlFor="pe-cf">Common function</label>
             <select id="pe-cf" value={cf} onChange={(e) => setCf(e.target.value)}><option value="">(unmapped)</option>{tax?.map((c: any) => <optgroup key={c.slug} label={c.name}>{c.functions.map((f: any) => <option key={f.id} value={f.id}>{f.name}</option>)}</optgroup>)}</select></div>
@@ -551,7 +589,7 @@ function ParameterEditor({ d, onSaved }: { d: any; onSaved: () => void }) {
         <hr />
         <b>Add technical explanation</b>
         <div className="row"><select value={ex.level} onChange={(e) => setEx({ ...ex, level: e.target.value })} aria-label="Level">{['short', 'detailed', 'advanced', 'manufacturer'].map((x) => <option key={x}>{x}</option>)}</select>
-          <select value={ex.language} onChange={(e) => setEx({ ...ex, language: e.target.value })} aria-label="Language"><option value="en">English</option><option value="bn">বাংলা</option></select>
+          <select value={ex.language} onChange={(e) => setEx({ ...ex, language: e.target.value })} aria-label="Language"><option value="en">English</option></select>
           <label style={{ display: 'inline-flex', gap: 5, margin: 0 }}><input type="checkbox" checked={ex.cite} onChange={(e) => setEx({ ...ex, cite: e.target.checked })} /> cites this record’s first source</label></div>
         <textarea value={ex.body} onChange={(e) => setEx({ ...ex, body: e.target.value })} aria-label="Explanation text" placeholder="Only statements supported by the manual. Without a citation it is stored as Unverified." />
         <button disabled={!ex.body.trim()} onClick={addExplanation}>Add explanation</button>

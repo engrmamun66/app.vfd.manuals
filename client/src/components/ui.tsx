@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 
 export const NOT_DOC = 'Not Documented';
@@ -58,7 +59,7 @@ export function ErrorBox({ e }: { e: any }) {
   return <div className="err" role="alert">{e.message || String(e)}</div>;
 }
 
-export function Crumbs({ items }: { items: { label: string; to?: string }[] }) {
+export function Crumbs({ items }: { items: { label: ReactNode; to?: string }[] }) {
   return (
     <nav className="crumbs" aria-label="Breadcrumb">
       {items.map((it, i) => (
@@ -231,4 +232,29 @@ export function SearchBox({ icon = 'search', value, onChange, onClear, className
       )}
     </span>
   );
+}
+
+/** Cuts long text to `max` characters followed by "..." (full text stays available through <Tip>). */
+export const truncate = (s: string, max = 35) => (s.length > max ? s.slice(0, max).trimEnd() + '...' : s);
+
+/** Standard tooltip (hover + keyboard focus, arrow, portal so overflow containers cannot clip it). */
+export function Tip({ text, children }: { text: string; children: ReactNode }) {
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const show = (e: React.SyntheticEvent<HTMLElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setPos({ x: r.left + r.width / 2, y: r.bottom + 8 });
+  };
+  return (
+    <>
+      <span tabIndex={0} aria-label={text} onMouseEnter={show} onFocus={show} onMouseLeave={() => setPos(null)} onBlur={() => setPos(null)} style={{ cursor: 'help' }}>{children}</span>
+      {pos && createPortal(<div className="tooltip" role="tooltip" style={{ left: pos.x, top: pos.y }}>{text}</div>, document.body)}
+    </>
+  );
+}
+
+/** A model name cut to 35 characters + "...", with the full name in a standard tooltip when it was cut. */
+export function ModelName({ name, brand, max = 35 }: { name: string | null | undefined; brand?: string | null; max?: number }) {
+  if (!name) return <>—</>;
+  const t = truncate(name, max);
+  return t === name ? <>{name}</> : <Tip text={`${brand ? brand + ' ' : ''}${name}`}>{t}</Tip>;
 }
