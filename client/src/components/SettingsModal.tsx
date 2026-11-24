@@ -125,6 +125,43 @@ function UiSettings() {
   );
 }
 
+const TRANSITIONS: [string, string][] = [['none', 'None'], ['fade', 'Fade'], ['slide-up', 'Slide up'], ['slide-left', 'Slide from right'], ['slide-right', 'Slide from left'], ['zoom-in', 'Zoom in'], ['zoom-out', 'Zoom out'], ['blur', 'Blur in'], ['flip', 'Tilt']];
+
+function PageTransition() {
+  const { settings, updateSettings } = useAuth();
+  const cur = settings?.page_transition ?? 'none';
+  const [n, setN] = useState(0); // bumps to replay the preview
+  const ms = settings?.page_transition_ms ?? 300;
+  const [draft, setDraft] = useState<number | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const pick = async (k: string) => {
+    setN((x) => x + 1);
+    try { setErr(null); await updateSettings({ page_transition: k } as any); } catch (e: any) { setErr(e.message); }
+  };
+  const saveMs = async (v: number) => {
+    setDraft(null); setN((x) => x + 1);
+    try { setErr(null); await updateSettings({ page_transition_ms: v } as any); } catch (e: any) { setErr(e.message); }
+  };
+  return (
+    <div style={{ maxWidth: 720, marginTop: 28 }}>
+      <h2>Page transition</h2>
+      <p className="muted small-text">Animation played when you navigate to another page. Personal: it only changes your own view.</p>
+      {err && <div className="err" role="alert">{err}</div>}
+      <div className="row" role="radiogroup" aria-label="Page transition">
+        {TRANSITIONS.map(([k, l]) => <button key={k} role="radio" aria-checked={cur === k} className={cur === k ? 'primary small' : 'small'} onClick={() => pick(k)}>{l}</button>)}
+      </div>
+      <div className="row" style={{ marginTop: 12 }}>
+        <label htmlFor="pt-speed" style={{ margin: 0 }}>Speed</label>
+        <span className="small-text muted">Fast</span>
+        <input id="pt-speed" className="range" type="range" min={100} max={2000} step={100} style={{ width: 260, '--pct': `${(((draft ?? ms) - 100) / 1900) * 100}%` } as React.CSSProperties} value={draft ?? ms} onChange={(e) => setDraft(Number(e.target.value))} onPointerUp={() => draft !== null && saveMs(draft)} onKeyUp={() => draft !== null && saveMs(draft)} />
+        <span className="small-text muted">Slow</span>
+        <span className="small-text">{draft ?? ms} ms</span>
+      </div>
+      <div key={n} className={`pt-preview ${cur !== 'none' ? `pt-${cur}` : ''}`} style={{ '--pt-ms': `${draft ?? ms}ms` } as React.CSSProperties}><b>Preview</b><div className="small-text muted">This is how the next page will appear.</div></div>
+    </div>
+  );
+}
+
 /** Full-screen settings: profile, preferences, model aliases, security and (Super Admin) application settings. */
 export function SettingsModal({ onClose: onClosed }: { onClose: () => void }) {
   const [closing, setClosing] = useState(false);
@@ -146,7 +183,7 @@ export function SettingsModal({ onClose: onClosed }: { onClose: () => void }) {
         <div className="fs-content" style={{ padding: '16px 28px' }}>
           {tab === 'profile' && <MySettings embedded />}
           {tab === 'models' && <ModelAliases />}
-          {tab === 'ui' && <UiSettings />}
+          {tab === 'ui' && <><UiSettings /><PageTransition /></>}
           {tab === 'security' && <ChangePassword embedded />}
           {tab === 'app' && isAdmin && <AdminSettings embedded />}
         </div>

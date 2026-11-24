@@ -3,8 +3,9 @@ import { useModels } from '../lib/models';
 import { useAsync } from './ui';
 
 /** Opens the selected model's original manual PDF in a new tab. Disabled when "All" is selected or no manual exists. */
-export function OriginalPdfButton() {
-  const { selected } = useModels();
+export function OriginalPdfButton({ modelId }: { modelId?: number } = {}) {
+  const { selected: sel } = useModels();
+  const selected = modelId ?? sel;
   const { data } = useAsync(() => get('/documents'), []);
   const doc = selected == null ? null : data?.find((d: any) => d.models.some((m: any) => m.id === selected) && d.revisions.length);
   const rev = doc?.revisions[doc.revisions.length - 1];

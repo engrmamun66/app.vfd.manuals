@@ -18,7 +18,9 @@ export interface Settings {
   default_highlight_color: string;
   split_view: { enabled: boolean; ratio: number; collapsed: 'left' | 'right' | null };
   language: 'en' | 'bn';
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'system';
+  page_transition?: string;
+  page_transition_ms?: number;
   [k: string]: any;
 }
 
@@ -108,7 +110,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user?.id, clearAuth]);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = settings?.theme === 'dark' ? 'dark' : 'light';
+    const mq = window.matchMedia?.('(prefers-color-scheme: dark)');
+    const apply = () => { document.documentElement.dataset.theme = settings?.theme === 'dark' || (settings?.theme === 'system' && mq?.matches) ? 'dark' : 'light'; };
+    apply();
+    if (settings?.theme !== 'system' || !mq) return;
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
   }, [settings?.theme]);
 
   const value: Ctx = {

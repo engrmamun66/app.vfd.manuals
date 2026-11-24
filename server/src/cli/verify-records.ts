@@ -26,7 +26,20 @@ const squash = (s: string) => s.toLowerCase().replace(/\s+/g, '');
 const alnum = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 const words = (s: string) => s.toLowerCase().match(/[a-z0-9]+/g) ?? [];
 const isNum = (v: unknown) => typeof v === 'string' && /^-?\d+(\.\d+)?$/.test(v.trim());
-const hasNumber = (text: string, v: string) => new RegExp(`(?<![\\w.])${v.trim().replace(/[.+*?^${}()|[\]\\]/g, '\\$&')}(?![\\w])`).test(text);
+const hasNumber = (text: string, v: string) => {
+  // Manual tables print values glued to units ("599.00Hz") or with stray spaces ("0. 1 to 160.0"): the number must not continue into more digits.
+  const esc = v.trim().replace(/[.+*?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`(?<![\\d.])${esc}(?!\\d|\\.\\d)`);
+  return re.test(text) || re.test(text.replace(/\s+/g, ''));
+};
+/** "10.27 ~ 10.34 Reserved": a parameter code that lies inside a printed code range counts as on the page. */
+const inCodeRange = (text: string, code: string) => {
+  const m = /^(\d{1,2})\.(\d{2})$/.exec(code.trim());
+  if (!m) return false;
+  for (const r of text.matchAll(/(\d{1,2})\.(\d{2})\s*(?:~|–|-|to)\s*(?:(\d{1,2})\.)?(\d{2})(?!\d)/g))
+    if (r[1] === m[1] && (r[3] === undefined || r[3] === m[1]) && Number(m[2]) >= Number(r[2]) && Number(m[2]) <= Number(r[4])) return true;
+  return false;
+};
 
 interface Check { ok: boolean; reasons: string[]; coverage: number }
 
@@ -34,6 +47,7 @@ function check(entityType: 'parameter' | 'modbus_register', row: any, pageText: 
   const reasons: string[] = [];
   const id = entityType === 'parameter' ? String(row.code) : String(row.original_address);
   let idOk = squash(pageText).includes(squash(id)) || (alnum(id).length >= 3 && alnum(pageText).includes(alnum(id)));
+  if (!idOk && entityType === 'parameter') idOk = inCodeRange(pageText, id);
   if (!idOk && entityType === 'modbus_register') {
     // addresses are printed in many notations (0x1000, 1000H, 1000): every address token of a list/range must appear as a whole token
     const toks = id.split(/\s*(?:-|–|;|,|\bto\b)\s*/i).map((t) => t.trim().replace(/^0x/i, '').replace(/h$/i, '')).filter(Boolean);

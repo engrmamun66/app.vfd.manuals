@@ -41,6 +41,8 @@ export const USER_SETTING_DEFAULTS: Record<string, unknown> = {
   selected_model: null, // model id used as the global filter on every page (null = all models)
   model_aliases: {}, // { [modelId]: short tab label }
   ui_settings: { show_verification_filter: false, show_evidence_filter: false, show_export_csv: false, show_export_json: false }, // optional list filters / export buttons, hidden by default
+  page_transition_ms: 300, // duration of that animation in milliseconds
+  page_transition: 'none', // animation played when navigating between pages
   model_order: [], // personal tab/list order: model ids, first = leftmost
   hidden_models: [], // model ids switched Off (not shown as tabs)
 };

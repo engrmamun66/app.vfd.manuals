@@ -121,7 +121,10 @@ export function FunctionPage() {
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Knowledge Base', to: '/parameters' }, { label: data.category, to: `/kb/${data.category_slug}` }, { label: data.name }]} />
-      <h1>{data.name} <InfoIcon title={data.name} text={data.short_description || 'No description recorded.'} /></h1>
+      <div className="row between" style={{ marginBottom: 8 }}>
+        <h1 style={{ margin: 0 }}>{data.name} <InfoIcon title={data.name} text={data.short_description || 'No description recorded.'} /></h1>
+        <div className="row"><OriginalPdfButton /><SaveBookmarkButton title={data.name} context={{ entityType: 'common_function', functionSlug: fslug }} /></div>
+      </div>
       {data.short_description && <p className="muted prose">{data.short_description} <span className="badge dashed">generic concept — not a manufacturer fact</span></p>}
       <ModelTabs />
       <h2>Brand-specific implementations</h2>
@@ -280,7 +283,7 @@ function ResearchFrame({ crumbs, title, subtitle, level, base, evidence, childre
         <Crumbs items={crumbs} />
         <div className="row between" style={{ marginBottom: 8 }}>
           <div><h1 style={{ marginBottom: 2 }}>{title}</h1><div className="muted">{subtitle}</div></div>
-          <div className="row"><SplitToggle /><AnnotationDisplayControl /><SaveBookmarkButton title={typeof title === 'string' ? title : ''} context={{ ...contextExtra, depth: level }} /></div>
+          <div className="row"><SplitToggle /><AnnotationDisplayControl />{modelTabs && <OriginalPdfButton modelId={modelTabs.modelId} />}<SaveBookmarkButton title={typeof title === 'string' ? title : ''} context={{ ...contextExtra, depth: level }} /></div>
         </div>
         {modelTabs && <ModelTabs record={modelTabs} />}
         <SplitView
@@ -425,7 +428,7 @@ function RegisterBody({ d, base, level, nav }: any) {
       <Crumbs items={[{ label: 'Home', to: '/' }, { label: 'Modbus', to: '/modbus/registers' }, { label: d.brand, to: `/modbus/registers?brand=${d.brand_slug}` }, { label: <ModelName name={d.model} brand={d.brand} />, to: `/model/${d.model_id}` }, { label: `Register ${d.original_address}` }, { label: level }]} />
       <div className="row between" style={{ marginBottom: 8 }}>
         <div><h1 style={{ marginBottom: 2 }}><span className="mono">{d.original_address}</span> — {d.name} <InfoIcon title={d.name} text={d.description || 'No description recorded.'} more={`${base}/purpose`} /></h1><div className="muted">{d.brand} {d.model}</div></div>
-        <div className="row"><SplitToggle /><AnnotationDisplayControl /><SaveBookmarkButton title={`${d.brand} ${d.model} — ${d.original_address} ${d.name}`} context={{ entityType: 'modbus_register', entityId: d.id, brandId: d.brand_id, modelId: d.model_id, depth: level }} /></div>
+        <div className="row"><SplitToggle /><AnnotationDisplayControl /><OriginalPdfButton modelId={d.model_id} /><SaveBookmarkButton title={`${d.brand} ${d.model} — ${d.original_address} ${d.name}`} context={{ entityType: 'modbus_register', entityId: d.id, brandId: d.brand_id, modelId: d.model_id, depth: level }} /></div>
       </div>
       <ModelTabs record={{ kind: 'register', modelId: d.model_id, level, counterparts: d.otherBrandImplementations ?? [] }} />
       <SplitView enabled={!!split && !!ev} leftTitle="Research" rightTitle={<span>Original manual {ev ? `· p.${po ?? ev.page_index}` : ''}</span>} left={body}

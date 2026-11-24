@@ -32,7 +32,15 @@ function validate(key: string, v: any) {
       if (!['en', 'bn'].includes(v)) throw badRequest('language must be en or bn');
       return v;
     case 'theme':
-      if (!['light', 'dark'].includes(v)) throw badRequest('theme must be light or dark');
+      if (!['light', 'dark', 'system'].includes(v)) throw badRequest('theme must be light, dark or system');
+      return v;
+    case 'page_transition_ms': {
+      const ms = Number(v);
+      if (!Number.isFinite(ms)) throw badRequest('page_transition_ms must be a number');
+      return Math.min(2000, Math.max(100, Math.round(ms)));
+    }
+    case 'page_transition':
+      if (!['none', 'fade', 'slide-up', 'slide-left', 'slide-right', 'zoom-in', 'zoom-out', 'blur', 'flip'].includes(v)) throw badRequest('invalid page_transition');
       return v;
     case 'explanation_levels_open':
       if (!Array.isArray(v)) throw badRequest('must be an array');

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { get } from '../lib/api';
 import { Crumbs, InfoIcon, useAsync, ModelName } from '../components/ui';
 import { ModelTabs } from '../components/ModelTabs';
+import { OriginalPdfButton } from '../components/OriginalPdfButton';
 import { useModels } from '../lib/models';
 
 /** Pure arithmetic only. Never decides that a result is a valid PLC address or a 4xxxx reference. */
@@ -71,7 +72,7 @@ export function CommSettings() {
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Modbus & RS485' }, { label: 'Communication Settings' }]} />
-      <h1>Communication Settings</h1>
+      <div className="row between" style={{ marginBottom: 8 }}><h1 style={{ margin: 0 }}>Communication Settings</h1><OriginalPdfButton /></div>
       <p className="muted">Slave address, baud rate, parity/stop bits, timeouts and loss behavior — only parameters from approved records.</p>
       <ModelTabs />
       <div className="table-wrap"><table><thead><tr><th>Function</th><th>Brand / Model</th><th>Code</th><th>Name</th><th>Default</th><th>Range</th><th>Verification</th></tr></thead><tbody>

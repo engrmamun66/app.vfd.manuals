@@ -216,7 +216,7 @@ mark.snip, .snippet mark { background: var(--inv-bg); color: var(--inv-fg); padd
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* ---------- model tabs ---------- */
-.model-tabs { display: flex; gap: 2px; overflow-x: auto; border-bottom: 1px solid var(--line); margin: 0 0 14px; }
+.model-tabs { display: flex; gap: 2px; overflow-x: auto; overflow-y: hidden; border-bottom: 1px solid var(--line); margin: 0 0 14px; }
 .model-tabs button { border: 1px solid transparent; border-bottom: none; background: none; padding: 6px 14px; white-space: nowrap; cursor: pointer; color: var(--fg-muted); font-weight: 600; margin-bottom: -1px; }
 .model-tabs button:hover { background: var(--bg-hover); }
 .model-tabs button.active { background: var(--bg); color: var(--fg); border-color: var(--line-strong); border-bottom: 1px solid var(--bg); }
@@ -297,3 +297,34 @@ tr.sel td { background: var(--bg-alt); }
 .pager { position: sticky; bottom: 0; z-index: 5; margin-top: 10px; padding: 10px 0; background: var(--bg); border-top: 1px solid var(--line); }
 .pager-hint { margin-left: auto; }
 .pager-hint.typing { padding: 3px 10px; border: 1px solid var(--line); background: var(--bg-alt); font-size: 13px; }
+
+/* ---------- Page transitions (Settings → UI settings) ---------- */
+@keyframes pt-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pt-slide-up { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes pt-slide-left { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+@keyframes pt-slide-right { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+@keyframes pt-zoom-in { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes pt-zoom-out { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: none; } }
+@keyframes pt-blur { from { opacity: 0; filter: blur(8px); } to { opacity: 1; filter: none; } }
+@keyframes pt-flip { from { opacity: 0; transform: perspective(900px) rotateX(-8deg) translateY(10px); } to { opacity: 1; transform: none; } }
+.pt-fade, .pt-slide-up, .pt-slide-left, .pt-slide-right, .pt-zoom-in, .pt-zoom-out, .pt-blur, .pt-flip { animation-duration: var(--pt-ms, 300ms); animation-timing-function: cubic-bezier(.2,.7,.2,1); animation-fill-mode: backwards; }
+.pt-fade { animation-name: pt-fade; } .pt-slide-up { animation-name: pt-slide-up; } .pt-slide-left { animation-name: pt-slide-left; } .pt-slide-right { animation-name: pt-slide-right; }
+.pt-zoom-in { animation-name: pt-zoom-in; } .pt-zoom-out { animation-name: pt-zoom-out; } .pt-blur { animation-name: pt-blur; } .pt-flip { animation-name: pt-flip; }
+@media (prefers-reduced-motion: reduce) { .pt-fade, .pt-slide-up, .pt-slide-left, .pt-slide-right, .pt-zoom-in, .pt-zoom-out, .pt-blur, .pt-flip { animation: none; } }
+.pt-preview { border: 1px dashed var(--line); padding: 14px 16px; margin-top: 12px; max-width: 420px; background: var(--bg-alt); }
+
+/* ---------- Styled range slider (flat black & white, square — matches the app theme) ---------- */
+input[type="range"].range { -webkit-appearance: none; appearance: none; height: 8px; padding: 0; border: 1px solid var(--line-strong); border-radius: 2px; cursor: pointer; background: linear-gradient(to right, var(--inv-bg) var(--pct, 0%), var(--bg) var(--pct, 0%)); }
+input[type="range"].range:focus { outline: none; }
+input[type="range"].range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 22px; border-radius: 2px; background: var(--bg); border: 2px solid var(--line-strong); box-shadow: 2px 2px 0 var(--line-strong); cursor: grab; }
+input[type="range"].range::-moz-range-thumb { width: 10px; height: 18px; border-radius: 2px; background: var(--bg); border: 2px solid var(--line-strong); box-shadow: 2px 2px 0 var(--line-strong); cursor: grab; }
+input[type="range"].range::-moz-range-track { background: transparent; }
+input[type="range"].range:active::-webkit-slider-thumb { cursor: grabbing; background: var(--inv-bg); }
+input[type="range"].range:focus-visible { outline: 2px solid var(--line-strong); outline-offset: 3px; }
+
+/* ---------- Header theme switch (System / Light / Dark) ---------- */
+.theme-switch { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 2px; overflow: hidden; margin-right: 6px; }
+.theme-switch button { border: 0; border-radius: 0; padding: 4px 7px; line-height: 0; background: var(--bg); color: var(--fg); }
+.theme-switch button + button { border-left: 1px solid var(--line-strong); }
+.theme-switch button.active { background: var(--inv-bg); color: var(--inv-fg); }
+.theme-switch button:not(.active):hover { background: var(--bg-hover); }

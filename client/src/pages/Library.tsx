@@ -7,6 +7,7 @@ import { PageViewer } from '../components/Viewer';
 import { SaveBookmarkButton } from './Bookmarks';
 import { escSnippet } from './ModbusTools';
 import { ModelTabs } from '../components/ModelTabs';
+import { OriginalPdfButton } from '../components/OriginalPdfButton';
 import { useModels } from '../lib/models';
 
 export function Library() {
@@ -17,7 +18,7 @@ export function Library() {
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Documentation Library' }, { label: 'Manuals' }]} />
-      <div className="row between"><h1>Documentation Library</h1>{user?.role === 'super_admin' && <Link className="btn primary" to="/library/import">Import documents</Link>}</div>
+      <div className="row between"><h1>Documentation Library</h1><div className="row"><OriginalPdfButton />{user?.role === 'super_admin' && <Link className="btn primary" to="/library/import">Import documents</Link>}</div></div>
       <ModelTabs />
       <ErrorBox e={error} />
       {loading ? <Loading /> : (
