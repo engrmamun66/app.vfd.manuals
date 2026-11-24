@@ -711,4 +711,19 @@ CREATE TABLE category_parameters (
 CREATE INDEX idx_cp_parameter ON category_parameters(parameter_id);
 `,
   },
+  {
+    version: 9,
+    name: 'parameter_function_links',
+    sql: /* sql */ `
+-- secondary mapping: a parameter that the manual ties to ANOTHER common function (shown in comparisons)
+CREATE TABLE parameter_function_links (
+  parameter_id INTEGER NOT NULL REFERENCES parameters(id) ON DELETE CASCADE,
+  function_id INTEGER NOT NULL REFERENCES common_functions(id) ON DELETE CASCADE,
+  equivalence TEXT,
+  note TEXT,
+  PRIMARY KEY (parameter_id, function_id)
+);
+CREATE INDEX idx_pfl_function ON parameter_function_links(function_id);
+`,
+  },
 ];

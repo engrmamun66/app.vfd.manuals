@@ -1,5 +1,5 @@
 import { getDb, runMigrations, openDb, setDb } from './db/index.js';
-import { bootstrapSuperAdmin, seedTaxonomy } from './db/seed.js';
+import { applyFunctionLinks, bootstrapSuperAdmin, seedTaxonomy } from './db/seed.js';
 import { createBackup } from './services/backup.js';
 import { systemDirsReady } from './services/storage.js';
 
@@ -11,6 +11,8 @@ export async function bootstrap(log: (m: string) => void = console.log) {
   if (applied.length) log(`Applied migrations: ${applied.join(', ')}`);
   const tax = seedTaxonomy(getDb());
   if (tax.categories || tax.functions) log(`Taxonomy seeded: +${tax.categories} categories, +${tax.functions} common functions`);
+  const links = applyFunctionLinks(getDb());
+  if (links) log(`Function links applied: +${links}`);
   const sa = await bootstrapSuperAdmin(getDb());
   log(sa.message);
   systemDirsReady();

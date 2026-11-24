@@ -26,6 +26,7 @@ export const config = {
   host: process.env.HOST || '127.0.0.1',
   port: int(process.env.PORT, 3000),
   isProd: process.env.NODE_ENV === 'production',
+  functionLinksFile: path.join(ROOT, 'data', 'function-links.json'),
   dbPath: process.env.DB_PATH ? path.resolve(process.env.DB_PATH) : path.join(ROOT, 'database', 'vfd-knowledge.db'),
   backupDir: path.join(ROOT, 'database', 'backups'),
   manualsDir: process.env.MANUALS_DIR ? path.resolve(process.env.MANUALS_DIR) : path.join(ROOT, 'vfd-manuals'),

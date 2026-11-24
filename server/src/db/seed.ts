@@ -49,6 +49,24 @@ export function seedTaxonomy(db: DB) {
   return { categories: c, functions: f };
 }
 
+/** Applies data/function-links.json (secondary common-function links). Idempotent; links whose parameter or function is not present yet are skipped. */
+export function applyFunctionLinks(db: DB) {
+  if (!fs.existsSync(config.functionLinksFile)) return 0;
+  const file = JSON.parse(fs.readFileSync(config.functionLinksFile, 'utf8')) as { links: { model: string; code: string; function: string; equivalence?: string; note?: string }[] };
+  const find = db.prepare('SELECT p.id FROM parameters p JOIN models m ON m.id = p.model_id WHERE m.name LIKE ? AND p.code = ? LIMIT 1');
+  const fn = db.prepare('SELECT id FROM common_functions WHERE slug = ?');
+  const ins = db.prepare('INSERT OR IGNORE INTO parameter_function_links(parameter_id, function_id, equivalence, note) VALUES (?,?,?,?)');
+  let n = 0;
+  db.transaction(() => {
+    for (const l of file.links) {
+      const p = find.get(`${l.model}%`, l.code) as { id: number } | undefined;
+      const f = fn.get(l.function) as { id: number } | undefined;
+      if (p && f) n += ins.run(p.id, f.id, l.equivalence ?? null, l.note ?? null).changes;
+    }
+  })();
+  return n;
+}
+
 /**
  * Creates the initial Super Admin ONLY when no Super Admin exists (§32.4).
  * Never resets an existing account or password. Password comes from env, never logged.

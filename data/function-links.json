@@ -1,0 +1,17 @@
+{
+  "_note": "Extra comparison mappings: a parameter that the manual itself ties to ANOTHER common function (secondary link). Every entry must be backed by manual text quoted in 'note'. Applied idempotently at start-up; never changes manufacturer values.",
+  "links": [
+    {
+      "model": "VFD-EL", "code": "01.01", "function": "rated-motor-frequency", "equivalence": "Functionally Similar",
+      "note": "Delta VFD-EL has no separate rated-motor-frequency parameter. The manual states for Pr.01.01 (Fbase): \"This value should be set according to the rated frequency of the motor as indicated on the motor nameplate.\""
+    },
+    {
+      "model": "VFD-EL", "code": "01.02", "function": "rated-motor-voltage", "equivalence": "Partially Equivalent",
+      "note": "Delta VFD-EL has no separate rated-motor-voltage parameter. The manual states for Pr.01.02 (Vmax): \"The Maximum Output Voltage setting must be smaller than or equal to the rated voltage of the motor as indicated on the motor nameplate.\" It limits the output voltage; it is not a nameplate entry."
+    },
+    {
+      "model": "VFD-EL", "code": "09.04", "function": "parity-stop-bits", "equivalence": "Functionally Similar",
+      "note": "Delta VFD-EL sets data bits, parity and stop bits together in the communication protocol choice of Pr.09.04 (e.g. Modbus RTU <8,N,2>, <8,E,1>), not in separate parameters."
+    }
+  ]
+}

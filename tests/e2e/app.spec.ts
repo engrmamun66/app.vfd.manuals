@@ -839,6 +839,27 @@ test.describe('theme & accessibility basics', () => {
     }
   });
 
+  test('comparison: a model keeps all its cells when another model is added; manual-backed related parameters are shown', async () => {
+    const models: any[] = await (await admin.request.get('/api/models')).json();
+    const delta = models.find((m) => /^VFD-EL/.test(m.name));
+    test.skip(!delta, 'Delta VFD-EL is not part of the seeded data');
+    const other = models.find((m) => m.id !== delta.id)!;
+    const solo = await (await admin.request.get(`/api/compare?models=${delta.id}`)).json();
+    const both = await (await admin.request.get(`/api/compare?models=${delta.id},${other.id}`)).json();
+    const cellsOf = (c: any) => new Map<string, string>(c.rows.map((r: any) => [r.function.slug, r.cells[delta.id].map((x: any) => x.kind + x.id).join(',')]));
+    const a = cellsOf(solo);
+    const b = cellsOf(both);
+    for (const [slug, cell] of a) if (cell) expect(b.get(slug), `Delta cell for ${slug} must not change when another model is added`).toBe(cell);
+    // Delta documents rated motor frequency/voltage only through Pr.01.01 / Pr.01.02: shown as related, with the manual's wording
+    const row = both.rows.find((r: any) => r.function.slug === 'rated-motor-frequency');
+    if (row) {
+      const c0 = row.cells[delta.id][0];
+      expect(c0.code).toBe('01.01');
+      expect(c0.linked).toBeTruthy();
+      expect(c0.equivalence_note).toContain('rated frequency of the motor');
+    }
+  });
+
   test('model tabs: selection persists across reload and pages; alias set in full-screen settings; sidebar collapses', async () => {
     await admin.goto('/parameters');
     const tabs = admin.locator('.model-tabs button');

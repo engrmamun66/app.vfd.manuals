@@ -521,7 +521,7 @@ export function Compare() {
                 return (
                   <td key={m.id}>{cell.map((c: any) => (
                     <div key={c.kind + c.id} style={{ marginBottom: 8 }}>
-                      <Link to={`/${c.kind === 'parameter' ? 'parameter' : 'register'}/${c.id}`} className="code"><b>{c.kind === 'parameter' ? c.code : c.original_address}</b></Link> <span className="small-text">{c.name}</span>
+                      <Link to={`/${c.kind === 'parameter' ? 'parameter' : 'register'}/${c.id}`} className="code"><b>{c.kind === 'parameter' ? c.code : c.original_address}</b></Link> <span className="small-text">{c.name}</span>{c.linked && <> <span className="badge dashed" title="The manual ties this parameter to this function; it is not a direct one-to-one parameter.">related</span></>}
                       {c.kind === 'parameter' ? (
                         <div className="small-text muted">{c.default_value ? `default ${c.default_value}` : ''}{c.min_value || c.max_value ? ` · ${c.min_value ?? '?'}…${c.max_value ?? '?'}` : ''} {c.unit ?? ''}</div>
                       ) : <div className="small-text muted">{c.access ?? ''} {c.scaling ?? ''}</div>}

@@ -641,6 +641,18 @@ export function buildComparison(modelIds: number[], opts: { category?: string | 
        FROM parameters p ${cdJoin('parameter', 'p', 'cdp')} WHERE ${cdVisible('cdp')} AND p.model_id IN (${ph}) AND p.common_function_id IS NOT NULL`,
     )
     .all(...modelIds) as any[];
+  // secondary links: parameters that the manual ties to another common function
+  const linked = db
+    .prepare(
+      `SELECT p.id, p.model_id, l.function_id common_function_id, p.code, p.name, p.unit, p.default_value, p.min_value, p.max_value, p.resolution,
+         COALESCE(l.equivalence, p.equivalence) equivalence, l.note equivalence_note, p.verification_status, p.evidence_status, 1 linked,
+         (SELECT json_object('page_index', s.page_index, 'printed_page', s.printed_page, 'document', d.title, 'revision_id', s.revision_id, 'quote_match', s.quote_match)
+            FROM evidence_records e JOIN source_references s ON s.id=e.source_reference_id JOIN document_revisions r ON r.id=s.revision_id JOIN documents d ON d.id=r.document_id
+            WHERE e.entity_type='parameter' AND e.entity_id=p.id ORDER BY CASE e.role WHEN 'original' THEN 0 ELSE 1 END, e.id LIMIT 1) source_json
+       FROM parameter_function_links l JOIN parameters p ON p.id = l.parameter_id ${cdJoin('parameter', 'p', 'cdp')} WHERE ${cdVisible('cdp')} AND p.model_id IN (${ph})`,
+    )
+    .all(...modelIds) as any[];
+  params.push(...linked);
   const regs = db
     .prepare(
       `SELECT r.id, r.model_id, r.common_function_id, r.original_address, r.address_format, r.name, r.access, r.scaling, r.unit, r.verification_status,
