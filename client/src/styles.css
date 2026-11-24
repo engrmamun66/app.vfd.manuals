@@ -292,3 +292,8 @@ button.icon-only.danger:hover { background: var(--inv-bg); color: var(--inv-fg);
 .model-tabs button.dim { opacity: .5; }
 .model-tabs button.dim:hover, .model-tabs button.dim.active { opacity: 1; }
 tr.sel td { background: var(--bg-alt); }
+
+/* Sticky pagination bar: stays visible at the bottom of the scrolling area */
+.pager { position: sticky; bottom: 0; z-index: 5; margin-top: 10px; padding: 10px 0; background: var(--bg); border-top: 1px solid var(--line); }
+.pager-hint { margin-left: auto; }
+.pager-hint.typing { padding: 3px 10px; border: 1px solid var(--line); background: var(--bg-alt); font-size: 13px; }

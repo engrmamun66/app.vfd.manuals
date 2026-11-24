@@ -146,13 +146,58 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]) {
   return { data, error, loading, reload: () => setTick((t) => t + 1), setData };
 }
 
+/** Pagers currently on screen; the most recently mounted one answers the arrow keys. */
+const pagerStack: { current: { prev: () => void; next: () => void; jump: (n: number) => void } }[] = [];
+
+/**
+ * Sticky pagination bar. Keys (no modifier, not while typing, no dialog open):
+ * ← / → previous / next page; type a number (e.g. 10) to jump to that page (0 or 1 = first page; ignored when the page does not exist).
+ */
 export function Pager({ page, limit, total, onPage }: { page: number; limit: number; total: number; onPage: (p: number) => void }) {
   const pages = Math.max(1, Math.ceil(total / limit));
+  const [typed, setTyped] = useState('');
+  const h = useRef({ prev: () => {}, next: () => {}, jump: (_n: number) => {} });
+  h.current = { prev: () => page > 1 && onPage(page - 1), next: () => page < pages && onPage(page + 1), jump: (n) => { const t = n <= 1 ? 1 : n; if (t <= pages && t !== page) onPage(t); } };
+  const buf = useRef('');
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => {
+    pagerStack.push(h);
+    const reset = () => { clearTimeout(timer.current); buf.current = ''; setTyped(''); };
+    const commit = () => { const n = Number(buf.current); reset(); if (!Number.isNaN(n)) h.current.jump(n); };
+    const onKey = (e: KeyboardEvent) => {
+      const digit = /^[0-9]$/.test(e.key);
+      const arrow = e.key === 'ArrowLeft' || e.key === 'ArrowRight';
+      const pending = buf.current !== '' && (e.key === 'Enter' || e.key === 'Escape');
+      if (!(arrow || digit || pending) || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.defaultPrevented) return;
+      if (pagerStack[pagerStack.length - 1] !== h) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.getAttribute('role') === 'separator' || t.getAttribute('role') === 'tab')) return;
+      if (document.querySelector('[role="dialog"]')) return;
+      e.preventDefault();
+      if (arrow) { reset(); if (e.key === 'ArrowLeft') h.current.prev(); else h.current.next(); return; }
+      if (e.key === 'Enter') return commit();
+      if (e.key === 'Escape') return reset();
+      buf.current = (buf.current + e.key).slice(0, 4);
+      setTyped(buf.current);
+      clearTimeout(timer.current);
+      timer.current = setTimeout(commit, 700);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      clearTimeout(timer.current);
+      window.removeEventListener('keydown', onKey);
+      const k = pagerStack.indexOf(h);
+      if (k >= 0) pagerStack.splice(k, 1);
+    };
+  }, []);
   return (
-    <div className="row" style={{ marginTop: 10 }}>
-      <button disabled={page <= 1} onClick={() => onPage(page - 1)}>← Prev</button>
+    <div className="row pager">
+      <button disabled={page <= 1} onClick={() => onPage(page - 1)} title="Previous page (← key)" aria-keyshortcuts="ArrowLeft">← Prev</button>
       <span className="muted small-text">Page {page} of {pages} · {total} records</span>
-      <button disabled={page >= pages} onClick={() => onPage(page + 1)}>Next →</button>
+      <button disabled={page >= pages} onClick={() => onPage(page + 1)} title="Next page (→ key)" aria-keyshortcuts="ArrowRight">Next →</button>
+      {typed
+        ? <span className="pager-hint typing" role="status">Go to page <b>{typed}</b>{Number(typed) > pages ? ` — only ${pages} page${pages === 1 ? '' : 's'}` : ' …'}</span>
+        : <span className="pager-hint faint small-text">← → change page · type a number (0 or 1 = first) to jump</span>}
     </div>
   );
 }

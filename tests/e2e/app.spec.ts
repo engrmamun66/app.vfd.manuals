@@ -652,6 +652,28 @@ test.describe('theme & accessibility basics', () => {
     }
   });
 
+  test('pagination bar is sticky and answers the arrow keys', async () => {
+    await admin.goto('/parameters?limit=2');
+    await expect(admin.getByText(/Page 1 of/)).toBeVisible();
+    expect(await admin.locator('.pager').evaluate((e) => getComputedStyle(e).position)).toBe('sticky');
+    await expect(admin.getByRole('button', { name: '← Prev' })).toHaveAttribute('title', /Previous page/);
+    await admin.locator('h1').click();
+    await admin.keyboard.press('ArrowRight');
+    await expect(admin.getByText(/Page 2 of/)).toBeVisible();
+    await admin.keyboard.press('ArrowLeft');
+    await expect(admin.getByText(/Page 1 of/)).toBeVisible();
+    await admin.keyboard.press('3'); // number jump (waits briefly for more digits)
+    await expect(admin.getByText(/Page 3 of/)).toBeVisible();
+    await admin.keyboard.press('0'); // 0 = first page
+    await expect(admin.getByText(/Page 1 of/)).toBeVisible();
+    await admin.keyboard.press('9');
+    await admin.keyboard.press('9');
+    await admin.keyboard.press('9'); // unavailable page: ignored
+    await expect(admin.getByText(/only \d+ page/)).toBeVisible();
+    await admin.waitForTimeout(1000);
+    await expect(admin.getByText(/Page 1 of/)).toBeVisible();
+  });
+
   test('model tabs: selection persists across reload and pages; alias set in full-screen settings; sidebar collapses', async () => {
     await admin.goto('/parameters');
     const tabs = admin.locator('.model-tabs button');

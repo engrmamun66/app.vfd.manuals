@@ -84,6 +84,20 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
   const [imgErr, setImgErr] = useState(false);
   const [loadedSrc, setLoadedSrc] = useState(''); // the image URL that has finished loading
   useEffect(() => setImgErr(false), [revisionId, page]);
+  // ← / → turn pages (ignored while typing in a field or when a modifier key is held)
+  const pageCount: number | undefined = data?.revision?.page_count;
+  useEffect(() => {
+    if (!onPage || !pageCount) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.defaultPrevented) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      if (e.key === 'ArrowLeft' && page > 1) { e.preventDefault(); onPage(page - 1); }
+      else if (e.key === 'ArrowRight' && page < pageCount) { e.preventDefault(); onPage(page + 1); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onPage, page, pageCount]);
   if (error) return <ErrorBox e={error} />;
   if (loading || !data) return <Loading what="Loading page" />;
   const rev = data.revision;
@@ -112,8 +126,8 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
         <div className="evidence-quote" title="Text recorded as evidence for this value"><span className="faint">Evidence quote: </span>{highlightQuote}</div>
       )}
       <div className="row" style={{ marginBottom: 8 }}>
-        <button className="small" disabled={page <= 1} onClick={() => onPage?.(page - 1)}>← Prev page</button>
-        <button className="small" disabled={page >= rev.page_count} onClick={() => onPage?.(page + 1)}>Next page →</button>
+        <button className="small" disabled={page <= 1} title="Previous page (←)" onClick={() => onPage?.(page - 1)}>← Prev page</button>
+        <button className="small" disabled={page >= rev.page_count} title="Next page (→)" onClick={() => onPage?.(page + 1)}>Next page →</button>
         <span className="tabs" style={{ margin: 0, border: 0 }}>
           <button className={`tab ${tab === 'image' ? 'active' : ''}`} onClick={() => setTab('image')}>Page image</button>
           <button className={`tab ${tab === 'text' ? 'active' : ''}`} onClick={() => setTab('text')}>Extracted text</button>
