@@ -1,5 +1,5 @@
 import { BookmarkIcon } from '../components/icons';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiError, del, get, patch, post } from '../lib/api';
 import { Crumbs, DeleteIconButton, ErrorBox, Modal, useAsync } from '../components/ui';
@@ -27,9 +27,17 @@ function FolderSelect({ folders, value, onChange, allowRoot = true }: { folders:
 export function SaveBookmarkButton({ title, context }: { title: string; context: Record<string, unknown> }) {
   const [open, setOpen] = useState(false);
   const loc = useLocation();
+  const mod = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'b') { e.preventDefault(); setOpen(true); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   return (
     <>
-      <button className="small" onClick={() => setOpen(true)} title="Save Research Bookmark"><BookmarkIcon /> Save</button>
+      <button className="small" onClick={() => setOpen(true)} title={`Save Research Bookmark (${mod} + B)`}><BookmarkIcon /> Save</button>
       {open && <SaveDialog title={title} url={loc.pathname + loc.search} context={context} onClose={() => setOpen(false)} />}
     </>
   );
@@ -38,7 +46,6 @@ export function SaveBookmarkButton({ title, context }: { title: string; context:
 function SaveDialog({ title, url, context, onClose }: { title: string; url: string; context: Record<string, unknown>; onClose: () => void }) {
   const { data: folders, reload } = useAsync<Folder[]>(() => get('/bookmarks/folders'), []);
   const [name, setName] = useState(title);
-  const [desc, setDesc] = useState('');
   const [notes, setNotes] = useState('');
   const [tags, setTags] = useState('');
   const [folder, setFolder] = useState<number | null>(null);
@@ -56,7 +63,7 @@ function SaveDialog({ title, url, context, onClose }: { title: string; url: stri
   };
   const save = async (allowDuplicate = false) => {
     try {
-      await post('/bookmarks', { name, description: desc, notes, research_url: url, folder_id: folder, tags: tags.split(',').map((t) => t.trim()).filter(Boolean), favorite: fav, context, allowDuplicate });
+      await post('/bookmarks', { name, notes, research_url: url, folder_id: folder, tags: tags.split(',').map((t) => t.trim()).filter(Boolean), favorite: fav, context, allowDuplicate });
       onClose();
     } catch (e) {
       if (e instanceof ApiError && e.status === 409 && (await confirmDialog('An identical bookmark already exists. Save another anyway?'))) return save(true);
@@ -66,13 +73,11 @@ function SaveDialog({ title, url, context, onClose }: { title: string; url: stri
   return (
     <Modal title="Save Research Bookmark" onClose={onClose}>
       {(<>
-        <div className="small-text muted" style={{ marginBottom: 8 }}>Saves this exact research location: <span className="mono">{url}</span></div>
         <div className="field"><label htmlFor="bm-name">Name</label><input id="bm-name" value={name} onChange={(e) => setName(e.target.value)} autoFocus /></div>
-        <div className="field"><label htmlFor="bm-desc">Description (optional)</label><input id="bm-desc" value={desc} onChange={(e) => setDesc(e.target.value)} /></div>
-        <div className="field"><label>Folder</label><div className="row">{folders && <FolderSelect folders={folders} value={folder} onChange={setFolder} />}</div>
-          <div className="row" style={{ marginTop: 6 }}><input placeholder="New subfolder name here…" value={newFolder} onChange={(e) => setNewFolder(e.target.value)} /><button className="small" onClick={addFolder}>Create folder</button></div></div>
-        <div className="field"><label htmlFor="bm-tags">Tags (comma separated)</label><input id="bm-tags" value={tags} onChange={(e) => setTags(e.target.value)} /></div>
         <div className="field"><label htmlFor="bm-notes">Personal notes</label><textarea id="bm-notes" value={notes} onChange={(e) => setNotes(e.target.value)} /></div>
+        <div className="field"><label>Folder</label><div className="row">{folders && <FolderSelect folders={folders} value={folder} onChange={setFolder} />}</div>
+          <div className="row" style={{ marginTop: 6 }}><input placeholder="New subfolder name here…" value={newFolder} onChange={(e) => setNewFolder(e.target.value)} /><button className="small" onClick={addFolder}>+ Create folder</button></div></div>
+        <div className="field"><label htmlFor="bm-tags">Tags (comma separated)</label><input id="bm-tags" value={tags} onChange={(e) => setTags(e.target.value)} /></div>
         <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}><input type="checkbox" checked={fav} onChange={(e) => setFav(e.target.checked)} /> Favorite</label>
         <ErrorBox e={err} />
         <div className="row" style={{ marginTop: 8 }}><button className="primary" disabled={!name.trim()} onClick={() => save()}>Save</button><button onClick={onClose}>Cancel</button></div>
@@ -184,7 +189,6 @@ export function BookmarksPage() {
                 <td>
                   {b.target_status === 'unavailable' && <span className="badge warn" title="The record this bookmark points to no longer exists. It will not be redirected elsewhere.">Target unavailable</span>}{' '}
                   <a href={b.research_url} onClick={(e) => { e.preventDefault(); post(`/bookmarks/${b.id}/open`).catch(() => {}); nav(b.research_url); }}><b>{b.name}</b></a>
-                  {b.description && <div className="small-text muted">{b.description}</div>}
                   {b.tags?.map((t: string) => <span key={t} className="badge dashed" style={{ marginRight: 3 }}>{t}</span>)}
                   <div className="small-text faint mono">{b.research_url}</div>
                 </td>
@@ -208,7 +212,6 @@ export function BookmarksPage() {
 
 function EditBookmark({ b, folders, onClose, onSaved }: { b: any; folders: Folder[]; onClose: () => void; onSaved: () => void }) {
   const [name, setName] = useState(b.name);
-  const [desc, setDesc] = useState(b.description ?? '');
   const [notes, setNotes] = useState(b.notes ?? '');
   const [tags, setTags] = useState((b.tags ?? []).join(', '));
   const [folder, setFolder] = useState<number | null>(b.folder_id);
@@ -216,12 +219,11 @@ function EditBookmark({ b, folders, onClose, onSaved }: { b: any; folders: Folde
   return (
     <Modal title="Edit bookmark" onClose={onClose}>
       <div className="field"><label>Name</label><input value={name} onChange={(e) => setName(e.target.value)} /></div>
-      <div className="field"><label>Description</label><input value={desc} onChange={(e) => setDesc(e.target.value)} /></div>
+      <div className="field"><label>Notes</label><textarea value={notes} onChange={(e) => setNotes(e.target.value)} /></div>
       <div className="field"><label>Folder</label><FolderSelect folders={folders} value={folder} onChange={setFolder} /></div>
       <div className="field"><label>Tags</label><input value={tags} onChange={(e) => setTags(e.target.value)} /></div>
-      <div className="field"><label>Notes</label><textarea value={notes} onChange={(e) => setNotes(e.target.value)} /></div>
       <ErrorBox e={err} />
-      <div className="row"><button className="primary" onClick={async () => { try { await patch(`/bookmarks/${b.id}`, { name, description: desc, notes, folder_id: folder, tags: tags.split(',').map((t: string) => t.trim()).filter(Boolean) }); onSaved(); } catch (e) { setErr(e); } }}>Save</button><button onClick={onClose}>Cancel</button></div>
+      <div className="row"><button className="primary" onClick={async () => { try { await patch(`/bookmarks/${b.id}`, { name, notes, folder_id: folder, tags: tags.split(',').map((t: string) => t.trim()).filter(Boolean) }); onSaved(); } catch (e) { setErr(e); } }}>Save</button><button onClick={onClose}>Cancel</button></div>
     </Modal>
   );
 }

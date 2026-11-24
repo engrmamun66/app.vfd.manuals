@@ -10,6 +10,8 @@ export interface RecordTabs {
   kind: 'parameter' | 'register';
   /** model of the record being viewed */
   modelId: number;
+  /** current sub-tab (e.g. 'detailed'); kept when switching to another model's record */
+  level?: string;
   /** the same common function in other models (from the record API) */
   counterparts: { id: number; model_id: number; code?: string; original_address?: string }[];
 }
@@ -27,7 +29,7 @@ export function ModelTabs({ record }: { record?: RecordTabs } = {}) {
     await select(id);
     if (!record || id === null || id === record.modelId) return;
     const c = counterpart(id);
-    nav(c ? `/${record.kind}/${c.id}` : record.kind === 'parameter' ? '/parameters' : '/modbus/registers');
+    nav(c ? `/${record.kind}/${c.id}${record.level && record.level !== 'overview' ? `?level=${record.level}` : ''}` : record.kind === 'parameter' ? '/parameters' : '/modbus/registers');
   };
   const [tip, setTip] = useState<TipState | null>(null);
   if (!models.length) return null;

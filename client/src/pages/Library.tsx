@@ -4,6 +4,7 @@ import { get, post, patch, api, fmtBytes, fmtDate } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { Crumbs, ErrorBox, Loading, VerifBadge, useAsync } from '../components/ui';
 import { PageViewer } from '../components/Viewer';
+import { SaveBookmarkButton } from './Bookmarks';
 import { escSnippet } from './ModbusTools';
 import { ModelTabs } from '../components/ModelTabs';
 import { useModels } from '../lib/models';
@@ -90,6 +91,7 @@ export function RevisionViewer() {
       <div className="row" style={{ marginBottom: 8 }}>
         <form onSubmit={(e) => { e.preventDefault(); if (Number(go) > 0) nav(`/library/revision/${rid}/page/${Number(go)}`); }} className="row"><label htmlFor="gp" style={{ margin: 0 }}>Go to PDF page</label><input id="gp" value={go} onChange={(e) => setGo(e.target.value)} style={{ width: 80 }} /><button className="small">Go</button></form>
         {user?.role === 'super_admin' && <button className="small" onClick={() => setEdit(!edit)}>Add record from this page</button>}
+        <SaveBookmarkButton title={`${rev?.title ?? 'Document'} — page ${p}`} context={{ entityType: 'document_page', revisionId: Number(rid), page: p }} />
       </div>
       {edit && rev && <ManualRecord revisionId={Number(rid)} page={p} onDone={() => setEdit(false)} />}
       <PageViewer revisionId={Number(rid)} page={p} onPage={(n) => nav(`/library/revision/${rid}/page/${n}`)} />

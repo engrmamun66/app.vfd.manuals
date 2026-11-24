@@ -175,8 +175,8 @@ bookmarksRouter.get(
     if (q.favorite === '1') where.push('b.favorite = 1');
     if (q.q) {
       const like = `%${String(q.q).slice(0, 100)}%`;
-      where.push('(b.name LIKE ? OR b.description LIKE ? OR b.notes LIKE ? OR EXISTS (SELECT 1 FROM research_bookmark_tag_relations r JOIN research_bookmark_tags t ON t.id=r.tag_id WHERE r.bookmark_id=b.id AND t.name LIKE ?))');
-      args.push(like, like, like, like);
+      where.push('(b.name LIKE ? OR b.notes LIKE ? OR EXISTS (SELECT 1 FROM research_bookmark_tag_relations r JOIN research_bookmark_tags t ON t.id=r.tag_id WHERE r.bookmark_id=b.id AND t.name LIKE ?))');
+      args.push(like, like, like);
     }
     const sort = q.sort === 'name' ? 'b.name COLLATE NOCASE' : q.sort === 'date' ? 'b.created_at DESC' : q.sort === 'opened' ? 'b.last_opened_at DESC' : 'b.display_order, b.created_at DESC';
     const limit = Math.min(Number(q.limit) || 500, 2000);
@@ -211,14 +211,13 @@ bookmarksRouter.post(
       const id = Number(
         db
           .prepare(
-            `INSERT INTO research_bookmarks(user_id, folder_id, name, description, notes, research_url, context_json, brand_id, model_id, entity_type, entity_id, research_depth, favorite, display_order)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            `INSERT INTO research_bookmarks(user_id, folder_id, name, notes, research_url, context_json, brand_id, model_id, entity_type, entity_id, research_depth, favorite, display_order)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
           )
           .run(
             uid,
             folder,
             name,
-            str(req.body.description, 'description', { max: 2000 }),
             str(req.body.notes, 'notes', { max: 10000 }),
             url,
             json(ctx),
@@ -249,9 +248,8 @@ bookmarksRouter.patch(
     const folder = 'folder_id' in req.body ? intParam(req.body.folder_id, 'folder_id') : b.folder_id;
     ownFolder(db, uid, folder);
     db.transaction(() => {
-      db.prepare('UPDATE research_bookmarks SET name = ?, description = ?, notes = ?, folder_id = ?, favorite = ?, display_order = ?, updated_at = ? WHERE id = ? AND user_id = ?').run(
+      db.prepare('UPDATE research_bookmarks SET name = ?, notes = ?, folder_id = ?, favorite = ?, display_order = ?, updated_at = ? WHERE id = ? AND user_id = ?').run(
         req.body.name !== undefined ? str(req.body.name, 'name', { required: true, max: 200 }) : b.name,
-        req.body.description !== undefined ? str(req.body.description, 'description', { max: 2000 }) : b.description,
         req.body.notes !== undefined ? str(req.body.notes, 'notes', { max: 10000 }) : b.notes,
         folder,
         req.body.favorite !== undefined ? (bool(req.body.favorite) ? 1 : 0) : b.favorite,
@@ -288,8 +286,8 @@ bookmarksRouter.post(
     const id = Number(
       db
         .prepare(
-          `INSERT INTO research_bookmarks(user_id, folder_id, name, description, notes, research_url, context_json, brand_id, model_id, entity_type, entity_id, research_depth, favorite, display_order)
-           SELECT user_id, folder_id, ?, description, notes, research_url, context_json, brand_id, model_id, entity_type, entity_id, research_depth, 0, display_order + 1 FROM research_bookmarks WHERE id = ? AND user_id = ?`,
+          `INSERT INTO research_bookmarks(user_id, folder_id, name, notes, research_url, context_json, brand_id, model_id, entity_type, entity_id, research_depth, favorite, display_order)
+           SELECT user_id, folder_id, ?, notes, research_url, context_json, brand_id, model_id, entity_type, entity_id, research_depth, 0, display_order + 1 FROM research_bookmarks WHERE id = ? AND user_id = ?`,
         )
         .run(newName, b.id, uid).lastInsertRowid,
     );

@@ -43,10 +43,19 @@ function GlobalSearch() {
   const { selected } = useModels();
   const { data } = useAsync(() => (q.trim().length >= 1 ? get('/search', { q, model: selected }) : Promise.resolve(null)), [q, selected]);
   const nav = useNavigate();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const mod = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'k') { e.preventDefault(); inputRef.current?.focus(); inputRef.current?.select(); setOpen(true); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   const go = (to: string) => { setOpen(false); setQ(''); nav(to); };
   return (
     <div className="search" style={{ position: 'relative' }}>
-      <SearchBox icon="search" placeholder="Search everything (2103, 0x2103, manual text…)" value={q} onChange={(v) => { setQ(v); setOpen(true); }} onFocus={() => setOpen(true)} onKeyDown={(e) => e.key === 'Escape' && setOpen(false)} aria-label="Global search" />
+      <SearchBox icon="search" inputRef={inputRef} title={`Search (${mod} + K)`} placeholder={`Search everything (2103, 0x2103, manual text…)  ${mod} + K`} value={q} onChange={(v) => { setQ(v); setOpen(true); }} onFocus={() => setOpen(true)} onKeyDown={(e) => e.key === 'Escape' && setOpen(false)} aria-label="Global search" />
       {open && data && (
         <div className="popover" style={{ top: '100%', left: 0, width: 'min(720px, 92vw)', maxHeight: '70vh', overflow: 'auto' }} onMouseLeave={() => undefined}>
           <div className="row between"><b>Results for “{data.q}”</b><button className="small ghost" onClick={() => setOpen(false)}>Close</button></div>
@@ -71,7 +80,9 @@ function Shell() {
 }
 
 function ShellInner() {
-  const { user, logout } = useAuth();
+  const { user, logout, settings, updateSettings } = useAuth();
+  const splitRef = useRef({ settings, updateSettings });
+  splitRef.current = { settings, updateSettings };
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem('sidebar-collapsed') === '1'; } catch { return false; } });
   const toggleSidebar = () => setCollapsed((c) => { try { localStorage.setItem('sidebar-collapsed', c ? '0' : '1'); } catch { /* ignore */ } return !c; });
@@ -96,6 +107,13 @@ function ShellInner() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key === '/') { e.preventDefault(); toggleSidebar(); }
+      // Ctrl/Cmd + . toggles split view.
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key === '.') {
+        e.preventDefault();
+        const { settings: st, updateSettings: up } = splitRef.current;
+        const sv = st?.split_view ?? { enabled: false, ratio: 0.55, collapsed: null };
+        up({ split_view: { ...sv, enabled: !sv.enabled, collapsed: null } } as any);
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);

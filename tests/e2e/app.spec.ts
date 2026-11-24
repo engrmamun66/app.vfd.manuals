@@ -260,6 +260,10 @@ test.describe('layout: full width, split view', () => {
     await expect(toggle).toHaveAttribute('aria-pressed', 'false');
     await toggle.click();
     await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    await admin.keyboard.press('Control+.');
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    await admin.keyboard.press('Control+.');
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
     const div = admin.locator('.split .divider');
     await expect(div).toBeVisible();
     const panes = admin.locator('.split > .pane');

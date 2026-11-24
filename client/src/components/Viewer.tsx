@@ -69,7 +69,7 @@ export function SplitToggle() {
   const { settings, updateSettings } = useAuth();
   const sv = settings?.split_view ?? { enabled: false, ratio: 0.55, collapsed: null };
   return (
-    <button className="small" aria-pressed={sv.enabled} title={`Split view: ${sv.enabled ? 'ON' : 'OFF'}`} onClick={() => updateSettings({ split_view: { ...sv, enabled: !sv.enabled, collapsed: null } } as any)}>
+    <button className="small" aria-pressed={sv.enabled} title={`Split view: ${sv.enabled ? 'ON' : 'OFF'} (Ctrl/Cmd + .)`} onClick={() => updateSettings({ split_view: { ...sv, enabled: !sv.enabled, collapsed: null } } as any)}>
       <SplitIcon on={sv.enabled} /> Split
     </button>
   );

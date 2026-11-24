@@ -631,4 +631,11 @@ CREATE UNIQUE INDEX uq_knowledge_item ON knowledge_items(model_id, kind, COALESC
 CREATE INDEX idx_knowledge_model_kind ON knowledge_items(model_id, kind);
 `,
   },
+  {
+    version: 3,
+    name: 'drop_bookmark_description',
+    sql: /* sql */ `
+ALTER TABLE research_bookmarks DROP COLUMN description;
+`,
+  },
 ];

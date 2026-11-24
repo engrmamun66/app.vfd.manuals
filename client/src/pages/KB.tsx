@@ -202,10 +202,12 @@ function Related({ d, kind }: { d: any; kind: 'parameter' | 'register' }) {
 /** Resolve short ids (/parameter/:id, /register/:id) to the canonical research URL. */
 export function ResolveEntity({ kind }: { kind: 'parameter' | 'register' }) {
   const { id } = useParams();
+  const [sp] = useSearchParams();
+  const lv = /^[a-z]+$/.test(sp.get('level') ?? '') ? `/${sp.get('level')}` : '';
   const { data, error } = useAsync(() => get(kind === 'parameter' ? `/parameters/${id}` : `/registers/${id}`), [id]);
   if (error) return <div className="page"><ErrorBox e={error} /><p>This research target is unavailable. It was not redirected elsewhere.</p></div>;
   if (!data) return <div className="page"><Loading /></div>;
-  return <Navigate replace to={kind === 'parameter' ? `/research/parameters/${data.brand_slug}/${data.model_slug ?? slug(data.model)}/${data.id}` : `/research/modbus/${data.brand_slug}/${slug(data.model)}/registers/${data.id}`} />;
+  return <Navigate replace to={kind === 'parameter' ? `/research/parameters/${data.brand_slug}/${data.model_slug ?? slug(data.model)}/${data.id}${lv}` : `/research/modbus/${data.brand_slug}/${slug(data.model)}/registers/${data.id}${lv}`} />;
 }
 
 function RecordSummary({ id }: { id: number }) {
@@ -319,7 +321,7 @@ export function ParameterResearch() {
       title={<span><span className="mono">{d.code}</span> — {d.name ?? 'Unnamed in extraction'} <InfoIcon title={d.function_name ?? d.code} text={d.function_short || d.description_en || 'No short description recorded.'} more={`${base}/detailed`} /></span>}
       subtitle={<>{d.brand} <ModelName name={d.model} /> · {d.function_name ? <>common function: <Link to={`/function/${d.function_slug}`}>{d.function_name}</Link></> : 'not mapped to a common function'}</>}
       entity={d}
-      modelTabs={{ kind: 'parameter', modelId: d.model_id, counterparts: d.otherBrandImplementations }}
+      modelTabs={{ kind: 'parameter', modelId: d.model_id, level, counterparts: d.otherBrandImplementations }}
       contextExtra={{ entityType: 'parameter', entityId: d.id, parameterId: d.id, brandId: d.brand_id, modelId: d.model_id }}
     >
       {({ sel, setSel }: any) => (
@@ -425,7 +427,7 @@ function RegisterBody({ d, base, level, nav }: any) {
         <div><h1 style={{ marginBottom: 2 }}><span className="mono">{d.original_address}</span> — {d.name} <InfoIcon title={d.name} text={d.description || 'No description recorded.'} more={`${base}/purpose`} /></h1><div className="muted">{d.brand} {d.model}</div></div>
         <div className="row"><SplitToggle /><AnnotationDisplayControl /><SaveBookmarkButton title={`${d.brand} ${d.model} — ${d.original_address} ${d.name}`} context={{ entityType: 'modbus_register', entityId: d.id, brandId: d.brand_id, modelId: d.model_id, depth: level }} /></div>
       </div>
-      <ModelTabs record={{ kind: 'register', modelId: d.model_id, counterparts: d.otherBrandImplementations ?? [] }} />
+      <ModelTabs record={{ kind: 'register', modelId: d.model_id, level, counterparts: d.otherBrandImplementations ?? [] }} />
       <SplitView enabled={!!split && !!ev} leftTitle="Research" rightTitle={<span>Original manual {ev ? `· p.${po ?? ev.page_index}` : ''}</span>} left={body}
         right={ev ? <PageViewer revisionId={ev.revision_id} page={po ?? ev.page_index ?? 1} onPage={setPo} quoteMatch={ev.quote_match} highlightQuote={ev.extracted_text} /> : null} />
       <span hidden>{loc.key}</span>
