@@ -91,13 +91,6 @@ export function Parameters({ category, userCategory }: { category?: string; user
       <SplitView enabled={split} leftTitle="Parameters" rightTitle="Record preview" right={<RecordPreview kind="parameter" id={preview} />} left={<>
       <div className="row" style={{ marginBottom: 12 }}>
         <SearchBox icon="filter" placeholder="Filter this list: code, name, description…" value={q.q ?? ''} onChange={(v) => set('q', v)} style={{ minWidth: 300 }} aria-label="Search parameters" />
-        {!category && !userCategory && <select className="ctl" value={q.ucat ? `my:${q.ucat}` : q.category ?? ''} aria-label="Category" onChange={(e) => {
-          const v = e.target.value;
-          const n = new URLSearchParams(sp);
-          n.delete('category'); n.delete('ucat'); n.delete('page');
-          if (v.startsWith('my:')) n.set('ucat', v.slice(3)); else if (v) n.set('category', v);
-          setSp(n, { replace: true });
-        }}><option value="">All categories</option>{tax?.map((c: any) => <option key={c.slug} value={c.slug}>{c.name}</option>)}{mineCats.categories.length > 0 && <optgroup label="★ My categories">{mineCats.categories.map((c) => <option key={c.id} value={`my:${c.id}`} className="opt-mine">● {c.name}</option>)}</optgroup>}</select>}
         {showStars && <div className="star-group" role="radiogroup" aria-label="Importance">{([['', 'All', 0], ['Important', '3 stars — Important', 3], ['Medium', '2 stars — Medium', 2], ['Optional', '1 star — Optional', 1]] as [string, string, number][]).map(([v, label, n]) => <button key={v} role="radio" aria-checked={(q.importance ?? '') === v} title={label} className={(q.importance ?? '') === v ? 'active' : ''} onClick={() => set('importance', v)}>{n === 0 ? 'All' : Array.from({ length: n }, (_, i) => <StarIcon key={i} />)}</button>)}</div>}
         {!showStars && <select className="ctl" value={q.importance ?? ''} onChange={(e) => set('importance', e.target.value)} aria-label="Importance"><option value="">Any importance</option><option>Important</option><option>Medium</option><option>Optional</option></select>}
         {showEvidence && <select className="ctl" value={q.evidence ?? ''} onChange={(e) => set('evidence', e.target.value)} aria-label="Evidence status"><option value="">Any evidence</option>{['Explicitly Documented', 'Calculated from Documented Data', 'Cross-Referenced', 'Unverified', 'Conflicting'].map((s) => <option key={s}>{s}</option>)}</select>}
