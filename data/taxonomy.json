@@ -2,6 +2,13 @@
   "_note": "Standardized taxonomy (categories + common technical functions). This file holds NO manufacturer technical values. Short descriptions are generic definitions of the function concept, not brand-specific facts.",
   "categories": [
     {
+      "slug": "basic-parameters",
+      "name": "Basic Parameters",
+      "display_order": 5,
+      "includes_functions": ["rated-motor-voltage", "rated-motor-current", "rated-motor-frequency", "rated-motor-power", "rated-motor-speed", "control-mode", "base-frequency", "command-source", "frequency-source", "acceleration-time-1", "deceleration-time-1", "maximum-frequency"],
+      "functions": []
+    },
+    {
       "slug": "motor-electrical",
       "name": "Motor & Electrical Configuration",
       "functions": [

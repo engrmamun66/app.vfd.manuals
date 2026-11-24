@@ -12,6 +12,7 @@
     "import:manual": "tsx server/src/cli/import-manual.ts",
     "import:curated": "tsx server/src/cli/import-curated.ts",
     "backup": "tsx server/src/cli/backup.ts",
+    "backup:prune": "tsx server/src/cli/backup-prune.ts",
     "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc -p client/tsconfig.json --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",

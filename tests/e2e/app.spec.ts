@@ -819,6 +819,26 @@ test.describe('theme & accessibility basics', () => {
     await expect(dlg).toBeHidden();
   });
 
+  test('Basic Parameters is the first system category in the sidebar and filters its own parameters', async () => {
+    await admin.goto('/parameters');
+    const subs = admin.locator('.sidebar a.nav-link.sub:not(.mine)');
+    await expect(subs.first()).toHaveText('Basic Parameters');
+    await expect(subs.nth(1)).toHaveText('Motor & Electrical Configuration');
+    await subs.first().click();
+    await expect(admin).toHaveURL(/\/kb\/basic-parameters$/);
+    await expect(admin.getByRole('heading', { level: 1, name: 'Basic Parameters' })).toBeVisible();
+    const res = await (await admin.request.get('/api/parameters?category=basic-parameters&limit=500')).json();
+    const all = await (await admin.request.get('/api/parameters?limit=500')).json();
+    expect(res.total).toBeLessThanOrEqual(all.total);
+    // per model, the frequency source and the run-command source are the first two rows
+    const byModel = new Map<number, string[]>();
+    for (const r of res.rows) byModel.set(r.model_id, [...(byModel.get(r.model_id) ?? []), r.function_slug]);
+    for (const slugs of byModel.values()) {
+      const lead = ['frequency-source', 'command-source'].filter((x) => slugs.includes(x));
+      expect(slugs.slice(0, lead.length)).toEqual(lead);
+    }
+  });
+
   test('model tabs: selection persists across reload and pages; alias set in full-screen settings; sidebar collapses', async () => {
     await admin.goto('/parameters');
     const tabs = admin.locator('.model-tabs button');

@@ -219,7 +219,7 @@ function paramFilters(q: any, req: any) {
     const ids = String(q.model).split(',').map(Number).filter(Number.isInteger);
     if (ids.length) where.push(`p.model_id IN (${ids.map(() => '?').join(',')})`), args.push(...ids);
   }
-  if (q.category) (where.push('c.slug = ?'), args.push(String(q.category)));
+  if (q.category) (where.push('(c.slug = ? OR EXISTS (SELECT 1 FROM category_parameters cp JOIN categories cx ON cx.id = cp.category_id WHERE cp.parameter_id = p.id AND cx.slug = ?))'), args.push(String(q.category), String(q.category)));
   if (q.ucat && req.user) {
     // personal category (only the owner's own categories can match)
     where.push('EXISTS (SELECT 1 FROM parameter_user_categories puc JOIN user_categories uc ON uc.id = puc.user_category_id WHERE puc.parameter_id = p.id AND uc.id = ? AND uc.user_id = ?)');
@@ -249,12 +249,14 @@ kbRouter.get(
     const db = getDb();
     const { limit, offset, page } = paging(req.query as any, 50, 500);
     const { where, args } = paramFilters(req.query, req);
+    // "Basic Parameters": in every model the frequency source and the run-command source come first
+    const basicFirst = req.query.category === 'basic-parameters' ? "CASE WHEN f.slug = 'frequency-source' AND ROW_NUMBER() OVER (PARTITION BY p.model_id, f.slug ORDER BY p.code) = 1 THEN 0 WHEN f.slug = 'command-source' AND ROW_NUMBER() OVER (PARTITION BY p.model_id, f.slug ORDER BY p.code) = 1 THEN 1 ELSE 2 END, " : '';
     const total = (db.prepare(`SELECT COUNT(*) c ${PARAM_FROM} WHERE ${where}`).get(...args) as { c: number }).c;
     const rows = db
       .prepare(
         `SELECT p.id, p.code, p.name, p.unit, p.default_value, p.min_value, p.max_value, p.access_type, p.verification_status, p.evidence_status, p.equivalence, p.is_demo, p.importance, p.param_group,
            m.id model_id, m.name model, b.name brand, b.slug brand_slug, f.slug function_slug, f.name function_name, f.name_bn function_name_bn, c.slug category_slug, c.name category
-         ${PARAM_FROM} WHERE ${where} ORDER BY ${cdOrder('cdb')}, b.name, ${cdOrder('cdm')}, m.name, ${cdOrder('cdp')}, CASE p.importance WHEN 'Important' THEN 0 WHEN 'Medium' THEN 1 WHEN 'Optional' THEN 2 ELSE 3 END, p.code LIMIT ? OFFSET ?`,
+         ${PARAM_FROM} WHERE ${where} ORDER BY ${cdOrder('cdb')}, b.name, ${cdOrder('cdm')}, m.name, ${basicFirst}${cdOrder('cdp')}, CASE p.importance WHEN 'Important' THEN 0 WHEN 'Medium' THEN 1 WHEN 'Optional' THEN 2 ELSE 3 END, p.code LIMIT ? OFFSET ?`,
       )
       .all(...args, limit, offset) as any[];
     // the caller's own personal categories per row (never other users')

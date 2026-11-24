@@ -23,7 +23,7 @@ exportsRouter.get(
     const args: unknown[] = [];
     if (req.query.brand) (where.push('b.slug = ?'), args.push(String(req.query.brand)));
     if (req.query.model) (where.push('m.id = ?'), args.push(Number(req.query.model)));
-    if (req.query.category) (where.push('c.slug = ?'), args.push(String(req.query.category)));
+    if (req.query.category) (where.push('(c.slug = ? OR EXISTS (SELECT 1 FROM category_parameters cp JOIN categories cx ON cx.id = cp.category_id WHERE cp.parameter_id = p.id AND cx.slug = ?))'), args.push(String(req.query.category), String(req.query.category)));
     let rows: any[] = [];
     const src = (type: string, alias: string) => `(SELECT d.title || ' | rev ' || COALESCE(r.revision_label,'?') || ' | PDF page ' || COALESCE(s.page_index,'?') || COALESCE(' | printed ' || s.printed_page,'') || ' | quote ' || s.quote_match
         FROM evidence_records e JOIN source_references s ON s.id=e.source_reference_id JOIN document_revisions r ON r.id=s.revision_id JOIN documents d ON d.id=r.document_id

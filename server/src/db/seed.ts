@@ -4,7 +4,7 @@ import type { DB } from './index.js';
 import { hashPassword, isValidEmail, normalizeEmail, passwordProblems } from '../auth/password.js';
 
 interface Taxonomy {
-  categories: { slug: string; name: string; name_bn?: string; functions: [string, string, string, string][] }[];
+  categories: { slug: string; name: string; name_bn?: string; display_order?: number; includes_functions?: string[]; functions: [string, string, string, string][] }[];
 }
 
 /**
@@ -25,7 +25,16 @@ export function seedTaxonomy(db: DB) {
     tax.categories.forEach((cat, ci) => {
       c += insCat.run(cat.slug, cat.name, cat.name_bn ?? null).changes;
       const catId = (getCat.get(cat.slug) as { id: number }).id;
-      db.prepare("INSERT OR IGNORE INTO content_display(entity_type, entity_id, display_order) VALUES ('category', ?, ?)").run(catId, (ci + 1) * 10);
+      db.prepare("INSERT OR IGNORE INTO content_display(entity_type, entity_id, display_order) VALUES ('category', ?, ?)").run(catId, cat.display_order ?? (ci + 1) * 10);
+      // a category that groups parameters of other categories (e.g. "Basic Parameters"): membership follows the common function
+      if (cat.includes_functions?.length) {
+        const ph = cat.includes_functions.map(() => '?').join(',');
+        db.prepare('DELETE FROM category_parameters WHERE category_id = ?').run(catId); // the list in taxonomy.json is authoritative
+        db.prepare(
+          `INSERT OR IGNORE INTO category_parameters(category_id, parameter_id)
+           SELECT ?, p.id FROM parameters p JOIN common_functions f ON f.id = p.common_function_id WHERE f.slug IN (${ph})`,
+        ).run(catId, ...cat.includes_functions);
+      }
       cat.functions.forEach(([slug, name, nameBn, desc], fi) => {
         const r = insFn.run(catId, slug, name, nameBn, desc);
         f += r.changes;

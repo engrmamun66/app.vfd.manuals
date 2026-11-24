@@ -698,4 +698,17 @@ ALTER TABLE user_categories ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0;
 UPDATE user_categories SET sort_order = id;
 `,
   },
+  {
+    version: 8,
+    name: 'category_parameters',
+    sql: /* sql */ `
+-- extra (many-to-many) membership of a parameter in a system category, e.g. "Basic Parameters"
+CREATE TABLE category_parameters (
+  category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+  parameter_id INTEGER NOT NULL REFERENCES parameters(id) ON DELETE CASCADE,
+  PRIMARY KEY (category_id, parameter_id)
+);
+CREATE INDEX idx_cp_parameter ON category_parameters(parameter_id);
+`,
+  },
 ];
