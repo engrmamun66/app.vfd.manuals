@@ -38,13 +38,13 @@ export function AnnotationsPage() {
           {data?.map((a) => (
             <div className="card" key={a.id}>
               <div className="row between">
-                <span>{a.color && <span className={`swatch c-${a.color}`} />} <b>{a.isOwn ? 'You' : a.author}</b> <span className="badge dashed">{a.visibility}</span> {a.status !== 'Active' && <span className="badge warn">{a.status}</span>}{a.anchor.brand && <span className="small-text muted"> · {a.anchor.brand} {a.anchor.model}</span>}</span>
+                <span>{a.color && <span className={`swatch c-${a.color}`} />} <b>{a.isOwn ? 'You' : a.author}</b> <span className="badge dashed">{a.visibility}</span> {a.status !== 'Active' && <span className="badge warn">{a.status}</span>}{a.anchor?.brand && <span className="small-text muted"> · {a.anchor.brand} {a.anchor.model}</span>}</span>
                 <span className="small-text faint">{new Date(a.createdAt).toLocaleString()}</span>
               </div>
-              <div className="evidence-quote">{a.anchor.selectedText}</div>
+              <div className="evidence-quote">{a.anchor?.selectedText}</div>
               {a.comment ? <p style={{ whiteSpace: 'pre-wrap' }}>{a.comment}</p> : <p className="muted">(highlight only)</p>}
-              {a.links.map((l, i) => <div key={i}><a href={l.url} target="_blank" rel="noopener noreferrer nofollow">{l.text || l.url}</a></div>)}
-              {a.attachments.length > 0 && <div className="att-grid">{a.attachments.map((t) => <a key={t.id} href={`/api/annotations/attachments/${t.id}/file`} target="_blank" rel="noreferrer"><img src={`/api/annotations/attachments/${t.id}/file?thumb=1`} alt={t.alt_text || 'attached image'} /></a>)}</div>}
+              {(Array.isArray(a.links) ? a.links : []).map((l, i) => <div key={i}><a href={l.url} target="_blank" rel="noopener noreferrer nofollow">{l.text || l.url}</a></div>)}
+              {Array.isArray(a.attachments) && a.attachments.length > 0 && <div className="att-grid">{a.attachments.map((t) => <a key={t.id} href={`/api/annotations/attachments/${t.id}/file`} target="_blank" rel="noreferrer"><img src={`/api/annotations/attachments/${t.id}/file?thumb=1`} alt={t.alt_text || 'attached image'} /></a>)}</div>}
               <div className="row" style={{ marginTop: 8 }}>
                 {a.researchUrl && tab !== 'trash' && <button className="small" onClick={() => nav(a.researchUrl!)}>Open research location</button>}
                 {a.isOwn && tab === 'mine' && (<>

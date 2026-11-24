@@ -245,7 +245,7 @@ function AnnotationEditor({ contentKey, contentHash, sel, ann, onClose, onSaved 
   const [comment, setComment] = useState(ann?.comment ?? '');
   const [color, setColor] = useState<string | null>(ann ? ann.color : settings?.default_highlight_color ?? 'yellow');
   const [vis, setVis] = useState<'private' | 'public'>(ann?.visibility ?? 'private');
-  const [links, setLinks] = useState<{ url: string; text: string }[]>(ann?.links.map((l) => ({ url: l.url, text: l.text ?? '' })) ?? []);
+  const [links, setLinks] = useState<{ url: string; text: string }[]>(ann?.links?.map((l) => ({ url: l.url, text: l.text ?? '' })) ?? []);
   const [files, setFiles] = useState<File[]>([]);
   const [existing, setExisting] = useState(ann?.attachments ?? []);
   const [err, setErr] = useState<any>(null);
@@ -391,7 +391,7 @@ function AnnotationPanel({ anns, onClose, onEdit, onChanged }: { anns: Ann[]; on
             <span className="faint small-text">{new Date(a.createdAt).toLocaleString()}</span>
           </div>
           {a.comment ? <p style={{ whiteSpace: 'pre-wrap', margin: '8px 0' }}>{a.comment}</p> : <p className="muted">(highlight only)</p>}
-          {a.links.map((l, i) => (
+          {(a.links ?? []).map((l, i) => (
             <div key={i}><a href={l.url} target="_blank" rel="noopener noreferrer nofollow">{l.text || l.url}</a></div>
           ))}
           {a.attachments.length > 0 && (
@@ -407,6 +407,10 @@ function AnnotationPanel({ anns, onClose, onEdit, onChanged }: { anns: Ann[]; on
               <select aria-label="Change highlight color" value={a.color ?? ''} onChange={(e) => run(() => patch(`/annotations/${a.id}`, { color: e.target.value || null }))} style={{ padding: '1px 4px' }}>
                 <option value="">No highlight</option>
                 {COLORS.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <select aria-label="Visibility" title="Who can see this annotation" value={a.visibility} onChange={(e) => run(() => patch(`/annotations/${a.id}`, { visibility: e.target.value }))} style={{ padding: '1px 4px' }}>
+                <option value="private">Private (only me)</option>
+                <option value="public">Public (all users)</option>
               </select>
               {a.color && a.comment && <button className="small" onClick={() => run(() => patch(`/annotations/${a.id}`, { color: null }))}>Remove highlight</button>}
               {a.comment && <button className="small icon-only" title="Delete comment" aria-label="Delete comment" style={{ background: 'var(--inv-bg)', color: 'var(--inv-fg)', borderColor: 'var(--inv-bg)' }} onClick={async () => (await confirmDialog('Delete this comment? (Moves to Trash if there is no highlight.)', { danger: true })) && run(() => post(`/annotations/${a.id}/delete-comment`))}>🗑</button>}

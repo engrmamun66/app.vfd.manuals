@@ -37,6 +37,14 @@ npm run manual:new -- "<filepath>" --brand "<Brand>" --model "<Model>" --revisio
 
 This copies the PDF to `vfd-manuals/<Brand>/`, creates `data/curated/<brand>-<model>.json` (stub; never overwrites an existing one) and imports the pages (text, OCR if needed, searchable). Note `revisionId`, `document_file` and `curatedFile` from the output. If `ok` is false, report the error and stop.
 
+**Page counting (must match the Dashboard "Manuals — pages" table).** The dashboard counts, per manual (`documents` row), the `page_count` of its **latest revision** (`MAX(document_revisions.id)`) and sums these for the total. It does not count `document_pages` rows of older revisions. After the import, confirm the new manual is counted correctly:
+
+```bash
+node -e "const D=require('better-sqlite3');const d=new D('database/vfd-knowledge.db',{readonly:true});console.log(d.prepare(\"SELECT d.title, r.page_count pages, (SELECT COUNT(*) FROM document_pages p WHERE p.revision_id=r.id) stored FROM documents d JOIN document_revisions r ON r.id=(SELECT MAX(id) FROM document_revisions WHERE document_id=d.id) ORDER BY d.title\").all(), d.prepare(\"SELECT SUM(r.page_count) total FROM documents d JOIN document_revisions r ON r.id=(SELECT MAX(id) FROM document_revisions WHERE document_id=d.id)\").get())"
+```
+
+For the new manual, `pages` must equal the PDF page count from Step 1 and `stored`. If they differ, fix the import (re-run it) before extracting. A manual with several imported revisions counts only its newest one.
+
 Edit the stub: set `model_evidence.evidence_quote` to a verbatim quote from page 1 that shows the model/title.
 
 ## Step 3 — Extract EVERYTHING into the curated JSON
@@ -87,7 +95,7 @@ npm run verify:records -- --apply               # marks records Verified only if
 
 ## Step 6 — Report to the user (short)
 
-- Brand / model / pages / scanned or text PDF.
+- Brand / model / pages (latest-revision count, as on the Dashboard) / scanned or text PDF, and the new total pages of all manuals from the query above.
 - Counts: parameters (Important / Medium / Optional), Modbus registers, knowledge items per kind.
 - How many records are `Verified` vs `Requires Manual Verification` (and why, e.g. scanned pages or glyph-image codes).
 - Anything not extractable or uncertain, with page numbers.

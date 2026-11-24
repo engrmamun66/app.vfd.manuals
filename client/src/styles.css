@@ -387,3 +387,5 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--line-strong);
 .brand-logo { flex: none; border-radius: 8px; box-shadow: 0 0 0 1px var(--line); }
 
 .crumb-back { margin-right: 10px; padding: 2px 9px; font-size: .8rem; min-height: 0; }
+.brand b, .brand span { line-height: 1.2; }
+.brand span { display: block; margin-top: 1px; }

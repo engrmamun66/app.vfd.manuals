@@ -45,6 +45,11 @@ export function Dashboard() {
               {!data.recentImports.length && <tr><td colSpan={4} className="muted">No imports yet.</td></tr>}</tbody></table></div>
         </div>
       </div>
+      <h2 style={{ marginTop: 20 }}>Manuals — pages</h2>
+      <div className="table-wrap"><table><thead><tr><th>Manual</th><th>Brand</th><th>Pages</th></tr></thead>
+        <tbody>{(data.manuals ?? []).map((d: any) => <tr key={d.id}><td><Link to={`/library/document/${d.id}`}>{d.title}</Link></td><td>{d.brand ?? '—'}</td><td className="num">{d.pages ?? '—'}</td></tr>)}
+          {!(data.manuals ?? []).length && <tr><td colSpan={3} className="muted">No manuals imported yet.</td></tr>}</tbody>
+        {(data.manuals ?? []).length > 0 && <tfoot><tr><th colSpan={2}>Total ({data.manuals.length} manuals)</th><th className="num">{data.manuals.reduce((n: number, d: any) => n + (d.pages ?? 0), 0)}</th></tr></tfoot>}</table></div>
       <h2 style={{ marginTop: 20 }}>Recently updated technical records</h2>
       <div className="table-wrap"><table><thead><tr><th>Type</th><th>Code / Address</th><th>Name</th><th>Model</th><th>Verification</th><th>Updated</th></tr></thead>
         <tbody>{data.recentlyUpdated.map((r: any) => <tr key={r.type + r.id}><td>{r.type === 'parameter' ? 'Parameter' : 'Register'}</td><td className="code"><Link to={`/${r.type === 'parameter' ? 'parameter' : 'register'}/${r.id}`}>{r.label}</Link></td><td>{r.name}</td><td>{r.brand} {r.model}</td><td><VerifBadge s={r.verification_status} /></td><td className="small-text">{fmtDate(r.updated_at)}</td></tr>)}

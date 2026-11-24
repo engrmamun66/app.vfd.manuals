@@ -62,7 +62,7 @@ function shape(db: DB, rows: any[], uid: number) {
     isOwn: a.user_id === uid,
     author: a.author_name,
     comment: a.comment_text,
-    links: parseJson(a.links_json, []),
+    links: parseJson<any[] | null>(a.links_json, []) ?? [],
     color: a.highlight_color,
     visibility: a.user_id === uid ? a.visibility : 'public',
     status: a.anchor_status === 'requires_reattachment' ? 'Requires Reattachment' : a.anchor_status === 'source_unavailable' ? 'Source Unavailable' : a.annotation_status,

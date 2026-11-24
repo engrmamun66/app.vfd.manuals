@@ -16,6 +16,7 @@ import { AdminContent, AdminLogs, AdminSettings, AdminUsers, MySettings } from '
 import { Loading, SearchBox, useAsync } from './components/ui';
 import { ModelsProvider, useModels } from './lib/models';
 import { MonitorIcon, MoonIcon, SunIcon } from './components/icons';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { SettingsModal } from './components/SettingsModal';
 import { DialogProvider } from './components/dialogs';
 
@@ -196,7 +197,7 @@ function ShellInner() {
         </div>
         {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
         {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
-        <div key={loc.pathname} className={settings?.page_transition && settings.page_transition !== 'none' ? `pt-${settings.page_transition}` : undefined} style={{ '--pt-ms': `${settings?.page_transition_ms ?? 300}ms` } as React.CSSProperties}><Outlet /></div>
+        <div key={loc.pathname} className={settings?.page_transition && settings.page_transition !== 'none' ? `pt-${settings.page_transition}` : undefined} style={{ '--pt-ms': `${settings?.page_transition_ms ?? 300}ms` } as React.CSSProperties}><ErrorBoundary resetKey={loc.pathname}><Outlet /></ErrorBoundary></div>
       </div>
     </div>
     </HotkeyCtx.Provider>

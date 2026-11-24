@@ -520,6 +520,23 @@ test.describe('library, import and verification (Super Admin)', () => {
     await expect(admin.locator('.page-img-wrap img')).toBeVisible({ timeout: 45_000 });
     await admin.getByRole('button', { name: 'Extracted text' }).click();
     await expect(admin.locator('pre.annot-host')).toBeVisible();
+    // highlight text on the manual page text, then open it: must show the annotation panel, not a blank view
+    const pre = admin.locator('pre.annot-host');
+    const word = ((await pre.innerText()).match(/[A-Za-z]{6,}/) ?? ['frequency'])[0];
+    await selectText(pre, word);
+    await admin.getByRole('button', { name: 'Highlight', exact: true }).click();
+    const urlBefore = admin.url();
+    await pre.locator('.annot').first().click();
+    await expect(admin.getByRole('dialog', { name: /Annotations/ })).toBeVisible();
+    expect(admin.url()).toBe(urlBefore);
+    await expect(admin.locator('.topbar')).toBeVisible();
+    // owner can switch visibility from the opened panel
+    const dlg = admin.getByRole('dialog', { name: /Annotations/ });
+    await expect(dlg.locator('.badge.dashed').first()).toHaveText('private');
+    await dlg.getByLabel('Visibility').selectOption('public');
+    await pre.locator('.annot').first().click();
+    await expect(admin.getByRole('dialog', { name: /Annotations/ }).locator('.badge.dashed').first()).toHaveText('public');
+    await admin.keyboard.press('Escape');
     await admin.getByRole('button', { name: 'Next page →' }).click();
     await expect(admin).toHaveURL(/page\/2$/);
   });

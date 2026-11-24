@@ -35,6 +35,15 @@ kbRouter.get(
       verificationBreakdown: db
         .prepare("SELECT 'parameter' t, verification_status s, COUNT(*) n FROM parameters GROUP BY 2 UNION ALL SELECT 'register', verification_status, COUNT(*) FROM modbus_registers GROUP BY 2")
         .all(),
+      // pages of each manual (latest revision of each document)
+      manuals: db
+        .prepare(
+          `SELECT d.id, d.title, b.name brand, r.page_count pages
+           FROM documents d LEFT JOIN brands b ON b.id=d.brand_id
+           JOIN document_revisions r ON r.id = (SELECT MAX(id) FROM document_revisions WHERE document_id=d.id)
+           ORDER BY b.name, d.title`,
+        )
+        .all(),
       recentImports: db.prepare('SELECT id, file_path, status, dry_run, started_at, finished_at FROM document_import_jobs ORDER BY id DESC LIMIT 8').all(),
       recentlyUpdated: db
         .prepare(
