@@ -129,7 +129,7 @@ const TRANSITIONS: [string, string][] = [['none', 'None'], ['fade', 'Fade'], ['s
 
 function PageTransition() {
   const { settings, updateSettings } = useAuth();
-  const cur = settings?.page_transition ?? 'none';
+  const cur = settings?.page_transition ?? 'slide-up';
   const [n, setN] = useState(0); // bumps to replay the preview
   const ms = settings?.page_transition_ms ?? 300;
   const [draft, setDraft] = useState<number | null>(null);

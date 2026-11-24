@@ -654,6 +654,10 @@ test.describe('theme & accessibility basics', () => {
 
   test('pagination bar is sticky and answers the arrow keys', async () => {
     await admin.goto('/parameters?limit=2');
+    await admin.setViewportSize({ width: 1400, height: 420 }); // short window: menu scrolls, user box stays pinned
+    const ub = await admin.locator('.userbox').boundingBox();
+    expect(Math.abs(ub!.y + ub!.height - 420)).toBeLessThan(2);
+    await admin.setViewportSize({ width: 1600, height: 900 });
     await expect(admin.getByText(/Page 1 of/)).toBeVisible();
     expect(await admin.locator('.pager').evaluate((e) => getComputedStyle(e).position)).toBe('sticky');
     await expect(admin.getByRole('button', { name: '← Prev' })).toHaveAttribute('title', /Previous page/);

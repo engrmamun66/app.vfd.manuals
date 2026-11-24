@@ -328,3 +328,23 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--line-strong);
 .theme-switch button + button { border-left: 1px solid var(--line-strong); }
 .theme-switch button.active { background: var(--inv-bg); color: var(--inv-fg); }
 .theme-switch button:not(.active):hover { background: var(--bg-hover); }
+
+/* User box: pinned at the bottom of the sidebar while the menu scrolls; one compact line */
+.sidebar .userbox { position: sticky; bottom: -24px; z-index: 2; margin-top: auto; display: flex; align-items: center; gap: 8px; padding: 10px 12px 34px; background: var(--sidebar-bg); border-top: 1px solid var(--line); box-shadow: 0 -6px 10px -8px rgba(0,0,0,.25); font-size: .85rem; color: var(--fg); }
+.userbox .avatar { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: .8rem; background: var(--fg); color: var(--bg); }
+.userbox .who { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.userbox .role-chip { flex: none; font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; padding: 2px 6px; border: 1px solid var(--line); color: var(--fg-muted); white-space: nowrap; }
+.userbox .signout { flex: none; width: 30px; height: 30px; padding: 0; display: grid; place-items: center; background: transparent; border: 1px solid transparent; color: var(--fg-muted); cursor: pointer; }
+.userbox .signout:hover { background: var(--sidebar-hover); border-color: var(--line); color: var(--fg); }
+
+/* ---------- Theme-aware scrollbars (flat, square — follow light/dark mode) ---------- */
+:root { color-scheme: light; }
+:root[data-theme='dark'] { color-scheme: dark; }
+* { scrollbar-width: thin; scrollbar-color: var(--fg-faint) var(--bg-alt); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-alt); }
+::-webkit-scrollbar-thumb { background: var(--fg-faint); border: 2px solid var(--bg-alt); border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: var(--fg-muted); }
+::-webkit-scrollbar-thumb:active { background: var(--fg); }
+::-webkit-scrollbar-corner { background: var(--bg-alt); }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
