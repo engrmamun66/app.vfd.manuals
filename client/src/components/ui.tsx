@@ -60,8 +60,11 @@ export function ErrorBox({ e }: { e: any }) {
 }
 
 export function Crumbs({ items }: { items: { label: ReactNode; to?: string }[] }) {
+  const nav = useNavigate();
+  const canBack = items.length > 1 && ((window.history.state?.idx as number | undefined) ?? 0) > 0;
   return (
     <nav className="crumbs" aria-label="Breadcrumb">
+      {canBack && <button type="button" className="small crumb-back" onClick={() => nav(-1)} title="Back to the previous page (keeps its filters)" aria-label="Back">← Back</button>}
       {items.map((it, i) => (
         <span key={i} style={{ display: 'contents' }}>
           {i > 0 && <span className="sep">›</span>}

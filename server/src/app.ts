@@ -10,6 +10,7 @@ import { annotationsRouter } from './routes/annotations.js';
 import { adminRouter } from './routes/admin.js';
 import { meRouter } from './routes/me.js';
 import { exportsRouter } from './routes/exports.js';
+import { feedbackRouter } from './routes/feedback.js';
 
 export function createApp(opts: { dev?: boolean } = {}) {
   const app = express();
@@ -41,6 +42,7 @@ export function createApp(opts: { dev?: boolean } = {}) {
   api.use(requireAuth(), requireCsrf);
   api.use('/me', meRouter);
   api.use('/bookmarks', bookmarksRouter);
+  api.use('/feedback', feedbackRouter);
   api.use('/annotations', annotationsRouter);
   api.use('/export', exportsRouter);
   api.use('/admin', requireSuperAdmin, adminRouter);

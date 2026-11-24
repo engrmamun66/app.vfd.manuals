@@ -638,4 +638,36 @@ CREATE INDEX idx_knowledge_model_kind ON knowledge_items(model_id, kind);
 ALTER TABLE research_bookmarks DROP COLUMN description;
 `,
   },
+  {
+    version: 4,
+    name: 'feedback_requests',
+    sql: /* sql */ `
+CREATE TABLE feedback_requests (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  kind TEXT NOT NULL CHECK (kind IN ('request','complaint')),
+  message TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new','in_progress','resolved')),
+  admin_note TEXT,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+CREATE INDEX idx_feedback_status ON feedback_requests(status, id);
+CREATE INDEX idx_feedback_user ON feedback_requests(user_id, id);
+CREATE TABLE feedback_images (
+  id INTEGER PRIMARY KEY,
+  feedback_id INTEGER NOT NULL REFERENCES feedback_requests(id) ON DELETE CASCADE,
+  upload_id INTEGER NOT NULL REFERENCES user_uploads(id)
+);
+CREATE INDEX idx_feedback_images ON feedback_images(feedback_id);
+`,
+  },
+  {
+    version: 5,
+    name: 'feedback_contact',
+    sql: /* sql */ `
+ALTER TABLE feedback_requests ADD COLUMN contact_phone TEXT;
+ALTER TABLE feedback_requests ADD COLUMN contact_email TEXT;
+`,
+  },
 ];

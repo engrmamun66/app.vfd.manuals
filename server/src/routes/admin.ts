@@ -170,11 +170,18 @@ adminRouter.post(
     const id = intParam(req.params.id, 'id', { required: true })!;
     const u = db.prepare('SELECT id, email FROM users WHERE id = ?').get(id) as any;
     if (!u) throw notFound();
-    // one-time temporary password shown ONLY in this response; user must change it at next login
-    const temp = crypto.randomBytes(9).toString('base64url') + 'a1!';
-    db.prepare('UPDATE users SET password_hash = ?, must_change_password = 1, failed_login_count = 0, locked_until = NULL, updated_at = ? WHERE id = ?').run(await hashPassword(temp), new Date().toISOString(), id);
+    // explicit password chosen by the Super Admin (validated like any password), or a generated one-time temporary password
+    const chosen = typeof req.body?.password === 'string' && req.body.password !== '' ? req.body.password : null;
+    if (chosen) {
+      const problems = passwordProblems(chosen, u.email);
+      if (problems.length) throw badRequest(problems.join(' '));
+    }
+    const mustChange = chosen ? req.body.mustChange !== false : true;
+    const temp = chosen ?? crypto.randomBytes(9).toString('base64url') + 'a1!';
+    db.prepare('UPDATE users SET password_hash = ?, must_change_password = ?, failed_login_count = 0, locked_until = NULL, updated_at = ? WHERE id = ?').run(await hashPassword(temp), mustChange ? 1 : 0, new Date().toISOString(), id);
     revokeSessions({ userId: id }, 'admin_password_reset');
-    logActivity({ userId: id, actorUserId: req.user!.id, event: 'admin_password_reset', entityType: 'user', entityId: id });
+    logActivity({ userId: id, actorUserId: req.user!.id, event: 'admin_password_reset', entityType: 'user', entityId: id, meta: { chosenByAdmin: !!chosen, mustChange } });
+    if (chosen) return res.json({ ok: true, mustChangePassword: mustChange, note: 'Password set. All sessions of this user were ended.' });
     res.json({ temporaryPassword: temp, note: 'Share this securely. It is not stored in plain text and will not be shown again.' });
   }),
 );

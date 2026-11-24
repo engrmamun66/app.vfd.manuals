@@ -508,3 +508,43 @@ describe('parameter importance and knowledge items', () => {
     db.prepare('DELETE FROM brands WHERE id = ?').run(brandId);
   });
 });
+
+describe('requests and complaints (feedback)', () => {
+  const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==', 'base64');
+  let fbId = 0;
+  let imgId = 0;
+
+  it('a user sends a request with an image; validation rejects bad input', async () => {
+    expect((await w(alice, 'post', '/feedback').field('kind', 'nonsense').field('message', 'hello there')).status).toBe(400);
+    expect((await w(alice, 'post', '/feedback').field('kind', 'request').field('message', 'x')).status).toBe(400);
+    expect((await w(alice, 'post', '/feedback').field('kind', 'request').field('message', 'bad file').attach('files', Buffer.from('<html>x</html>'), 'evil.png')).status).toBe(415);
+    expect(db.prepare('SELECT COUNT(*) c FROM feedback_requests').get().c).toBe(0); // failed upload leaves nothing behind
+    const ok = await w(alice, 'post', '/feedback').field('kind', 'complaint').field('message', 'Wrong default for parameter 01.02').attach('files', PNG, 'shot.png');
+    expect(ok.status).toBe(201);
+    fbId = ok.body.id;
+  });
+
+  it('only the sender sees it in /mine; only the Super Admin sees the full list', async () => {
+    const mine = await r(alice, '/feedback/mine');
+    expect(mine.body.rows).toHaveLength(1);
+    imgId = mine.body.rows[0].images[0].upload_id;
+    expect((await r(bob, '/feedback/mine')).body.rows).toHaveLength(0);
+    expect((await r(alice, '/feedback')).status).toBe(403);
+    const all = await r(admin, '/feedback');
+    expect(all.status).toBe(200);
+    expect(all.body.rows[0]).toMatchObject({ kind: 'complaint', status: 'new', email: expect.any(String) });
+  });
+
+  it('images are private to the sender and the Super Admin', async () => {
+    expect((await r(alice, `/feedback/images/${imgId}`)).status).toBe(200);
+    expect((await r(admin, `/feedback/images/${imgId}?thumb=1`)).status).toBe(200);
+    expect((await r(bob, `/feedback/images/${imgId}`)).status).toBe(404);
+  });
+
+  it('the Super Admin sets status and a note; users cannot', async () => {
+    expect((await w(alice, 'patch', `/feedback/${fbId}`).send({ status: 'resolved' })).status).toBe(403);
+    expect((await w(admin, 'patch', `/feedback/${fbId}`).send({ status: 'bogus' })).status).toBe(400);
+    expect((await w(admin, 'patch', `/feedback/${fbId}`).send({ status: 'resolved', admin_note: 'Fixed, thanks.' })).status).toBe(200);
+    expect((await r(alice, '/feedback/mine')).body.rows[0]).toMatchObject({ status: 'resolved', admin_note: 'Fixed, thanks.' });
+  });
+});

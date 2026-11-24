@@ -121,6 +121,8 @@ function UserDetail({ id, onClose }: { id: number; onClose: () => void }) {
   const { data: rec } = useAsync(() => get(`/admin/users/${id}/storage/reconcile`), [id]);
   const [msg, setMsg] = useState<any>(null);
   const [lim, setLim] = useState<any>(null);
+  const [newPw, setNewPw] = useState('');
+  const [mustChange, setMustChange] = useState(true);
   useEffect(() => { if (u) setLim({ quotaMB: Math.round(u.limits.quotaBytes / 1048576), fileMB: Math.round(u.limits.maxFileBytes / 1048576), att: u.limits.maxAttachmentsPerComment }); }, [u]);
   const run = async (fn: () => Promise<any>) => { try { setMsg(await fn()); reload(); } catch (e) { setMsg(e); } };
   if (!u || !lim) return <Modal title="User" onClose={onClose}><Loading /></Modal>;
@@ -136,7 +138,11 @@ function UserDetail({ id, onClose }: { id: number; onClose: () => void }) {
           <div className="row" style={{ marginTop: 8 }}>
             <select value={u.role} onChange={(e) => run(() => patch(`/admin/users/${u.id}`, { role: e.target.value }))} aria-label="Role"><option value="user">Normal User</option><option value="super_admin">Super Admin</option></select>
             <button className="small" onClick={async () => (await confirmDialog('Generate a one-time temporary password? All sessions of this user will end.')) && run(() => post(`/admin/users/${u.id}/reset-password`))}>Reset password</button>
-            <button className="small" onClick={() => run(() => post(`/admin/users/${u.id}/revoke-all`, {}))}>Log out all sessions</button></div></div>
+            <button className="small" onClick={() => run(() => post(`/admin/users/${u.id}/revoke-all`, {}))}>Log out all sessions</button></div>
+          <h3 style={{ marginTop: 12 }}>Set password</h3>
+          <div className="row"><PasswordInput value={newPw} onChange={(e) => setNewPw(e.target.value)} autoComplete="new-password" placeholder="New password for this user" />
+            <button className="small primary" disabled={!newPw} onClick={async () => (await confirmDialog(`Set this password for ${u.email}? All sessions of this user will end.`)) && run(async () => { const r = await post(`/admin/users/${u.id}/reset-password`, { password: newPw, mustChange }); setNewPw(''); return r; })}>Set password</button></div>
+          <label style={{ margin: '6px 0 0', display: 'inline-flex', gap: 6, alignItems: 'center', fontWeight: 400 }}><input type="checkbox" checked={mustChange} onChange={(e) => setMustChange(e.target.checked)} />Require the user to change it at next login</label></div>
         <div><h3>Storage</h3><table><tbody>
           <tr><th>Total used</th><td>{fmtBytes(s.total)} ({s.percent}% of {fmtBytes(u.limits.quotaBytes)})</td></tr><tr><th>Remaining</th><td>{fmtBytes(s.remaining)}</td></tr>
           <tr><th>Files</th><td>{s.files}</td></tr><tr><th>Images</th><td>{fmtBytes(s.images)}</td></tr><tr><th>Comment attachments</th><td>{fmtBytes(s.attachments)}</td></tr><tr><th>Documents</th><td>{fmtBytes(s.documents)}</td></tr><tr><th>Exports</th><td>{fmtBytes(s.exports)}</td></tr><tr><th>Thumbnails</th><td>{fmtBytes(s.thumbnails)}</td></tr></tbody></table>

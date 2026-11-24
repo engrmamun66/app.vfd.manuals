@@ -678,6 +678,44 @@ test.describe('theme & accessibility basics', () => {
     await expect(admin.getByText(/Page 1 of/)).toBeVisible();
   });
 
+  test('Send request: user submits a complaint with an image; Super Admin sees it and sets status; user sees the note', async () => {
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==', 'base64');
+    await alice.goto('/parameters');
+    await alice.getByRole('button', { name: 'Send request' }).click();
+    const dlg = alice.getByRole('dialog', { name: 'Send request' });
+    await expect(dlg.getByRole('radio', { name: /Request/ })).toBeChecked();
+    await dlg.getByText('Complaint', { exact: true }).click();
+    await expect(dlg.getByRole('radio', { name: /Complaint/ })).toBeChecked();
+    await dlg.getByLabel(/Phone number/).fill('+880 1711-000000');
+    await dlg.getByLabel(/^Email/).fill('contact@example.test');
+    await dlg.getByLabel('Your message').fill('E2E complaint: a value looks wrong');
+    await dlg.getByLabel('Attach images').setInputFiles({ name: 'shot.png', mimeType: 'image/png', buffer: png });
+    await expect(dlg.getByAltText('shot.png')).toBeVisible();
+    await dlg.getByRole('button', { name: 'Send', exact: true }).click();
+    await expect(dlg.getByRole('status')).toContainText('Sent');
+    await dlg.getByRole('button', { name: 'Close', exact: true }).last().click();
+    // Super Admin: new menu + the message with its image
+    await admin.goto('/admin/requests');
+    const card = admin.locator('.fb-card', { hasText: 'E2E complaint: a value looks wrong' });
+    await expect(card).toBeVisible();
+    await expect(card.getByText('Complaint', { exact: true })).toBeVisible();
+    await expect(card.locator('img')).toBeVisible();
+    await expect(card).toContainText('+880 1711-000000');
+    await expect(card).toContainText('contact@example.test');
+    await card.getByLabel('Status').selectOption('in_progress');
+    await card.getByLabel('Admin note').fill('Looking into it');
+    await card.getByRole('button', { name: 'Save note' }).click();
+    // user sees status and note
+    await alice.reload();
+    await alice.getByRole('button', { name: 'Send request' }).click();
+    await alice.getByRole('tab', { name: 'My messages' }).click();
+    await expect(alice.getByText('Looking into it')).toBeVisible();
+    await expect(alice.getByText('In progress')).toBeVisible();
+    await alice.keyboard.press('Escape');
+    // normal users have no access to the admin page
+    expect((await alice.request.get('/api/feedback')).status()).toBe(403);
+  });
+
   test('model tabs: selection persists across reload and pages; alias set in full-screen settings; sidebar collapses', async () => {
     await admin.goto('/parameters');
     const tabs = admin.locator('.model-tabs button');

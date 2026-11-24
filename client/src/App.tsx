@@ -10,6 +10,8 @@ import { BookmarksPage } from './pages/Bookmarks';
 import { AnnotationsPage } from './pages/AnnotationsPage';
 import { DocumentPage, ImportPage, Library, RevisionViewer } from './pages/Library';
 import { VerificationCenter } from './pages/Verification';
+import { FeedbackAdmin } from './pages/Feedback';
+import { FeedbackModal } from './components/FeedbackModal';
 import { AdminContent, AdminLogs, AdminSettings, AdminUsers, MySettings } from './pages/Admin';
 import { Loading, SearchBox, useAsync } from './components/ui';
 import { ModelsProvider, useModels } from './lib/models';
@@ -86,6 +88,7 @@ function ShellInner() {
   const splitRef = useRef({ settings, updateSettings });
   splitRef.current = { settings, updateSettings };
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem('sidebar-collapsed') === '1'; } catch { return false; } });
   const toggleSidebar = () => setCollapsed((c) => { try { localStorage.setItem('sidebar-collapsed', c ? '0' : '1'); } catch { /* ignore */ } return !c; });
   const { data: tax } = useAsync(() => get('/taxonomy'), []);
@@ -100,7 +103,7 @@ function ShellInner() {
       { title: 'Research', items: [['/compare', 'Multi-Brand Comparison'], ['/bookmarks', 'Research Bookmarks'], ['/annotations', 'My Annotations']] },
       { title: 'Documentation Library', items: [['/library', 'Manuals'], ...(isAdmin ? [['/library/import', 'Import Documents'] as [string, string]] : [])] },
     ];
-    if (isAdmin) secs.push({ title: 'Administration', items: [['/verification', 'Verification Center'], ['/admin/content', 'Content & Order'], ['/admin/users', 'Users & Monitoring'], ['/admin/logs', 'Activity & Audit']] });
+    if (isAdmin) secs.push({ title: 'Administration', items: [['/verification', 'Verification Center'], ['/admin/content', 'Content & Order'], ['/admin/users', 'Users & Monitoring'], ['/admin/requests', 'User Requests'], ['/admin/logs', 'Activity & Audit']] });
     return secs;
   }, [tax, isAdmin]);
   const keys = useMemo(() => assignHotkeys(sections.flatMap((s) => s.items.map(([to, label]): [string, string] => [to, label]))), [sections]);
@@ -158,7 +161,7 @@ function ShellInner() {
     <HotkeyCtx.Provider value={{ keys, show: showKeys }}>
     <div className={`app ${collapsed ? 'collapsed' : ''}`}>
       <aside className="sidebar" aria-label="Main navigation" aria-hidden={collapsed}>
-        <div className="brand"><b>VFD Knowledge Base</b><span>Technical Research Explorer</span></div>
+        <div className="brand"><img src="/favicon.svg" alt="" width="34" height="34" className="brand-logo" /><div><b>VFD Knowledge Base</b><span>Technical Research Explorer</span></div></div>
         {sections.map((sec, i) => (
           <Fragment key={i}>
             {sec.title && <div className="nav-group">{sec.title}</div>}
@@ -179,6 +182,9 @@ function ShellInner() {
         <div className="topbar">
           <button className="ghost icon-btn" onClick={toggleSidebar} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!collapsed} title={`${collapsed ? 'Expand sidebar' : 'Collapse sidebar'} (${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl'} + /)`}>☰</button>
           <GlobalSearch /><span className="spacer" />
+          <button className="small send-request" onClick={() => setFeedbackOpen(true)} title="Send a request or complaint to the administrator">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg> Send request
+          </button>
           <div className="theme-switch" role="radiogroup" aria-label="Theme mode">
             {([['system', 'System', <MonitorIcon key="s" />], ['light', 'Light', <SunIcon key="l" />], ['dark', 'Dark', <MoonIcon key="d" />]] as const).map(([k, l, ic]) => (
               <button key={k} role="radio" aria-checked={(settings?.theme ?? 'light') === k} aria-label={`${l} mode`} title={`${l} mode`} className={(settings?.theme ?? 'light') === k ? 'active' : ''} onClick={() => updateSettings({ theme: k } as any)}>{ic}</button>
@@ -189,6 +195,7 @@ function ShellInner() {
           </button>
         </div>
         {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
+        {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
         <div key={loc.pathname} className={settings?.page_transition && settings.page_transition !== 'none' ? `pt-${settings.page_transition}` : undefined} style={{ '--pt-ms': `${settings?.page_transition_ms ?? 300}ms` } as React.CSSProperties}><Outlet /></div>
       </div>
     </div>
@@ -232,6 +239,7 @@ export default function App() {
         <Route path="/verification" element={<AdminOnly><VerificationCenter /></AdminOnly>} />
         <Route path="/admin/content" element={<AdminOnly><AdminContent /></AdminOnly>} />
         <Route path="/admin/users" element={<AdminOnly><AdminUsers /></AdminOnly>} />
+        <Route path="/admin/requests" element={<AdminOnly><FeedbackAdmin /></AdminOnly>} />
         <Route path="/admin/logs" element={<AdminOnly><AdminLogs /></AdminOnly>} />
         <Route path="/admin/settings" element={<AdminOnly><AdminSettings /></AdminOnly>} />
         <Route path="/settings" element={<MySettings />} />

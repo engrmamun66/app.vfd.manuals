@@ -361,3 +361,29 @@ input[type="range"].range:focus-visible { outline: 2px solid var(--line-strong);
 .seg button { border: 0; border-radius: 0; padding: 2px 8px; font-size: .78rem; min-height: 0; line-height: 1.4; background: var(--bg); color: var(--fg); }
 .seg button + button { border-left: 1px solid var(--line-strong); }
 .seg button.active { background: var(--inv-bg); color: var(--inv-fg); }
+
+/* ---------- Send request (feedback) ---------- */
+.send-request { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.radio-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.radio-card { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border: 1px solid var(--line); background: var(--bg); cursor: pointer; font-weight: 400; color: var(--fg); }
+.radio-card:hover { background: var(--bg-hover); }
+.radio-card input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.radio-card.on { border-color: var(--fg); box-shadow: inset 0 0 0 1px var(--fg); background: var(--bg-alt); }
+.radio-card:focus-within { outline: 2px solid var(--fg); outline-offset: 2px; }
+.rc-title { font-weight: 700; }
+.rc-title::before { content: ''; display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--fg-muted); margin-right: 8px; vertical-align: -1px; }
+.radio-card.on .rc-title::before { border-color: var(--fg); background: radial-gradient(var(--fg) 0 45%, transparent 50%); }
+.rc-hint { font-size: .82rem; color: var(--fg-muted); }
+.dropzone { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px dashed var(--fg-faint); background: var(--bg-alt); }
+.thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.thumb { position: relative; width: 84px; height: 84px; padding: 0; border: 1px solid var(--line); background: var(--bg-alt); cursor: pointer; overflow: hidden; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb-x { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; padding: 0; line-height: 1; font-size: 11px; background: var(--inv-bg); color: var(--inv-fg); border: 0; cursor: pointer; }
+.fb-card.resolved { opacity: .7; }
+@media (max-width: 560px) { .radio-cards { grid-template-columns: 1fr; } .send-request { font-size: 0; gap: 0; } }
+
+/* ---------- Sidebar brand logo ---------- */
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-logo { flex: none; border-radius: 8px; box-shadow: 0 0 0 1px var(--line); }
+
+.crumb-back { margin-right: 10px; padding: 2px 9px; font-size: .8rem; min-height: 0; }
