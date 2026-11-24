@@ -55,16 +55,17 @@ export function listBackups(db: DB) {
   return db.prepare('SELECT * FROM backups ORDER BY id DESC').all();
 }
 
-/** Monday (UTC) of the week a timestamp falls in, as YYYY-MM-DD. */
-function weekKey(t: number) {
+const KEEP_DAYS = 7;
+
+/** Local calendar day of a timestamp, as YYYY-MM-DD. */
+function dayKey(t: number) {
   const d = new Date(t);
-  d.setUTCHours(0, 0, 0, 0);
-  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
-  return d.toISOString().slice(0, 10);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 /**
- * Retention: keep only the NEWEST verified backup of each calendar week (Mon–Sun, UTC), delete the rest.
+ * Retention: keep only the NEWEST backup of each local calendar day, and only for the last KEEP_DAYS days
+ * (today + the previous 6). Everything else is deleted automatically after each new backup.
  * Only touches `vfd-knowledge-*.db` files in the backup folder and their rows in `backups`.
  */
 export function pruneBackups(db: DB, opts: { dryRun?: boolean } = {}) {
@@ -78,12 +79,13 @@ export function pruneBackups(db: DB, opts: { dryRun?: boolean } = {}) {
       return { full, t: st.mtimeMs, size: st.size };
     })
     .sort((a, b) => b.t - a.t); // newest first
+  const allowed = new Set(Array.from({ length: KEEP_DAYS }, (_, n) => dayKey(Date.now() - n * 86400000)));
   const seen = new Set<string>();
   let kept = 0, deleted = 0, freedBytes = 0;
   const hasTable = db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='backups'").get();
   for (const f of files) {
-    const wk = weekKey(f.t);
-    if (!seen.has(wk)) { seen.add(wk); kept++; continue; }
+    const day = dayKey(f.t);
+    if (allowed.has(day) && !seen.has(day)) { seen.add(day); kept++; continue; }
     deleted++; freedBytes += f.size;
     if (opts.dryRun) continue;
     fs.rmSync(f.full, { force: true });
