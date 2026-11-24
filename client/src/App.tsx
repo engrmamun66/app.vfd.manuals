@@ -18,7 +18,7 @@ import { FeedbackModal } from './components/FeedbackModal';
 import { AdminContent, AdminLogs, AdminSettings, AdminUsers, MySettings } from './pages/Admin';
 import { Loading, SearchBox, useAsync } from './components/ui';
 import { ModelsProvider, useModels } from './lib/models';
-import { MonitorIcon, MoonIcon, SunIcon } from './components/icons';
+import { MonitorIcon, MoonIcon, NavIcon, SunIcon } from './components/icons';
 import { PageToolbar, PageToolsProvider } from './components/PageTools';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SettingsModal } from './components/SettingsModal';
@@ -29,7 +29,7 @@ const HotkeyCtx = createContext<{ keys: Map<string, string>; show: boolean }>({ 
 function Nav({ to, children, sub, mine }: { to: string; children: React.ReactNode; sub?: boolean; mine?: boolean }) {
   const { keys, show } = useContext(HotkeyCtx);
   const k = keys.get(to);
-  return <NavLink to={to} end className={({ isActive }) => `nav-link ${sub ? 'sub' : ''} ${mine ? 'mine' : ''} ${isActive ? 'active' : ''}`}>{children}{show && k && <kbd className="key-badge" aria-hidden="true">{k.toUpperCase()}</kbd>}</NavLink>;
+  return <NavLink to={to} end className={({ isActive }) => `nav-link ${sub ? 'sub' : ''} ${mine ? 'mine' : ''} ${isActive ? 'active' : ''}`}>{!sub && !mine && <NavIcon to={to} />}{children}{show && k && <kbd className="key-badge" aria-hidden="true">{k.toUpperCase()}</kbd>}</NavLink>;
 }
 
 /** Assigns each nav item a unique letter: word initials first, then any remaining letter of its label, then digits. */
@@ -115,6 +115,15 @@ function ShellInner() {
     if (isAdmin) secs.push({ title: 'Administration', items: [['/verification', 'Verification Center'], ['/admin/content', 'Content & Order'], ['/admin/users', 'Users & Monitoring'], ['/admin/requests', 'User Requests'], ['/admin/logs', 'Activity & Audit']] });
     return secs;
   }, [tax, isAdmin]);
+  // collapsible sections (Administration starts closed); the section holding the current page always opens
+  const [secState, setSecState] = useState<Record<string, boolean>>(() => { try { return JSON.parse(localStorage.getItem('nav-sections') ?? '{}'); } catch { return {}; } });
+  const isOpen = (t: string) => secState[t] ?? t !== 'Administration';
+  const toggleSec = (t: string) => setSecState((s) => { const n = { ...s, [t]: !(s[t] ?? t !== 'Administration') }; try { localStorage.setItem('nav-sections', JSON.stringify(n)); } catch { /* ignore */ } return n; });
+  const here = loc.pathname;
+  useEffect(() => {
+    const sec = sections.find((s) => s.title && s.items.some(([to]) => to === '/' ? false : here === to || here.startsWith(to + '/')));
+    if (sec?.title && !(secState[sec.title] ?? sec.title !== 'Administration')) setSecState((s) => ({ ...s, [sec.title!]: true }));
+  }, [here]); // eslint-disable-line react-hooks/exhaustive-deps
   const keys = useMemo(() => assignHotkeys(sections.flatMap((s) => s.items.map(([to, label]): [string, string] => [to, label]))), [sections]);
 
   // Ctrl/Cmd + / toggles the sidebar.
@@ -173,8 +182,8 @@ function ShellInner() {
         <Link to="/" className="brand" title="Go to Dashboard" aria-label="VFD Knowledge Base — go to Dashboard"><img src="/favicon.svg" alt="" width="34" height="34" className="brand-logo" /><div><b>VFD Knowledge Base</b><span>Technical Research Explorer</span></div></Link>
         {sections.map((sec, i) => (
           <Fragment key={i}>
-            {sec.title && <div className="nav-group">{sec.title}</div>}
-            {sec.items.map(([to, label, sub]) => {
+            {sec.title && <button type="button" className="nav-group nav-group-btn" aria-expanded={isOpen(sec.title)} onClick={() => toggleSec(sec.title!)}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ transform: isOpen(sec.title) ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}><path d="M9 6l6 6-6 6" /></svg>{sec.title}</button>}
+            {(!sec.title || isOpen(sec.title)) && sec.items.map(([to, label, sub]) => {
               if (sub && !catsOpen) return null;
               if (to === '/knowledge') return (
                 <Fragment key={to}>
