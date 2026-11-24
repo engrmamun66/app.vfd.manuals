@@ -110,6 +110,30 @@ export function InfoIcon({ title, text, more }: { title?: string; text: ReactNod
   );
 }
 
+/** Right-hand side panel that slides in (and out); Esc, the ✕ button and a click on the backdrop close it. */
+export function Drawer({ title, onClose, children, width = 440 }: { title: string; onClose: () => void; children: ReactNode; width?: number }) {
+  const [closing, setClosing] = useState(false);
+  const close = () => {
+    if (closing) return;
+    setClosing(true);
+    setTimeout(onClose, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 200);
+  };
+  useEffect(() => {
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && close();
+    document.addEventListener('keydown', esc);
+    return () => document.removeEventListener('keydown', esc);
+  });
+  return createPortal(
+    <div className={`drawer-bg ${closing ? 'closing' : ''}`} onMouseDown={(e) => e.target === e.currentTarget && close()}>
+      <aside className="drawer" role="dialog" aria-modal="true" aria-label={title} style={{ width: `min(${width}px, 100vw)` }}>
+        <div className="drawer-head"><h2>{title}</h2><button className="ghost small" onClick={close} aria-label="Close">✕</button></div>
+        <div className="drawer-body">{children}</div>
+      </aside>
+    </div>,
+    document.body,
+  );
+}
+
 export function Modal({ title, onClose, children, wide }: { title: string; onClose: () => void; children: ReactNode; wide?: boolean }) {
   useEffect(() => {
     const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();

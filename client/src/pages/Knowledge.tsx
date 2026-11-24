@@ -3,7 +3,6 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { get } from '../lib/api';
 import { Crumbs, ErrorBox, Loading, Pager, SearchBox, VerifBadge, useAsync, ModelName } from '../components/ui';
 import { ModelTabs } from '../components/ModelTabs';
-import { OriginalPdfButton } from '../components/OriginalPdfButton';
 import { useModels } from '../lib/models';
 
 export const KIND_LABELS: Record<string, string> = {
@@ -45,7 +44,7 @@ export function KnowledgePage() {
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Knowledge Base', to: '/parameters' }, { label: 'Troubleshooting & Manual Topics' }]} />
-      <div className="row between" style={{ marginBottom: 8 }}><h1 style={{ margin: 0 }}>Troubleshooting & Manual Topics</h1><OriginalPdfButton /></div>
+      <div className="row between" style={{ marginBottom: 8 }}><h1 style={{ margin: 0 }}>Troubleshooting & Manual Topics</h1></div>
       <ModelTabs />
       <div className="row" style={{ marginBottom: 10, flexWrap: 'wrap' }} role="tablist" aria-label="Topic">
         <button role="tab" aria-selected={!kind} className={!kind ? 'primary small' : 'small'} onClick={() => set('kind', '')}>All ({totalAll})</button>

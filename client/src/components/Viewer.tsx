@@ -1,3 +1,4 @@
+import { useSplitAvailable } from './PageTools';
 import { SplitIcon } from './icons';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -9,6 +10,7 @@ import { ErrorBox, Loading, QuoteBadge, Spinner, useAsync } from './ui';
 /** Resizable two-pane layout. Ratio/enabled state persisted per user in SQLite via settings. */
 export function SplitView({ enabled, left, right, leftTitle, rightTitle }: { enabled: boolean; left: ReactNode; right: ReactNode; leftTitle: string; rightTitle: ReactNode }) {
   const { settings, updateSettings } = useAuth();
+  useSplitAvailable();
   const sv = settings?.split_view ?? { enabled: false, ratio: 0.55, collapsed: null };
   const [ratio, setRatio] = useState(sv.ratio);
   const [drag, setDrag] = useState(false);

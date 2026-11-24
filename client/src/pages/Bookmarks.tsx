@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiError, del, get, patch, post } from '../lib/api';
 import { Crumbs, DeleteIconButton, ErrorBox, Modal, useAsync } from '../components/ui';
+import { ListIcon, SavedBookmarksModal } from '../components/SavedLists';
 import { chooseDialog, confirmDialog, promptDialog } from '../components/dialogs';
 
 interface Folder { id: number; parent_id: number | null; name: string; display_order: number; bookmark_count: number }
@@ -24,8 +25,9 @@ function FolderSelect({ folders, value, onChange, allowRoot = true }: { folders:
 }
 
 /** "Save Research Bookmark": saves the exact internal URL + context. Can create folders inline. */
-export function SaveBookmarkButton({ title, context }: { title: string; context: Record<string, unknown> }) {
+export function SaveBookmarkButton({ title, context }: { title?: string; context: Record<string, unknown> }) {
   const [open, setOpen] = useState(false);
+  const [listOpen, setListOpen] = useState(false);
   const loc = useLocation();
   const mod = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
   useEffect(() => {
@@ -37,8 +39,12 @@ export function SaveBookmarkButton({ title, context }: { title: string; context:
   }, []);
   return (
     <>
-      <button className="small" onClick={() => setOpen(true)} title={`Save Research Bookmark (${mod} + B)`}><BookmarkIcon /> Save</button>
-      {open && <SaveDialog title={title} url={loc.pathname + loc.search} context={context} onClose={() => setOpen(false)} />}
+      <span className="btn-group" role="group" aria-label="Bookmarks">
+        <button className="small" onClick={() => setOpen(true)} title={`Save Research Bookmark (${mod} + B)`}><BookmarkIcon /> Save</button>
+        <button className="small icon-only" onClick={() => setListOpen(true)} aria-label="Show saved bookmarks" title="Show saved bookmarks"><ListIcon /></button>
+      </span>
+      {listOpen && <SavedBookmarksModal onClose={() => setListOpen(false)} />}
+      {open && <SaveDialog title={title ?? document.querySelector('.page h1')?.textContent?.trim() ?? document.title} url={loc.pathname + loc.search} context={context} onClose={() => setOpen(false)} />}
     </>
   );
 }

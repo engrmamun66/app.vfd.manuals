@@ -698,11 +698,11 @@ test.describe('theme & accessibility basics', () => {
     await expect(admin.getByText(/Page 1 of/)).toBeVisible();
   });
 
-  test('Send request: user submits a complaint with an image; Super Admin sees it and sets status; user sees the note', async () => {
+  test('Send message: user submits a complaint with an image; Super Admin sees it and sets status; user sees the note', async () => {
     const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==', 'base64');
     await alice.goto('/parameters');
-    await alice.getByRole('button', { name: 'Send request' }).click();
-    const dlg = alice.getByRole('dialog', { name: 'Send request' });
+    await alice.getByRole('button', { name: 'Send message' }).click();
+    const dlg = alice.getByRole('dialog', { name: 'Send message' });
     await expect(dlg.getByRole('radio', { name: /Request/ })).toBeChecked();
     await dlg.getByText('Complaint', { exact: true }).click();
     await expect(dlg.getByRole('radio', { name: /Complaint/ })).toBeChecked();
@@ -727,7 +727,7 @@ test.describe('theme & accessibility basics', () => {
     await card.getByRole('button', { name: 'Save note' }).click();
     // user sees status and note
     await alice.reload();
-    await alice.getByRole('button', { name: 'Send request' }).click();
+    await alice.getByRole('button', { name: 'Send message' }).click();
     await alice.getByRole('tab', { name: 'My messages' }).click();
     await expect(alice.getByText('Looking into it')).toBeVisible();
     await expect(alice.getByText('In progress')).toBeVisible();
@@ -782,6 +782,15 @@ test.describe('theme & accessibility basics', () => {
     await alice.request.delete(`/api/my-categories/${aliceCatId}`, { headers: { 'X-CSRF-Token': csrfA } });
     const csrfB = (await (await bob.request.get('/api/auth/me')).json()).csrfToken;
     await bob.request.delete(`/api/my-categories/${bobList[0].id}`, { headers: { 'X-CSRF-Token': csrfB } });
+  });
+
+  test('sidebar gear next to "+ Add category" opens Settings on the My categories tab', async () => {
+    await alice.goto('/parameters');
+    await alice.getByRole('button', { name: 'Manage my categories in Settings' }).click();
+    const dlg = alice.getByRole('dialog', { name: 'Settings' });
+    await expect(dlg.getByRole('tab', { name: 'My categories' })).toHaveAttribute('aria-selected', 'true');
+    await dlg.getByRole('button', { name: 'Close settings' }).click();
+    await expect(dlg).toBeHidden();
   });
 
   test('Settings → My categories: create, rename and delete own categories', async () => {
@@ -858,6 +867,48 @@ test.describe('theme & accessibility basics', () => {
       expect(c0.linked).toBeTruthy();
       expect(c0.equivalence_note).toContain('rated frequency of the motor');
     }
+  });
+
+  test('highlight and comment work on any page text, including list tables', async () => {
+    await alice.goto('/parameters?limit=5');
+    const cell = alice.locator('tbody tr').first().locator('td').nth(2); // the "Name" cell
+    await expect(cell).toBeVisible();
+    const word = ((await cell.innerText()).match(/[A-Za-z]{3,}/) ?? ['x'])[0];
+    await selectText(cell, word);
+    await alice.getByRole('button', { name: 'Highlight', exact: true }).click();
+    await expect.poll(() => alice.evaluate(() => (CSS as any).highlights.size)).toBeGreaterThan(0);
+    await alice.reload();
+    await expect(alice.locator('tbody tr').first()).toBeVisible();
+    await expect.poll(() => alice.evaluate(() => (CSS as any).highlights.size)).toBeGreaterThan(0); // persisted
+    // click the highlighted text → annotation panel
+    const box = await alice.evaluate(() => {
+      const r = Array.from((CSS as any).highlights.values())[0] as any;
+      const rect = Array.from(r)[0] ? (Array.from(r)[0] as Range).getBoundingClientRect() : null;
+      return rect && { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    });
+    await alice.mouse.click(box!.x, box!.y);
+    const dlg = alice.getByRole('dialog', { name: /Annotations/ });
+    await expect(dlg).toBeVisible();
+    await dlg.getByRole('button', { name: 'Delete annotation' }).click();
+    await alice.getByRole('dialog', { name: 'Please confirm' }).getByRole('button', { name: 'Confirm' }).click();
+    await expect.poll(() => alice.evaluate(() => (CSS as any).highlights.size)).toBe(0);
+  });
+
+  test('Save and Notes are button groups; the right button lists saved bookmarks / my notes in a modal', async () => {
+    await admin.goto(paramUrl);
+    await expect(admin.getByRole('group', { name: 'Bookmarks' })).toBeVisible();
+    await expect(admin.getByRole('group', { name: 'Notes' })).toBeVisible();
+    await admin.getByRole('button', { name: 'Show saved bookmarks' }).click();
+    const b = admin.getByRole('dialog', { name: 'Saved bookmarks' });
+    await expect(b).toBeVisible();
+    await b.getByRole('button', { name: 'Close', exact: true }).first().click();
+    await expect(b).toBeHidden();
+    await admin.getByRole('button', { name: 'Show my notes' }).click();
+    const n = admin.getByRole('dialog', { name: 'My notes' });
+    await expect(n).toBeVisible();
+    await n.getByRole('button', { name: 'All pages' }).click();
+    await admin.keyboard.press('Escape');
+    await expect(n).toBeHidden();
   });
 
   test('model tabs: selection persists across reload and pages; alias set in full-screen settings; sidebar collapses', async () => {

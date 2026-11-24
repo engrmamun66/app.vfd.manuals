@@ -176,13 +176,13 @@ function PageTransition() {
 }
 
 /** Full-screen settings: profile, preferences, model aliases, security and (Super Admin) application settings. */
-export function SettingsModal({ onClose: onClosed }: { onClose: () => void }) {
+export function SettingsModal({ onClose: onClosed, initialTab }: { onClose: () => void; initialTab?: string }) {
   const [closing, setClosing] = useState(false);
   const onClose = () => { if (!closing) { setClosing(true); window.setTimeout(onClosed, window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 220); } };
   const { user } = useAuth();
   const isAdmin = user?.role === 'super_admin';
   const tabs = [['models', 'Model aliases'], ['ui', 'UI settings'], ['categories', 'My categories'], ['profile', 'Profile & Preferences'], ['security', 'Change password'], ...(isAdmin ? [['app', 'Application & Backups']] : [])] as [string, string][];
-  const [tab, setTab] = useState('models');
+  const [tab, setTab] = useState(initialTab ?? 'models');
   useEffect(() => {
     const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     document.addEventListener('keydown', esc);

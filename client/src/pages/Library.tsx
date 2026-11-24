@@ -4,10 +4,9 @@ import { get, post, patch, api, fmtBytes, fmtDate } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { Crumbs, ErrorBox, Loading, VerifBadge, useAsync } from '../components/ui';
 import { PageViewer } from '../components/Viewer';
-import { SaveBookmarkButton } from './Bookmarks';
+import { usePageInfo } from '../components/PageTools';
 import { escSnippet } from './ModbusTools';
 import { ModelTabs } from '../components/ModelTabs';
-import { OriginalPdfButton } from '../components/OriginalPdfButton';
 import { useModels } from '../lib/models';
 
 export function Library() {
@@ -18,7 +17,7 @@ export function Library() {
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Documentation Library' }, { label: 'Manuals' }]} />
-      <div className="row between"><h1>Documentation Library</h1><div className="row"><OriginalPdfButton />{user?.role === 'super_admin' && <Link className="btn primary" to="/library/import">Import documents</Link>}</div></div>
+      <div className="row between"><h1>Documentation Library</h1><div className="row">{user?.role === 'super_admin' && <Link className="btn primary" to="/library/import">Import documents</Link>}</div></div>
       <ModelTabs />
       <ErrorBox e={error} />
       {loading ? <Loading /> : (
@@ -86,13 +85,13 @@ export function RevisionViewer() {
   const { data: rev } = useAsync(() => get(`/revisions/${rid}`), [rid]);
   const [go, setGo] = useState('');
   const [edit, setEdit] = useState(false);
+  usePageInfo({ title: `${rev?.title ?? 'Document'} — page ${p}`, context: { entityType: 'document_page', revisionId: Number(rid), page: p } });
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Documentation Library', to: '/library' }, { label: rev?.title ?? 'Document', to: rev ? `/library/document/${rev.document_id}` : undefined }, { label: `Page ${p}` }]} />
       <div className="row" style={{ marginBottom: 8 }}>
         <form onSubmit={(e) => { e.preventDefault(); if (Number(go) > 0) nav(`/library/revision/${rid}/page/${Number(go)}`); }} className="row"><label htmlFor="gp" style={{ margin: 0 }}>Go to PDF page</label><input id="gp" value={go} onChange={(e) => setGo(e.target.value)} style={{ width: 80 }} /><button className="small">Go</button></form>
         {user?.role === 'super_admin' && <button className="small" onClick={() => setEdit(!edit)}>Add record from this page</button>}
-        <span style={{ marginLeft: 'auto' }}><SaveBookmarkButton title={`${rev?.title ?? 'Document'} — page ${p}`} context={{ entityType: 'document_page', revisionId: Number(rid), page: p }} /></span>
       </div>
       {edit && rev && <ManualRecord revisionId={Number(rid)} page={p} onDone={() => setEdit(false)} />}
       <PageViewer revisionId={Number(rid)} page={p} onPage={(n) => nav(`/library/revision/${rid}/page/${n}`)} />

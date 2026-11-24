@@ -1,8 +1,9 @@
 import { EyeIcon } from './icons';
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { api, del, get, patch, post } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { Modal, ErrorBox } from './ui';
+import { ListIcon, NotesListModal } from './SavedLists';
 import { confirmDialog } from './dialogs';
 
 export const COLORS = ['yellow', 'green', 'blue', 'pink', 'orange', 'purple'] as const;
@@ -239,7 +240,7 @@ export function Annotatable({ contentKey, text, as = 'div', className, children 
   );
 }
 
-function AnnotationEditor({ contentKey, contentHash, sel, ann, onClose, onSaved }: { contentKey: string; contentHash: string; sel: any; ann?: Ann; onClose: () => void; onSaved: () => void }) {
+export function AnnotationEditor({ contentKey, contentHash, sel, ann, onClose, onSaved }: { contentKey: string; contentHash: string; sel: any; ann?: Ann; onClose: () => void; onSaved: () => void }) {
   const page = useContext(Ctx);
   const { settings } = useAuth();
   const [comment, setComment] = useState(ann?.comment ?? '');
@@ -363,7 +364,7 @@ function AnnotationEditor({ contentKey, contentHash, sel, ann, onClose, onSaved 
   );
 }
 
-function AnnotationPanel({ anns, onClose, onEdit, onChanged }: { anns: Ann[]; onClose: () => void; onEdit: (a: Ann) => void; onChanged: () => void }) {
+export function AnnotationPanel({ anns, onClose, onEdit, onChanged }: { anns: Ann[]; onClose: () => void; onEdit: (a: Ann) => void; onChanged: () => void }) {
   const [big, setBig] = useState<number | null>(null);
   const [err, setErr] = useState<any>(null);
   const run = async (fn: () => Promise<unknown>) => {
@@ -429,7 +430,16 @@ function AnnotationPanel({ anns, onClose, onEdit, onChanged }: { anns: Ann[]; on
 export function AnnotationDisplayControl() {
   const { settings, updateSettings } = useAuth();
   const [open, setOpen] = useState(false);
+  const [listOpen, setListOpen] = useState(false);
   const ref = useRef<HTMLSpanElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  const [alignRight, setAlignRight] = useState(false);
+  // open left-aligned with the button; flip to right-aligned only when that would run off the screen
+  useLayoutEffect(() => {
+    if (!open) return setAlignRight(false);
+    const r = popRef.current?.getBoundingClientRect();
+    if (r && r.right > window.innerWidth - 8) setAlignRight(true);
+  }, [open]);
   useEffect(() => {
     if (!open) return;
     const close = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && setOpen(false);
@@ -443,12 +453,13 @@ export function AnnotationDisplayControl() {
   const set = (k: keyof typeof d, v: boolean) => updateSettings({ annotation_display: { ...d, [k]: v } } as any);
   const anyShown = d.showOthersPublic || d.showOwn;
   return (
+    <span className="btn-group" role="group" aria-label="Notes">
     <span className="pop-anchor" ref={ref}>
       <button className="small" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(!open)} title={`Annotations: ${anyShown ? 'shown' : 'hidden'}`}>
         <EyeIcon off={!anyShown} /> Notes
       </button>
       {open && (
-        <div className="popover" role="dialog" aria-label="Annotation Display Settings" style={{ top: '100%', right: 0 }}>
+        <div className="popover" ref={popRef} role="dialog" aria-label="Annotation Display Settings" style={alignRight ? { top: '100%', right: 0 } : { top: '100%', left: 0 }}>
           <b>Annotation Display Settings</b>
           <p className="muted small-text">Affects only what you see. Nothing is deleted or made private/public.</p>
           {([
@@ -475,6 +486,9 @@ export function AnnotationDisplayControl() {
           </div>
         </div>
       )}
+    </span>
+    <button className="small icon-only" onClick={() => setListOpen(true)} aria-label="Show my notes" title="Show my notes"><ListIcon /></button>
+    {listOpen && <NotesListModal onClose={() => setListOpen(false)} />}
     </span>
   );
 }

@@ -13,11 +13,13 @@ import { VerificationCenter } from './pages/Verification';
 import { FeedbackAdmin } from './pages/Feedback';
 import { MyCategoriesProvider, useMyCategories } from './lib/myCategories';
 import { MineIcon, MyCategoriesModal } from './components/MyCategories';
+import { PageAnnotations } from './components/PageAnnotations';
 import { FeedbackModal } from './components/FeedbackModal';
 import { AdminContent, AdminLogs, AdminSettings, AdminUsers, MySettings } from './pages/Admin';
 import { Loading, SearchBox, useAsync } from './components/ui';
 import { ModelsProvider, useModels } from './lib/models';
 import { MonitorIcon, MoonIcon, SunIcon } from './components/icons';
+import { PageToolbar, PageToolsProvider } from './components/PageTools';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SettingsModal } from './components/SettingsModal';
 import { DialogProvider } from './components/dialogs';
@@ -91,6 +93,7 @@ function ShellInner() {
   const splitRef = useRef({ settings, updateSettings });
   splitRef.current = { settings, updateSettings };
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<string | undefined>(undefined);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [catsOpen, setCatsOpen] = useState(() => { try { return localStorage.getItem('nav-cats-open') !== '0'; } catch { return true; } });
   const toggleCats = () => setCatsOpen((o) => { try { localStorage.setItem('nav-cats-open', o ? '0' : '1'); } catch { /* ignore */ } return !o; });
@@ -164,7 +167,7 @@ function ShellInner() {
   if (!user) return null;
   if (user.mustChangePassword) return <ChangePassword forced />;
   return (
-    <HotkeyCtx.Provider value={{ keys, show: showKeys }}>
+    <PageToolsProvider><HotkeyCtx.Provider value={{ keys, show: showKeys }}>
     <div className={`app ${collapsed ? 'collapsed' : ''}`}>
       <aside className="sidebar" aria-label="Main navigation" aria-hidden={collapsed}>
         <Link to="/" className="brand" title="Go to Dashboard" aria-label="VFD Knowledge Base — go to Dashboard"><img src="/favicon.svg" alt="" width="34" height="34" className="brand-logo" /><div><b>VFD Knowledge Base</b><span>Technical Research Explorer</span></div></Link>
@@ -176,7 +179,14 @@ function ShellInner() {
               if (to === '/knowledge') return (
                 <Fragment key={to}>
                   {catsOpen && mine.categories.map((c) => <Nav key={`my${c.id}`} to={`/my/${c.id}`} sub mine><MineIcon /> {c.name}</Nav>)}
-                  {catsOpen && <button type="button" className="nav-add ghost" onClick={mine.openManager} title="Create or manage your own categories">+ Add category</button>}
+                  {catsOpen && (
+                    <div className="nav-add-row">
+                      <button type="button" className="nav-add ghost" onClick={mine.openManager} title="Create a category of your own">+ Add category</button>
+                      <button type="button" className="nav-gear ghost" aria-label="Manage my categories in Settings" title="Manage my categories (settings)" onClick={() => { setSettingsTab('categories'); setSettingsOpen(true); }}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
+                      </button>
+                    </div>
+                  )}
                   <Nav to={to} sub={sub}>{label}</Nav>
                 </Fragment>
               );
@@ -204,25 +214,27 @@ function ShellInner() {
         <div className="topbar">
           <button className="ghost icon-btn" onClick={toggleSidebar} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!collapsed} title={`${collapsed ? 'Expand sidebar' : 'Collapse sidebar'} (${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl'} + /)`}>☰</button>
           <GlobalSearch /><span className="spacer" />
+          <PageToolbar />
           <button className="small send-request" onClick={() => setFeedbackOpen(true)} title="Send a request or complaint to the administrator">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg> Send request
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg> Send message
           </button>
           <div className="theme-switch" role="radiogroup" aria-label="Theme mode">
             {([['system', 'System', <MonitorIcon key="s" />], ['light', 'Light', <SunIcon key="l" />], ['dark', 'Dark', <MoonIcon key="d" />]] as const).map(([k, l, ic]) => (
               <button key={k} role="radio" aria-checked={(settings?.theme ?? 'light') === k} aria-label={`${l} mode`} title={`${l} mode`} className={(settings?.theme ?? 'light') === k ? 'active' : ''} onClick={() => updateSettings({ theme: k } as any)}>{ic}</button>
             ))}
           </div>
-          <button className="ghost icon-btn" onClick={() => setSettingsOpen(true)} aria-label="Settings" title="Settings">
+          <button className="ghost icon-btn" onClick={() => { setSettingsTab(undefined); setSettingsOpen(true); }} aria-label="Settings" title="Settings">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
           </button>
         </div>
         <MyCategoriesModal />
-        {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
+        <PageAnnotations />
+        {settingsOpen && <SettingsModal initialTab={settingsTab} onClose={() => setSettingsOpen(false)} />}
         {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
         <div key={loc.pathname} className={settings?.page_transition && settings.page_transition !== 'none' ? `pt-${settings.page_transition}` : undefined} style={{ '--pt-ms': `${settings?.page_transition_ms ?? 300}ms` } as React.CSSProperties}><ErrorBoundary resetKey={loc.pathname}><Outlet /></ErrorBoundary></div>
       </div>
     </div>
-    </HotkeyCtx.Provider>
+    </HotkeyCtx.Provider></PageToolsProvider>
   );
 }
 

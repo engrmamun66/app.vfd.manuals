@@ -116,6 +116,21 @@ annotationsRouter.get(
   }),
 );
 
+/** Annotations whose content key starts with a prefix (used by the page-wide annotation layer: all keys of one page). */
+annotationsRouter.get(
+  '/for-prefix',
+  ah(async (req, res) => {
+    const db = getDb();
+    const uid = req.user!.id;
+    const prefix = String(req.query.prefix || '');
+    if (!/^ui:[A-Za-z0-9_.:-]+$/.test(prefix) || prefix.length > 120) throw badRequest('Invalid prefix');
+    const rows = db
+      .prepare(`${SELECT} WHERE x.content_key LIKE @p ESCAPE '!' AND ${VISIBLE} AND a.deletion_status = 'active' ORDER BY a.created_at LIMIT 1000`)
+      .all({ uid, p: prefix.replace(/[%_!]/g, (c) => '!' + c) + '%' }) as any[];
+    res.json(shape(db, rows, uid));
+  }),
+);
+
 annotationsRouter.post(
   '/',
   ah(async (req, res) => {

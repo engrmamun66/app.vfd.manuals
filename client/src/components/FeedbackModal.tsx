@@ -11,7 +11,7 @@ const OPTIONS = [
   { value: 'complaint', title: 'Complaint', hint: 'Report a wrong value, a problem or something not working' },
 ] as const;
 
-/** "Send request" dialog: pick Request or Complaint, write the message, optionally attach images. */
+/** "Send message" dialog: pick Request or Complaint, write the message, optionally attach images. */
 export function FeedbackModal({ onClose }: { onClose: () => void }) {
   const [kind, setKind] = useState<'request' | 'complaint'>('request');
   const [phone, setPhone] = useState('');
@@ -63,7 +63,7 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <Modal title="Send request" onClose={onClose} wide>
+    <Modal title="Send message" onClose={onClose} wide>
       <div className="tabs" role="tablist">
         <button role="tab" aria-selected={tab === 'new'} className={`tab ${tab === 'new' ? 'active' : ''}`} onClick={() => setTab('new')}>New message</button>
         <button role="tab" aria-selected={tab === 'mine'} className={`tab ${tab === 'mine' ? 'active' : ''}`} onClick={() => setTab('mine')}>My messages</button>

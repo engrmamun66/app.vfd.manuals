@@ -9,8 +9,9 @@ import { ImportanceBadge } from './Knowledge';
 import { useModels } from '../lib/models';
 import { useUiSettings } from '../lib/auth';
 import { Crumbs, ModelName, Tip, truncate, ErrorBox, EquivBadge, EvBadge, InfoIcon, Loading, Pager, QuoteBadge, SearchBox, Val, VerifBadge, download, useAsync } from '../components/ui';
-import { PageViewer, SplitToggle, SplitView } from '../components/Viewer';
-import { Annotatable, AnnotationDisplayControl, AnnotationScope } from '../components/Annotatable';
+import { usePageInfo } from '../components/PageTools';
+import { PageViewer, SplitView } from '../components/Viewer';
+import { Annotatable, AnnotationScope } from '../components/Annotatable';
 import { SaveBookmarkButton } from './Bookmarks';
 import { useMyCategories } from '../lib/myCategories';
 import { CategoryPicker, MineIcon, ParameterMyCategories } from '../components/MyCategories';
@@ -85,7 +86,7 @@ export function Parameters({ category, userCategory }: { category?: string; user
     <div className="page">
       <Crumbs items={[{ label: 'Knowledge Base', to: '/parameters' }, { label: catName ?? 'All Parameters' }]} />
       <div className="row between"><h1>{myName && <><MineIcon size={20} /> </>}{catName ?? 'All Parameters'}</h1>
-        <div className="row"><SplitToggle />{showExportCsv && <button className="small" onClick={() => download(`/export?scope=parameters&format=csv${category ? '&category=' + category : ''}`)}>Export CSV</button>}{showExportJson && <button className="small" onClick={() => download(`/export?scope=parameters&format=json${category ? '&category=' + category : ''}`)}>Export JSON</button>}<OriginalPdfButton /></div></div>
+        <div className="row">{showExportCsv && <button className="small" onClick={() => download(`/export?scope=parameters&format=csv${category ? '&category=' + category : ''}`)}>Export CSV</button>}{showExportJson && <button className="small" onClick={() => download(`/export?scope=parameters&format=json${category ? '&category=' + category : ''}`)}>Export JSON</button>}</div></div>
       <ModelTabs />
       <SplitView enabled={split} leftTitle="Parameters" rightTitle="Record preview" right={<RecordPreview kind="parameter" id={preview} />} left={<>
       <div className="row" style={{ marginBottom: 12 }}>
@@ -135,6 +136,7 @@ export function FunctionPage() {
   const { data: raw, error, loading } = useAsync(() => get(`/functions/${fslug}`), [fslug]);
   const { selected } = useModels();
   const data = raw && selected ? { ...raw, parameters: raw.parameters.filter((p: any) => p.model_id === selected), registers: raw.registers.filter((r: any) => r.model_id === selected) } : raw;
+  usePageInfo(data ? { title: data.name, context: { entityType: 'common_function', functionSlug: fslug } } : null);
   if (error) return <div className="page"><ErrorBox e={error} /></div>;
   if (!data) return <div className="page"><Loading /></div>;
   return (
@@ -142,7 +144,6 @@ export function FunctionPage() {
       <Crumbs items={[{ label: 'Knowledge Base', to: '/parameters' }, { label: data.category, to: `/kb/${data.category_slug}` }, { label: data.name }]} />
       <div className="row between" style={{ marginBottom: 8 }}>
         <h1 style={{ margin: 0 }}>{data.name} <InfoIcon title={data.name} text={data.short_description || 'No description recorded.'} /></h1>
-        <div className="row"><OriginalPdfButton /><SaveBookmarkButton title={data.name} context={{ entityType: 'common_function', functionSlug: fslug }} /></div>
       </div>
       {data.short_description && <p className="muted prose">{data.short_description} <span className="badge dashed">generic concept — not a manufacturer fact</span></p>}
       <ModelTabs />
@@ -289,6 +290,7 @@ function ResearchFrame({ crumbs, title, subtitle, level, base, evidence, childre
   const [rightMode, setRightMode] = useState<'source' | number>('source');
   const ev = evidence[sel ?? 0];
   const split = settings?.split_view?.enabled;
+  usePageInfo({ title: typeof title === 'string' ? title : undefined, context: { ...contextExtra, depth: level }, modelId: modelTabs?.modelId });
   useEffect(() => setPageOverride(null), [sel]);
   const body = (
     <>
@@ -302,7 +304,6 @@ function ResearchFrame({ crumbs, title, subtitle, level, base, evidence, childre
         <Crumbs items={crumbs} />
         <div className="row between" style={{ marginBottom: 8 }}>
           <div><h1 style={{ marginBottom: 2 }}>{title}</h1><div className="muted">{subtitle}</div></div>
-          <div className="row"><SplitToggle /><AnnotationDisplayControl />{modelTabs && <OriginalPdfButton modelId={modelTabs.modelId} />}<SaveBookmarkButton title={typeof title === 'string' ? title : ''} context={{ ...contextExtra, depth: level }} /></div>
         </div>
         {modelTabs && <ModelTabs record={modelTabs} />}
         <SplitView
@@ -414,6 +415,7 @@ function RegisterBody({ d, base, level, nav }: any) {
   const ev = d.evidence[sel ?? 0];
   const split = settings?.split_view?.enabled;
   const [po, setPo] = useState<number | null>(null);
+  usePageInfo({ title: `${d.brand} ${d.model} — ${d.original_address} ${d.name}`, context: { entityType: 'modbus_register', entityId: d.id, brandId: d.brand_id, modelId: d.model_id, depth: level }, modelId: d.model_id });
   useEffect(() => setPo(null), [sel]);
   const loc = useLocation();
   const body = (
@@ -448,7 +450,6 @@ function RegisterBody({ d, base, level, nav }: any) {
       <Crumbs items={[{ label: 'Home', to: '/' }, { label: 'Modbus', to: '/modbus/registers' }, { label: d.brand, to: `/modbus/registers?brand=${d.brand_slug}` }, { label: <ModelName name={d.model} brand={d.brand} />, to: `/model/${d.model_id}` }, { label: `Register ${d.original_address}` }, { label: level }]} />
       <div className="row between" style={{ marginBottom: 8 }}>
         <div><h1 style={{ marginBottom: 2 }}><span className="mono">{d.original_address}</span> — {d.name} <InfoIcon title={d.name} text={d.description || 'No description recorded.'} more={`${base}/purpose`} /></h1><div className="muted">{d.brand} {d.model}</div></div>
-        <div className="row"><SplitToggle /><AnnotationDisplayControl /><OriginalPdfButton modelId={d.model_id} /><SaveBookmarkButton title={`${d.brand} ${d.model} — ${d.original_address} ${d.name}`} context={{ entityType: 'modbus_register', entityId: d.id, brandId: d.brand_id, modelId: d.model_id, depth: level }} /></div>
       </div>
       <ModelTabs record={{ kind: 'register', modelId: d.model_id, level, counterparts: d.otherBrandImplementations ?? [] }} />
       <SplitView enabled={!!split && !!ev} leftTitle="Research" rightTitle={<span>Original manual {ev ? `· p.${po ?? ev.page_index}` : ''}</span>} left={body}
@@ -552,7 +553,7 @@ export function Registers() {
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Modbus & RS485' }, { label: 'Register Explorer' }]} />
-      <div className="row between"><h1>Modbus Register Explorer</h1><div className="row"><SplitToggle />{showExportCsv && <button className="small" onClick={() => download('/export?scope=registers&format=csv')}>Export CSV</button>}{showExportJson && <button className="small" onClick={() => download('/export?scope=registers&format=json')}>Export JSON</button>}<OriginalPdfButton /></div></div>
+      <div className="row between"><h1>Modbus Register Explorer</h1><div className="row">{showExportCsv && <button className="small" onClick={() => download('/export?scope=registers&format=csv')}>Export CSV</button>}{showExportJson && <button className="small" onClick={() => download('/export?scope=registers&format=json')}>Export JSON</button>}</div></div>
       <ModelTabs />
       <SplitView enabled={split} leftTitle="Registers" rightTitle="Record preview" right={<RecordPreview kind="register" id={preview} />} left={<>
       <div className="row" style={{ marginBottom: 12 }}>
