@@ -26,7 +26,7 @@ async function main() {
     const vite = await createServer({
       configFile: path.join(clientRoot, 'vite.config.ts'),
       root: clientRoot,
-      server: { middlewareMode: true, hmr: { server } },
+      server: { middlewareMode: true, hmr: { server }, allowedHosts: ['.trycloudflare.com', '.ngrok-free.app', '.ngrok.app', '.ngrok.io'] }, // tunnel hosts (cloudflared / ngrok)
       appType: 'spa',
     });
     app.use(vite.middlewares);
