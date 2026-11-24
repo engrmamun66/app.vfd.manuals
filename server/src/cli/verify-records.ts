@@ -43,7 +43,7 @@ const inCodeRange = (text: string, code: string) => {
 
 interface Check { ok: boolean; reasons: string[]; coverage: number }
 
-function check(entityType: 'parameter' | 'modbus_register', row: any, pageText: string, quote: string | null): Check {
+function check(entityType: 'parameter' | 'modbus_register', row: any, pageText: string, quote: string | null, adjacent: string[] = []): Check {
   const reasons: string[] = [];
   const id = entityType === 'parameter' ? String(row.code) : String(row.original_address);
   let idOk = squash(pageText).includes(squash(id)) || (alnum(id).length >= 3 && alnum(pageText).includes(alnum(id)));
@@ -52,7 +52,14 @@ function check(entityType: 'parameter' | 'modbus_register', row: any, pageText: 
     // addresses are printed in many notations (0x1000, 1000H, 1000): every address token of a list/range must appear as a whole token
     const toks = id.split(/\s*(?:-|–|;|,|\bto\b)\s*/i).map((t) => t.trim().replace(/^0x/i, '').replace(/h$/i, '')).filter(Boolean);
     const esc = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    idOk = toks.length > 0 && toks.every((t) => new RegExp(`(?<![0-9A-Za-z])(?:0x)?${esc(t)}h?(?![0-9A-Za-z])`, 'i').test(pageText));
+    idOk = toks.length > 0 && toks.every((t) => new RegExp(`(?<![0-9A-Za-z])(?:0x)?0*${esc(t.replace(/^0+(?=.)/, ''))}h?(?![0-9A-Za-z])`, 'i').test(pageText)); // leading zeros do not change an address (0x0320 = 0x320)
+  }
+  if (!idOk && entityType === 'parameter' && /^[Il]\d{1,3}$/.test(id)) {
+    // the PDF text layer prints the letter I of a code as the digit 1 ("I82" -> "182"): accept that spelling when the parameter's name is on the page too
+    const alias = new RegExp(`(?<![0-9A-Za-z])1${id.slice(1)}(?![0-9A-Za-z])`);
+    const nameW = words(String(row.name ?? '')).filter((w) => w.length > 2);
+    const onPage = new Set(words(pageText));
+    if (alias.test(pageText) && nameW.length && nameW.filter((w) => onPage.has(w)).length / nameW.length >= 0.8) idOk = true;
   }
   if (!idOk) reasons.push(`identifier "${id}" not on page`);
   const pageWords = new Set(words(pageText));
@@ -62,12 +69,13 @@ function check(entityType: 'parameter' | 'modbus_register', row: any, pageText: 
   else if (coverage < 0.85) reasons.push(`quote only ${(coverage * 100).toFixed(0)}% on page`);
   if (entityType === 'parameter')
     for (const [k, v] of [['default', row.default_value], ['min', row.min_value], ['max', row.max_value]] as const)
-      if (isNum(v) && !hasNumber(pageText, v)) reasons.push(`${k} value ${v} not on page`);
+      // a range / default cell shared by several rows is printed once, often at the top of the same table on the neighbouring page
+      if (isNum(v) && !hasNumber(pageText, v) && !adjacent.some((t) => hasNumber(t, v))) reasons.push(`${k} value ${v} not on page`);
   return { ok: reasons.length === 0, reasons, coverage };
 }
 
 const pageStmt = db.prepare(
-  `SELECT dp.text, dp.text_source, sr.extracted_text quote, sr.page_index, e.id evidence_id
+  `SELECT dp.text, dp.text_source, sr.extracted_text quote, sr.page_index, sr.revision_id, e.id evidence_id
    FROM evidence_records e JOIN source_references sr ON sr.id = e.source_reference_id
    LEFT JOIN document_pages dp ON dp.id = sr.page_id
    WHERE e.entity_type = ? AND e.entity_id = ? AND e.role = 'original' ORDER BY e.id LIMIT 1`,
@@ -86,7 +94,8 @@ for (const [entityType, table] of [['parameter', 'parameters'], ['modbus_registe
       failures.push(`${entityType} #${row.id} ${row.model_name.slice(0, 14)}: no page text for cited page`);
       continue;
     }
-    const r = check(entityType, row, decode(ev.text), decode(ev.quote));
+    const adjacent = (db.prepare('SELECT text FROM document_pages WHERE revision_id = ? AND page_index IN (?, ?)').all(ev.revision_id, ev.page_index - 1, ev.page_index + 1) as { text: string }[]).map((x) => decode(x.text));
+    const r = check(entityType, row, decode(ev.text), decode(ev.quote), adjacent);
     if (r.ok) {
       bucket.pass++;
       if (apply) {
