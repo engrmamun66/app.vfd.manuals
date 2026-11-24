@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAuth } from '../lib/auth';
 import { shortName, useModels } from '../lib/models';
 import { AdminSettings, MySettings } from '../pages/Admin';
+import { MyCategoriesManager } from './MyCategories';
 import { ChangePassword } from '../pages/AuthPages';
 
 function ModelAliases() {
@@ -56,7 +57,6 @@ function ModelAliases() {
 
   return (
     <div style={{ maxWidth: 860 }}>
-      <h2>Model aliases</h2>
       <p className="muted small-text">
         Your personal model list: <b>drag a row</b> (or use ▲ ▼) to choose which model comes first — the tabs follow this order. Alias: a short name (1–16 characters); empty shows the short model name.
         Switch a model Off to hide its tab. Everything here is personal and only affects your view.
@@ -104,7 +104,6 @@ function UiSettings() {
   ];
   return (
     <div style={{ maxWidth: 720 }}>
-      <h2>UI settings</h2>
       <p className="muted small-text">Optional interface elements. Personal: they only change your own view.</p>
       {err && <div className="err" role="alert">{err}</div>}
       <div className="table-wrap"><table>
@@ -182,7 +181,7 @@ export function SettingsModal({ onClose: onClosed }: { onClose: () => void }) {
   const onClose = () => { if (!closing) { setClosing(true); window.setTimeout(onClosed, window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 220); } };
   const { user } = useAuth();
   const isAdmin = user?.role === 'super_admin';
-  const tabs = [['models', 'Model aliases'], ['ui', 'UI settings'], ['profile', 'Profile & Preferences'], ['security', 'Change password'], ...(isAdmin ? [['app', 'Application & Backups']] : [])] as [string, string][];
+  const tabs = [['models', 'Model aliases'], ['ui', 'UI settings'], ['categories', 'My categories'], ['profile', 'Profile & Preferences'], ['security', 'Change password'], ...(isAdmin ? [['app', 'Application & Backups']] : [])] as [string, string][];
   const [tab, setTab] = useState('models');
   useEffect(() => {
     const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -193,10 +192,12 @@ export function SettingsModal({ onClose: onClosed }: { onClose: () => void }) {
     <div className={`fs-modal ${closing ? 'closing' : ''}`} role="dialog" aria-modal="true" aria-label="Settings">
       <div className="fs-head"><h2>Settings</h2><button onClick={onClose} aria-label="Close settings">✕ Close</button></div>
       <div className="fs-body">
-        <div className="fs-tabs" role="tablist">{tabs.map(([k, l]) => <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>{l}</button>)}</div>
-        <div className="fs-content" style={{ padding: '16px 28px' }}>
+        <div className="fs-tabs" role="tablist" aria-orientation="vertical">{tabs.map(([k, l]) => <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>{l}</button>)}</div>
+        <div className="fs-content">
+          <h2 className="fs-title">{tabs.find(([k]) => k === tab)?.[1]}</h2>
           {tab === 'profile' && <MySettings embedded />}
           {tab === 'models' && <ModelAliases />}
+          {tab === 'categories' && <MyCategoriesManager />}
           {tab === 'ui' && <><UiSettings /><PageTransition /></>}
           {tab === 'security' && <ChangePassword embedded />}
           {tab === 'app' && isAdmin && <AdminSettings embedded />}

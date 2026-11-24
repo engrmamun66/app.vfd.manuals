@@ -197,7 +197,7 @@ mark.snip, .snippet mark { background: var(--inv-bg); color: var(--inv-fg); padd
 .sel-menu button:hover { background: rgba(128, 128, 128, .4); }
 .att-grid { display: flex; gap: 8px; flex-wrap: wrap; }
 .att-grid img { width: 96px; height: 96px; object-fit: cover; border: 1px solid var(--line); cursor: zoom-in; }
-.modal-bg { position: fixed; inset: 0; background: rgba(0, 0, 0, .55); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+.modal-bg { position: fixed; inset: 0; background: rgba(0, 0, 0, .55); display: flex; align-items: center; justify-content: center; z-index: 130; padding: 16px; }
 .modal { background: var(--bg); border: 1px solid var(--line-strong); max-width: 560px; width: 100%; max-height: 92vh; overflow: auto; padding: 18px 20px; }
 .modal.wide { max-width: 980px; }
 
@@ -434,3 +434,16 @@ a.brand:focus-visible { outline: 2px solid var(--fg); outline-offset: -2px; }
 .cat-btn.has { border-left: 3px solid var(--fg); }
 .cat-pop { z-index: 60; padding: 10px; background: var(--bg); border: 1px solid var(--line); box-shadow: 0 6px 18px rgba(0,0,0,.2); }
 option.opt-mine { font-weight: 600; }
+.mycat[draggable='true'] { cursor: grab; }
+.mycat.dragging { opacity: .45; }
+.mycat .order-btns { display: inline-flex; flex-direction: column; gap: 0; }
+.mycat .order-btns button { padding: 0 5px; line-height: 1.1; font-size: .65rem; min-height: 0; }
+
+/* ---------- Settings modal: selected menu flows into the content pane ---------- */
+.fs-tabs { padding: 16px 0 16px 12px; overflow: visible; }
+.fs-tabs button { position: relative; border: 1px solid transparent; border-right: 0; border-radius: 6px 0 0 6px; margin-bottom: 2px; padding: 9px 18px; color: var(--fg-muted); }
+.fs-tabs button.active { color: var(--fg); font-weight: 650; background: var(--bg); border-color: var(--line); border-left-color: var(--line); margin-right: -1px; width: calc(100% + 1px); z-index: 1; box-shadow: inset 3px 0 0 var(--fg); }
+.fs-content { padding: 24px 32px 48px; background: var(--bg); }
+.fs-title { margin: 0 0 4px; padding-bottom: 12px; border-bottom: 1px solid var(--line); font-size: 1.35rem; }
+.fs-title + * { margin-top: 16px; }
+@media (max-width: 720px) { .fs-tabs { padding: 0; overflow-x: auto; } .fs-tabs button { border-radius: 0; margin: 0; } .fs-tabs button.active { width: auto; margin-right: 0; border-color: transparent; border-bottom-color: var(--fg); box-shadow: none; } }

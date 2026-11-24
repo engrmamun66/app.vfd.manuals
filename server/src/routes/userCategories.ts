@@ -33,7 +33,7 @@ userCategoriesRouter.get(
     const rows = getDb()
       .prepare(
         `SELECT c.id, c.name, (SELECT COUNT(*) FROM parameter_user_categories x WHERE x.user_category_id = c.id) count
-         FROM user_categories c WHERE c.user_id = ? ORDER BY c.name COLLATE NOCASE`,
+         FROM user_categories c WHERE c.user_id = ? ORDER BY c.sort_order, c.id`,
       )
       .all(req.user!.id);
     res.json({ rows });
@@ -49,9 +49,27 @@ userCategoriesRouter.post(
     assertNotSystem(name);
     if ((db.prepare('SELECT COUNT(*) c FROM user_categories WHERE user_id = ?').get(uid) as any).c >= MAX_PER_USER) throw conflict(`You can create at most ${MAX_PER_USER} categories`);
     if (db.prepare('SELECT 1 FROM user_categories WHERE user_id = ? AND name_key = ?').get(uid, key(name))) throw conflict('You already have a category with this name');
-    const id = Number(db.prepare('INSERT INTO user_categories(user_id, name, name_key) VALUES (?,?,?)').run(uid, name, key(name)).lastInsertRowid);
+    const id = Number(db.prepare('INSERT INTO user_categories(user_id, name, name_key, sort_order) VALUES (?,?,?, (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM user_categories WHERE user_id = ?))').run(uid, name, key(name), uid).lastInsertRowid);
     logActivity({ userId: uid, event: 'user_category_create', entityType: 'user_category', entityId: id });
     res.status(201).json({ id, name, count: 0 });
+  }),
+);
+
+/** Priority order of the caller's categories (sidebar / lists follow it). Unlisted categories keep their relative order after the listed ones. */
+userCategoriesRouter.put(
+  '/order',
+  ah(async (req, res) => {
+    const db = getDb();
+    const uid = req.user!.id;
+    const ids: unknown = req.body?.ids;
+    if (!Array.isArray(ids) || ids.length > MAX_PER_USER) throw badRequest('ids must be an array');
+    const want = [...new Set(ids.map((x) => Number(x)))];
+    const all = (db.prepare('SELECT id FROM user_categories WHERE user_id = ? ORDER BY sort_order, id').all(uid) as { id: number }[]).map((r) => r.id);
+    if (want.some((x) => !all.includes(x))) throw notFound('Category not found');
+    const final = [...want, ...all.filter((x) => !want.includes(x))];
+    const upd = db.prepare('UPDATE user_categories SET sort_order = ? WHERE id = ? AND user_id = ?');
+    db.transaction(() => final.forEach((id, i) => upd.run(i + 1, id, uid)))();
+    res.json({ ids: final });
   }),
 );
 

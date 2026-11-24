@@ -11,6 +11,7 @@ interface Ctx {
   rename: (id: number, name: string) => Promise<void>;
   remove: (id: number) => Promise<void>;
   assign: (parameterId: number, categoryIds: number[]) => Promise<number[]>;
+  reorder: (ids: number[]) => Promise<void>;
   openManager: () => void;
   managerOpen: boolean;
   closeManager: () => void;
@@ -39,6 +40,10 @@ export function MyCategoriesProvider({ children }: { children: ReactNode }) {
     create: async (name) => { const c = await post<MyCategory>('/my-categories', { name }); await reload(); return c; },
     rename: async (id, name) => { await patch(`/my-categories/${id}`, { name }); await reload(); },
     remove: async (id) => { await del(`/my-categories/${id}`); await reload(); },
+    reorder: async (ids) => {
+      setCategories((cs) => ids.map((id) => cs.find((c) => c.id === id)!).filter(Boolean)); // optimistic
+      try { await put('/my-categories/order', { ids }); } finally { await reload(); }
+    },
     assign: async (parameterId, categoryIds) => { const r = await put<{ ids: number[] }>(`/my-categories/for-parameter/${parameterId}`, { categoryIds }); await reload(); return r.ids; },
   }), [categories, loaded, reload, managerOpen]);
   return <MyCategoriesCtx.Provider value={value}>{children}</MyCategoriesCtx.Provider>;

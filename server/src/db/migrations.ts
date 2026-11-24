@@ -690,4 +690,12 @@ CREATE TABLE parameter_user_categories (
 CREATE INDEX idx_puc_parameter ON parameter_user_categories(parameter_id);
 `,
   },
+  {
+    version: 7,
+    name: 'user_category_order',
+    sql: /* sql */ `
+ALTER TABLE user_categories ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0;
+UPDATE user_categories SET sort_order = id;
+`,
+  },
 ];

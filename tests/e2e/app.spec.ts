@@ -784,6 +784,41 @@ test.describe('theme & accessibility basics', () => {
     await bob.request.delete(`/api/my-categories/${bobList[0].id}`, { headers: { 'X-CSRF-Token': csrfB } });
   });
 
+  test('Settings → My categories: create, rename and delete own categories', async () => {
+    await alice.goto('/parameters');
+    await alice.getByRole('button', { name: 'Settings', exact: true }).click();
+    const dlg = alice.getByRole('dialog', { name: 'Settings' });
+    await dlg.getByRole('tab', { name: 'My categories' }).click();
+    await dlg.getByLabel('New category name').fill('Temp Cat');
+    await dlg.getByRole('button', { name: 'Add', exact: true }).click();
+    await expect(dlg.locator('.mycat')).toHaveCount(1);
+    await expect(alice.locator('.sidebar a.nav-link.mine', { hasText: 'Temp Cat' })).toBeVisible(); // sidebar follows
+    // priority order: a second category, then move it up; the sidebar follows
+    await dlg.getByLabel('New category name').fill('Second Cat');
+    await dlg.getByRole('button', { name: 'Add', exact: true }).click();
+    await expect(dlg.locator('.mycat')).toHaveCount(2);
+    await dlg.getByRole('button', { name: 'Move Second Cat up' }).click();
+    await expect(dlg.locator('.mycat').first()).toContainText('Second Cat');
+    await expect(alice.locator('.sidebar a.nav-link.mine').first()).toContainText('Second Cat');
+    await alice.reload();
+    await alice.getByRole('button', { name: 'Settings', exact: true }).click();
+    await alice.getByRole('dialog', { name: 'Settings' }).getByRole('tab', { name: 'My categories' }).click();
+    await expect(alice.getByRole('dialog', { name: 'Settings' }).locator('.mycat').first()).toContainText('Second Cat'); // persisted
+    await dlg.locator('.mycat', { hasText: 'Second Cat' }).getByRole('button', { name: 'Delete', exact: true }).click();
+    await alice.getByRole('dialog', { name: 'Please confirm' }).getByRole('button', { name: 'Delete' }).click();
+    await expect(dlg.locator('.mycat')).toHaveCount(1);
+    await dlg.getByRole('button', { name: 'Rename' }).click();
+    await dlg.getByLabel('Category name', { exact: true }).fill('Temp Renamed');
+    await dlg.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(dlg.locator('.mycat')).toContainText('Temp Renamed');
+    await dlg.locator('.mycat').getByRole('button', { name: 'Delete', exact: true }).click();
+    await alice.getByRole('dialog', { name: 'Please confirm' }).getByRole('button', { name: 'Delete' }).click();
+    await expect(dlg.locator('.mycat')).toHaveCount(0);
+    await expect(alice.locator('.sidebar a.nav-link.mine')).toHaveCount(0);
+    await dlg.getByRole('button', { name: 'Close settings' }).click();
+    await expect(dlg).toBeHidden();
+  });
+
   test('model tabs: selection persists across reload and pages; alias set in full-screen settings; sidebar collapses', async () => {
     await admin.goto('/parameters');
     const tabs = admin.locator('.model-tabs button');

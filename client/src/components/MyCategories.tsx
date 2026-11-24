@@ -14,13 +14,31 @@ export function MineIcon({ size = 13 }: { size?: number }) {
   );
 }
 
-/** Add / rename / delete the user's own categories. */
+/** Quick-manage dialog (opened from the sidebar / pickers). */
 export function MyCategoriesModal() {
-  const { categories, create, rename, remove, closeManager, managerOpen } = useMyCategories();
+  const { closeManager, managerOpen } = useMyCategories();
+  if (!managerOpen) return null;
+  return (
+    <Modal title="My categories" onClose={closeManager}>
+      <MyCategoriesManager />
+    </Modal>
+  );
+}
+
+/** Create / rename / delete the user's own categories (used in the dialog and in Settings). */
+export function MyCategoriesManager() {
+  const { categories, create, rename, remove, reorder } = useMyCategories();
+  const [dragId, setDragId] = useState<number | null>(null);
+  const move = (id: number, to: number) => {
+    const ids = categories.map((c) => c.id);
+    const from = ids.indexOf(id);
+    if (from < 0 || to < 0 || to >= ids.length || to === from) return;
+    ids.splice(to, 0, ids.splice(from, 1)[0]);
+    run(() => reorder(ids));
+  };
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<{ id: number; name: string } | null>(null);
-  if (!managerOpen) return null;
   const run = async (fn: () => Promise<unknown>) => {
     setError(null);
     try { await fn(); return true; } catch (e: any) { setError(e.message || 'Something went wrong'); return false; }
@@ -31,7 +49,7 @@ export function MyCategoriesModal() {
     if (await run(() => create(name))) setName('');
   };
   return (
-    <Modal title="My categories" onClose={closeManager}>
+    <div>
       <p className="small-text muted" style={{ marginTop: 0 }}>Your own categories are private to you. Names must be different from the system categories.</p>
       <form className="row" onSubmit={add} style={{ marginBottom: 10 }}>
         <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} placeholder="New category name" aria-label="New category name" style={{ flex: 1 }} autoFocus />
@@ -39,9 +57,11 @@ export function MyCategoriesModal() {
       </form>
       {error && <div className="err" role="alert">{error}</div>}
       {categories.length === 0 && <div className="empty">No personal categories yet.</div>}
+      {categories.length > 1 && <p className="small-text faint" style={{ margin: '0 0 6px' }}>Priority order: drag a row or use ▲ ▼. The sidebar and the lists follow this order (top = highest priority).</p>}
       <ul className="mycat-list">
-        {categories.map((c) => (
-          <li key={c.id} className="mycat">
+        {categories.map((c, i) => (
+          <li key={c.id} className={`mycat ${dragId === c.id ? 'dragging' : ''}`} draggable={editing?.id !== c.id} onDragStart={() => setDragId(c.id)} onDragEnd={() => setDragId(null)} onDragOver={(e) => dragId !== null && e.preventDefault()} onDrop={(e) => { e.preventDefault(); if (dragId !== null) move(dragId, i); setDragId(null); }}>
+            <span className="order-btns"><button type="button" className="small ghost" aria-label={`Move ${c.name} up`} title="Higher priority" disabled={i === 0} onClick={() => move(c.id, i - 1)}>▲</button><button type="button" className="small ghost" aria-label={`Move ${c.name} down`} title="Lower priority" disabled={i === categories.length - 1} onClick={() => move(c.id, i + 1)}>▼</button></span>
             <MineIcon />
             {editing?.id === c.id ? (
               <form className="row" style={{ flex: 1 }} onSubmit={async (e) => { e.preventDefault(); if (await run(() => rename(c.id, editing.name))) setEditing(null); }}>
@@ -59,7 +79,7 @@ export function MyCategoriesModal() {
           </li>
         ))}
       </ul>
-    </Modal>
+    </div>
   );
 }
 
