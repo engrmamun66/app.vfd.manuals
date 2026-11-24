@@ -309,8 +309,15 @@ kbRouter.get(
          ${from} WHERE ${w} ORDER BY b.name, m.name, k.kind, CASE k.importance WHEN 'Important' THEN 0 WHEN 'Medium' THEN 1 WHEN 'Optional' THEN 2 ELSE 3 END, k.code, k.title LIMIT ? OFFSET ?`,
       )
       .all(...args, limit, offset)
-      .map((r: any) => ({ ...r, details: parseJson(r.details_json, null), details_json: undefined }));
-    res.json({ total, page, limit, rows, kinds });
+      .map((r: any) => ({ ...r, details: parseJson(r.details_json, null), details_json: undefined })) as any[];
+    // every manual page of each topic (primary first), so the UI can show the raw page images
+    const pagesBy = new Map<number, any[]>();
+    if (rows.length) {
+      const ph = rows.map(() => '?').join(',');
+      for (const p of db.prepare(`SELECT item_id, revision_id, page_index, printed_page, role FROM knowledge_item_pages WHERE item_id IN (${ph}) ORDER BY item_id, role = 'related', page_index`).all(...rows.map((r) => r.id)) as any[])
+        (pagesBy.get(p.item_id) ?? pagesBy.set(p.item_id, []).get(p.item_id)!).push(p);
+    }
+    res.json({ total, page, limit, rows: rows.map((r) => ({ ...r, pages: pagesBy.get(r.id) ?? (r.page_index ? [{ revision_id: r.revision_id, page_index: r.page_index, printed_page: r.printed_page, role: 'primary' }] : []) })), kinds });
   }),
 );
 

@@ -911,6 +911,31 @@ test.describe('theme & accessibility basics', () => {
     await expect(n).toBeHidden();
   });
 
+  test('Ctrl + ; collapses and expands all sidebar groups', async () => {
+    await admin.goto('/parameters');
+    const btn = admin.locator('.nav-all');
+    const before = await btn.getAttribute('aria-label');
+    await admin.keyboard.press('Control+;');
+    await expect(btn).not.toHaveAttribute('aria-label', before!);
+    await admin.keyboard.press('Control+;');
+    await expect(btn).toHaveAttribute('aria-label', before!);
+  });
+
+  test('manual topics are separate sidebar menus, each with its own page; topics list their manual pages', async () => {
+    await admin.goto('/parameters');
+    const side = admin.locator('.sidebar');
+    if ((await admin.locator('.nav-all').getAttribute('aria-label')) === 'Expand all groups') await admin.keyboard.press('Control+;'); // make sure every group is open
+    await expect(side.getByText('Troubleshooting & Manual Topics')).toHaveCount(0);
+    for (const l of ['Faults', 'Alarms', 'Warnings', 'Troubleshooting', 'Wiring & Terminals', 'Installation', 'Safety', 'Specifications', 'Communication', 'Maintenance', 'Notes']) await expect(side.getByRole('link', { name: l, exact: true })).toBeVisible();
+    await side.getByRole('link', { name: 'Wiring & Terminals', exact: true }).click();
+    await expect(admin).toHaveURL(/\/knowledge\/wiring$/);
+    await expect(admin.getByRole('heading', { level: 1, name: 'Wiring & Terminals' })).toBeVisible();
+    const api = await (await admin.request.get('/api/knowledge?kind=wiring&limit=50')).json();
+    for (const r of api.rows) expect(r.pages.length).toBeGreaterThanOrEqual(1); // every topic keeps at least its primary page
+    await admin.goto('/knowledge');
+    await expect(admin).toHaveURL(/\/knowledge\/fault$/);
+  });
+
   test('model tabs: selection persists across reload and pages; alias set in full-screen settings; sidebar collapses', async () => {
     await admin.goto('/parameters');
     const tabs = admin.locator('.model-tabs button');

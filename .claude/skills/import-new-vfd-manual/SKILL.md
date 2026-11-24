@@ -89,6 +89,7 @@ npm run import:manual -- "<document_file>"      # stages all extracted records +
 npm run approve:all                             # approves staged records (conflicts are preserved, never overwritten)
 npm run verify:records                          # dry run: shows what would be auto-verified
 npm run verify:records -- --apply               # marks records Verified only if the page text confirms them
+npm run topics:pages -- --apply                # links every manual topic (faults, wiring, installation, ...) to ALL its pages: primary + continuation/related pages proven by the page text
 ```
 
 `verify:records` marks a record `Verified` only when its code/address, evidence quote and stored numbers are found on the cited page; everything else stays `Requires Manual Verification` with the reason stored.

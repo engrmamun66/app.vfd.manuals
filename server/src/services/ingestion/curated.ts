@@ -57,6 +57,8 @@ export interface CuratedKnowledge {
   cause?: string | null;
   remedy?: string | null;
   details?: Record<string, unknown> | null;
+  /** extra manual pages of the same topic (e.g. a wiring section spanning several pages); page_index stays the primary page */
+  pages?: number[];
   page_index?: number | null;
   printed_page?: string | null;
   section?: string | null;

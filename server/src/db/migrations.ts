@@ -726,4 +726,21 @@ CREATE TABLE parameter_function_links (
 CREATE INDEX idx_pfl_function ON parameter_function_links(function_id);
 `,
   },
+  {
+    version: 10,
+    name: 'knowledge_item_pages',
+    sql: /* sql */ `
+-- every manual page that belongs to a knowledge topic: the primary page plus related / continuation pages
+CREATE TABLE IF NOT EXISTS knowledge_item_pages (
+  item_id INTEGER NOT NULL REFERENCES knowledge_items(id) ON DELETE CASCADE,
+  revision_id INTEGER NOT NULL,
+  page_index INTEGER NOT NULL,
+  printed_page TEXT,
+  role TEXT NOT NULL DEFAULT 'related' CHECK (role IN ('primary','related')),
+  PRIMARY KEY (item_id, revision_id, page_index)
+);
+INSERT OR IGNORE INTO knowledge_item_pages(item_id, revision_id, page_index, printed_page, role)
+  SELECT id, revision_id, page_index, printed_page, 'primary' FROM knowledge_items WHERE revision_id IS NOT NULL AND page_index IS NOT NULL;
+`,
+  },
 ];

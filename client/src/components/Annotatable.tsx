@@ -476,10 +476,10 @@ export function AnnotationDisplayControl() {
           <label style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--fg)', fontWeight: 400 }}>
             <input type="checkbox" checked={settings.highlight_mode} onChange={(e) => updateSettings({ highlight_mode: e.target.checked })} /> Highlight Mode: <b>{settings.highlight_mode ? 'ON' : 'OFF'}</b>
           </label>
-          <div className="row" style={{ marginTop: 6 }}>
-            <span className="small-text muted">Default color</span>
+          <div className="row" style={{ marginTop: 6, flexWrap: 'nowrap', gap: 4 }}>
+            <span className="small-text muted" style={{ marginRight: 4, whiteSpace: 'nowrap' }}>Default color</span>
             {COLORS.map((c) => (
-              <button key={c} className="ghost small" aria-label={`Default highlight ${c}`} aria-pressed={settings.default_highlight_color === c} onClick={() => updateSettings({ default_highlight_color: c })}>
+              <button key={c} className="ghost small" style={{ padding: '3px 4px' }} aria-label={`Default highlight ${c}`} aria-pressed={settings.default_highlight_color === c} onClick={() => updateSettings({ default_highlight_color: c })}>
                 <span className={`swatch c-${c} ${settings.default_highlight_color === c ? 'sel' : ''}`} />
               </button>
             ))}

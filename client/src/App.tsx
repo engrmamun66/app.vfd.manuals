@@ -98,7 +98,19 @@ function ShellInner() {
   const [catsOpen, setCatsOpen] = useState(() => { try { return localStorage.getItem('nav-cats-open') !== '0'; } catch { return true; } });
   const toggleCats = () => setCatsOpen((o) => { try { localStorage.setItem('nav-cats-open', o ? '0' : '1'); } catch { /* ignore */ } return !o; });
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem('sidebar-collapsed') === '1'; } catch { return false; } });
-  const toggleSidebar = () => setCollapsed((c) => { try { localStorage.setItem('sidebar-collapsed', c ? '0' : '1'); } catch { /* ignore */ } return !c; });
+  // phones/tablets: the sidebar is an off-canvas drawer opened by the menu button
+  const MOBILE_Q = '(max-width: 960px)';
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia?.(MOBILE_Q).matches ?? false);
+  const [navOpen, setNavOpen] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia?.(MOBILE_Q);
+    if (!mq) return;
+    const on = () => { setIsMobile(mq.matches); setNavOpen(false); };
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  useEffect(() => { setNavOpen(false); }, [loc.pathname]);
+  const toggleSidebar = () => window.matchMedia?.(MOBILE_Q).matches ? setNavOpen((o) => !o) : setCollapsed((c) => { try { localStorage.setItem('sidebar-collapsed', c ? '0' : '1'); } catch { /* ignore */ } return !c; });
   const { data: tax } = useAsync(() => get('/taxonomy'), []);
   const mine = useMyCategories();
   const isAdmin = user?.role === 'super_admin';
@@ -107,7 +119,10 @@ function ShellInner() {
     const kbCats = (tax ?? []).filter((c: any) => c.show_nav);
     const secs: { title?: string; items: [string, string, boolean?][] }[] = [
       { items: [['/', 'Dashboard']] },
-      { title: 'Knowledge Base', items: [['/parameters', 'All Parameters'], ...kbCats.map((c: any): [string, string, boolean] => [`/kb/${c.slug}`, c.name, true]), ['/knowledge', 'Troubleshooting & Manual Topics']] },
+      { title: 'Knowledge Base', items: [['/parameters', 'All Parameters'], ...kbCats.map((c: any): [string, string, boolean] => [`/kb/${c.slug}`, c.name, true]), ['/knowledge', 'My categories']] },
+      { title: 'Diagnostics', items: [['/knowledge/fault', 'Faults'], ['/knowledge/alarm', 'Alarms'], ['/knowledge/warning', 'Warnings'], ['/knowledge/troubleshooting', 'Troubleshooting']] },
+      { title: 'Installation & Wiring', items: [['/knowledge/wiring', 'Wiring & Terminals'], ['/knowledge/installation', 'Installation'], ['/knowledge/safety', 'Safety']] },
+      { title: 'Technical Reference', items: [['/knowledge/specification', 'Specifications'], ['/knowledge/communication', 'Communication'], ['/knowledge/maintenance', 'Maintenance'], ['/knowledge/note', 'Notes']] },
       { title: 'Modbus & RS485', items: [['/modbus/registers', 'Register Explorer'], ['/modbus/communication', 'Communication Settings'], ['/modbus/converter', 'Address Converter']] },
       { title: 'Research', items: [['/compare', 'Multi-Brand Comparison'], ['/bookmarks', 'Research Bookmarks'], ['/annotations', 'My Annotations']] },
       { title: 'Documentation Library', items: [['/library', 'Manuals'], ...(isAdmin ? [['/library/import', 'Import Documents'] as [string, string]] : [])] },
@@ -124,12 +139,30 @@ function ShellInner() {
     const sec = sections.find((s) => s.title && s.items.some(([to]) => to === '/' ? false : here === to || here.startsWith(to + '/')));
     if (sec?.title && !(secState[sec.title] ?? sec.title !== 'Administration')) setSecState((s) => ({ ...s, [sec.title!]: true }));
   }, [here]); // eslint-disable-line react-hooks/exhaustive-deps
-  const keys = useMemo(() => assignHotkeys(sections.flatMap((s) => s.items.map(([to, label]): [string, string] => [to, label]))), [sections]);
+  // sidebar filter: while typing, every section opens and only matching items stay
+  const [navQ, setNavQ] = useState('');
+  const q = navQ.trim().toLowerCase();
+  const hit = (label: string) => label.toLowerCase().includes(q);
+  const showCats = catsOpen || !!q;
+  const titles = sections.map((s) => s.title).filter(Boolean) as string[];
+  const allOpen = titles.every(isOpen) && catsOpen;
+  const toggleAll = () => {
+    const next = !allOpen;
+    const n = Object.fromEntries(titles.map((t) => [t, next]));
+    setSecState(n); setCatsOpen(next);
+    try { localStorage.setItem('nav-sections', JSON.stringify(n)); localStorage.setItem('nav-cats-open', next ? '1' : '0'); } catch { /* ignore */ }
+  };
+  const toggleAllRef = useRef(toggleAll);
+  toggleAllRef.current = toggleAll;
+  const firstMatch = q ? (sections.flatMap((sec) => sec.items.filter(([, l]) => hit(l)).map(([to]) => to))[0] ?? (mine.categories.find((c) => hit(c.name)) ? `/my/${mine.categories.find((c) => hit(c.name))!.id}` : null)) : null;
+  const keys = useMemo(() => assignHotkeys(sections.flatMap((s) => s.items.filter(([to]) => to !== '/knowledge').map(([to, label]): [string, string] => [to, label]))), [sections]);
 
   // Ctrl/Cmd + / toggles the sidebar.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key === '/') { e.preventDefault(); toggleSidebar(); }
+      // Ctrl/Cmd + ; collapses / expands all menu groups.
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key === ';') { e.preventDefault(); toggleAllRef.current(); }
       // Ctrl/Cmd + . toggles split view.
       if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key === '.') {
         e.preventDefault();
@@ -177,18 +210,26 @@ function ShellInner() {
   if (user.mustChangePassword) return <ChangePassword forced />;
   return (
     <PageToolsProvider><HotkeyCtx.Provider value={{ keys, show: showKeys }}>
-    <div className={`app ${collapsed ? 'collapsed' : ''}`}>
-      <aside className="sidebar" aria-label="Main navigation" aria-hidden={collapsed}>
+    <div className={`app ${!isMobile && collapsed ? 'collapsed' : ''} ${isMobile && navOpen ? 'nav-open' : ''}`}>
+      {isMobile && navOpen && <div className="nav-backdrop" onClick={() => setNavOpen(false)} aria-hidden="true" />}
+      <aside className="sidebar" aria-label="Main navigation" aria-hidden={isMobile ? !navOpen : collapsed}>
+        <div className="nav-sticky">
         <Link to="/" className="brand" title="Go to Dashboard" aria-label="VFD Knowledge Base — go to Dashboard"><img src="/favicon.svg" alt="" width="34" height="34" className="brand-logo" /><div><b>VFD Knowledge Base</b><span>Technical Research Explorer</span></div></Link>
-        {sections.map((sec, i) => (
+        <div className="nav-filter"><SearchBox icon="filter" placeholder="Filter menu…" value={navQ} onChange={setNavQ} aria-label="Filter menu" onKeyDown={(e) => { if (e.key === 'Escape') setNavQ(''); if (e.key === 'Enter' && firstMatch) { nav(firstMatch); setNavQ(''); } }} />
+          <button type="button" className="nav-all ghost" onClick={toggleAll} aria-label={allOpen ? 'Collapse all groups' : 'Expand all groups'} title={`${allOpen ? 'Collapse all groups' : 'Expand all groups'} (${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl'} + ;)`}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{allOpen ? <path d="M7 20l5-5 5 5M7 4l5 5 5-5" /> : <path d="M7 15l5 5 5-5M7 9l5-5 5 5" />}</svg>
+          </button></div>
+        </div>
+        {sections.filter((sec) => !q || sec.items.some(([to, label, sub]) => hit(label) || (to === '/knowledge' && mine.categories.some((c) => hit(c.name))))).map((sec, i) => (
           <Fragment key={i}>
-            {sec.title && <button type="button" className="nav-group nav-group-btn" aria-expanded={isOpen(sec.title)} onClick={() => toggleSec(sec.title!)}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ transform: isOpen(sec.title) ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}><path d="M9 6l6 6-6 6" /></svg>{sec.title}</button>}
-            {(!sec.title || isOpen(sec.title)) && sec.items.map(([to, label, sub]) => {
-              if (sub && !catsOpen) return null;
+            {sec.title && <button type="button" className="nav-group nav-group-btn" aria-expanded={q ? true : isOpen(sec.title)} onClick={() => toggleSec(sec.title!)}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ transform: isOpen(sec.title) ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}><path d="M9 6l6 6-6 6" /></svg>{sec.title}</button>}
+            {(!sec.title || q || isOpen(sec.title)) && sec.items.map(([to, label, sub]) => {
+              if (sub && !showCats) return null;
+              if (q && !hit(label) && !(to === '/parameters' && sec.items.some(([, l, s]) => s && hit(l))) && !(to === '/knowledge' && mine.categories.some((c) => hit(c.name)))) return null;
               if (to === '/knowledge') return (
                 <Fragment key={to}>
-                  {catsOpen && mine.categories.map((c) => <Nav key={`my${c.id}`} to={`/my/${c.id}`} sub mine><MineIcon /> {c.name}</Nav>)}
-                  {catsOpen && (
+                  {showCats && mine.categories.filter((c) => !q || hit(c.name)).map((c) => <Nav key={`my${c.id}`} to={`/my/${c.id}`} sub mine><MineIcon /> {c.name}</Nav>)}
+                  {showCats && !q && (
                     <div className="nav-add-row">
                       <button type="button" className="nav-add ghost" onClick={mine.openManager} title="Create a category of your own">+ Add category</button>
                       <button type="button" className="nav-gear ghost" aria-label="Manage my categories in Settings" title="Manage my categories (settings)" onClick={() => { setSettingsTab('categories'); setSettingsOpen(true); }}>
@@ -196,7 +237,6 @@ function ShellInner() {
                       </button>
                     </div>
                   )}
-                  <Nav to={to} sub={sub}>{label}</Nav>
                 </Fragment>
               );
               if (to !== '/parameters') return <Nav key={to} to={to} sub={sub}>{label}</Nav>;
@@ -221,12 +261,14 @@ function ShellInner() {
       </aside>
       <div className="main">
         <div className="topbar">
-          <button className="ghost icon-btn" onClick={toggleSidebar} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!collapsed} title={`${collapsed ? 'Expand sidebar' : 'Collapse sidebar'} (${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl'} + /)`}>☰</button>
+          <button className="ghost icon-btn" onClick={toggleSidebar} aria-label={(isMobile ? !navOpen : collapsed) ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={isMobile ? navOpen : !collapsed} title={`${collapsed ? 'Expand sidebar' : 'Collapse sidebar'} (${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl'} + /)`}>☰</button>
           <GlobalSearch /><span className="spacer" />
           <PageToolbar />
           <button className="small send-request" onClick={() => setFeedbackOpen(true)} title="Send a request or complaint to the administrator">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg> Send message
           </button>
+          {(() => { const cur = (settings?.theme ?? 'light') as 'system' | 'light' | 'dark'; const nextT = cur === 'system' ? 'light' : cur === 'light' ? 'dark' : 'system'; const label = { system: 'System', light: 'Light', dark: 'Dark' }; return (
+            <button type="button" className="ghost icon-btn theme-cycle" onClick={() => updateSettings({ theme: nextT } as any)} aria-label={`Theme: ${label[cur]}. Switch to ${label[nextT]}`} title={`Theme: ${label[cur]} (tap for ${label[nextT]})`}>{cur === 'system' ? <MonitorIcon /> : cur === 'light' ? <SunIcon /> : <MoonIcon />}</button>); })()}
           <div className="theme-switch" role="radiogroup" aria-label="Theme mode">
             {([['system', 'System', <MonitorIcon key="s" />], ['light', 'Light', <SunIcon key="l" />], ['dark', 'Dark', <MoonIcon key="d" />]] as const).map(([k, l, ic]) => (
               <button key={k} role="radio" aria-checked={(settings?.theme ?? 'light') === k} aria-label={`${l} mode`} title={`${l} mode`} className={(settings?.theme ?? 'light') === k ? 'active' : ''} onClick={() => updateSettings({ theme: k } as any)}>{ic}</button>
@@ -269,7 +311,8 @@ export default function App() {
         <Route path="/parameters" element={<Parameters />} />
         <Route path="/kb/:slug" element={<CategoryRoute />} />
         <Route path="/my/:id" element={<MyCategoryRoute />} />
-        <Route path="/knowledge" element={<KnowledgePage />} />
+        <Route path="/knowledge" element={<Navigate to="/knowledge/fault" replace />} />
+        <Route path="/knowledge/:kind" element={<KnowledgePage />} />
         <Route path="/function/:slug" element={<FunctionPage />} />
         <Route path="/model/:id" element={<ModelPage />} />
         <Route path="/parameter/:id" element={<ResolveEntity kind="parameter" />} />

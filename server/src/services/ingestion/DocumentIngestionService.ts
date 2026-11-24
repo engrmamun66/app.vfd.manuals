@@ -525,6 +525,15 @@ export class DocumentIngestionService {
           const ok = qm === 'exact' || qm === 'normalized';
           const r = insKi.run(modelId, revisionId, k.kind, k.code?.trim() || null, k.title.trim(), k.description ?? null, k.cause ?? null, k.remedy ?? null, k.details ? json(k.details) : null, k.section ?? null, k.page_index ?? null, k.printed_page ?? null, k.evidence_quote ?? null, qm, ['Important', 'Medium', 'Optional'].includes(k.importance as string) ? k.importance : null, ok ? 'Explicitly Documented' : 'Unverified', ok ? 'Unverified' : 'Requires Manual Verification');
           result.extraction.knowledgeItems += r.changes;
+          if (r.changes && k.page_index) {
+            const id = Number(r.lastInsertRowid);
+            // primary page + any extra pages the extraction lists for this topic (e.g. a wiring section over several pages)
+            db.prepare("INSERT OR IGNORE INTO knowledge_item_pages(item_id, revision_id, page_index, printed_page, role) VALUES (?,?,?,?,'primary')").run(id, revisionId, k.page_index, k.printed_page ?? null);
+            for (const extra of (Array.isArray(k.pages) ? k.pages : []).slice(0, 6)) {
+              const pi = Number(extra);
+              if (Number.isInteger(pi) && pi > 0 && pi !== k.page_index) db.prepare("INSERT OR IGNORE INTO knowledge_item_pages(item_id, revision_id, page_index, printed_page, role) VALUES (?,?,?,NULL,'related')").run(id, revisionId, pi);
+            }
+          }
         }
       } else result.extraction.knowledgeItems = (curated.knowledge_items ?? []).length;
       if (!dryRun && result.extraction.staged) {

@@ -22,7 +22,8 @@
     "curated:check": "tsx server/src/cli/check-curated.ts",
     "approve:all": "tsx server/src/cli/approve-all.ts",
     "http": "cloudflared tunnel --url http://127.0.0.1:2234",
-    "verify:records": "tsx server/src/cli/verify-records.ts"
+    "verify:records": "tsx server/src/cli/verify-records.ts",
+    "topics:pages": "tsx server/src/cli/link-topic-pages.ts"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.2.0",

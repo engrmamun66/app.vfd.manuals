@@ -10,6 +10,7 @@ Rules (see master prompt §2):
 - `evidence_quote` must be text copied verbatim from the cited page (≤ 400 chars). The importer
   checks the quote against the extracted PDF text of that page; mismatches are flagged
   `Requires Manual Verification`.
+- Knowledge items may also list `"pages": [13, 14]` = extra pages of the same topic (e.g. a wiring section over several pages); `page_index` stays the main page. `npm run topics:pages -- --apply` adds further related pages automatically from the page text.
 - `page_index` = 1-based physical PDF page index. `printed_page` = number printed on the page
   (e.g. `"4-12"`) or `null` if not clearly visible. They are stored separately.
 - All AI-assisted extraction is imported as `Unverified` and must be approved by a human.
