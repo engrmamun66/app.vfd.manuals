@@ -90,6 +90,8 @@ function ShellInner() {
   splitRef.current = { settings, updateSettings };
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [catsOpen, setCatsOpen] = useState(() => { try { return localStorage.getItem('nav-cats-open') !== '0'; } catch { return true; } });
+  const toggleCats = () => setCatsOpen((o) => { try { localStorage.setItem('nav-cats-open', o ? '0' : '1'); } catch { /* ignore */ } return !o; });
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem('sidebar-collapsed') === '1'; } catch { return false; } });
   const toggleSidebar = () => setCollapsed((c) => { try { localStorage.setItem('sidebar-collapsed', c ? '0' : '1'); } catch { /* ignore */ } return !c; });
   const { data: tax } = useAsync(() => get('/taxonomy'), []);
@@ -162,11 +164,20 @@ function ShellInner() {
     <HotkeyCtx.Provider value={{ keys, show: showKeys }}>
     <div className={`app ${collapsed ? 'collapsed' : ''}`}>
       <aside className="sidebar" aria-label="Main navigation" aria-hidden={collapsed}>
-        <div className="brand"><img src="/favicon.svg" alt="" width="34" height="34" className="brand-logo" /><div><b>VFD Knowledge Base</b><span>Technical Research Explorer</span></div></div>
+        <Link to="/" className="brand" title="Go to Dashboard" aria-label="VFD Knowledge Base — go to Dashboard"><img src="/favicon.svg" alt="" width="34" height="34" className="brand-logo" /><div><b>VFD Knowledge Base</b><span>Technical Research Explorer</span></div></Link>
         {sections.map((sec, i) => (
           <Fragment key={i}>
             {sec.title && <div className="nav-group">{sec.title}</div>}
-            {sec.items.map(([to, label, sub]) => <Nav key={to} to={to} sub={sub}>{label}</Nav>)}
+            {sec.items.map(([to, label, sub]) => {
+              if (sub && !catsOpen) return null;
+              if (to !== '/parameters') return <Nav key={to} to={to} sub={sub}>{label}</Nav>;
+              return (
+                <div key={to} className="nav-parent">
+                  <Nav to={to}>{label}</Nav>
+                  <button type="button" className="nav-toggle ghost" aria-expanded={catsOpen} aria-label={catsOpen ? 'Collapse parameter categories' : 'Expand parameter categories'} title={catsOpen ? 'Collapse' : 'Expand'} onClick={toggleCats}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ transform: catsOpen ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}><path d="M9 6l6 6-6 6" /></svg></button>
+                </div>
+              );
+            })}
           </Fragment>
         ))}
         <div className="grow" />

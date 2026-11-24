@@ -671,6 +671,9 @@ test.describe('theme & accessibility basics', () => {
 
   test('pagination bar is sticky and answers the arrow keys', async () => {
     await admin.goto('/parameters?limit=2');
+    await admin.getByRole('link', { name: /go to Dashboard/i }).click(); // sidebar logo/title goes home
+    await expect(admin).toHaveURL(/\/$/);
+    await admin.goto('/parameters?limit=2');
     await admin.setViewportSize({ width: 1400, height: 420 }); // short window: menu scrolls, user box stays pinned
     const ub = await admin.locator('.userbox').boundingBox();
     expect(Math.abs(ub!.y + ub!.height - 420)).toBeLessThan(2);

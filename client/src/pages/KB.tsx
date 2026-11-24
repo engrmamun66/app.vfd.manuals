@@ -40,13 +40,13 @@ export function Dashboard() {
         </div>
         <div>
           <h2>Recent documentation imports</h2>
-          <div className="table-wrap"><table><thead><tr><th>#</th><th>File</th><th>Status</th><th>When</th></tr></thead>
+          <div className="table-wrap"><table className="resp imports"><thead><tr><th>#</th><th>File</th><th>Status</th><th>When</th></tr></thead>
             <tbody>{data.recentImports.map((j: any) => <tr key={j.id}><td>{j.id}</td><td className="small-text">{j.file_path}</td><td><span className="badge">{j.status}{j.dry_run ? ' (dry run)' : ''}</span></td><td className="small-text">{fmtDate(j.finished_at || j.started_at)}</td></tr>)}
               {!data.recentImports.length && <tr><td colSpan={4} className="muted">No imports yet.</td></tr>}</tbody></table></div>
         </div>
       </div>
       <h2 style={{ marginTop: 20 }}>Manuals — pages</h2>
-      <div className="table-wrap"><table><thead><tr><th>Manual</th><th>Brand</th><th>Pages</th></tr></thead>
+      <div className="table-wrap"><table><thead><tr><th>Manual</th><th>Brand</th><th className="num">Pages</th></tr></thead>
         <tbody>{(data.manuals ?? []).map((d: any) => <tr key={d.id}><td><Link to={`/library/document/${d.id}`}>{d.title}</Link></td><td>{d.brand ?? '—'}</td><td className="num">{d.pages ?? '—'}</td></tr>)}
           {!(data.manuals ?? []).length && <tr><td colSpan={3} className="muted">No manuals imported yet.</td></tr>}</tbody>
         {(data.manuals ?? []).length > 0 && <tfoot><tr><th colSpan={2}>Total ({data.manuals.length} manuals)</th><th className="num">{data.manuals.reduce((n: number, d: any) => n + (d.pages ?? 0), 0)}</th></tr></tfoot>}</table></div>
