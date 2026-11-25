@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { del, get, patch, post } from '../lib/api';
 import { Crumbs, ErrorBox, Loading, useAsync } from '../components/ui';
-import { COLORS, type Ann } from '../components/Annotatable';
+import { COLORS, annUrl, type Ann } from '../components/Annotatable';
 import { confirmDialog } from '../components/dialogs';
 
 export function AnnotationsPage() {
@@ -46,7 +46,7 @@ export function AnnotationsPage() {
               {(Array.isArray(a.links) ? a.links : []).map((l, i) => <div key={i}><a href={l.url} target="_blank" rel="noopener noreferrer nofollow">{l.text || l.url}</a></div>)}
               {Array.isArray(a.attachments) && a.attachments.length > 0 && <div className="att-grid">{a.attachments.map((t) => <a key={t.id} href={`/api/annotations/attachments/${t.id}/file`} target="_blank" rel="noreferrer"><img src={`/api/annotations/attachments/${t.id}/file?thumb=1`} alt={t.alt_text || 'attached image'} /></a>)}</div>}
               <div className="row" style={{ marginTop: 8 }}>
-                {a.researchUrl && tab !== 'trash' && <button className="small" onClick={() => nav(a.researchUrl!)}>Open research location</button>}
+                {annUrl(a) && tab !== 'trash' && <button className="small" onClick={() => nav(annUrl(a)!)}>Open research location</button>}
                 {a.isOwn && tab === 'mine' && (<>
                   <button className="small" onClick={() => run(() => patch(`/annotations/${a.id}`, { favorite: !a.favorite }))}>{a.favorite ? '★ Favorite' : '☆ Favorite'}</button>
                   <button className="small" onClick={() => run(() => patch(`/annotations/${a.id}`, { visibility: a.visibility === 'private' ? 'public' : 'private' }))}>Make {a.visibility === 'private' ? 'public' : 'private'}</button>

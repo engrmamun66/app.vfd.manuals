@@ -2,7 +2,7 @@ import { pdfUrl } from './OriginalPdfButton';
 import { useSplitAvailable } from './PageTools';
 import { SplitIcon } from './icons';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { get } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { Annotatable, AnnotationScope } from './Annotatable';
@@ -79,9 +79,19 @@ export function SplitToggle() {
 }
 
 /** Original manufacturer page: image (zoom/pan) and extracted text (annotatable). Never replaces the image with OCR. */
-export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuote }: { revisionId: number; page: number; onPage?: (p: number) => void; quoteMatch?: string | null; highlightQuote?: string | null }) {
+export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuote, compact }: { revisionId: number; page: number; onPage?: (p: number) => void; quoteMatch?: string | null; highlightQuote?: string | null; compact?: boolean }) {
   const loc = useLocation();
-  const [tab, setTab] = useState<'image' | 'text'>('image');
+  const navigate = useNavigate();
+  // on a manual page address (/library/revision/…) the tab lives in the URL (?tab=text): search results, annotations and bookmarks
+  // reopen the page on "Extracted text" when that is where the match / note is
+  const onPageRoute = loc.pathname.startsWith('/library/revision/');
+  const urlTab: 'image' | 'text' = onPageRoute && new URLSearchParams(loc.search).get('tab') === 'text' ? 'text' : 'image';
+  const [tab, setTabState] = useState<'image' | 'text'>(urlTab);
+  useEffect(() => { setTabState(urlTab); }, [urlTab, page]);
+  const setTab = (t: 'image' | 'text') => {
+    setTabState(t);
+    if (onPageRoute) navigate({ pathname: loc.pathname, search: t === 'text' ? '?tab=text' : '' }, { replace: true });
+  };
   const [zoom, setZoom] = useState(1);
   const { data, error, loading } = useAsync(() => get(`/revisions/${revisionId}/pages/${page}`), [revisionId, page]);
   const [imgErr, setImgErr] = useState(false);
@@ -110,22 +120,22 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
   const imgLoaded = loadedSrc === imgSrc;
   return (
     <div>
-      <div className="row between" style={{ marginBottom: 8 }}>
-        <div>
+      <div className="row between" style={{ marginBottom: 8, justifyContent: compact ? 'flex-end' : undefined }}>
+        {!compact && <div>
           <b>{rev.title}</b>
           <div className="small-text muted">
             {rev.revision_label ? `Rev ${rev.revision_label} · ` : ''}PDF page {page}/{rev.page_count}
             {p.printed_page ? ` · printed page ${p.printed_page}` : ' · printed page not verified'}
             {' · '}text: {p.text_source === 'pdf-text' ? 'PDF text layer' : p.text_source === 'ocr' ? `OCR (${p.ocr_confidence ? Math.round(p.ocr_confidence) + '% conf.' : 'unverified'})` : 'none'}
           </div>
-        </div>
+        </div>}
         <div className="row">
           {quoteMatch !== undefined && <QuoteBadge s={quoteMatch} />}
           <a className="btn small" href={pdfUrl(revisionId, rev.title ?? 'manual', page)} target="_blank" rel="noreferrer">Open original PDF <span aria-hidden="true">↗</span></a>
           {!loc.pathname.startsWith('/library/revision/') && <Link className="btn small" to={`/library/revision/${revisionId}/page/${page}`}>Full viewer</Link>}
         </div>
       </div>
-      {highlightQuote && (
+      {highlightQuote && !compact && (
         <div className="evidence-quote" title="Text recorded as evidence for this value"><span className="faint">Evidence quote: </span>{highlightQuote}</div>
       )}
       <div className="row" style={{ marginBottom: 8 }}>
@@ -154,7 +164,7 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
           </div>
         )
       ) : p.text ? (
-        <AnnotationScope researchUrl={`/library/revision/${revisionId}/page/${page}`} context={{ entityType: 'document_page', entityId: p.id, documentId: rev.document_id, revisionId, pageId: p.id }}>
+        <AnnotationScope researchUrl={`/library/revision/${revisionId}/page/${page}?tab=text`} context={{ entityType: 'document_page', entityId: p.id, documentId: rev.document_id, revisionId, pageId: p.id }}>
           {p.text_source === 'ocr' && <div className="ok-box small-text">OCR text — may contain recognition errors. Verify against the page image.</div>}
           <Annotatable as="pre" contentKey={`docpage:${revisionId}:${page}`} text={p.text} className="mono" />
         </AnnotationScope>

@@ -733,7 +733,14 @@ kbRouter.get(
     assertFeature(req.user!, 'lock_search', 'Search is a Pro feature. Upgrade to search everything.');
     const like = `%${q.slice(0, 100)}%`;
     const hidden = includeHidden(req);
-    const modelId = Number.isInteger(Number(req.query.model)) && Number(req.query.model) > 0 ? Number(req.query.model) : null;
+    // scope: "@model" chips in the search box send ?models=1,2,3 (several VFDs); the model tab filter sends ?model=1
+    const ids = (String(req.query.models ?? '') || String(req.query.model ?? ''))
+      .split(',')
+      .map((x) => Number(x))
+      .filter((n) => Number.isInteger(n) && n > 0)
+      .slice(0, 50);
+    const MF = ids.length ? `m.id IN (${ids.join(',')})` : '1=1';
+    const DF = ids.length ? `d.id IN (SELECT document_id FROM document_models WHERE model_id IN (${ids.join(',')}))` : '1=1';
     const m = buildMatcher(q);
     const functions = db
       .prepare(
@@ -752,16 +759,16 @@ kbRouter.get(
       .prepare(
         `SELECT p.id, p.code, p.name, p.verification_status, m.name model, b.name brand, f.name function_name ${PARAM_FROM}
          WHERE ${hidden ? '1=1' : `${cdVisible('cdp', 'search')} AND ${cdVisible('cdm')} AND ${cdVisible('cdb')}`}
-         AND (p.code LIKE ? OR p.name LIKE ? OR p.description_en LIKE ? OR p.description_bn LIKE ?) AND (? IS NULL OR m.id = ?) ORDER BY (p.code = ?) DESC, b.name LIMIT 50`,
+         AND (p.code LIKE ? OR p.name LIKE ? OR p.description_en LIKE ? OR p.description_bn LIKE ?) AND ${MF} ORDER BY (p.code = ?) DESC, b.name LIMIT 50`,
       )
-      .all(like, like, like, like, modelId, modelId, q.slice(0, 100)) as any[];
+      .all(like, like, like, like, q.slice(0, 100)) as any[];
     if (parameters.length < 10 && m.tokens.length) {
       const all = db
         .prepare(
           `SELECT p.id, p.code, p.name, p.description_en, p.verification_status, m.name model, b.name brand, f.name function_name ${PARAM_FROM}
-           WHERE ${hidden ? '1=1' : `${cdVisible('cdp', 'search')} AND ${cdVisible('cdm')} AND ${cdVisible('cdb')}`} AND (? IS NULL OR m.id = ?)`,
+           WHERE ${hidden ? '1=1' : `${cdVisible('cdp', 'search')} AND ${cdVisible('cdm')} AND ${cdVisible('cdb')}`} AND ${MF}`,
         )
-        .all(modelId, modelId) as any[];
+        .all() as any[];
       const have = new Set(parameters.map((x) => x.id));
       for (const { row } of rankRows(all, m, (r) => `${r.code} ${r.name ?? ''} ${r.function_name ?? ''} ${r.description_en ?? ''}`))
         if (!have.has(row.id) && parameters.length < 40) parameters.push({ id: row.id, code: row.code, name: row.name, verification_status: row.verification_status, model: row.model, brand: row.brand, function_name: row.function_name });
@@ -770,22 +777,22 @@ kbRouter.get(
       .prepare(
         `SELECT r.id, r.original_address, r.name, r.verification_status, m.name model, b.name brand ${REG_FROM}
          WHERE ${hidden ? '1=1' : `${cdVisible('cdr', 'search')} AND ${cdVisible('cdm')}`}
-         AND (r.original_address LIKE ? OR r.name LIKE ? OR r.description LIKE ? OR EXISTS (SELECT 1 FROM modbus_address_conversions mc WHERE mc.register_id=r.id AND mc.value LIKE ?)) AND (? IS NULL OR m.id = ?) LIMIT 50`,
+         AND (r.original_address LIKE ? OR r.name LIKE ? OR r.description LIKE ? OR EXISTS (SELECT 1 FROM modbus_address_conversions mc WHERE mc.register_id=r.id AND mc.value LIKE ?)) AND ${MF} LIMIT 50`,
       )
-      .all(like, like, like, like, modelId, modelId) as any[];
+      .all(like, like, like, like) as any[];
     if (registers.length < 10 && m.tokens.length) {
       const all = db
         .prepare(
           `SELECT r.id, r.original_address, r.name, r.description, r.verification_status, m.name model, b.name brand ${REG_FROM}
-           WHERE ${hidden ? '1=1' : `${cdVisible('cdr', 'search')} AND ${cdVisible('cdm')}`} AND (? IS NULL OR m.id = ?)`,
+           WHERE ${hidden ? '1=1' : `${cdVisible('cdr', 'search')} AND ${cdVisible('cdm')}`} AND ${MF}`,
         )
-        .all(modelId, modelId) as any[];
+        .all() as any[];
       const have = new Set(registers.map((x) => x.id));
       for (const { row } of rankRows(all, m, (r) => `${r.original_address} ${r.name ?? ''} ${r.description ?? ''}`))
         if (!have.has(row.id) && registers.length < 40) registers.push({ id: row.id, original_address: row.original_address, name: row.name, verification_status: row.verification_status, model: row.model, brand: row.brand });
     }
     const models = db
-      .prepare(`SELECT m.id, m.name, b.name brand FROM models m JOIN brands b ON b.id=m.brand_id ${cdJoin('model', 'm', 'cd')} WHERE ${hidden ? '1=1' : cdVisible('cd', 'search')} AND (m.name LIKE ? OR b.name LIKE ?) LIMIT 20`)
+      .prepare(`SELECT m.id, m.name, b.name brand FROM models m JOIN brands b ON b.id=m.brand_id ${cdJoin('model', 'm', 'cd')} WHERE ${hidden ? '1=1' : cdVisible('cd', 'search')} AND (m.name LIKE ? OR b.name LIKE ?) AND ${MF} LIMIT 20`)
       .all(like, like);
 
     // manual topics (faults, warnings, wiring, specifications ...): matched on code, title and the documented text
@@ -795,9 +802,9 @@ kbRouter.get(
         .prepare(
           `SELECT k.id, k.kind, k.code, k.title, k.description, k.cause, k.remedy, k.section, k.page_index, k.revision_id, m.name model, b.name brand
            FROM knowledge_items k JOIN models m ON m.id=k.model_id JOIN brands b ON b.id=m.brand_id ${cdJoin('model', 'm', 'cdm')} ${cdJoin('brand', 'b', 'cdb')}
-           WHERE ${hidden ? '1=1' : `${cdVisible('cdm')} AND ${cdVisible('cdb')}`} AND (? IS NULL OR m.id = ?)`,
+           WHERE ${hidden ? '1=1' : `${cdVisible('cdm')} AND ${cdVisible('cdb')}`} AND ${MF}`,
         )
-        .all(modelId, modelId) as any[];
+        .all() as any[];
       const textOf = (r: any) => [r.code, r.title, r.description, r.cause, r.remedy].filter(Boolean).join('. ');
       topics = rankRows(items, m, textOf)
         .slice(0, 25)
@@ -814,7 +821,7 @@ kbRouter.get(
             `SELECT pg.id page_id, pg.page_index, pg.printed_page, pg.text_source, pg.text, r.id revision_id, d.id document_id, d.title document_title
              FROM document_pages_fts JOIN document_pages pg ON pg.id = document_pages_fts.rowid
              JOIN document_revisions r ON r.id=pg.revision_id JOIN documents d ON d.id=r.document_id ${cdJoin('document', 'd', 'cd')}
-             WHERE document_pages_fts MATCH ? AND ${hidden ? '1=1' : cdVisible('cd', 'search')} ORDER BY rank LIMIT 400`,
+             WHERE document_pages_fts MATCH ? AND ${DF} AND ${hidden ? '1=1' : cdVisible('cd', 'search')} ORDER BY rank LIMIT 400`,
           )
           .all(ftsQ) as any[];
         pages = rankRows(cands, m, (r) => r.text ?? '')

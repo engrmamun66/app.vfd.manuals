@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { get, post, patch, api, fmtBytes, fmtDate } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { Crumbs, ErrorBox, Loading, VerifBadge, useAsync } from '../components/ui';
@@ -72,7 +72,7 @@ export function DocumentPage() {
         </div>)}
       <h2 style={{ marginTop: 20 }}>Search inside this document</h2>
       <input placeholder="Search extracted text…" value={q} onChange={(e) => setQ(e.target.value)} style={{ minWidth: 320 }} aria-label="Search document" />
-      <div className="stack" style={{ marginTop: 8 }}>{hits.map((h) => <div key={h.page_index} className="small-text"><Link to={`/library/revision/${rev.id}/page/${h.page_index}`}>Page {h.page_index}{h.printed_page ? ` (printed ${h.printed_page})` : ''}</Link> <span className="snippet" dangerouslySetInnerHTML={{ __html: escSnippet(h.snippet) }} /></div>)}</div>
+      <div className="stack" style={{ marginTop: 8 }}>{hits.map((h) => <div key={h.page_index} className="small-text"><Link to={`/library/revision/${rev.id}/page/${h.page_index}?tab=text`}>Page {h.page_index}{h.printed_page ? ` (printed ${h.printed_page})` : ''}</Link> <span className="snippet" dangerouslySetInnerHTML={{ __html: escSnippet(h.snippet) }} /></div>)}</div>
     </div>
   );
 }
@@ -80,6 +80,7 @@ export function DocumentPage() {
 export function RevisionViewer() {
   const { rid, page } = useParams();
   const nav = useNavigate();
+  const search = useLocation().search; // keeps the chosen tab (?tab=text) while turning pages
   const { user } = useAuth();
   const p = Number(page) || 1;
   const { data: rev } = useAsync(() => get(`/revisions/${rid}`), [rid]);
@@ -90,11 +91,11 @@ export function RevisionViewer() {
     <div className="page">
       <Crumbs items={[{ label: 'Documentation Library', to: '/library' }, { label: rev?.title ?? 'Document', to: rev ? `/library/document/${rev.document_id}` : undefined }, { label: `Page ${p}` }]} />
       <div className="row" style={{ marginBottom: 8 }}>
-        <form onSubmit={(e) => { e.preventDefault(); if (Number(go) > 0) nav(`/library/revision/${rid}/page/${Number(go)}`); }} className="row"><label htmlFor="gp" style={{ margin: 0 }}>Go to PDF page</label><input id="gp" value={go} onChange={(e) => setGo(e.target.value)} style={{ width: 80 }} /><button className="small">Go</button></form>
+        <form onSubmit={(e) => { e.preventDefault(); if (Number(go) > 0) nav(`/library/revision/${rid}/page/${Number(go)}${search}`); }} className="row"><label htmlFor="gp" style={{ margin: 0 }}>Go to PDF page</label><input id="gp" value={go} onChange={(e) => setGo(e.target.value)} style={{ width: 80 }} /><button className="small">Go</button></form>
         {user?.role === 'super_admin' && <button className="small" onClick={() => setEdit(!edit)}>Add record from this page</button>}
       </div>
       {edit && rev && <ManualRecord revisionId={Number(rid)} page={p} onDone={() => setEdit(false)} />}
-      <PageViewer revisionId={Number(rid)} page={p} onPage={(n) => nav(`/library/revision/${rid}/page/${n}`)} />
+      <PageViewer revisionId={Number(rid)} page={p} onPage={(n) => nav(`/library/revision/${rid}/page/${n}${search}`)} />
     </div>
   );
 }

@@ -21,9 +21,9 @@ import { PageAnnotations } from './components/PageAnnotations';
 import { FeedbackModal } from './components/FeedbackModal';
 import { AdminContent, AdminLogs, AdminSettings, AdminUsers, MySettings } from './pages/Admin';
 import { Loading, SearchBox, useAsync } from './components/ui';
-import { ModelsProvider, useModels } from './lib/models';
+import { ModelsProvider, useModels, type ModelRow } from './lib/models';
 import { MonitorIcon, MoonIcon, NavIcon, SunIcon } from './components/icons';
-import { PageToolbar, PageToolsProvider } from './components/PageTools';
+import { PageToolbar, PageToolsProvider, TitleLinePdf } from './components/PageTools';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SettingsModal } from './components/SettingsModal';
 import { DialogProvider } from './components/dialogs';
@@ -82,15 +82,45 @@ function assignHotkeys(items: [string, string][]) {
   return map;
 }
 
+const alnum = (x: string) => x.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+/**
+ * Header search. Type "@" to pick one or more VFD models (partial or full name; Tab / Enter selects).
+ * A picked model stays in the box as a short chip and the search then runs only inside the manuals of the picked models.
+ */
 function GlobalSearch() {
   const [q, setQ] = useState('');
+  const [picked, setPicked] = useState<ModelRow[]>([]);
   const [open, setOpen] = useState(false);
-  const { selected } = useModels();
-  const { searchLocked, openPlans } = usePremium();
-  const { data } = useAsync(() => (!searchLocked && q.trim().length >= 1 ? get('/search', { q, model: selected }) : Promise.resolve(null)), [q, selected, searchLocked]);
-  const nav = useNavigate();
+  const [sugIdx, setSugIdx] = useState(0);
+  const { selected, allModels, label } = useModels();
+  const { searchLocked, openPlans, modelLocked } = usePremium();
   const inputRef = useRef<HTMLInputElement>(null);
+  const nav = useNavigate();
   const mod = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
+
+  // "@partial name" typed at a word start → model suggestions (only while something matches)
+  const at = q.lastIndexOf('@');
+  const mention = at >= 0 && (at === 0 || /\s/.test(q[at - 1])) ? q.slice(at + 1) : null;
+  const suggestions = useMemo(() => {
+    if (mention === null) return [] as ModelRow[];
+    const toks = mention.toLowerCase().split(/\s+/).filter(Boolean);
+    return allModels
+      .filter((m) => !picked.some((p) => p.id === m.id))
+      .filter((m) => {
+        const hay = `${m.brand} ${m.name} ${label(m)}`.toLowerCase();
+        const flat = alnum(hay);
+        return toks.every((t) => hay.includes(t) || flat.includes(alnum(t)));
+      })
+      .slice(0, 8);
+  }, [mention, allModels, picked, label]);
+  const mentioning = mention !== null && suggestions.length > 0;
+  useEffect(() => { setSugIdx(0); }, [mention]);
+
+  const searchText = (mentioning ? q.slice(0, at) : q).trim();
+  const scope = picked.map((m) => m.id).join(',');
+  const { data } = useAsync(() => (!searchLocked && searchText ? get('/search', scope ? { q: searchText, models: scope } : { q: searchText, model: selected }) : Promise.resolve(null)), [searchText, scope, selected, searchLocked]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'k') { e.preventDefault(); inputRef.current?.focus(); inputRef.current?.select(); setOpen(true); }
@@ -98,13 +128,72 @@ function GlobalSearch() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
-  const go = (to: string) => { setOpen(false); setQ(''); nav(to); };
+  const go = (to: string) => { setOpen(false); setQ(''); setPicked([]); nav(to); };
+
+  const pick = (m: ModelRow) => {
+    if (modelLocked(m.id)) { openPlans(`${m.brand} ${m.name} is a Pro model.`); return; }
+    setPicked((p) => [...p, m]);
+    setQ(q.slice(0, at).replace(/\s+$/, ''));
+    setOpen(true);
+    inputRef.current?.focus();
+  };
+  const lastEsc = useRef(0);
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Esc twice in a row clears everything: the text and the picked VFDs
+    if (e.key === 'Escape') {
+      const now = Date.now();
+      const double = now - lastEsc.current < 700;
+      lastEsc.current = now;
+      if (double) { e.preventDefault(); setQ(''); setPicked([]); setOpen(false); lastEsc.current = 0; return; }
+    }
+    if (mentioning) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); setSugIdx((i) => (i + 1) % suggestions.length); return; }
+      if (e.key === 'ArrowUp') { e.preventDefault(); setSugIdx((i) => (i - 1 + suggestions.length) % suggestions.length); return; }
+      if (e.key === 'Tab' || e.key === 'Enter') { e.preventDefault(); pick(suggestions[Math.min(sugIdx, suggestions.length - 1)]); return; }
+      if (e.key === 'Escape') { e.preventDefault(); setQ(q.slice(0, at).trimEnd()); return; }
+    }
+    if (e.key === 'Escape') setOpen(false);
+    if (e.key === 'Backspace' && !q && picked.length) setPicked((p) => p.slice(0, -1));
+  };
+  const lockedMsg = () => openPlans('Search is a Pro feature.');
+  const hasAny = !!q || picked.length > 0;
+
   return (
     <div className="search" style={{ position: 'relative' }}>
-      <SearchBox icon="search" inputRef={inputRef} title={`Search (${mod} + K)`} placeholder={`Search everything (2103, 0x2103, manual text…)  ${mod} + K`} value={q} onChange={(v) => { if (searchLocked) { openPlans('Search is a Pro feature.'); return; } setQ(v); setOpen(true); }} onFocus={() => { if (searchLocked) { inputRef.current?.blur(); openPlans('Search is a Pro feature.'); return; } setOpen(true); }} onKeyDown={(e) => e.key === 'Escape' && setOpen(false)} aria-label="Global search" />
-      {open && data && (
+      <div className="gs-box" onMouseDown={(e) => { if (e.target !== inputRef.current && !(e.target as Element).closest('button')) { e.preventDefault(); inputRef.current?.focus(); } }}>
+        <svg className="gs-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+        {picked.map((m) => (
+          <span key={m.id} className="gs-chip" title={`Searching only in ${m.brand} ${m.name}`}>@{label(m)}<button type="button" aria-label={`Remove ${label(m)} from the search`} onClick={() => { setPicked((p) => p.filter((x) => x.id !== m.id)); inputRef.current?.focus(); }}>✕</button></span>
+        ))}
+        <input
+          ref={inputRef}
+          title={`Search (${mod} + K). Type @ to search inside chosen VFD manuals`}
+          placeholder={picked.length ? 'Search in the selected VFD…' : `Search anything, @ = pick a VFD ( ${mod} + K )`}
+          value={q}
+          onChange={(e) => { if (searchLocked) { lockedMsg(); return; } setQ(e.target.value); setOpen(true); }}
+          onFocus={() => { if (searchLocked) { inputRef.current?.blur(); lockedMsg(); return; } setOpen(true); }}
+          onKeyDown={onKeyDown}
+          aria-label="Global search"
+          aria-autocomplete="list"
+          aria-expanded={mentioning}
+          autoComplete="off"
+        />
+        {hasAny && <button type="button" className="gs-clear ghost" aria-label="Clear search" title="Clear" onClick={() => { setQ(''); setPicked([]); inputRef.current?.focus(); }}>✕</button>}
+      </div>
+      {open && mentioning && (
+        <div className="popover gs-sug" role="listbox" aria-label="VFD models">
+          {suggestions.map((m, i) => (
+            <div key={m.id} role="option" aria-selected={i === sugIdx} className={`gs-opt ${i === sugIdx ? 'on' : ''}`} onMouseDown={(e) => { e.preventDefault(); pick(m); }} onMouseEnter={() => setSugIdx(i)}>
+              <span className="gs-opt-main">@{label(m)}{modelLocked(m.id) && <span aria-hidden="true"> 🔒</span>}</span>
+              <span className="gs-opt-sub">{m.brand} · {m.name}</span>
+            </div>
+          ))}
+          <div className="gs-sug-foot"><kbd>Tab</kbd> select · <kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Esc</kbd> cancel</div>
+        </div>
+      )}
+      {open && !mentioning && data && (
         <div className="popover search-pop" style={{ top: '100%', left: 0 }}>
-          <SearchResults data={data} onGo={go} onClose={() => setOpen(false)} />
+          <SearchResults data={data} scope={picked.map((m) => label(m))} onGo={go} onClose={() => setOpen(false)} />
         </div>)}
     </div>
   );
@@ -119,6 +208,7 @@ function Shell() {
 function ShellInner() {
   const { user, logout, settings, updateSettings, impersonation, stopImpersonation } = useAuth();
   const loc = useLocation();
+  const mainRef = useRef<HTMLDivElement>(null);
   const splitRef = useRef({ settings, updateSettings });
   splitRef.current = { settings, updateSettings };
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -291,7 +381,8 @@ function ShellInner() {
         </div>
         </div>
       </aside>
-      <div className="main">
+      <div className="main" ref={mainRef}>
+        <TitleLinePdf scrollRef={mainRef} />
         <div className="topbar">
           <button className="ghost icon-btn" onClick={toggleSidebar} aria-label={(isMobile ? !navOpen : collapsed) ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={isMobile ? navOpen : !collapsed} title={`${collapsed ? 'Expand sidebar' : 'Collapse sidebar'} (${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl'} + /)`}>☰</button>
           <GlobalSearch /><span className="spacer" />

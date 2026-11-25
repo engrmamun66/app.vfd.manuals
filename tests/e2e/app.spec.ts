@@ -183,7 +183,10 @@ test.describe('dashboard & knowledge base', () => {
     const img = admin.locator('.page-img-wrap img');
     await expect(img).toBeVisible({ timeout: 45_000 });
     await expect.poll(async () => img.evaluate((i: HTMLImageElement) => i.naturalWidth), { timeout: 45_000 }).toBeGreaterThan(200);
-    await expect(admin.getByText(/PDF page \d+\//).first()).toBeVisible();
+    // the source card and the page title / evidence-quote block are not shown on this tab; the page controls are
+    await expect(admin.getByText(/PDF page \d+\//)).toHaveCount(0);
+    await expect(admin.getByText('Evidence quote:')).toHaveCount(0);
+    await expect(admin.getByRole('button', { name: 'Extracted text' })).toBeVisible();
     await expect(admin.getByRole('link', { name: 'Open original PDF' }).first()).toBeVisible();
   });
 
@@ -539,7 +542,7 @@ test.describe('library, import and verification (Super Admin)', () => {
     await expect(admin.getByRole('dialog', { name: /Annotations/ }).locator('.badge.dashed').first()).toHaveText('public');
     await admin.keyboard.press('Escape');
     await admin.getByRole('button', { name: 'Next page →' }).click();
-    await expect(admin).toHaveURL(/page\/2$/);
+    await expect(admin).toHaveURL(/page\/2(\?tab=text)?$/);
   });
 
   test('verification center: staged records need review; quote check visible; review dialog shows the evidence', async () => {
@@ -596,6 +599,8 @@ test.describe('administration', () => {
   test('disabling an account signs that user out immediately and blocks login; re-enable allows a new login', async ({ browser }) => {
     await admin.goto('/admin/users');
     await bob.goto('/');
+    await expect(bob.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+    await bob.waitForTimeout(2000); // let bob's real-time connection open before the admin disables the account
     await admin.locator('tr', { hasText: BOB.email }).getByRole('button', { name: 'Disable' }).click();
     await confirmModal(admin);
     await expect(bob.getByRole('heading', { name: 'Sign in' })).toBeVisible({ timeout: 20_000 });
@@ -862,6 +867,81 @@ test.describe('premium: free limits, plans dialog, subscription review (Super Ad
     await alice.goto('/');
     await alice.getByLabel('Global search').fill(seq.slice(0, 5).join(' ').toUpperCase());
     await expect(alice.getByRole('heading', { name: /Manual text/ })).toBeVisible();
+  });
+
+  test('search: "@" suggests models; Tab picks one (several allowed) and the search runs only in their manuals', async () => {
+    const models = (await (await alice.request.get('/api/models')).json()) as { id: number; name: string; brand: string }[];
+    expect(models.length).toBeGreaterThan(1);
+    const [m1, m2] = models;
+    await alice.goto('/');
+    const box = alice.getByLabel('Global search');
+    await box.fill('@');
+    const list = alice.getByRole('listbox', { name: 'VFD models' });
+    await expect(list).toBeVisible();
+    expect(await list.getByRole('option').count()).toBeGreaterThan(1);
+    // partial name, then Tab
+    const partial = m1.name.replace(/\s*\(.*$/, '').slice(0, 5);
+    await box.fill(`@${partial}`);
+    await expect(list.getByRole('option').first()).toBeVisible();
+    await box.press('Tab');
+    await expect(alice.locator('.gs-chip')).toHaveCount(1);
+    await expect(box).toHaveValue('');
+    // a second VFD
+    await box.fill(`@${m2.name.replace(/\s*\(.*$/, '').slice(0, 5)}`);
+    await box.press('Enter');
+    await expect(alice.locator('.gs-chip')).toHaveCount(2);
+    // Backspace on an empty box removes the last chip
+    await box.press('Backspace');
+    await expect(alice.locator('.gs-chip')).toHaveCount(1);
+    // a search now runs inside the picked manual only
+    await box.fill('frequency');
+    await expect(alice.getByText(/results? for “frequency” in/)).toBeVisible();
+    const docs = (await (await alice.request.get('/api/documents')).json()) as { id: number; models: { id: number }[] }[];
+    const ofModel = new Set(docs.filter((d) => d.models.some((m) => m.id === m1.id)).map((d) => d.id));
+    const scoped = await (await alice.request.get('/api/search', { params: { q: 'frequency', models: String(m1.id) } })).json();
+    expect(scoped.pages.length).toBeGreaterThan(0);
+    for (const pg of scoped.pages) expect(ofModel.has(pg.document_id)).toBe(true);
+    for (const x of [...scoped.parameters, ...scoped.registers]) expect(x.model).toBe(m1.name);
+    // two models at once
+    const both = await (await alice.request.get('/api/search', { params: { q: 'frequency', models: `${m1.id},${m2.id}` } })).json();
+    const ofBoth = new Set(docs.filter((d) => d.models.some((m) => m.id === m1.id || m.id === m2.id)).map((d) => d.id));
+    for (const pg of both.pages) expect(ofBoth.has(pg.document_id)).toBe(true);
+    // Esc twice in a row clears the text and the chips
+    await box.press('Escape');
+    await box.press('Escape');
+    await expect(box).toHaveValue('');
+    await expect(alice.locator('.gs-chip')).toHaveCount(0);
+    // the clear button does the same
+    await box.fill('@');
+    await box.press('Tab');
+    await expect(alice.locator('.gs-chip')).toHaveCount(1);
+    await alice.getByRole('button', { name: 'Clear search' }).click();
+    await expect(alice.locator('.gs-chip')).toHaveCount(0);
+  });
+
+  test('a manual page opened from search or from a note reopens on the "Extracted text" tab; the tab stays while turning pages', async () => {
+    const hit = (await (await alice.request.get('/api/search', { params: { q: 'frequency' } })).json()).pages[0];
+    // search result link
+    await alice.goto('/');
+    await alice.getByLabel('Global search').fill('frequency');
+    await alice.getByRole('link', { name: new RegExp(`Page ${hit.printed_page || hit.page_index}`) }).first().waitFor();
+    expect(await alice.locator('.sr-row[href*="/library/revision/"]').first().getAttribute('href')).toContain('?tab=text');
+    // the page address decides the tab
+    await alice.goto(`/library/revision/${hit.revision_id}/page/${hit.page_index}?tab=text`);
+    await expect(alice.getByRole('button', { name: 'Extracted text' })).toHaveClass(/active/);
+    await expect(alice.getByRole('button', { name: 'Page image' })).not.toHaveClass(/active/);
+    // turning the page keeps the tab
+    await alice.getByRole('button', { name: 'Next page →' }).click();
+    await expect(alice).toHaveURL(/tab=text/);
+    await expect(alice.getByRole('button', { name: 'Extracted text' })).toHaveClass(/active/);
+    // switching tabs is reflected in the address (so bookmarks and notes made here remember it)
+    await alice.getByRole('button', { name: 'Page image' }).click();
+    await expect(alice).not.toHaveURL(/tab=text/);
+    await alice.getByRole('button', { name: 'Extracted text' }).click();
+    await expect(alice).toHaveURL(/tab=text/);
+    // without the parameter the page opens on the image
+    await alice.goto(`/library/revision/${hit.revision_id}/page/${hit.page_index}`);
+    await expect(alice.getByRole('button', { name: 'Page image' })).toHaveClass(/active/);
   });
 });
 

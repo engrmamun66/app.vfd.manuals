@@ -8,7 +8,7 @@ const KIND_LABEL: Record<string, string> = { fault: 'Fault', alarm: 'Alarm', war
 const INITIAL = 5;
 
 /** The header search results: grouped, each result says what it is, where it is from and why it matched. */
-export function SearchResults({ data, onGo, onClose }: { data: any; onGo: (to: string) => void; onClose: () => void }) {
+export function SearchResults({ data, scope = [], onGo, onClose }: { data: any; scope?: string[]; onGo: (to: string) => void; onClose: () => void }) {
   const [more, setMore] = useState<Record<string, boolean>>({});
   const groups = useMemo<Group[]>(() => {
     const fns: Group = { id: 'functions', title: 'Common functions', hint: 'Same function across brands', rows: (data.functions ?? []).map((f: any) => ({ key: `f${f.id}`, to: `/function/${f.slug}`, title: f.name, meta: f.category })) };
@@ -21,7 +21,7 @@ export function SearchResults({ data, onGo, onClose }: { data: any; onGo: (to: s
     const models: Group = { id: 'models', title: 'Models', hint: 'Drives', rows: (data.models ?? []).map((m: any) => ({ key: `m${m.id}`, to: `/model/${m.id}`, title: m.name, meta: m.brand })) };
     const pages: Group = {
       id: 'pages', title: 'Manual text', hint: 'Pages of the manuals that contain your words', snippetLines: 3,
-      rows: (data.pages ?? []).map((p: any) => ({ key: `pg${p.page_id}`, to: `/library/revision/${p.revision_id}/page/${p.page_index}`, title: p.document_title, page: `Page ${p.printed_page || p.page_index}`, match: p.match, snippet: p.snippet })),
+      rows: (data.pages ?? []).map((p: any) => ({ key: `pg${p.page_id}`, to: `/library/revision/${p.revision_id}/page/${p.page_index}?tab=text`, title: p.document_title, page: `Page ${p.printed_page || p.page_index}`, match: p.match, snippet: p.snippet })),
     };
     // pasted sentences are most likely from a manual page; short words and codes are most likely a parameter
     const words = String(data.q ?? '').trim().split(/\s+/).length;
@@ -34,7 +34,7 @@ export function SearchResults({ data, onGo, onClose }: { data: any; onGo: (to: s
   return (
     <div className="sr" role="region" aria-label="Search results">
       <div className="sr-head">
-        <div className="sr-title"><b>{total ? `${total} result${total === 1 ? '' : 's'}` : 'No results'}</b> <span className="muted">for “{data.q}”</span></div>
+        <div className="sr-title"><b>{total ? `${total} result${total === 1 ? '' : 's'}` : 'No results'}</b> <span className="muted">for “{data.q}”{scope.length > 0 && <> in <b>{scope.map((x) => `@${x}`).join(', ')}</b></>}</span></div>
         <button className="small ghost" onClick={onClose} aria-label="Close search results">Close</button>
       </div>
       {groups.length > 1 && (

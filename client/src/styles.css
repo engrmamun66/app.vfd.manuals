@@ -657,3 +657,28 @@ button.get-pro.is-pro:hover { background: var(--bg-hover); color: var(--fg); opa
 .sr-snippet { margin-top: 4px; font-size: .82rem; line-height: 1.5; color: var(--fg-muted); display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .sr mark { background: transparent; color: var(--fg); font-weight: 700; box-shadow: inset 0 -.5em 0 var(--hl-soft); padding: 0 1px; }
 .sr-more { margin: 4px 14px 2px; font-size: .8rem; }
+
+/* "Open PDF": on the title line (desktop) / in the header toolbar (mobile) */
+.main { position: relative; }
+.title-pdf { position: absolute; right: 24px; z-index: 6; }
+.tb-pdf { display: none; }
+@media (min-width: 961px) { .main .page h1 { padding-right: 110px; } }
+@media (max-width: 960px) { .title-pdf { display: none !important; } .tb-pdf { display: inline-flex; } }
+
+/* ===== Header search box with @model chips ===== */
+.gs-box { position: relative; display: flex; align-items: center; flex-wrap: wrap; gap: 5px; width: 100%; min-height: 38px; padding: 3px 32px 3px 36px; background: var(--bg); border: 1px solid var(--line-strong); border-radius: 6px; cursor: text; transition: border-color .12s, box-shadow .12s; }
+.gs-box:focus-within { border-color: var(--fg); box-shadow: 0 0 0 3px color-mix(in srgb, var(--fg) 12%, transparent); }
+.gs-icon { position: absolute; left: 11px; top: 11px; color: var(--fg-faint); pointer-events: none; }
+.gs-box:focus-within .gs-icon { color: var(--fg); }
+.gs-box input, .gs-box input:focus { flex: 1; min-width: 150px; height: 30px; padding: 0; border: 0; outline: 0; box-shadow: none; background: transparent; border-radius: 0; }
+.gs-chip { display: inline-flex; align-items: center; gap: 2px; max-width: 220px; padding: 1px 3px 1px 9px; border-radius: 999px; background: var(--inv-bg); color: var(--inv-fg); font-size: .8rem; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gs-chip button { background: transparent; color: inherit; border: 0; padding: 0 5px; font-size: .7rem; line-height: 1.6; opacity: .75; border-radius: 50%; }
+.gs-chip button:hover { opacity: 1; background: rgba(128,128,128,.35); }
+.gs-clear { position: absolute; right: 5px; top: 6px; padding: 2px 7px; border: none; border-radius: 50%; font-size: .75rem; color: var(--fg-muted); }
+.gs-sug { top: calc(100% + 2px); left: 0; width: min(480px, 94vw); padding: 4px 0 0; }
+.gs-opt { display: flex; flex-direction: column; gap: 1px; padding: 7px 14px; cursor: pointer; border-left: 3px solid transparent; }
+.gs-opt.on { background: var(--bg-hover); border-left-color: var(--fg); }
+.gs-opt-main { font-weight: 650; }
+.gs-opt-sub { font-size: .78rem; color: var(--fg-muted); }
+.gs-sug-foot { padding: 6px 14px; border-top: 1px solid var(--line); font-size: .76rem; color: var(--fg-muted); background: var(--bg-alt); }
+.gs-sug-foot kbd { font-size: .72rem; padding: 0 4px; border: 1px solid var(--line-strong); border-radius: 3px; margin-right: 2px; }

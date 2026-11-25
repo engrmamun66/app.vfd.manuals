@@ -381,7 +381,7 @@ export function ParameterResearch() {
             </div>
           )}
           {level === 'source' && <EvidenceList evidence={d.evidence} selected={sel} onSelect={setSel} />}
-          {level === 'original' && (d.evidence.length ? <div className="stack"><EvidenceList evidence={d.evidence} selected={sel} onSelect={setSel} />{d.evidence[sel ?? 0] && <PageViewer revisionId={d.evidence[sel ?? 0].revision_id} page={d.evidence[sel ?? 0].page_index ?? 1} quoteMatch={d.evidence[sel ?? 0].quote_match} highlightQuote={d.evidence[sel ?? 0].extracted_text} />}</div> : <EvidenceList evidence={[]} selected={null} onSelect={() => {}} />)}
+          {level === 'original' && (d.evidence.length ? <div className="stack">{d.evidence.length > 1 && <EvidenceList evidence={d.evidence} selected={sel} onSelect={setSel} />}{d.evidence[sel ?? 0] && <PageViewer compact revisionId={d.evidence[sel ?? 0].revision_id} page={d.evidence[sel ?? 0].page_index ?? 1} quoteMatch={d.evidence[sel ?? 0].quote_match} highlightQuote={d.evidence[sel ?? 0].extracted_text} />}</div> : <EvidenceList evidence={[]} selected={null} onSelect={() => {}} />)}
         </>
       )}
     </ResearchFrame>
@@ -436,7 +436,7 @@ function RegisterBody({ d, base, level, nav }: any) {
       </div>)}
       {level === 'explanation' && <div className="stack"><Explanations items={d.explanations} />{d.restrictions && <><h3>Communication restrictions</h3><p>{d.restrictions}</p></>}</div>}
       {level === 'source' && <EvidenceList evidence={d.evidence} selected={sel} onSelect={setSel} />}
-      {level === 'original' && (d.evidence.length ? <div className="stack"><EvidenceList evidence={d.evidence} selected={sel} onSelect={setSel} />{ev && <PageViewer revisionId={ev.revision_id} page={ev.page_index ?? 1} quoteMatch={ev.quote_match} highlightQuote={ev.extracted_text} />}</div> : <div className="err">Page Reference Not Verified — no source recorded.</div>)}
+      {level === 'original' && (d.evidence.length ? <div className="stack">{d.evidence.length > 1 && <EvidenceList evidence={d.evidence} selected={sel} onSelect={setSel} />}{ev && <PageViewer compact revisionId={ev.revision_id} page={ev.page_index ?? 1} quoteMatch={ev.quote_match} highlightQuote={ev.extracted_text} />}</div> : <div className="err">Page Reference Not Verified — no source recorded.</div>)}
     </>
   );
   return (

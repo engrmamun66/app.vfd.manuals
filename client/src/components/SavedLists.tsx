@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { get, fmtDate } from '../lib/api';
 import { Drawer, ErrorBox, Loading, SearchBox, useAsync } from './ui';
-import type { Ann } from './Annotatable';
+import { annUrl, type Ann } from './Annotatable';
 
 /** Small "list" icon used as the right half of the Save / Notes button groups. */
 export function ListIcon() {
@@ -72,7 +72,7 @@ export function NotesListModal({ onClose }: { onClose: () => void }) {
             </div>
             <blockquote className="small-text" style={{ margin: '6px 0' }}>“{a.anchor.selectedText.slice(0, 200)}”</blockquote>
             {a.comment && <p style={{ margin: '4px 0', whiteSpace: 'pre-wrap' }}>{a.comment}</p>}
-            {a.researchUrl && <Link to={a.researchUrl} onClick={onClose} className="small-text">Go to this note →</Link>}
+            {annUrl(a) && <Link to={annUrl(a)!} onClick={onClose} className="small-text">Go to this note →</Link>}
           </li>
         ))}
       </ul>

@@ -31,6 +31,14 @@ export interface Ann {
   anchor: { contentKey: string; selectedText: string; start: number | null; end: number | null; prefix: string | null; suffix: string | null; contentHash: string | null; brand?: string | null; model?: string | null };
 }
 
+/** Address of the place an annotation was made. A note on manual page text reopens on the "Extracted text" tab. */
+export function annUrl(a: Pick<Ann, 'researchUrl' | 'anchor'>): string | null {
+  const u = a.researchUrl;
+  if (!u) return null;
+  if (a.anchor?.contentKey?.startsWith('docpage:') && u.startsWith('/library/revision/') && !/[?&]tab=/.test(u)) return u + (u.includes('?') ? '&' : '?') + 'tab=text';
+  return u;
+}
+
 /** Per-page context: shared by all <Annotatable> blocks so the research URL & entity ids are saved with every annotation. */
 interface PageCtx {
   researchUrl: string;
@@ -418,7 +426,7 @@ export function AnnotationPanel({ anns, onClose, onEdit, onChanged }: { anns: An
               <button className="small danger" onClick={async () => (await confirmDialog('Delete the complete annotation (comment, highlight and attachments)? It can be restored from Trash.', { danger: true })) && run(() => post(`/annotations/${a.id}/trash`))}>Delete annotation</button>
             </div>
           )}
-          {a.researchUrl && <div className="small-text faint" style={{ marginTop: 6 }}>Context: <a href={a.researchUrl}>{a.researchUrl}</a></div>}
+          {annUrl(a) && <div className="small-text faint" style={{ marginTop: 6 }}>Context: <a href={annUrl(a)!}>{annUrl(a)}</a></div>}
         </div>
       ))}
       {big && <Modal title="Image" onClose={() => setBig(null)} wide><img src={`/api/annotations/attachments/${big}/file`} alt="full size attachment" style={{ maxWidth: '100%' }} /></Modal>}

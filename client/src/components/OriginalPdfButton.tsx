@@ -13,6 +13,6 @@ export function OriginalPdfButton({ modelId }: { modelId?: number } = {}) {
   const { data } = useAsync(() => get('/documents'), []);
   const doc = selected == null ? null : data?.find((d: any) => d.models.some((m: any) => m.id === selected) && d.revisions.length);
   const rev = doc?.revisions[doc.revisions.length - 1];
-  if (!rev) return <button className="small" disabled title={selected == null ? 'Select a model to open its original PDF' : 'No original PDF for this model'}><span className="pdf-full">Open original </span>PDF <span aria-hidden="true">↗</span></button>;
-  return <a className="btn small" href={pdfUrl(rev.id, `${doc.brand ?? ''} ${doc.models.find((m: any) => m.id === selected)?.name ?? doc.title}`)} target="_blank" rel="noreferrer" title={doc.title}><span className="pdf-full">Open original </span>PDF <span aria-hidden="true">↗</span></a>;
+  if (!rev) return <button className="small" disabled title={selected == null ? 'Select a model to open its original PDF' : 'No original PDF for this model'}>Open PDF <span aria-hidden="true">↗</span></button>;
+  return <a className="btn small" href={pdfUrl(rev.id, `${doc.brand ?? ''} ${doc.models.find((m: any) => m.id === selected)?.name ?? doc.title}`)} target="_blank" rel="noreferrer" title={`Open original PDF — ${doc.title}`}>Open PDF <span aria-hidden="true">↗</span></a>;
 }
