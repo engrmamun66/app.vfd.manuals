@@ -30,6 +30,9 @@ interface Ctx {
   loading: boolean;
   notice: string | null;
   socket: Socket | null;
+  /** set while a Super Admin is signed in as this user */
+  impersonation: { byUserId: number; byEmail: string; byName: string | null } | null;
+  stopImpersonation(): Promise<void>;
   login(email: string, password: string): Promise<void>;
   register(data: Record<string, string>): Promise<void>;
   logout(): Promise<void>;
@@ -52,13 +55,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [impersonation, setImpersonation] = useState<Ctx['impersonation']>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const hb = useRef<number | null>(null);
   const userRef = useRef<User | null>(null);
   userRef.current = user;
 
-  const apply = (r: { user: User; csrfToken: string; settings: Settings }) => {
+  const apply = (r: { user: User; csrfToken: string; settings: Settings; impersonation?: Ctx['impersonation'] }) => {
+    setImpersonation(r.impersonation ?? null);
     setCsrf(r.csrfToken);
     setUser(r.user);
     setSettings(r.settings);
@@ -124,6 +129,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     notice,
     socket,
+    impersonation,
+    async stopImpersonation() {
+      await post('/auth/stop-impersonation');
+      window.location.assign('/admin/users'); // full reload: new cookie, fresh state
+    },
     async login(email, password) {
       apply(await post('/auth/login', { email, password }));
       setNotice(null);

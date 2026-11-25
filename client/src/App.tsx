@@ -43,13 +43,26 @@ export const LockIcon = () => (
 
 /** Shown instead of a page the Super Admin marked as Pro-only. */
 function LockedPage() {
-  const { openPlans } = usePremium();
+  const { openPlans, status } = usePremium();
+  const m = status?.config.plans.monthly.price;
   return (
-    <div className="page">
-      <h1>Pro feature</h1>
-      <div className="card" style={{ maxWidth: 560 }}>
-        <p><LockIcon /> This page is part of the Pro plan. Upgrade to open it.</p>
-        <button className="primary" onClick={() => openPlans('This page is a Pro feature.')}>See plans</button>
+    <div className="page locked-page">
+      <div className="locked-card">
+        <span className="locked-badge" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="11" width="16" height="10" rx="1.5" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /><path d="M12 15v2" /></svg>
+        </span>
+        <span className="badge solid">PRO</span>
+        <h1>Pro feature</h1>
+        <p className="muted">This page is part of the Pro plan. Upgrade to open it and unlock everything else.</p>
+        <ul className="locked-list">
+          <li>Every menu and VFD model unlocked</li>
+          <li>Unlimited comments, highlights and bookmarks</li>
+          <li>Request new VFD manuals, with 24/7 support</li>
+        </ul>
+        <div className="row" style={{ justifyContent: 'center' }}>
+          <button className="primary" onClick={() => openPlans('This page is a Pro feature.')}>See plans{m ? ` — from ৳${m}/month` : ''}</button>
+          <Link className="btn" to="/">Back to Dashboard</Link>
+        </div>
       </div>
     </div>
   );
@@ -112,7 +125,7 @@ function Shell() {
 }
 
 function ShellInner() {
-  const { user, logout, settings, updateSettings } = useAuth();
+  const { user, logout, settings, updateSettings, impersonation, stopImpersonation } = useAuth();
   const loc = useLocation();
   const splitRef = useRef({ settings, updateSettings });
   splitRef.current = { settings, updateSettings };
@@ -219,9 +232,16 @@ function ShellInner() {
     return () => { clearTimeout(timer); window.removeEventListener('keydown', down, true); window.removeEventListener('keyup', up, true); window.removeEventListener('blur', blur); };
   }, []);
   if (!user) return null;
-  if (user.mustChangePassword) return <ChangePassword forced />;
+  if (user.mustChangePassword && !impersonation) return <ChangePassword forced />;
   return (
     <PageToolsProvider><HotkeyCtx.Provider value={{ keys, show: showKeys }}>
+    <>
+    {impersonation && (
+      <div className="impersonation-bar" role="status">
+        <span>Signed in as <b>{user.displayName ?? user.email}</b> ({user.email}) — started by {impersonation.byEmail}. Passwords cannot be changed in this mode.</span>
+        <button type="button" className="small" onClick={() => stopImpersonation()}>Return to admin</button>
+      </div>
+    )}
     <div className={`app ${!isMobile && collapsed ? 'collapsed' : ''} ${isMobile && navOpen ? 'nav-open' : ''}`}>
       {isMobile && navOpen && <div className="nav-backdrop" onClick={() => setNavOpen(false)} aria-hidden="true" />}
       <aside className="sidebar" aria-label="Main navigation" aria-hidden={isMobile ? !navOpen : collapsed}>
@@ -294,9 +314,9 @@ function ShellInner() {
               <button key={k} role="radio" aria-checked={(settings?.theme ?? 'light') === k} aria-label={`${l} mode`} title={`${l} mode`} className={(settings?.theme ?? 'light') === k ? 'active' : ''} onClick={() => updateSettings({ theme: k } as any)}>{ic}</button>
             ))}
           </div>
-          <button type="button" className={`small get-pro ${isPro ? 'is-pro' : ''}`} onClick={() => openPlans()} title={isPro ? 'You have Pro access' : 'See Pro plans'}>
+          {!isAdmin && <button type="button" className={`small get-pro ${isPro ? 'is-pro' : ''}`} onClick={() => openPlans()} title={isPro ? 'You have Pro access' : 'See Pro plans'}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M12 2l3 6.5 7 1-5 5 1.2 7L12 18l-6.2 3.5L7 14.5l-5-5 7-1z" /></svg> <span className="gp-label">{isPro ? 'Pro' : 'Get Pro'}</span>
-          </button>
+          </button>}
           <button className="ghost icon-btn" onClick={() => { setSettingsTab(undefined); setSettingsOpen(true); }} aria-label="Settings" title="Settings">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
           </button>
@@ -308,6 +328,7 @@ function ShellInner() {
         <div key={loc.pathname} className={settings?.page_transition && settings.page_transition !== 'none' ? `pt-${settings.page_transition}` : undefined} style={{ '--pt-ms': `${settings?.page_transition_ms ?? 300}ms` } as React.CSSProperties}><ErrorBoundary resetKey={loc.pathname}>{!inAdmin && menuLocked(loc.pathname) ? <LockedPage /> : <Outlet />}</ErrorBoundary></div>
       </div>
     </div>
+    </>
     </HotkeyCtx.Provider></PageToolsProvider>
   );
 }

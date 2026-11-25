@@ -796,4 +796,13 @@ CREATE INDEX idx_pay_user ON payments(user_id);
 CREATE INDEX idx_pay_sub ON payments(subscription_id);
 `,
   },
+  {
+    version: 13,
+    name: 'session_impersonation',
+    sql: /* sql */ `
+-- a Super Admin "logged in as" another user: the new session remembers who started it and from which session
+ALTER TABLE user_sessions ADD COLUMN impersonator_user_id INTEGER REFERENCES users(id);
+ALTER TABLE user_sessions ADD COLUMN impersonator_session_id INTEGER;
+`,
+  },
 ];

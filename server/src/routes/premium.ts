@@ -23,13 +23,13 @@ premiumRouter.get(
     const db = getDb();
     const sub = activeSubscription(u.id);
     const pending = db.prepare("SELECT id, plan, amount, created_at FROM subscriptions WHERE user_id = ? AND status = 'draft' ORDER BY id DESC LIMIT 1").get(u.id) ?? null;
-    const phone = (db.prepare('SELECT phone FROM users WHERE id = ?').get(u.id) as { phone: string | null }).phone;
+    const me = db.prepare('SELECT phone, display_name FROM users WHERE id = ?').get(u.id) as { phone: string | null; display_name: string | null };
     res.json({
       isPro: isPro(u.id, u.role),
       plan: u.role === 'super_admin' ? 'admin' : sub?.plan ?? null,
       endsAt: sub?.ends_at ?? null,
       pending,
-      profileComplete: !!phone && !!u.email,
+      profileComplete: !!me.phone && !!me.display_name?.trim() && !!u.email,
       config: getPremiumConfig(),
       usage: usage(u.id),
     });
@@ -50,8 +50,8 @@ premiumRouter.post(
     const db = getDb();
     const uid = req.user!.id;
     const plan = oneOf(req.body.plan, 'plan', ['monthly', 'yearly'] as const);
-    const me = db.prepare('SELECT email, phone FROM users WHERE id = ?').get(uid) as { email: string; phone: string | null };
-    if (!me.email || !me.phone) throw new HttpError(400, 'Please complete your profile (email and phone number) first.', { code: 'PROFILE_INCOMPLETE' });
+    const me = db.prepare('SELECT email, phone, display_name FROM users WHERE id = ?').get(uid) as { email: string; phone: string | null; display_name: string | null };
+    if (!me.email || !me.phone || !me.display_name?.trim()) throw new HttpError(400, 'Please complete your profile (full name, email and phone number) first.', { code: 'PROFILE_INCOMPLETE' });
     if (db.prepare("SELECT 1 FROM subscriptions WHERE user_id = ? AND status = 'draft'").get(uid)) throw conflict('You already have a subscription request waiting for review. Withdraw it first to send a new one.');
     if (!req.file) throw badRequest('Please attach your payment receipt (JPEG, PNG or WebP image).');
     const note = str(req.body.note, 'note', { max: 500 });

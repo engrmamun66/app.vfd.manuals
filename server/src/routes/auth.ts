@@ -4,7 +4,7 @@ import { getDb } from '../db/index.js';
 import { ah, badRequest, HttpError, intParam, str } from '../lib/http.js';
 import { logActivity } from '../lib/audit.js';
 import { hashPassword, isValidEmail, isValidPhone, normalizeEmail, passwordProblems, verifyPassword } from '../auth/password.js';
-import { clearSessionCookie, createSession, revokeSessions } from '../auth/sessions.js';
+import { clearSessionCookie, createSession, revokeSessions, stopImpersonation } from '../auth/sessions.js';
 import { requireAuth, requireCsrf, requireJson } from '../auth/middleware.js';
 import { sqliteRateLimit } from '../auth/rateLimit.js';
 import { clientIp } from '../auth/clientIp.js';
@@ -68,6 +68,8 @@ authRouter.post(
     if (password !== confirm) throw badRequest('Password and Confirm Password do not match.');
     const problems = passwordProblems(password, email);
     if (problems.length) throw badRequest(problems.join(' '), { password: problems });
+    const fullName = str(req.body.displayName, 'Full name', { required: true, max: 100 })!;
+    if (fullName.length < 2) throw badRequest('Full name is required.');
     const phone = str(req.body.phone, 'Phone', { max: 30 });
     if (phone && !isValidPhone(phone)) throw badRequest('Phone number format is invalid.');
     const company = str(req.body.company, 'Current Company', { max: 150 });
@@ -82,7 +84,7 @@ authRouter.post(
             `INSERT INTO users(email, email_normalized, password_hash, role, status, phone, company, designation, display_name, login_count, last_login_at)
              VALUES (?,?,?,'user','enabled',?,?,?,?,1,?)`,
           )
-          .run(emailRaw, email, hash, phone, company, designation, emailRaw.split('@')[0], new Date().toISOString()).lastInsertRowid,
+          .run(emailRaw, email, hash, phone, company, designation, fullName, new Date().toISOString()).lastInsertRowid,
       );
     } catch (e) {
       if ((e as any).code?.startsWith('SQLITE_CONSTRAINT'))
@@ -153,13 +155,20 @@ authed.get(
   '/me',
   ah(async (req, res) => {
     const u = getDb().prepare('SELECT * FROM users WHERE id = ?').get(req.user!.id);
-    res.json({ user: publicUser(u), csrfToken: req.sessionRow!.csrf_token, sessionId: req.sessionRow!.id, sessionExpiresAt: req.sessionRow!.expires_at, settings: getUserSettings(req.user!.id) });
+    const imp = req.sessionRow!.impersonator_user_id ? (getDb().prepare('SELECT id, email, display_name FROM users WHERE id = ?').get(req.sessionRow!.impersonator_user_id) as any) : null;
+    res.json({ user: publicUser(u), csrfToken: req.sessionRow!.csrf_token, sessionId: req.sessionRow!.id, sessionExpiresAt: req.sessionRow!.expires_at, settings: getUserSettings(req.user!.id), impersonation: imp ? { byUserId: imp.id, byEmail: imp.email, byName: imp.display_name } : null });
   }),
 );
 
 authed.post(
   '/logout',
   ah(async (req, res) => {
+    if (req.sessionRow!.impersonator_user_id) {
+      // signing out of an impersonated session returns to the admin instead of ending everything
+      const r = stopImpersonation(req, res);
+      logActivity({ userId: r.targetUserId ?? req.user!.id, actorUserId: r.adminUserId, event: 'impersonation_end', entityType: 'session', entityId: req.sessionRow!.id });
+      return void res.json({ ok: true, returnedToAdmin: r.ok });
+    }
     revokeSessions({ sessionId: req.sessionRow!.id }, 'logout');
     logActivity({ userId: req.user!.id, event: 'logout', entityType: 'session', entityId: req.sessionRow!.id });
     clearSessionCookie(res);
@@ -168,8 +177,21 @@ authed.post(
 );
 
 authed.post(
+  '/stop-impersonation',
+  ah(async (req, res) => {
+    if (!req.sessionRow!.impersonator_user_id) throw badRequest('This is not an impersonated session.');
+    const target = req.user!.id;
+    const sid = req.sessionRow!.id;
+    const r = stopImpersonation(req, res);
+    logActivity({ userId: target, actorUserId: r.adminUserId, event: 'impersonation_end', entityType: 'session', entityId: sid });
+    res.json({ ok: r.ok });
+  }),
+);
+
+authed.post(
   '/change-password',
   ah(async (req, res) => {
+    if (req.sessionRow!.impersonator_user_id) throw new HttpError(403, 'Passwords cannot be changed while signed in as another user.');
     const db = getDb();
     const u = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user!.id) as any;
     const current = String(req.body.currentPassword || '');
@@ -199,7 +221,7 @@ authed.patch(
     if (phone !== undefined) fields.phone = phone;
     if (req.body.company !== undefined) fields.company = str(req.body.company, 'Company', { max: 150 });
     if (req.body.designation !== undefined) fields.designation = str(req.body.designation, 'Designation', { max: 150 });
-    if (req.body.displayName !== undefined) fields.display_name = str(req.body.displayName, 'Display name', { max: 100 });
+    if (req.body.displayName !== undefined) fields.display_name = str(req.body.displayName, 'Full name', { required: true, max: 100 });
     if (!Object.keys(fields).length) throw badRequest('Nothing to update');
     db.prepare(`UPDATE users SET ${Object.keys(fields).map((k) => `${k} = ?`).join(', ')}, updated_at = ? WHERE id = ?`).run(...Object.values(fields), new Date().toISOString(), req.user!.id);
     logActivity({ userId: req.user!.id, event: 'profile_update', meta: { fields: Object.keys(fields) } });

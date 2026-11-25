@@ -94,7 +94,7 @@ export function AdminUsers() {
               <td className="small-text">{new Date(u.created_at).toLocaleDateString()}</td><td className="small-text">{fmtDate(u.last_login_at)}</td><td className="num">{u.login_count}</td>
               <td className="num">{u.comments_active}</td><td className="num">{u.annotations_total}</td><td className="num">{u.bookmarks}/{u.folders}</td><td className="num">{u.files}</td>
               <td className="small-text">{fmtBytes(u.storage_bytes)} / {fmtBytes(u.quota_bytes)}<div style={{ height: 4, background: 'var(--line)' }}><div style={{ height: 4, width: `${Math.min(100, (u.storage_bytes / (u.quota_bytes || 1)) * 100)}%`, background: 'var(--fg)' }} /></div></td>
-              <td><div className="row" style={{ flexWrap: 'nowrap' }}><button className="small" onClick={() => setDetail(u.id)}>Details</button>{u.id !== me?.id && <button className="small" onClick={() => toggle(u)}>{u.status === 'enabled' ? 'Disable' : 'Enable'}</button>}</div></td></tr>);
+              <td><div className="row" style={{ flexWrap: 'nowrap' }}><button className="small" onClick={() => setDetail(u.id)}>Details</button>{u.id !== me?.id && <button className="small" onClick={() => toggle(u)}>{u.status === 'enabled' ? 'Disable' : 'Enable'}</button>}{u.id !== me?.id && u.role !== 'super_admin' && u.status === 'enabled' && <button className="small primary" title="Open the app as this user (2 hours). Your admin session stays active." onClick={async () => { if (!(await confirmDialog(`Sign in as ${u.email}? You will see the app exactly as this user. Use \"Return to admin\" to come back.`))) return; try { await post(`/admin/users/${u.id}/impersonate`, {}); window.location.assign('/'); } catch (e) { alert((e as Error).message); } }}>Login as</button>}</div></td></tr>);
         })}</tbody></table></div>
       {detail && <UserDetail id={detail} onClose={() => { setDetail(null); refresh(); }} />}
       {create && <CreateUser onClose={() => { setCreate(false); refresh(); }} />}
@@ -107,6 +107,7 @@ function CreateUser({ onClose }: { onClose: () => void }) {
   const [err, setErr] = useState<any>(null);
   return (
     <Modal title="Create user" onClose={onClose}>
+      <div className="field"><label>Full name *</label><input value={f.displayName} onChange={(e) => setF({ ...f, displayName: e.target.value })} /></div>
       <div className="field"><label>Email</label><input value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
       <div className="field"><label>Temporary password (user must change it at first login)</label><PasswordInput value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
       <div className="field"><label>Role</label><select value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })}><option value="user">Normal User</option><option value="super_admin">Super Admin</option></select></div>
@@ -230,9 +231,9 @@ export function MySettings({ embedded }: { embedded?: boolean } = {}) {
       {!embedded && <h1>Settings</h1>}
       <div className="grid2">
         <div className="card"><h2>Profile</h2><p className="muted small-text">{user?.email}</p>
-          {(['displayName', 'phone', 'company', 'designation'] as const).map((k) => <div className="field" key={k}><label>{k}</label><input value={(p as any)[k]} onChange={(e) => setP({ ...p, [k]: e.target.value })} /></div>)}
+          {(['displayName', 'phone', 'company', 'designation'] as const).map((k) => <div className="field" key={k}><label>{({ displayName: 'Full name *', phone: 'Phone', company: 'Company', designation: 'Designation' })[k]}</label><input value={(p as any)[k]} onChange={(e) => setP({ ...p, [k]: e.target.value })} /></div>)}
           <ErrorBox e={msg instanceof Error ? msg : null} />
-          <div className="row"><button className="primary" onClick={async () => { try { await patch('/auth/profile', p); setMsg({ ok: true }); refresh(); } catch (e) { setMsg(e); } }}>Save profile</button>{!embedded && <Link className="btn" to="/settings/password">Change password</Link>}</div></div>
+          <div className="row"><button className="primary" disabled={p.displayName.trim().length < 2} onClick={async () => { try { await patch('/auth/profile', p); setMsg({ ok: true }); refresh(); } catch (e) { setMsg(e); } }}>Save profile</button>{!embedded && <Link className="btn" to="/settings/password">Change password</Link>}</div></div>
         <div className="card"><h2>Preferences</h2>
           <div className="field"><label>Language of explanations</label><select value={settings?.language} onChange={(e) => updateSettings({ language: e.target.value as any })}><option value="en">English</option></select></div>
           <div className="field"><label>Theme</label><select value={settings?.theme} onChange={(e) => updateSettings({ theme: e.target.value as any })}><option value="light">Light (black & white)</option><option value="dark">Dark</option><option value="system">System</option></select></div>

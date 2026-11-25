@@ -18,6 +18,8 @@ export interface SessionRow {
   csrf_token: string;
   expires_at: string;
   revoked_at: string | null;
+  impersonator_user_id: number | null;
+  impersonator_session_id: number | null;
 }
 
 /** Hook set by the socket layer so revocations disconnect live sockets. */
@@ -74,7 +76,7 @@ export function resolveSession(token: string | undefined): { session: SessionRow
   const db = getDb();
   const row = db
     .prepare(
-      `SELECT s.id, s.user_id, s.csrf_token, s.expires_at, s.revoked_at, s.last_seen_at,
+      `SELECT s.id, s.user_id, s.csrf_token, s.expires_at, s.revoked_at, s.last_seen_at, s.impersonator_user_id, s.impersonator_session_id,
               u.id AS uid, u.email, u.role, u.status, u.must_change_password, u.display_name
        FROM user_sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ?`,
     )
@@ -85,7 +87,7 @@ export function resolveSession(token: string | undefined): { session: SessionRow
   if (!row.last_seen_at || Date.now() - new Date(row.last_seen_at).getTime() > 60_000)
     db.prepare('UPDATE user_sessions SET last_seen_at = ? WHERE id = ?').run(new Date().toISOString(), row.id);
   return {
-    session: { id: row.id, user_id: row.user_id, csrf_token: row.csrf_token, expires_at: row.expires_at, revoked_at: row.revoked_at },
+    session: { id: row.id, user_id: row.user_id, csrf_token: row.csrf_token, expires_at: row.expires_at, revoked_at: row.revoked_at, impersonator_user_id: row.impersonator_user_id ?? null, impersonator_session_id: row.impersonator_session_id ?? null },
     user: { id: row.uid, email: row.email, role: row.role, status: row.status, must_change_password: row.must_change_password, display_name: row.display_name },
   };
 }
@@ -104,4 +106,48 @@ export function revokeSessions(where: { sessionId?: number; userId?: number; exc
     sessionEvents.onRevoke(ids, reason);
   }
   return ids;
+}
+
+// ---------------- "login as" (Super Admin impersonation) ----------------
+const ADMIN_COOKIE = `${config.sessionCookie}_admin`;
+export const IMPERSONATION_TTL_MS = 2 * 3_600_000;
+const cookieOpts = (expires: Date) => ({ httpOnly: true, sameSite: 'lax' as const, secure: config.cookieSecure, expires, path: '/' });
+
+/**
+ * Starts a short-lived session for `targetId` and keeps the admin's own session token in a second httpOnly cookie
+ * so "Return to admin" can restore it. The admin's session is NOT revoked.
+ */
+export function createImpersonationSession(req: Request, res: Response, targetId: number, admin: { userId: number; sessionId: number; expiresAt: string }) {
+  const adminToken = parseCookies(req.headers.cookie)[config.sessionCookie];
+  if (!adminToken) throw new Error('no admin session cookie');
+  const db = getDb();
+  const token = randomToken(32);
+  const csrf = randomToken(24);
+  const expires = new Date(Date.now() + IMPERSONATION_TTL_MS);
+  const info = db
+    .prepare(
+      `INSERT INTO user_sessions(token_hash, csrf_token, user_id, expires_at, last_seen_at, user_agent, ip, impersonator_user_id, impersonator_session_id)
+       VALUES (?,?,?,?,?,?,?,?,?)`,
+    )
+    .run(sha256(token), csrf, targetId, expires.toISOString(), new Date().toISOString(), String(req.headers['user-agent'] || '').slice(0, 300), clientIp(req), admin.userId, admin.sessionId);
+  res.cookie(ADMIN_COOKIE, adminToken, cookieOpts(new Date(admin.expiresAt)));
+  res.cookie(config.sessionCookie, token, cookieOpts(expires));
+  return { sessionId: Number(info.lastInsertRowid), csrf };
+}
+
+/** Ends an impersonation session and restores the admin's own session cookie. Returns false if this is not an impersonation session or the admin session is gone. */
+export function stopImpersonation(req: Request, res: Response): { ok: boolean; adminUserId?: number; targetUserId?: number } {
+  const sr = req.sessionRow;
+  if (!sr?.impersonator_session_id) return { ok: false };
+  const cookies = parseCookies(req.headers.cookie);
+  const adminToken = cookies[ADMIN_COOKIE];
+  const admin = resolveSession(adminToken);
+  revokeSessions({ sessionId: sr.id }, 'impersonation_end');
+  res.clearCookie(ADMIN_COOKIE, { httpOnly: true, sameSite: 'lax', secure: config.cookieSecure, path: '/' });
+  if (!admin || admin.session.id !== sr.impersonator_session_id || admin.user.role !== 'super_admin') {
+    clearSessionCookie(res); // admin session expired/revoked: they must sign in again
+    return { ok: false };
+  }
+  res.cookie(config.sessionCookie, adminToken, cookieOpts(new Date(admin.session.expires_at)));
+  return { ok: true, adminUserId: admin.user.id, targetUserId: sr.user_id };
 }

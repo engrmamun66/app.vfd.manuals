@@ -62,7 +62,7 @@ export function Login() {
 export function Register() {
   const { register } = useAuth();
   const nav = useNavigate();
-  const [f, setF] = useState({ email: '', password: '', confirmPassword: '', phone: '', company: '', designation: '' });
+  const [f, setF] = useState({ email: '', displayName: '', password: '', confirmPassword: '', phone: '', company: '', designation: '' });
   const [err, setErr] = useState<any>(null);
   const [busy, setBusy] = useState(false);
   const [regOn, setRegOn] = useState(true);
@@ -95,6 +95,7 @@ export function Register() {
   return (
     <Wrap title="Create account">
       <form onSubmit={submit}>
+        <div className="field"><label htmlFor="r-name">Full name *</label><input id="r-name" required minLength={2} maxLength={100} autoComplete="name" value={f.displayName} onChange={set('displayName')} /></div>
         <div className="field"><label htmlFor="r-email">Email address *</label><input id="r-email" type="email" required autoComplete="email" value={f.email} onChange={set('email')} /></div>
         <div className="field">
           <label htmlFor="r-pw">Password *</label><PasswordInput id="r-pw" required autoComplete="new-password" value={f.password} onChange={set('password')} />

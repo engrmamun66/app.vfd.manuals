@@ -7,7 +7,7 @@ import { getDb } from '../db/index.js';
 import { ah, badRequest, conflict, intParam, notFound, oneOf, paging, str, bool } from '../lib/http.js';
 import { audit, logActivity } from '../lib/audit.js';
 import { hashPassword, isValidEmail, normalizeEmail, passwordProblems } from '../auth/password.js';
-import { revokeSessions } from '../auth/sessions.js';
+import { createImpersonationSession, IMPERSONATION_TTL_MS, revokeSessions } from '../auth/sessions.js';
 import { getAllAppSettings, setAppSetting, userLimits } from '../services/settings.js';
 import { ensureUserDirs, reconcileStorage, storageUsage } from '../services/storage.js';
 import { presenceSnapshot } from '../services/presence.js';
@@ -123,7 +123,7 @@ adminRouter.post(
     const id = Number(
       db
         .prepare("INSERT INTO users(email, email_normalized, password_hash, role, status, must_change_password, display_name, company, designation, phone) VALUES (?,?,?,?, 'enabled', 1, ?,?,?,?)")
-        .run(emailRaw, email, await hashPassword(pw), role, str(req.body.displayName, 'displayName', { max: 100 }) ?? emailRaw.split('@')[0], str(req.body.company, 'company', { max: 150 }), str(req.body.designation, 'designation', { max: 150 }), str(req.body.phone, 'phone', { max: 30 })).lastInsertRowid,
+        .run(emailRaw, email, await hashPassword(pw), role, str(req.body.displayName, 'Full name', { required: true, max: 100 })!, str(req.body.company, 'company', { max: 150 }), str(req.body.designation, 'designation', { max: 150 }), str(req.body.phone, 'phone', { max: 30 })).lastInsertRowid,
     );
     ensureUserDirs(id);
     logActivity({ userId: id, actorUserId: req.user!.id, event: 'admin_create_user', entityType: 'user', entityId: id, meta: { role } });
@@ -183,6 +183,24 @@ adminRouter.post(
     logActivity({ userId: id, actorUserId: req.user!.id, event: 'admin_password_reset', entityType: 'user', entityId: id, meta: { chosenByAdmin: !!chosen, mustChange } });
     if (chosen) return res.json({ ok: true, mustChangePassword: mustChange, note: 'Password set. All sessions of this user were ended.' });
     res.json({ temporaryPassword: temp, note: 'Share this securely. It is not stored in plain text and will not be shown again.' });
+  }),
+);
+
+// "Login as": Super Admin opens a short session as another user (their own session stays alive for "Return to admin")
+adminRouter.post(
+  '/users/:id/impersonate',
+  ah(async (req, res) => {
+    const db = getDb();
+    const id = intParam(req.params.id, 'id', { required: true })!;
+    const u = db.prepare('SELECT id, email, role, status FROM users WHERE id = ?').get(id) as any;
+    if (!u) throw notFound();
+    if (id === req.user!.id) throw badRequest('You are already signed in as this user.');
+    if (u.role === 'super_admin') throw badRequest('Cannot sign in as another Super Admin.');
+    if (u.status !== 'enabled') throw badRequest('This account is disabled. Enable it first.');
+    if (req.sessionRow!.impersonator_user_id) throw badRequest('Already inside an impersonated session.');
+    const s = createImpersonationSession(req, res, id, { userId: req.user!.id, sessionId: req.sessionRow!.id, expiresAt: req.sessionRow!.expires_at });
+    logActivity({ userId: id, actorUserId: req.user!.id, event: 'impersonation_start', entityType: 'session', entityId: s.sessionId, meta: { ttlMinutes: IMPERSONATION_TTL_MS / 60000 } });
+    res.json({ ok: true, email: u.email, expiresInMinutes: IMPERSONATION_TTL_MS / 60000 });
   }),
 );
 

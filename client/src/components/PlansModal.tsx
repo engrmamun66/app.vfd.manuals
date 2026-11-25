@@ -48,11 +48,12 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
 
   const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (name.trim().length < 2) return setError('Full name is required.');
     if (!phone.trim()) return setError('Phone number is required.');
     setBusy(true);
     setError(null);
     try {
-      await patch('/auth/profile', { phone: phone.trim(), ...(name.trim() ? { displayName: name.trim() } : {}) });
+      await patch('/auth/profile', { phone: phone.trim(), displayName: name.trim() });
       await refresh();
       await reload();
       setStage('pay');
@@ -149,10 +150,10 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
 
       {stage === 'profile' && (
         <form className="stack" onSubmit={saveProfile}>
-          <p>To become a paid customer we need your <b>e-mail</b> and <b>phone number</b>, so we can reach you about your subscription. Please complete your profile first.</p>
+          <p>To become a paid customer we need your <b>full name</b>, <b>e-mail</b> and <b>phone number</b>, so we can reach you about your subscription. Please complete your profile first.</p>
           <div className="field"><label htmlFor="pf-email">E-mail</label><input id="pf-email" value={user?.email ?? ''} readOnly style={{ width: '100%' }} /></div>
-          <div className="field"><label htmlFor="pf-name">Name <span className="faint">(optional)</span></label><input id="pf-name" value={name} maxLength={100} onChange={(e) => setName(e.target.value)} style={{ width: '100%' }} /></div>
-          <div className="field"><label htmlFor="pf-phone">Phone number</label><input id="pf-phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} maxLength={30} onChange={(e) => setPhone(e.target.value)} placeholder="+880 1XXX-XXXXXX" style={{ width: '100%' }} autoFocus required /></div>
+          <div className="field"><label htmlFor="pf-name">Full name</label><input id="pf-name" value={name} maxLength={100} minLength={2} onChange={(e) => setName(e.target.value)} style={{ width: '100%' }} autoFocus={!name.trim()} required /></div>
+          <div className="field"><label htmlFor="pf-phone">Phone number</label><input id="pf-phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} maxLength={30} onChange={(e) => setPhone(e.target.value)} placeholder="+880 1XXX-XXXXXX" style={{ width: '100%' }} required autoFocus={!!name.trim()} /></div>
           {error && <div className="err" role="alert">{error}</div>}
           <div className="row" style={{ justifyContent: 'space-between' }}>
             <button type="button" onClick={() => { setError(null); setStage('plans'); }}>← Back</button>

@@ -28,6 +28,7 @@ async function register(browser: Browser, u: { email: string; pw: string }) {
   const ctx = await browser.newContext({ baseURL: 'http://127.0.0.1:3077', viewport: { width: 1600, height: 900 } });
   const p = await ctx.newPage();
   await p.goto('/register');
+  await p.locator('#r-name').fill(u.email.split('@')[0]);
   await p.locator('#r-email').fill(u.email);
   await p.locator('#r-pw').fill(u.pw);
   await p.locator('#r-pw2').fill(u.pw);

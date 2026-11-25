@@ -23,7 +23,7 @@ export function requireAuth(opts: { allowMustChange?: boolean } = {}) {
     }
     req.user = r.user;
     req.sessionRow = r.session;
-    if (r.user.must_change_password && !opts.allowMustChange) {
+    if (r.user.must_change_password && !opts.allowMustChange && !r.session.impersonator_user_id) {
       res.status(403).json({ error: 'Password change required', code: 'MUST_CHANGE_PASSWORD' });
       return;
     }

@@ -39,7 +39,7 @@ async function adminLogin(): Promise<Client> {
 }
 
 async function createUserVia(admin: Client, email: string): Promise<Client> {
-  const res = await w(admin, 'post', '/admin/users').send({ email, password: 'Temp-Password-123!', role: 'user' });
+  const res = await w(admin, 'post', '/admin/users').send({ displayName: 'Test User', email, password: 'Temp-Password-123!', role: 'user' });
   expect(res.status).toBe(201);
   const c = await newClient();
   const l = await c.agent.post('/api/auth/login').send({ email, password: 'Temp-Password-123!' });
@@ -95,7 +95,7 @@ describe('authentication, registration, CSRF', () => {
 
   it('registration: validates, forces Normal User, auto-logs-in, no enumeration, IP rate limit 3/hour', async () => {
     const c = await newClient();
-    const base = { email: 'Carol@Example.test', password: 'Sup3r-Secret-Pass!', confirmPassword: 'Sup3r-Secret-Pass!' };
+    const base = { email: 'Carol@Example.test', displayName: 'Carol Example', password: 'Sup3r-Secret-Pass!', confirmPassword: 'Sup3r-Secret-Pass!' };
     // 1: mismatch
     expect((await c.agent.post('/api/auth/register').send({ ...base, confirmPassword: 'nope' })).status).toBe(400);
     // 2: success, tries to self-promote
@@ -109,7 +109,7 @@ describe('authentication, registration, CSRF', () => {
     expect(dup.status).toBe(400);
     expect(JSON.stringify(dup.body).toLowerCase()).not.toContain('already exists');
     // 4: over the limit → 429 + Retry-After, even for requests that would fail validation
-    const lim = await request(app).post('/api/auth/register').send({ email: 'x@y.test', password: 'a', confirmPassword: 'a' });
+    const lim = await request(app).post('/api/auth/register').send({ displayName: 'X Y', email: 'x@y.test', password: 'a', confirmPassword: 'a' });
     expect(lim.status).toBe(429);
     expect(lim.headers['retry-after']).toBeTruthy();
     expect((await c.agent.get('/api/admin/users')).status).toBe(403); // normal user cannot reach admin
@@ -327,7 +327,7 @@ describe('Super Admin: monitoring, remote logout, disable/enable', () => {
     await w(admin, 'patch', '/admin/settings').send({ registration_enabled: false });
     expect((await request(app).get('/api/auth/registration-status')).body.registrationEnabled).toBe(false);
     db.prepare('DELETE FROM rate_limit_hits').run();
-    expect((await request(app).post('/api/auth/register').send({ email: 'late@example.test', password: 'Sup3r-Secret-Pass!', confirmPassword: 'Sup3r-Secret-Pass!' })).status).toBe(403);
+    expect((await request(app).post('/api/auth/register').send({ displayName: 'Late User', email: 'late@example.test', password: 'Sup3r-Secret-Pass!', confirmPassword: 'Sup3r-Secret-Pass!' })).status).toBe(403);
     await w(admin, 'patch', '/admin/settings').send({ registration_enabled: true });
   });
 
