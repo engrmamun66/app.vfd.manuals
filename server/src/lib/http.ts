@@ -19,7 +19,7 @@ export const ah =
 
 export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction) {
   if (err instanceof HttpError) {
-    res.status(err.status).json({ error: err.message, details: err.details });
+    res.status(err.status).json({ error: err.message, details: err.details, code: (err.details as { code?: string } | undefined)?.code });
     return;
   }
   const e = err as { code?: string; message?: string; type?: string; status?: number };

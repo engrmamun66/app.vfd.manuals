@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { assertFeature } from '../services/premium.js';
 import { getDb } from '../db/index.js';
 import { ah, badRequest, intParam, notFound, oneOf, paging, str } from '../lib/http.js';
 import { parseJson } from '../lib/util.js';
@@ -727,6 +728,7 @@ kbRouter.get(
     const db = getDb();
     const q = String(req.query.q || '').trim().slice(0, 100);
     if (!q) return res.json({ q, functions: [], parameters: [], registers: [], models: [], pages: [] });
+    assertFeature(req.user!, 'lock_search', 'Search is a Pro feature. Upgrade to search everything.');
     const like = `%${q}%`;
     const hidden = includeHidden(req);
     const modelId = Number.isInteger(Number(req.query.model)) && Number(req.query.model) > 0 ? Number(req.query.model) : null;

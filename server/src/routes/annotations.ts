@@ -7,6 +7,7 @@ import { logActivity } from '../lib/audit.js';
 import { json, parseJson } from '../lib/util.js';
 import { purgeUpload, safeResolve, saveUserImage, userRoot } from '../services/storage.js';
 import { userLimits } from '../services/settings.js';
+import { assertUploadSize, assertWithinLimit } from '../services/premium.js';
 
 /**
  * Shared Text Anchor + Independent User Annotations (§35).
@@ -145,6 +146,8 @@ annotationsRouter.post(
     const visibility = oneOf(b.visibility, 'visibility', ['private', 'public'] as const, 'private');
     const comment = str(b.comment, 'comment', { max: 20000 });
     if (!comment && !color) throw badRequest('Provide a comment, a highlight color, or both');
+    if (comment) assertWithinLimit(req.user!, 'comments');
+    if (color) assertWithinLimit(req.user!, 'highlights');
     const links = validateLinks(b.links);
     const start = intParam(b.start, 'start', { min: 0 });
     const end = intParam(b.end, 'end', { min: 0 });
@@ -371,6 +374,7 @@ annotationsRouter.post(
     const lim = userLimits(uid);
     if (existing + files.length > lim.maxAttachmentsPerComment) throw new HttpError(413, `A comment can have at most ${lim.maxAttachmentsPerComment} images`);
     const created: number[] = [];
+    for (const f of files) assertUploadSize(req.user!, f.size);
     for (const f of files) {
       const uploadId = await saveUserImage({ userId: uid, buf: f.buffer, originalName: f.originalname, kind: 'comment-attachment', subdir: `comment-attachments/${a.id}` });
       created.push(

@@ -541,26 +541,6 @@ test.describe('library, import and verification (Super Admin)', () => {
     await expect(admin).toHaveURL(/page\/2$/);
   });
 
-  test('import page lists manuals folder, marks imported files, normal users are blocked', async () => {
-    await admin.goto('/library/import');
-    await expect(admin.getByRole('link', { name: 'Imported' }).first()).toBeVisible();
-    await expect(admin.getByText('Not imported').first()).toBeVisible();
-    expect((await alice.request.get('/api/manuals/scan')).status()).toBe(403);
-    await alice.goto('/library/import');
-    await expect(alice.getByText('requires the Super Admin role')).toBeVisible();
-  });
-
-  test('dry-run import of an already imported file reports a duplicate and changes nothing', async () => {
-    const before = await (await admin.request.get('/api/dashboard')).json();
-    await admin.goto('/library/import');
-    await admin.locator('tr', { hasText: 'Delta-VFD-EL-Series-Users-Manual.pdf' }).getByRole('button', { name: 'Dry run' }).click();
-    await expect(admin.getByText(/Import job #\d+ — dry_run/)).toBeVisible({ timeout: 60_000 });
-    await expect(admin.getByText('Yes — revision')).toBeVisible();
-    const after = await (await admin.request.get('/api/dashboard')).json();
-    expect(after.totals.documents).toBe(before.totals.documents);
-    expect(after.totals.pages).toBe(before.totals.pages);
-  });
-
   test('verification center: staged records need review; quote check visible; review dialog shows the evidence', async () => {
     await admin.goto('/verification');
     await expect(admin.getByRole('tab', { name: /Staged records/ }).or(admin.getByRole('button', { name: /Staged records/ }))).toBeVisible();
@@ -653,6 +633,167 @@ test.describe('administration', () => {
     await expect(admin.locator('tbody')).toContainText('admin_disable_account');
     const text = await admin.locator('table').innerText();
     expect(text).not.toMatch(/Password-|vfdkb_sid|token_hash/);
+  });
+});
+
+test.describe('premium: free limits, plans dialog, subscription review (Super Admin)', () => {
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==', 'base64');
+  const baseCfg = {
+    locked_menus: [] as string[], locked_models: [] as number[], lock_search: false, lock_custom_category: false, lock_requests: true,
+    max_upload_mb: 2, max_comments: 20, max_highlights: 50, max_bookmarks: 20,
+    plans: { monthly: { price: 99 }, yearly: { price: 450 } },
+    payment: { bkash_number: '01700000000', bkash_type: 'Personal', banks: [{ bank: 'Test Bank', account_name: 'VFD KB', account_number: '123456', branch: 'Main' }], receipt_email: 'pay@example.test', instructions: 'Pay then attach the receipt.' },
+  };
+  const setCfg = async (over: object) => {
+    const r = await admin.request.put('/api/premium-admin/config', { data: { ...baseCfg, ...over }, headers: { 'X-CSRF-Token': await csrfOf(admin) } });
+    expect(r.status()).toBe(200);
+  };
+  const csrfOf = async (p: Page) => (await (await p.request.get('/api/auth/me')).json()).csrfToken as string;
+
+  test('normal users cannot read or change premium settings; the Superadmin Panel button is admin-only', async () => {
+    expect((await alice.request.get('/api/premium-admin/config')).status()).toBe(403);
+    expect((await alice.request.get('/api/premium-admin/subscriptions')).status()).toBe(403);
+    await alice.goto('/');
+    await expect(alice.getByRole('link', { name: 'Superadmin Panel' })).toHaveCount(0);
+    await admin.goto('/');
+    await admin.getByRole('link', { name: 'Superadmin Panel' }).click();
+    await expect(admin).toHaveURL(/\/superadmin\/subscriptions$/);
+    await expect(admin.getByRole('heading', { name: 'Subscriptions' })).toBeVisible();
+    await expect(admin.getByRole('link', { name: 'Premium Settings' })).toBeVisible();
+    await expect(admin.getByRole('link', { name: 'Back to app' })).toBeVisible();
+    await admin.getByRole('link', { name: 'Premium Settings' }).click();
+    await expect(admin.getByRole('heading', { name: 'Premium Settings' })).toBeVisible();
+    await expect(admin.getByLabel('Max comments (count)')).toHaveValue('20');
+    await expect(admin.getByLabel('bKash number')).toHaveValue('');
+    await admin.getByRole('link', { name: 'Back to app' }).click();
+    await expect(admin.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+  });
+
+  test('a locked menu opens the plans dialog; a limit of 0 answers 402 with the same dialog', async () => {
+    await setCfg({ locked_menus: ['/compare'], lock_search: true, max_bookmarks: 0 });
+    await alice.goto('/');
+    await alice.reload();
+    await alice.getByRole('link', { name: 'Multi-Brand Comparison' }).click();
+    const dlg = alice.getByRole('dialog', { name: 'Get Pro' });
+    await expect(dlg).toBeVisible();
+    await expect(dlg).toContainText('৳99');
+    await expect(dlg).toContainText('৳450');
+    await expect(dlg).toContainText('01700000000');
+    await expect(dlg).toContainText('pay@example.test');
+    await alice.keyboard.press('Escape');
+    await alice.goto('/compare'); // direct address: the page itself is replaced by a notice
+    await expect(alice.getByRole('heading', { name: 'Pro feature' })).toBeVisible();
+    // server-side limits answer 402
+    const csrf = await csrfOf(alice);
+    const bm = await alice.request.post('/api/bookmarks', { data: { name: 'x', research_url: '/parameters' }, headers: { 'X-CSRF-Token': csrf } });
+    expect(bm.status()).toBe(402);
+    expect((await bm.json()).code).toBe('PREMIUM_REQUIRED');
+    expect((await alice.request.get('/api/search?q=abc')).status()).toBe(402);
+    // search box opens the dialog instead of searching
+    await alice.goto('/');
+    await alice.getByRole('searchbox', { name: 'Global search' }).or(alice.getByLabel('Global search')).first().click();
+    await expect(alice.getByRole('dialog', { name: 'Get Pro' })).toBeVisible();
+    await alice.keyboard.press('Escape');
+  });
+
+  test('subscribe: profile first, then receipt; admin makes the user premium; limits stop applying; admin cancels', async () => {
+    await alice.goto('/');
+    await alice.getByRole('button', { name: /Get Pro/ }).click();
+    const dlg = alice.getByRole('dialog', { name: 'Get Pro' });
+    await dlg.getByRole('button', { name: 'Choose Monthly' }).click();
+    // no phone number yet → profile step
+    const prof = alice.getByRole('dialog', { name: 'Complete your profile' });
+    await expect(prof).toBeVisible();
+    await prof.getByLabel('Phone number').fill('+880 1711-123456');
+    await prof.getByRole('button', { name: 'Save and continue' }).click();
+    const pay = alice.getByRole('dialog', { name: 'Monthly plan' });
+    await expect(pay).toContainText('৳99');
+    await pay.getByRole('button', { name: /Submit Monthly request/ }).click();
+    await expect(pay.getByRole('alert')).toContainText('receipt');
+    await pay.getByLabel('Payment receipt').setInputFiles({ name: 'receipt.png', mimeType: 'image/png', buffer: png });
+    await pay.getByRole('button', { name: /Submit Monthly request/ }).click();
+    await expect(alice.getByRole('dialog', { name: 'Request sent' })).toContainText('within 3 days at maximum');
+    await alice.getByRole('dialog', { name: 'Request sent' }).getByRole('button', { name: 'Close' }).last().click();
+    const st = await (await alice.request.get('/api/premium/status')).json();
+    expect(st.isPro).toBe(false);
+    expect(st.pending.plan).toBe('monthly');
+    // a second open request is refused
+    const csrf = await csrfOf(alice);
+    const again = await alice.request.post('/api/premium/subscribe', { multipart: { plan: 'yearly', receipt: { name: 'r.png', mimeType: 'image/png', buffer: png } }, headers: { 'X-CSRF-Token': csrf } });
+    expect(again.status()).toBe(409);
+    // Super Admin reviews it
+    await admin.goto('/superadmin/subscriptions');
+    const card = admin.locator('.fb-card', { hasText: 'alice@e2e.test' }).first();
+    await expect(card).toContainText('Waiting for review');
+    await expect(card.locator('img')).toBeVisible();
+    await card.getByRole('button', { name: 'Make premium' }).click();
+    await expect(admin.locator('.fb-card', { hasText: 'alice@e2e.test' })).toHaveCount(0); // leaves the "waiting" list
+    await expect.poll(async () => (await (await alice.request.get('/api/premium/status')).json()).isPro).toBe(true);
+    // Pro: limits and locked menus no longer apply
+    const bm = await alice.request.post('/api/bookmarks', { data: { name: 'pro bookmark', research_url: '/parameters' }, headers: { 'X-CSRF-Token': csrf } });
+    expect(bm.status()).toBeLessThan(300);
+    expect((await alice.request.get('/api/search?q=abc')).status()).toBe(200);
+    await alice.goto('/compare');
+    await expect(alice.getByRole('heading', { name: 'Pro feature' })).toHaveCount(0);
+    await expect(alice.getByRole('button', { name: /^.*Pro$/ }).first()).toBeVisible();
+    // cancel
+    await admin.goto('/superadmin/subscriptions');
+    await admin.getByLabel('Status filter').selectOption('active');
+    await admin.locator('.fb-card', { hasText: 'alice@e2e.test' }).first().getByRole('button', { name: 'Cancel subscription' }).click();
+    await expect.poll(async () => (await (await alice.request.get('/api/premium/status')).json()).isPro).toBe(false);
+    expect((await alice.request.get('/api/search?q=abc')).status()).toBe(402);
+    await alice.request.delete(`/api/bookmarks/${(await bm.json()).id}`, { headers: { 'X-CSRF-Token': csrf } });
+    // back to defaults for the remaining tests
+    await setCfg({});
+    await expect.poll(async () => (await alice.request.get('/api/search?q=abc')).status()).toBe(200);
+  });
+
+  test('payments ledger: activation recorded one; add, search, edit and delete; normal users are blocked', async () => {
+    expect((await alice.request.get('/api/premium-admin/payments')).status()).toBe(403);
+    await admin.goto('/superadmin/payments');
+    await expect(admin.getByRole('heading', { name: 'Payments' })).toBeVisible();
+    // the monthly subscription activated earlier was recorded automatically
+    const auto = admin.locator('tbody tr', { hasText: 'alice@e2e.test' });
+    await expect(auto).toHaveCount(1);
+    await expect(auto).toContainText('৳99');
+    // add
+    await admin.getByRole('button', { name: '+ Add payment' }).click();
+    const dlg = admin.getByRole('dialog', { name: 'Add payment' });
+    await dlg.getByLabel('Amount (৳)').fill('450');
+    await dlg.getByLabel('Method').selectOption('bank');
+    await dlg.getByLabel('Payer name').fill('Rahim Uddin');
+    await dlg.getByLabel('Transaction ID').fill('TRX-E2E-7788');
+    await dlg.getByLabel('User e-mail').fill('nobody@e2e.test');
+    await dlg.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(dlg.getByRole('alert')).toContainText('No user with this e-mail');
+    await dlg.getByLabel('User e-mail').fill('');
+    await dlg.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(dlg).toBeHidden();
+    // search by transaction id and by payer name
+    await admin.getByLabel('Search payments').fill('TRX-E2E-7788');
+    const row = admin.locator('tbody tr', { hasText: 'Rahim Uddin' });
+    await expect(row).toHaveCount(1);
+    await expect(admin.locator('tbody tr')).toHaveCount(1);
+    await expect(row).toContainText('৳450');
+    await expect(row).toContainText('Bank');
+    // edit
+    await row.getByRole('button', { name: 'Edit' }).click();
+    const ed = admin.getByRole('dialog', { name: 'Edit payment' });
+    await ed.getByLabel('Amount (৳)').fill('460');
+    await ed.getByLabel('Status').selectOption('refunded');
+    await ed.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(admin.locator('tbody tr', { hasText: 'Rahim Uddin' })).toContainText('৳460');
+    await expect(admin.locator('tbody tr', { hasText: 'Rahim Uddin' })).toContainText('Refunded');
+    // filters
+    await admin.getByLabel('Search payments').fill('');
+    await admin.getByLabel('Method filter').selectOption('bank');
+    await expect(admin.locator('tbody tr', { hasText: 'alice@e2e.test' })).toHaveCount(0);
+    await admin.getByLabel('Method filter').selectOption('');
+    // delete (confirmation modal)
+    await admin.getByLabel('Search payments').fill('TRX-E2E-7788');
+    await admin.locator('tbody tr', { hasText: 'Rahim Uddin' }).getByRole('button', { name: 'Delete' }).click();
+    await confirmModal(admin);
+    await expect(admin.getByText('No payment matches the search.')).toBeVisible();
   });
 });
 

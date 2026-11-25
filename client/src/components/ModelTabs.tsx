@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useModels } from '../lib/models';
+import { usePremium } from '../lib/premium';
 
 interface TipState { text: string; x: number; y: number }
 
@@ -22,6 +23,7 @@ export interface RecordTabs {
  */
 export function ModelTabs({ record }: { record?: RecordTabs } = {}) {
   const { models, selected, select, label } = useModels();
+  const { modelLocked, openPlans } = usePremium();
   const nav = useNavigate();
   const counterpart = (modelId: number) => record?.counterparts.find((c) => c.model_id === modelId);
   const choose = async (id: number | null) => {
@@ -49,8 +51,8 @@ export function ModelTabs({ record }: { record?: RecordTabs } = {}) {
           const missing = !!record && !isCurrent && !counterpart(m.id);
           const tip = !record ? `${m.brand} ${m.name}` : isCurrent ? `${m.brand} ${m.name} (this record)` : missing ? `${m.brand} ${m.name} — no equivalent record documented, opens the list` : `${m.brand} ${m.name} — open the equivalent record`;
           return (
-            <button key={m.id} role="tab" aria-selected={selected === m.id} className={`${selected === m.id ? 'active' : ''} ${isCurrent ? 'current' : ''} ${missing ? 'dim' : ''}`} onClick={() => choose(m.id)} {...props(tip)}>
-              {label(m)}
+            <button key={m.id} role="tab" aria-selected={selected === m.id} className={`${selected === m.id ? 'active' : ''} ${isCurrent ? 'current' : ''} ${missing ? 'dim' : ''}`} onClick={() => (modelLocked(m.id) ? openPlans(`${m.brand} ${m.name} is a Pro model.`) : choose(m.id))} {...props(modelLocked(m.id) ? `${tip} — Pro` : tip)}>
+              {label(m)}{modelLocked(m.id) && <span className="tab-lock" aria-hidden="true"> 🔒</span>}
             </button>
           );
         })}

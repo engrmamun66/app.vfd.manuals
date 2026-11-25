@@ -12,6 +12,7 @@ import { meRouter } from './routes/me.js';
 import { exportsRouter } from './routes/exports.js';
 import { feedbackRouter } from './routes/feedback.js';
 import { userCategoriesRouter } from './routes/userCategories.js';
+import { premiumAdminRouter, premiumRouter } from './routes/premium.js';
 
 export function createApp(opts: { dev?: boolean } = {}) {
   const app = express();
@@ -45,6 +46,8 @@ export function createApp(opts: { dev?: boolean } = {}) {
   api.use('/bookmarks', bookmarksRouter);
   api.use('/feedback', feedbackRouter);
   api.use('/my-categories', userCategoriesRouter);
+  api.use('/premium', premiumRouter);
+  api.use('/premium-admin', requireSuperAdmin, premiumAdminRouter);
   api.use('/annotations', annotationsRouter);
   api.use('/export', exportsRouter);
   api.use('/admin', requireSuperAdmin, adminRouter);

@@ -8,9 +8,12 @@ import { Compare, Dashboard, FunctionPage, ModelPage, ParameterResearch, Paramet
 import { KnowledgePage } from './pages/Knowledge';
 import { BookmarksPage } from './pages/Bookmarks';
 import { AnnotationsPage } from './pages/AnnotationsPage';
-import { DocumentPage, ImportPage, Library, RevisionViewer } from './pages/Library';
+import { DocumentPage, Library, RevisionViewer } from './pages/Library';
 import { VerificationCenter } from './pages/Verification';
 import { FeedbackAdmin } from './pages/Feedback';
+import { PaymentsAdmin, PremiumSettings, SubscriptionsAdmin } from './pages/PremiumAdmin';
+import { PremiumProvider, usePremium } from './lib/premium';
+import { ADMIN_HOME, adminSections, isAdminPath, mainSections } from './lib/nav';
 import { MyCategoriesProvider, useMyCategories } from './lib/myCategories';
 import { MineIcon, MyCategoriesModal } from './components/MyCategories';
 import { PageAnnotations } from './components/PageAnnotations';
@@ -29,7 +32,27 @@ const HotkeyCtx = createContext<{ keys: Map<string, string>; show: boolean }>({ 
 function Nav({ to, children, sub, mine }: { to: string; children: React.ReactNode; sub?: boolean; mine?: boolean }) {
   const { keys, show } = useContext(HotkeyCtx);
   const k = keys.get(to);
-  return <NavLink to={to} end className={({ isActive }) => `nav-link ${sub ? 'sub' : ''} ${mine ? 'mine' : ''} ${isActive ? 'active' : ''}`}>{!sub && !mine && <NavIcon to={to} />}{children}{show && k && <kbd className="key-badge" aria-hidden="true">{k.toUpperCase()}</kbd>}</NavLink>;
+  const { menuLocked, openPlans } = usePremium();
+  const locked = menuLocked(to);
+  return <NavLink to={to} end onClick={(e) => { if (locked) { e.preventDefault(); openPlans('This menu is a Pro feature.'); } }} className={({ isActive }) => `nav-link ${sub ? 'sub' : ''} ${mine ? 'mine' : ''} ${locked ? 'locked' : ''} ${isActive ? 'active' : ''}`}>{!sub && !mine && <NavIcon to={to} />}{children}{locked && <LockIcon />}{show && k && <kbd className="key-badge" aria-hidden="true">{k.toUpperCase()}</kbd>}</NavLink>;
+}
+
+export const LockIcon = () => (
+  <svg className="nav-lock" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" role="img" aria-label="Pro"><rect x="4" y="11" width="16" height="10" rx="1" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+);
+
+/** Shown instead of a page the Super Admin marked as Pro-only. */
+function LockedPage() {
+  const { openPlans } = usePremium();
+  return (
+    <div className="page">
+      <h1>Pro feature</h1>
+      <div className="card" style={{ maxWidth: 560 }}>
+        <p><LockIcon /> This page is part of the Pro plan. Upgrade to open it.</p>
+        <button className="primary" onClick={() => openPlans('This page is a Pro feature.')}>See plans</button>
+      </div>
+    </div>
+  );
 }
 
 /** Assigns each nav item a unique letter: word initials first, then any remaining letter of its label, then digits. */
@@ -49,7 +72,8 @@ function GlobalSearch() {
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
   const { selected } = useModels();
-  const { data } = useAsync(() => (q.trim().length >= 1 ? get('/search', { q, model: selected }) : Promise.resolve(null)), [q, selected]);
+  const { searchLocked, openPlans } = usePremium();
+  const { data } = useAsync(() => (!searchLocked && q.trim().length >= 1 ? get('/search', { q, model: selected }) : Promise.resolve(null)), [q, selected, searchLocked]);
   const nav = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const mod = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
@@ -63,7 +87,7 @@ function GlobalSearch() {
   const go = (to: string) => { setOpen(false); setQ(''); nav(to); };
   return (
     <div className="search" style={{ position: 'relative' }}>
-      <SearchBox icon="search" inputRef={inputRef} title={`Search (${mod} + K)`} placeholder={`Search everything (2103, 0x2103, manual text…)  ${mod} + K`} value={q} onChange={(v) => { setQ(v); setOpen(true); }} onFocus={() => setOpen(true)} onKeyDown={(e) => e.key === 'Escape' && setOpen(false)} aria-label="Global search" />
+      <SearchBox icon="search" inputRef={inputRef} title={`Search (${mod} + K)`} placeholder={`Search everything (2103, 0x2103, manual text…)  ${mod} + K`} value={q} onChange={(v) => { if (searchLocked) { openPlans('Search is a Pro feature.'); return; } setQ(v); setOpen(true); }} onFocus={() => { if (searchLocked) { inputRef.current?.blur(); openPlans('Search is a Pro feature.'); return; } setOpen(true); }} onKeyDown={(e) => e.key === 'Escape' && setOpen(false)} aria-label="Global search" />
       {open && data && (
         <div className="popover" style={{ top: '100%', left: 0, width: 'min(720px, 92vw)', maxHeight: '70vh', overflow: 'auto' }} onMouseLeave={() => undefined}>
           <div className="row between"><b>Results for “{data.q}”</b><button className="small ghost" onClick={() => setOpen(false)}>Close</button></div>
@@ -84,7 +108,7 @@ function GlobalSearch() {
 function Shell() {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
-  return <ModelsProvider><MyCategoriesProvider><ShellInner /></MyCategoriesProvider></ModelsProvider>;
+  return <PremiumProvider><ModelsProvider><MyCategoriesProvider><ShellInner /></MyCategoriesProvider></ModelsProvider></PremiumProvider>;
 }
 
 function ShellInner() {
@@ -115,29 +139,17 @@ function ShellInner() {
   const mine = useMyCategories();
   const isAdmin = user?.role === 'super_admin';
   const nav = useNavigate();
-  const sections = useMemo(() => {
-    const kbCats = (tax ?? []).filter((c: any) => c.show_nav);
-    const secs: { title?: string; items: [string, string, boolean?][] }[] = [
-      { items: [['/', 'Dashboard']] },
-      { title: 'Knowledge Base', items: [['/parameters', 'All Parameters'], ...kbCats.map((c: any): [string, string, boolean] => [`/kb/${c.slug}`, c.name, true]), ['/knowledge', 'My categories']] },
-      { title: 'Diagnostics', items: [['/knowledge/fault', 'Faults'], ['/knowledge/alarm', 'Alarms'], ['/knowledge/warning', 'Warnings'], ['/knowledge/troubleshooting', 'Troubleshooting']] },
-      { title: 'Installation & Wiring', items: [['/knowledge/wiring', 'Wiring & Terminals'], ['/knowledge/installation', 'Installation'], ['/knowledge/safety', 'Safety']] },
-      { title: 'Technical Reference', items: [['/knowledge/specification', 'Specifications'], ['/knowledge/communication', 'Communication'], ['/knowledge/maintenance', 'Maintenance'], ['/knowledge/note', 'Notes']] },
-      { title: 'Modbus & RS485', items: [['/modbus/registers', 'Register Explorer'], ['/modbus/communication', 'Communication Settings'], ['/modbus/converter', 'Address Converter']] },
-      { title: 'Research', items: [['/compare', 'Multi-Brand Comparison'], ['/bookmarks', 'Research Bookmarks'], ['/annotations', 'My Annotations']] },
-      { title: 'Documentation Library', items: [['/library', 'Manuals'], ...(isAdmin ? [['/library/import', 'Import Documents'] as [string, string]] : [])] },
-    ];
-    if (isAdmin) secs.push({ title: 'Administration', items: [['/verification', 'Verification Center'], ['/admin/content', 'Content & Order'], ['/admin/users', 'Users & Monitoring'], ['/admin/requests', 'User Requests'], ['/admin/logs', 'Activity & Audit']] });
-    return secs;
-  }, [tax, isAdmin]);
-  // collapsible sections (Administration starts closed); the section holding the current page always opens
+  const inAdmin = isAdmin && isAdminPath(loc.pathname);
+  const { isPro, openPlans, menuLocked, categoryLocked } = usePremium();
+  const sections = useMemo(() => (inAdmin ? adminSections : mainSections(tax)), [tax, inAdmin]);
+  // collapsible sections; the section holding the current page always opens
   const [secState, setSecState] = useState<Record<string, boolean>>(() => { try { return JSON.parse(localStorage.getItem('nav-sections') ?? '{}'); } catch { return {}; } });
-  const isOpen = (t: string) => secState[t] ?? t !== 'Administration';
-  const toggleSec = (t: string) => setSecState((s) => { const n = { ...s, [t]: !(s[t] ?? t !== 'Administration') }; try { localStorage.setItem('nav-sections', JSON.stringify(n)); } catch { /* ignore */ } return n; });
+  const isOpen = (t: string) => secState[t] ?? true;
+  const toggleSec = (t: string) => setSecState((s) => { const n = { ...s, [t]: !(s[t] ?? true) }; try { localStorage.setItem('nav-sections', JSON.stringify(n)); } catch { /* ignore */ } return n; });
   const here = loc.pathname;
   useEffect(() => {
     const sec = sections.find((s) => s.title && s.items.some(([to]) => to === '/' ? false : here === to || here.startsWith(to + '/')));
-    if (sec?.title && !(secState[sec.title] ?? sec.title !== 'Administration')) setSecState((s) => ({ ...s, [sec.title!]: true }));
+    if (sec?.title && !(secState[sec.title] ?? true)) setSecState((s) => ({ ...s, [sec.title!]: true }));
   }, [here]); // eslint-disable-line react-hooks/exhaustive-deps
   // sidebar filter: while typing, every section opens and only matching items stay
   const [navQ, setNavQ] = useState('');
@@ -231,7 +243,7 @@ function ShellInner() {
                   {showCats && mine.categories.filter((c) => !q || hit(c.name)).map((c) => <Nav key={`my${c.id}`} to={`/my/${c.id}`} sub mine><MineIcon /> {c.name}</Nav>)}
                   {showCats && !q && (
                     <div className="nav-add-row">
-                      <button type="button" className="nav-add ghost" onClick={mine.openManager} title="Create a category of your own">+ Add category</button>
+                      <button type="button" className="nav-add ghost" onClick={() => (categoryLocked ? openPlans('Custom categories are a Pro feature.') : mine.openManager())} title="Create a category of your own">+ Add category</button>
                       <button type="button" className="nav-gear ghost" aria-label="Manage my categories in Settings" title="Manage my categories (settings)" onClick={() => { setSettingsTab('categories'); setSettingsOpen(true); }}>
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
                       </button>
@@ -250,6 +262,13 @@ function ShellInner() {
           </Fragment>
         ))}
         <div className="grow" />
+        <div className="nav-bottom">
+        {isAdmin && (
+          <Link to={inAdmin ? '/' : ADMIN_HOME} className="admin-panel-btn" title={inAdmin ? 'Return to the application' : 'Open the Super Admin panel'}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{inAdmin ? <path d="M19 12H5M12 19l-7-7 7-7" /> : <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />}</svg>
+            {inAdmin ? 'Back to app' : 'Superadmin Panel'}
+          </Link>
+        )}
         <div className="userbox">
           <span className="avatar" aria-hidden="true">{(user.displayName ?? user.email).trim().charAt(0).toUpperCase()}</span>
           <span className="who" title={`${user.displayName ?? user.email} — ${user.email}`}>{user.displayName ?? user.email}</span>
@@ -257,6 +276,7 @@ function ShellInner() {
           <button className="signout" onClick={logout} aria-label="Sign out" title="Sign out">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
           </button>
+        </div>
         </div>
       </aside>
       <div className="main">
@@ -274,6 +294,9 @@ function ShellInner() {
               <button key={k} role="radio" aria-checked={(settings?.theme ?? 'light') === k} aria-label={`${l} mode`} title={`${l} mode`} className={(settings?.theme ?? 'light') === k ? 'active' : ''} onClick={() => updateSettings({ theme: k } as any)}>{ic}</button>
             ))}
           </div>
+          <button type="button" className={`small get-pro ${isPro ? 'is-pro' : ''}`} onClick={() => openPlans()} title={isPro ? 'You have Pro access' : 'See Pro plans'}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M12 2l3 6.5 7 1-5 5 1.2 7L12 18l-6.2 3.5L7 14.5l-5-5 7-1z" /></svg> <span className="gp-label">{isPro ? 'Pro' : 'Get Pro'}</span>
+          </button>
           <button className="ghost icon-btn" onClick={() => { setSettingsTab(undefined); setSettingsOpen(true); }} aria-label="Settings" title="Settings">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
           </button>
@@ -282,7 +305,7 @@ function ShellInner() {
         <PageAnnotations />
         {settingsOpen && <SettingsModal initialTab={settingsTab} onClose={() => setSettingsOpen(false)} />}
         {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
-        <div key={loc.pathname} className={settings?.page_transition && settings.page_transition !== 'none' ? `pt-${settings.page_transition}` : undefined} style={{ '--pt-ms': `${settings?.page_transition_ms ?? 300}ms` } as React.CSSProperties}><ErrorBoundary resetKey={loc.pathname}><Outlet /></ErrorBoundary></div>
+        <div key={loc.pathname} className={settings?.page_transition && settings.page_transition !== 'none' ? `pt-${settings.page_transition}` : undefined} style={{ '--pt-ms': `${settings?.page_transition_ms ?? 300}ms` } as React.CSSProperties}><ErrorBoundary resetKey={loc.pathname}>{!inAdmin && menuLocked(loc.pathname) ? <LockedPage /> : <Outlet />}</ErrorBoundary></div>
       </div>
     </div>
     </HotkeyCtx.Provider></PageToolsProvider>
@@ -326,21 +349,36 @@ export default function App() {
         <Route path="/bookmarks" element={<BookmarksPage />} />
         <Route path="/annotations" element={<AnnotationsPage />} />
         <Route path="/library" element={<Library />} />
-        <Route path="/library/import" element={<AdminOnly><ImportPage /></AdminOnly>} />
         <Route path="/library/document/:id" element={<DocumentPage />} />
         <Route path="/library/revision/:rid/page/:page" element={<RevisionViewer />} />
-        <Route path="/verification" element={<AdminOnly><VerificationCenter /></AdminOnly>} />
-        <Route path="/admin/content" element={<AdminOnly><AdminContent /></AdminOnly>} />
-        <Route path="/admin/users" element={<AdminOnly><AdminUsers /></AdminOnly>} />
-        <Route path="/admin/requests" element={<AdminOnly><FeedbackAdmin /></AdminOnly>} />
-        <Route path="/admin/logs" element={<AdminOnly><AdminLogs /></AdminOnly>} />
-        <Route path="/admin/settings" element={<AdminOnly><AdminSettings /></AdminOnly>} />
+        <Route path="/superadmin" element={<Navigate to="/superadmin/subscriptions" replace />} />
+        <Route path="/superadmin/subscriptions" element={<AdminOnly><SubscriptionsAdmin /></AdminOnly>} />
+        <Route path="/superadmin/payments" element={<AdminOnly><PaymentsAdmin /></AdminOnly>} />
+        <Route path="/superadmin/premium" element={<AdminOnly><PremiumSettings /></AdminOnly>} />
+        <Route path="/superadmin/verification" element={<AdminOnly><VerificationCenter /></AdminOnly>} />
+        <Route path="/superadmin/content" element={<AdminOnly><AdminContent /></AdminOnly>} />
+        <Route path="/superadmin/users" element={<AdminOnly><AdminUsers /></AdminOnly>} />
+        <Route path="/superadmin/requests" element={<AdminOnly><FeedbackAdmin /></AdminOnly>} />
+        <Route path="/superadmin/logs" element={<AdminOnly><AdminLogs /></AdminOnly>} />
+        <Route path="/superadmin/settings" element={<AdminOnly><AdminSettings /></AdminOnly>} />
+        {/* earlier addresses keep working */}
+        <Route path="/verification" element={<MovedTo to="/superadmin/verification" />} />
+        <Route path="/admin/content" element={<MovedTo to="/superadmin/content" />} />
+        <Route path="/admin/users" element={<MovedTo to="/superadmin/users" />} />
+        <Route path="/admin/requests" element={<MovedTo to="/superadmin/requests" />} />
+        <Route path="/admin/logs" element={<MovedTo to="/superadmin/logs" />} />
+        <Route path="/admin/settings" element={<MovedTo to="/superadmin/settings" />} />
         <Route path="/settings" element={<MySettings />} />
         <Route path="/settings/password" element={<ChangePassword />} />
         <Route path="*" element={<div className="page"><h1>Not found</h1><Link to="/">Home</Link></div>} />
       </Route>
     </Routes>
   );
+}
+
+function MovedTo({ to }: { to: string }) {
+  const l = useLocation();
+  return <Navigate to={to + l.search} replace />;
 }
 
 function AdminOnly({ children }: { children: React.ReactNode }) {

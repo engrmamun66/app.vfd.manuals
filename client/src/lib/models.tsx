@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'r
 import { get } from './api';
 import { useAuth } from './auth';
 import { useAsync } from '../components/ui';
+import { usePremium } from './premium';
 
 /** Default tab label: model name without the trailing parenthetical, e.g. "FRENIC-Mini (FRN0001 …)" → "FRENIC-Mini". */
 export const shortName = (name: string) => name.replace(/\s*\(.*$/, '').trim() || name;
@@ -25,6 +26,7 @@ export const useModels = () => useContext(ModelsCtx);
 export function ModelsProvider({ children }: { children: ReactNode }) {
   const { settings, updateSettings } = useAuth();
   const { data } = useAsync<ModelRow[]>(() => get('/models'), []);
+  const { modelLocked } = usePremium();
   const order = (settings?.model_order ?? []) as number[];
   // personal order first (as saved), models not yet ordered keep the default order after them
   const allModels = [...(data ?? [])].sort((a, b) => {
@@ -41,7 +43,7 @@ export function ModelsProvider({ children }: { children: ReactNode }) {
       allModels,
       isOn: (id) => !off.includes(id),
       // a stored id that no longer exists / is hidden falls back to "all"
-      selected: data && stored !== null && !models.some((m) => m.id === stored) ? null : stored,
+      selected: data && stored !== null && (!models.some((m) => m.id === stored) || modelLocked(stored)) ? null : stored,
       select: (id) => updateSettings({ selected_model: id }),
       label: (m) => aliases[String(m.id)] || shortName(m.name),
     }),

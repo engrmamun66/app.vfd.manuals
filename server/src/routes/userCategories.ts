@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { getDb } from '../db/index.js';
 import { ah, badRequest, conflict, intParam, notFound, str } from '../lib/http.js';
 import { logActivity } from '../lib/audit.js';
+import { assertFeature } from '../services/premium.js';
 
 /**
  * Personal parameter categories. Every query is scoped by the session user id (other users never see them).
@@ -45,6 +46,7 @@ userCategoriesRouter.post(
   ah(async (req, res) => {
     const db = getDb();
     const uid = req.user!.id;
+    assertFeature(req.user!, 'lock_custom_category', 'Custom categories are a Pro feature. Upgrade to create your own categories.');
     const name = cleanName(req.body?.name);
     assertNotSystem(name);
     if ((db.prepare('SELECT COUNT(*) c FROM user_categories WHERE user_id = ?').get(uid) as any).c >= MAX_PER_USER) throw conflict(`You can create at most ${MAX_PER_USER} categories`);
@@ -123,6 +125,7 @@ userCategoriesRouter.put(
   ah(async (req, res) => {
     const db = getDb();
     const uid = req.user!.id;
+    assertFeature(req.user!, 'lock_custom_category', 'Custom categories are a Pro feature. Upgrade to assign your own categories.');
     const pid = intParam(req.params.pid, 'pid', { required: true })!;
     if (!db.prepare('SELECT 1 FROM parameters WHERE id = ?').get(pid)) throw notFound('Parameter not found');
     const ids: unknown = req.body?.categoryIds;

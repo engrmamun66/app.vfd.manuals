@@ -15,6 +15,12 @@ export const setUnauthorizedHandler = (fn: (code?: string) => void) => {
   onUnauthorized = fn;
 };
 
+let onPremium: ((message: string) => void) | null = null;
+/** Called when the server refuses an action because it needs a Pro plan (HTTP 402). */
+export const setPremiumHandler = (fn: ((message: string) => void) | null) => {
+  onPremium = fn;
+};
+
 export async function api<T = any>(path: string, opts: { method?: string; body?: unknown; form?: FormData; query?: Record<string, unknown> } = {}): Promise<T> {
   let url = '/api' + path;
   if (opts.query) {
@@ -36,6 +42,7 @@ export async function api<T = any>(path: string, opts: { method?: string; body?:
   const data = ct.includes('application/json') ? await res.json().catch(() => null) : null;
   if (!res.ok) {
     if ((res.status === 401 || (res.status === 403 && data?.code === 'MUST_CHANGE_PASSWORD')) && onUnauthorized) onUnauthorized(data?.code);
+    if (res.status === 402 && data?.code === 'PREMIUM_REQUIRED' && onPremium) onPremium(data.error);
     throw new ApiError(res.status, data?.error || res.statusText, data?.code, data?.details);
   }
   return data as T;

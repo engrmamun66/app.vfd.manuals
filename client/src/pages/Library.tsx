@@ -17,7 +17,7 @@ export function Library() {
   return (
     <div className="page">
       <Crumbs items={[{ label: 'Documentation Library' }, { label: 'Manuals' }]} />
-      <div className="row between"><h1>Documentation Library</h1><div className="row">{user?.role === 'super_admin' && <Link className="btn primary" to="/library/import">Import documents</Link>}</div></div>
+      <div className="row between"><h1>Documentation Library</h1></div>
       <ModelTabs />
       <ErrorBox e={error} />
       {loading ? <Loading /> : (
@@ -125,80 +125,6 @@ function ManualRecord({ revisionId, page, onDone }: { revisionId: number; page: 
       <div className="field"><label>evidence_quote (copy verbatim from this page — it is checked against the page text)</label><textarea value={f.evidence_quote ?? ''} onChange={set('evidence_quote')} /></div>
       <div className="row"><button className="primary" disabled={!model} onClick={submit}>Stage for review (page {page})</button><button onClick={onDone}>Close</button></div>
       {res && (res instanceof Error ? <ErrorBox e={res} /> : <div className="ok-box">Staged #{res.stagedId} · quote: {res.quoteMatch} · {res.comparison}. Approve it in the <Link to="/verification">Verification Center</Link>.</div>)}
-    </div>
-  );
-}
-
-// ============ Import documents ============
-export function ImportPage() {
-  const { data: scan, reload } = useAsync(() => get('/manuals/scan'), []);
-  const [job, setJob] = useState<number | null>(null);
-  const [jobData, setJobData] = useState<any>(null);
-  const [err, setErr] = useState<any>(null);
-  const [folder, setFolder] = useState('');
-  const timer = useRef<number | null>(null);
-  useEffect(() => {
-    if (!job) return;
-    const tick = async () => {
-      try {
-        const j = await get(`/imports/${job}`);
-        setJobData(j);
-        if (['running'].includes(j.status)) timer.current = window.setTimeout(tick, 1500);
-        else reload();
-      } catch (e) { setErr(e); }
-    };
-    tick();
-    return () => { if (timer.current) clearTimeout(timer.current); };
-  }, [job]);
-  const start = async (path: string, dryRun: boolean) => {
-    setErr(null); setJobData(null);
-    try { setJob((await post('/imports', { path, dryRun })).importJobId); } catch (e) { setErr(e); }
-  };
-  const upload = async (file: File) => {
-    setErr(null); setJobData(null);
-    const fd = new FormData();
-    fd.append('file', file);
-    if (folder) fd.append('folder', folder);
-    try { setJob((await api('/imports/upload', { form: fd, method: 'POST' })).importJobId); } catch (e) { setErr(e); }
-  };
-  const r = jobData?.result;
-  return (
-    <div className="page">
-      <Crumbs items={[{ label: 'Documentation Library', to: '/library' }, { label: 'Import Documents' }]} />
-      <h1>Import Documents</h1>
-      <p className="muted prose">Imports run through the same <code>DocumentIngestionService</code> as the CLI (<code>npm run import:manual -- "vfd-manuals/…"</code>). Nothing is overwritten; extracted records go to review. Only files you explicitly choose are processed — there is no folder watcher.</p>
-      <ErrorBox e={err} />
-      <div className="card alt" style={{ marginBottom: 14 }}>
-        <b>Upload a manual</b>
-        <div className="row" style={{ marginTop: 6 }}><input placeholder="Target folder in vfd-manuals/ (e.g. Delta)" value={folder} onChange={(e) => setFolder(e.target.value)} list="folders" /><datalist id="folders">{scan?.folders.map((f: string) => <option key={f} value={f} />)}</datalist>
-          <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} /></div>
-      </div>
-      <h2>Files in vfd-manuals/</h2>
-      <div className="table-wrap"><table><thead><tr><th>File</th><th>Folder</th><th>Size</th><th>Status</th><th></th></tr></thead><tbody>
-        {scan?.files.map((f: any) => (
-          <tr key={f.path}><td className="small-text">{f.path.replace('vfd-manuals/', '')}</td><td>{f.folder}</td><td>{fmtBytes(f.size)}</td>
-            <td>{f.imported ? <Link to={`/library/document/${f.documentId}`} className="badge strong">Imported</Link> : <span className="badge dashed">Not imported</span>}{scan.curated.some((c: any) => c.document_file?.toLowerCase() === f.path.toLowerCase()) && <span className="badge" style={{ marginLeft: 4 }}>curated extraction available</span>}</td>
-            <td><div className="row"><button className="small" onClick={() => start(f.path, true)}>Dry run</button><button className="small primary" onClick={() => start(f.path, false)}>{f.imported ? 'Re-run (adds nothing duplicate)' : 'Import'}</button></div></td></tr>))}
-      </tbody></table></div>
-      {job && (
-        <div className="card" style={{ marginTop: 16 }}>
-          <h2>Import job #{job} — {jobData?.status ?? 'starting'}</h2>
-          {!r && <><Loading what="Processing" /><pre className="mono small-text" style={{ maxHeight: 200, overflow: 'auto' }}>{jobData?.log?.join('\n')}</pre></>}
-          {r && (<>
-            <div className="table-wrap"><table><tbody>
-              <tr><th>Document</th><td>{r.document.name} ({r.document.format}, {fmtBytes(r.document.sizeBytes ?? 0)})</td></tr>
-              <tr><th>Detected brand / model</th><td>{r.detected.brand ?? 'unknown'} / {r.detected.model ?? 'unknown'} <span className="badge dashed">needs review</span><div className="small-text muted">{r.detected.identificationSource}</div></td></tr>
-              <tr><th>Pages</th><td>{r.pages.total} total · {r.pages.withTextLayer} with text layer · {r.pages.ocrProcessed} OCR'd · {r.pages.ocrFailed} OCR failed · {r.pages.empty} without text · OCR: {r.ocrStatus}</td></tr>
-              <tr><th>Extracted</th><td>{r.extraction.parametersExtracted} parameters · {r.extraction.registersExtracted} registers · {r.extraction.staged} staged · {r.extraction.skippedAlreadyStaged} already staged</td></tr>
-              <tr><th>Comparison</th><td>{Object.entries(r.comparison).map(([k, v]) => `${k}: ${v}`).join(' · ') || '—'}</td></tr>
-              <tr><th>Duplicate</th><td>{r.duplicates ? `Yes — revision #${r.duplicates.existingRevisionId}` : 'No'}</td></tr>
-              <tr><th>Pending review</th><td>{r.pendingReview} · tasks created: {r.verificationTasksCreated}</td></tr>
-            </tbody></table></div>
-            {r.errors.length > 0 && <div className="err"><b>Errors</b><ul>{r.errors.map((e: string, i: number) => <li key={i}>{e}</li>)}</ul></div>}
-            {r.warnings.length > 0 && <details><summary>{r.warnings.length} warning(s)</summary><ul>{r.warnings.map((e: string, i: number) => <li key={i} className="small-text">{e}</li>)}</ul></details>}
-            {r.pendingReview > 0 && <Link className="btn primary" to={`/verification?job=${job}`}>Review {r.pendingReview} extracted records</Link>}
-          </>)}
-        </div>)}
     </div>
   );
 }

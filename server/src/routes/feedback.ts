@@ -7,6 +7,7 @@ import { audit, logActivity } from '../lib/audit.js';
 import { purgeUpload, safeResolve, saveUserImage, userRoot } from '../services/storage.js';
 import { requireSuperAdmin } from '../auth/middleware.js';
 import { isValidEmail, normalizeEmail } from '../auth/password.js';
+import { assertFeature } from '../services/premium.js';
 
 /**
  * Requests and complaints sent by users (message + optional images).
@@ -32,6 +33,7 @@ feedbackRouter.post(
     const db = getDb();
     const uid = req.user!.id;
     const kind = oneOf(req.body.kind, 'kind', KINDS);
+    if (kind === 'request') assertFeature(req.user!, 'lock_requests', 'Sending a request (for example a new VFD manual) is a Pro feature. Complaints stay free.');
     const message = str(req.body.message, 'message', { required: true, max: 4000 })!;
     if (message.trim().length < 3) throw badRequest('Please write a few words (at least 3 characters)');
     // optional contact details

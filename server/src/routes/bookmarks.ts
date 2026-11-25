@@ -3,6 +3,7 @@ import { getDb, type DB } from '../db/index.js';
 import { ah, badRequest, bool, conflict, intParam, notFound, oneOf, str } from '../lib/http.js';
 import { logActivity } from '../lib/audit.js';
 import { json, parseJson } from '../lib/util.js';
+import { assertWithinLimit } from '../services/premium.js';
 
 /** Research bookmarks: private per user. Every query is scoped by the session user id (IDOR-safe). */
 export const bookmarksRouter = Router();
@@ -193,6 +194,7 @@ bookmarksRouter.get(
 bookmarksRouter.post(
   '/',
   ah(async (req, res) => {
+    assertWithinLimit(req.user!, 'bookmarks');
     const db = getDb();
     const uid = req.user!.id;
     const name = str(req.body.name, 'name', { required: true, max: 200 })!;

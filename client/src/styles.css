@@ -580,3 +580,38 @@ select.ctl:focus { outline: none; border-color: var(--fg); box-shadow: 0 0 0 3px
 }
 @media (max-width: 960px) { .pager-hint { display: none; } }
 @media (max-width: 960px) { .pager { justify-content: center; gap: 10px; } .pager .pager-hint.typing { margin-left: 0; } }
+
+/* ===== Premium: plans dialog, locks, Superadmin Panel ===== */
+.plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.plan { display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--line); padding: 14px 16px; background: var(--bg); }
+.plan h3 { margin: 0; display: flex; align-items: center; gap: 8px; }
+.plan.current { border-color: var(--fg); background: var(--bg-alt); }
+.plan.pro { border-color: var(--line-strong); }
+.plan.best { border-color: var(--fg); box-shadow: inset 0 0 0 1px var(--fg); }
+.plan-price { font-size: 1.7rem; font-weight: 700; }
+.plan-price span { font-size: .85rem; font-weight: 400; color: var(--fg-muted); }
+.plan ul { margin: 0; padding-left: 18px; font-size: .88rem; flex: 1; }
+.plan li + li { margin-top: 4px; }
+.plan-foot { margin-top: auto; }
+.pay-box .pay-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-top: 8px; }
+.pay-num { font-size: 1.05rem; font-weight: 650; overflow-wrap: anywhere; }
+.get-pro { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-weight: 650; background: var(--inv-bg); color: var(--inv-fg); border-color: var(--inv-bg); }
+button.get-pro:hover { background: var(--inv-bg); color: var(--inv-fg); opacity: .85; }
+button.get-pro.is-pro:hover { background: var(--bg-hover); color: var(--fg); opacity: 1; }
+.get-pro.is-pro { background: transparent; color: var(--fg); border-color: var(--fg); }
+.nav-lock { margin-left: 6px; vertical-align: -1px; opacity: .65; }
+.nav-link.locked { color: var(--fg-muted); }
+.tab-lock { font-size: .75em; }
+.sidebar .nav-bottom { position: sticky; bottom: 0; z-index: 2; margin-top: auto; background: var(--sidebar-bg); }
+.sidebar .nav-bottom .userbox { position: static; margin-top: 0; }
+.admin-panel-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 12px 8px; padding: 8px 10px; border: 1px solid var(--fg); background: var(--inv-bg); color: var(--inv-fg); text-decoration: none; font-weight: 650; font-size: .88rem; }
+.admin-panel-btn:hover { opacity: .88; }
+.lock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 16px; }
+.lock-group { border: 1px solid var(--line); padding: 8px 12px; margin: 0; min-width: 0; }
+.lock-group legend { padding: 0 6px; }
+.lock-item { display: flex; align-items: center; gap: 8px; font-weight: 400; padding: 2px 0; cursor: pointer; }
+.limits { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; align-items: end; }
+.limits .field input { width: 100%; }
+@media (max-width: 860px) { .plans { grid-template-columns: 1fr; } }
+@media (max-width: 960px) { .topbar .get-pro .gp-label { display: none; } .topbar .get-pro { padding: 6px 9px; } }
+.sticky-save { position: sticky; bottom: 0; z-index: 5; margin: 16px -4px 0; padding: 10px 4px; background: var(--bg); border-top: 1px solid var(--line); box-shadow: 0 -6px 10px -8px rgba(0,0,0,.25); }

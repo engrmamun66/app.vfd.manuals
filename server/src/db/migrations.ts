@@ -743,4 +743,57 @@ INSERT OR IGNORE INTO knowledge_item_pages(item_id, revision_id, page_index, pri
   SELECT id, revision_id, page_index, printed_page, 'primary' FROM knowledge_items WHERE revision_id IS NOT NULL AND page_index IS NOT NULL;
 `,
   },
+  {
+    version: 11,
+    name: 'subscriptions',
+    sql: /* sql */ `
+-- paid plans: a user sends a request (draft) with a payment receipt; the Super Admin checks it and activates / cancels it
+CREATE TABLE subscriptions (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  plan TEXT NOT NULL CHECK (plan IN ('monthly','yearly')),
+  amount INTEGER NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'BDT',
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','active','cancelled')),
+  receipt_upload_id INTEGER REFERENCES user_uploads(id),
+  user_note TEXT,
+  admin_note TEXT,
+  starts_at TEXT,
+  ends_at TEXT,
+  decided_by INTEGER REFERENCES users(id),
+  decided_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+CREATE INDEX idx_sub_user ON subscriptions(user_id, id);
+CREATE INDEX idx_sub_status ON subscriptions(status, id);
+`,
+  },
+  {
+    version: 12,
+    name: 'payments',
+    sql: /* sql */ `
+-- payment collection ledger kept by the Super Admin (one row per payment received)
+CREATE TABLE payments (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  subscription_id INTEGER REFERENCES subscriptions(id) ON DELETE SET NULL,
+  payer_name TEXT,
+  payer_phone TEXT,
+  amount INTEGER NOT NULL CHECK (amount >= 0),
+  currency TEXT NOT NULL DEFAULT 'BDT',
+  method TEXT NOT NULL DEFAULT 'bkash' CHECK (method IN ('bkash','bank','cash','other')),
+  trx_id TEXT,
+  paid_at TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'received' CHECK (status IN ('received','refunded')),
+  note TEXT,
+  created_by INTEGER REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+CREATE INDEX idx_pay_paid ON payments(paid_at, id);
+CREATE INDEX idx_pay_user ON payments(user_id);
+CREATE INDEX idx_pay_sub ON payments(subscription_id);
+`,
+  },
 ];
