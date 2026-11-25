@@ -16,6 +16,7 @@ import { PremiumProvider, usePremium } from './lib/premium';
 import { ADMIN_HOME, adminSections, isAdminPath, mainSections } from './lib/nav';
 import { MyCategoriesProvider, useMyCategories } from './lib/myCategories';
 import { MineIcon, MyCategoriesModal } from './components/MyCategories';
+import { SearchResults } from './components/SearchResults';
 import { PageAnnotations } from './components/PageAnnotations';
 import { FeedbackModal } from './components/FeedbackModal';
 import { AdminContent, AdminLogs, AdminSettings, AdminUsers, MySettings } from './pages/Admin';
@@ -102,17 +103,8 @@ function GlobalSearch() {
     <div className="search" style={{ position: 'relative' }}>
       <SearchBox icon="search" inputRef={inputRef} title={`Search (${mod} + K)`} placeholder={`Search everything (2103, 0x2103, manual text…)  ${mod} + K`} value={q} onChange={(v) => { if (searchLocked) { openPlans('Search is a Pro feature.'); return; } setQ(v); setOpen(true); }} onFocus={() => { if (searchLocked) { inputRef.current?.blur(); openPlans('Search is a Pro feature.'); return; } setOpen(true); }} onKeyDown={(e) => e.key === 'Escape' && setOpen(false)} aria-label="Global search" />
       {open && data && (
-        <div className="popover" style={{ top: '100%', left: 0, width: 'min(720px, 92vw)', maxHeight: '70vh', overflow: 'auto' }} onMouseLeave={() => undefined}>
-          <div className="row between"><b>Results for “{data.q}”</b><button className="small ghost" onClick={() => setOpen(false)}>Close</button></div>
-          {([['Common functions', data.functions.map((f: any) => [f.id, `/function/${f.slug}`, f.name, f.category])],
-            ['Parameters', data.parameters.map((p: any) => [p.id, `/parameter/${p.id}`, `${p.code} — ${p.name ?? ''}`, `${p.brand} ${p.model}`])],
-            ['Modbus registers', data.registers.map((r: any) => [r.id, `/register/${r.id}`, `${r.original_address} — ${r.name}`, `${r.brand} ${r.model}`])],
-            ['Models', data.models.map((m: any) => [m.id, `/model/${m.id}`, m.name, m.brand])]] as [string, [number, string, string, string][]][]).map(([title, items]) => items.length > 0 && (
-            <div key={title} style={{ marginTop: 8 }}><div className="small-text muted"><b>{title}</b> ({items.length})</div>
-              {items.slice(0, 12).map(([id, to, a, b]) => <div key={id}><a href={to} onClick={(e) => { e.preventDefault(); go(to); }}>{a}</a> <span className="faint small-text">{b}</span></div>)}</div>))}
-          {data.pages.length > 0 && <div style={{ marginTop: 8 }}><div className="small-text muted"><b>Manual text</b> ({data.pages.length})</div>
-            {data.pages.slice(0, 8).map((p: any) => <div key={p.page_id} className="small-text"><a href="#" onClick={(e) => { e.preventDefault(); go(`/library/revision/${p.revision_id}/page/${p.page_index}`); }}>{p.document_title} p.{p.page_index}</a> <span className="snippet" dangerouslySetInnerHTML={{ __html: escSnippet(p.snippet) }} /></div>)}</div>}
-          {!data.functions.length && !data.parameters.length && !data.registers.length && !data.models.length && !data.pages.length && <p className="muted">No match in the database.</p>}
+        <div className="popover search-pop" style={{ top: '100%', left: 0 }}>
+          <SearchResults data={data} onGo={go} onClose={() => setOpen(false)} />
         </div>)}
     </div>
   );

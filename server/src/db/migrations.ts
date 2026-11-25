@@ -805,4 +805,12 @@ ALTER TABLE user_sessions ADD COLUMN impersonator_user_id INTEGER REFERENCES use
 ALTER TABLE user_sessions ADD COLUMN impersonator_session_id INTEGER;
 `,
   },
+  {
+    version: 14,
+    name: 'page_text_vocabulary',
+    sql: /* sql */ `
+-- every word of the manual pages, so the search box can offer close spellings
+CREATE VIRTUAL TABLE IF NOT EXISTS document_pages_vocab USING fts5vocab(document_pages_fts, 'row');
+`,
+  },
 ];

@@ -239,7 +239,7 @@ test.describe('dashboard & knowledge base', () => {
   test('global search finds parameters and manual page text', async () => {
     await admin.goto('/');
     await admin.getByLabel('Global search').fill('frequency');
-    await expect(admin.locator('.popover').getByText(/Manual text/)).toBeVisible();
+    await expect(admin.locator('.popover').getByRole('heading', { name: /Manual text/ })).toBeVisible();
     await expect(admin.locator('.popover')).toContainText(/Parameters|Common functions/);
   });
 });
@@ -825,6 +825,43 @@ test.describe('premium: free limits, plans dialog, subscription review (Super Ad
     expect(back.impersonation).toBeNull();
     expect((await p.request.get('/api/admin/users')).status()).toBe(200);
     await ctx.close();
+  });
+
+  test('search is forgiving: words copied from a page image (typos, missing words, other case/order) still find the page', async () => {
+    const find = async (q: string) => (await (await alice.request.get('/api/search', { params: { q } })).json());
+    // take a real sentence from a stored manual page
+    const base = await find('frequency command source');
+    expect(base.pages.length).toBeGreaterThan(0);
+    const page = base.pages[0];
+    const clean = (page.snippet as string).replace(/\[\[|\]\]| … /g, ' ').replace(/\s+/g, ' ').trim().split(' ').filter((w) => /^[A-Za-z]{4,}$/.test(w));
+    expect(clean.length).toBeGreaterThan(5);
+    const seq = clean.slice(0, 8);
+    // exact words, a typo in two words, one word missing, shouting and reversed order: the same page must still come back
+    const variants = [
+      seq.join(' '),
+      seq.map((w, i) => (i % 3 === 1 ? w.slice(0, 2) + w.slice(3) : w)).join(' '),
+      seq.filter((_, i) => i !== 2).join(' '),
+      seq.join(' ').toUpperCase(),
+      [...seq].reverse().join(' '),
+    ];
+    for (const v of variants) {
+      const r = await find(v);
+      expect(r.pages.map((x: any) => x.page_id), `query: ${v}`).toContain(page.page_id);
+    }
+    // a split / joined word and a plural still match
+    expect((await find('over current')).pages.length).toBeGreaterThan(0);
+    expect((await find('overcurrent')).pages.length).toBeGreaterThan(0);
+    expect((await find('carier frequencies')).pages.length).toBeGreaterThan(0);
+    // junk finds nothing and does not fail
+    const none = await find('qzxqzxqzx');
+    expect(none.pages).toEqual([]);
+    // manual topics (faults, wiring ...) are searched too
+    const t = await find('overcurrent fault remedy');
+    expect(Array.isArray(t.topics)).toBe(true);
+    // the header search box shows the pages
+    await alice.goto('/');
+    await alice.getByLabel('Global search').fill(seq.slice(0, 5).join(' ').toUpperCase());
+    await expect(alice.getByRole('heading', { name: /Manual text/ })).toBeVisible();
   });
 });
 
