@@ -630,3 +630,5 @@ button.get-pro.is-pro:hover { background: var(--bg-hover); color: var(--fg); opa
 .impersonation-bar { height: 36px; flex-wrap: nowrap; overflow: hidden; }
 .impersonation-bar span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .impersonation-bar ~ .app { height: calc(100% - 36px); }
+/* wider header search (desktop) */
+@media (min-width: 961px) { .topbar .search { max-width: 900px; } }
