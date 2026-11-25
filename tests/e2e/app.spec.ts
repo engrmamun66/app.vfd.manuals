@@ -796,6 +796,36 @@ test.describe('premium: free limits, plans dialog, subscription review (Super Ad
     await confirmModal(admin);
     await expect(admin.getByText('No payment matches the search.')).toBeVisible();
   });
+
+  test('Super Admin can sign in as a user with one click and return to the admin session', async ({ browser }) => {
+    const ctx = await browser.newContext({ baseURL: 'http://127.0.0.1:3077', viewport: { width: 1600, height: 900 }, storageState: await adminCtx.storageState() });
+    const p = await ctx.newPage();
+    await p.goto('/superadmin/users');
+    const row = p.locator('tbody tr', { hasText: 'alice@e2e.test' });
+    await expect(row).toBeVisible();
+    // not offered for the admin's own row
+    await expect(p.locator('tbody tr', { hasText: ADMIN.email }).getByRole('button', { name: 'Login as' })).toHaveCount(0);
+    await row.getByRole('button', { name: 'Login as' }).click();
+    await confirmModal(p);
+    await expect(p.locator('.impersonation-bar')).toContainText('alice@e2e.test');
+    const me = await (await p.request.get('/api/auth/me')).json();
+    expect(me.user.email).toBe('alice@e2e.test');
+    expect(me.user.role).toBe('user');
+    expect(me.impersonation.byEmail).toBe(ADMIN.email);
+    // acts as a normal user: no admin API, no admin button, no password change
+    expect((await p.request.get('/api/admin/users')).status()).toBe(403);
+    await expect(p.getByRole('link', { name: 'Superadmin Panel' })).toHaveCount(0);
+    await expect(p.getByRole('button', { name: 'Get Pro' }).or(p.getByRole('button', { name: /Get Pro/ })).first()).toBeVisible();
+    expect((await p.request.post('/api/auth/change-password', { data: { currentPassword: 'x', newPassword: 'y', confirmPassword: 'y' }, headers: { 'X-CSRF-Token': me.csrfToken } })).status()).toBe(403);
+    // return to admin
+    await p.getByRole('button', { name: 'Return to admin' }).click();
+    await expect(p.locator('.impersonation-bar')).toHaveCount(0);
+    const back = await (await p.request.get('/api/auth/me')).json();
+    expect(back.user.email).toBe(ADMIN.email);
+    expect(back.impersonation).toBeNull();
+    expect((await p.request.get('/api/admin/users')).status()).toBe(200);
+    await ctx.close();
+  });
 });
 
 test.describe('theme & accessibility basics', () => {

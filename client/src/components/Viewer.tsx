@@ -1,3 +1,4 @@
+import { pdfUrl } from './OriginalPdfButton';
 import { useSplitAvailable } from './PageTools';
 import { SplitIcon } from './icons';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
@@ -120,7 +121,7 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
         </div>
         <div className="row">
           {quoteMatch !== undefined && <QuoteBadge s={quoteMatch} />}
-          <a className="btn small" href={`/api/revisions/${revisionId}/file#page=${page}`} target="_blank" rel="noreferrer">Open original PDF <span aria-hidden="true">↗</span></a>
+          <a className="btn small" href={pdfUrl(revisionId, rev.title ?? 'manual', page)} target="_blank" rel="noreferrer">Open original PDF <span aria-hidden="true">↗</span></a>
           {!loc.pathname.startsWith('/library/revision/') && <Link className="btn small" to={`/library/revision/${revisionId}/page/${page}`}>Full viewer</Link>}
         </div>
       </div>

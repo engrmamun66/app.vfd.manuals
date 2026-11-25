@@ -9,6 +9,7 @@ import { ImportanceBadge } from './Knowledge';
 import { useModels } from '../lib/models';
 import { useUiSettings } from '../lib/auth';
 import { Crumbs, ModelName, Tip, truncate, ErrorBox, EquivBadge, EvBadge, InfoIcon, Loading, Pager, QuoteBadge, SearchBox, Val, VerifBadge, download, useAsync } from '../components/ui';
+import { pdfUrl } from '../components/OriginalPdfButton';
 import { usePageInfo } from '../components/PageTools';
 import { PageViewer, SplitView } from '../components/Viewer';
 import { Annotatable, AnnotationScope } from '../components/Annotatable';
@@ -183,7 +184,7 @@ function EvidenceList({ evidence, selected, onSelect }: { evidence: any[]; selec
           <div className="row">
             <button className="small" onClick={() => onSelect(i)}>Show page here</button>
             {e.page_index && <Link className="btn small" to={`/library/revision/${e.revision_id}/page/${e.page_index}`}>Open in viewer</Link>}
-            <a className="btn small" href={`/api/revisions/${e.revision_id}/file#page=${e.page_index ?? 1}`} target="_blank" rel="noreferrer">Open original PDF <span aria-hidden="true">↗</span></a>
+            <a className="btn small" href={pdfUrl(e.revision_id, `${e.brand ?? ''} ${e.model ?? e.document_title ?? 'manual'}`, e.page_index ?? 1)} target="_blank" rel="noreferrer">Open original PDF <span aria-hidden="true">↗</span></a>
           </div>
         </div>
       ))}
