@@ -144,9 +144,9 @@ export function PremiumSettings() {
 
       <div className="card stack">
         <h2 style={{ margin: 0 }}>Manual page images</h2>
-        <label className="lock-item"><input type="checkbox" checked={cfg.text_mapping !== false} onChange={(e) => set('text_mapping', e.target.checked)} /> Enable text mapping on manual images (text can be selected, copied, commented and highlighted)</label>
-        <label className="lock-item"><input type="checkbox" checked={cfg.highlight_matched !== false} onChange={(e) => set('highlight_matched', e.target.checked)} /> Highlight matched words on Manual image (the cited value is marked in yellow)</label>
-        <div className="small-text faint">Applies to all users. Highlighting needs text mapping.</div>
+        <label className="lock-item"><input type="checkbox" checked={!!cfg.lock_highlight_matched} onChange={(e) => set('lock_highlight_matched', e.target.checked)} /> Highlighting matched words on Manual image needs Pro (the cited value marked in yellow)</label>
+        <label className="lock-item"><input type="checkbox" checked={!!cfg.lock_text_mapping} onChange={(e) => set('lock_text_mapping', e.target.checked)} /> Text mapping on manual images needs Pro (selecting, copying, commenting and highlighting text on the page image)</label>
+        <div className="small-text faint">Checked = not available to free users. Pro users and Super Admins always have both. The yellow mark needs text mapping.</div>
       </div>
 
       <div className="card stack">

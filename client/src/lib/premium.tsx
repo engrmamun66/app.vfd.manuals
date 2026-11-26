@@ -9,8 +9,8 @@ export interface PremiumConfig {
   lock_search: boolean;
   lock_custom_category: boolean;
   lock_requests: boolean;
-  text_mapping?: boolean;
-  highlight_matched?: boolean;
+  lock_text_mapping?: boolean;
+  lock_highlight_matched?: boolean;
   max_upload_mb: number | null;
   max_comments: number | null;
   max_highlights: number | null;
@@ -38,9 +38,11 @@ interface Ctx {
   modelLocked: (id: number) => boolean;
   searchLocked: boolean;
   categoryLocked: boolean;
+  textMappingLocked: boolean;
+  highlightLocked: boolean;
 }
 
-const PremiumCtx = createContext<Ctx>({ status: null, isPro: false, openPlans: () => {}, reload: async () => {}, menuLocked: () => false, modelLocked: () => false, searchLocked: false, categoryLocked: false });
+const PremiumCtx = createContext<Ctx>({ status: null, isPro: false, openPlans: () => {}, reload: async () => {}, menuLocked: () => false, modelLocked: () => false, searchLocked: false, categoryLocked: false, textMappingLocked: false, highlightLocked: false });
 export const usePremium = () => useContext(PremiumCtx);
 
 export function PremiumProvider({ children }: { children: ReactNode }) {
@@ -66,6 +68,8 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
       modelLocked: (id) => !pro && !!cfg && cfg.locked_models.includes(id),
       searchLocked: !pro && !!cfg?.lock_search,
       categoryLocked: !pro && !!cfg?.lock_custom_category,
+      textMappingLocked: !pro && !!cfg?.lock_text_mapping,
+      highlightLocked: !pro && !!cfg?.lock_highlight_matched,
     };
   }, [status, openPlans, reload]);
   return (

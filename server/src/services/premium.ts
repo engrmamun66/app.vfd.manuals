@@ -13,8 +13,8 @@ export interface PremiumConfig {
   lock_search: boolean;
   lock_custom_category: boolean;
   lock_requests: boolean; // "request" messages (new manual / model requests)
-  text_mapping: boolean; // selectable text layer over manual page images
-  highlight_matched: boolean; // cited words marked on the manual page image
+  lock_text_mapping: boolean; // selectable text layer over manual page images needs Pro
+  lock_highlight_matched: boolean; // cited words marked on the manual page image need Pro
   max_upload_mb: number | null; // largest comment image a free user may upload (null = no limit)
   max_comments: number | null;
   max_highlights: number | null;
@@ -29,8 +29,8 @@ export const PREMIUM_DEFAULTS: PremiumConfig = {
   lock_search: false,
   lock_custom_category: false,
   lock_requests: true,
-  text_mapping: true,
-  highlight_matched: true,
+  lock_text_mapping: false,
+  lock_highlight_matched: false,
   max_upload_mb: 2,
   max_comments: 20,
   max_highlights: 50,

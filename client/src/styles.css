@@ -661,7 +661,7 @@ button.get-pro.is-pro:hover { background: var(--bg-hover); color: var(--fg); opa
 
 /* "Open PDF": on the title line (desktop) / in the header toolbar (mobile) */
 .main { position: relative; }
-.title-pdf { position: absolute; right: 24px; z-index: 6; }
+.title-pdf { position: absolute; right: 24px; z-index: 6; display: flex; align-items: center; gap: 8px; }
 .tb-pdf { display: none; }
 @media (min-width: 961px) { .main .page h1 { padding-right: 110px; } }
 @media (max-width: 960px) { .title-pdf { display: none !important; } .tb-pdf { display: inline-flex; } }

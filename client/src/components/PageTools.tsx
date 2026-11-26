@@ -33,11 +33,10 @@ export function useSplitAvailable() {
 
 /** Global header toolbar: [Split — only where supported] [Notes] [Save] [Open PDF — always last]. */
 export function PageToolbar() {
-  const { info, splitCount } = useContext(PageToolsCtx);
+  const { info } = useContext(PageToolsCtx);
   const adminPage = useLocation().pathname.startsWith('/superadmin'); // no notes / bookmarks on Superadmin Panel pages
   return (
     <div className="page-toolbar">
-      {splitCount > 0 && <SplitToggle />}
       {!adminPage && <AnnotationDisplayControl />}
       {!adminPage && <SaveBookmarkButton title={info?.title} context={info?.context ?? {}} />}
       <span className="tb-pdf"><OriginalPdfButton modelId={info?.modelId} /></span>
@@ -51,7 +50,7 @@ export function PageToolbar() {
  * On mobile the same button lives in the header toolbar instead.
  */
 export function TitleLinePdf({ scrollRef }: { scrollRef: React.RefObject<HTMLElement | null> }) {
-  const { info } = useContext(PageToolsCtx);
+  const { info, splitCount } = useContext(PageToolsCtx);
   const adminPage = useLocation().pathname.startsWith('/superadmin');
   const box = useRef<HTMLDivElement>(null);
   const [top, setTop] = useState<number | null>(null);
@@ -77,5 +76,5 @@ export function TitleLinePdf({ scrollRef }: { scrollRef: React.RefObject<HTMLEle
     return () => { clearTimeout(tm); mo.disconnect(); ro.disconnect(); window.removeEventListener('resize', later); };
   }, [scrollRef]);
   if (adminPage) return null;
-  return <div ref={box} className="title-pdf" style={top == null ? { display: 'none' } : { top }}><OriginalPdfButton modelId={info?.modelId} /></div>;
+  return <div ref={box} className="title-pdf" style={top == null ? { display: 'none' } : { top }}><OriginalPdfButton modelId={info?.modelId} />{splitCount > 0 && <SplitToggle />}</div>;
 }

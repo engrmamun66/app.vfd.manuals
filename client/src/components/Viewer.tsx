@@ -142,9 +142,9 @@ function TextOverlay({ revisionId, page, quote }: { revisionId: number; page: nu
 /** Original manufacturer page: image (zoom/pan) and extracted text (annotatable). Never replaces the image with OCR. */
 export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuote, compact, overlay, inModal }: { revisionId: number; page: number; onPage?: (p: number) => void; quoteMatch?: string | null; highlightQuote?: string | null; compact?: boolean; overlay?: boolean; inModal?: boolean }) {
   const [full, setFull] = useState(false);
-  const premCfg = usePremium().status?.config;
-  const mapOn = premCfg?.text_mapping !== false; // Super Admin switches in Premium Settings
-  const hlOn = premCfg?.highlight_matched !== false;
+  const { textMappingLocked, highlightLocked } = usePremium(); // Super Admin sets these in Premium Settings
+  const mapOn = !textMappingLocked;
+  const hlOn = !highlightLocked;
   const loc = useLocation();
   const navigate = useNavigate();
   // on a manual page address (/library/revision/…) the tab lives in the URL (?tab=text): search results, annotations and bookmarks
