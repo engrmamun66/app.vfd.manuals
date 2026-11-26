@@ -9,6 +9,8 @@ export interface PremiumConfig {
   lock_search: boolean;
   lock_custom_category: boolean;
   lock_requests: boolean;
+  text_mapping?: boolean;
+  highlight_matched?: boolean;
   max_upload_mb: number | null;
   max_comments: number | null;
   max_highlights: number | null;

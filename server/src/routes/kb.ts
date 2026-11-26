@@ -307,7 +307,7 @@ kbRouter.get(
     const kinds = db.prepare(`SELECT k.kind, COUNT(*) n ${from} WHERE ${kw.join(' AND ')} GROUP BY k.kind`).all(...kindArgs);
     const rows = db
       .prepare(
-        `SELECT k.id, k.kind, k.code, k.title, k.description, k.cause, k.remedy, k.details_json, k.section, k.page_index, k.printed_page, k.revision_id, k.importance,
+        `SELECT k.id, k.kind, k.code, k.title, k.description, k.cause, k.remedy, k.details_json, k.section, k.page_index, k.printed_page, k.revision_id, k.importance, k.evidence_quote,
            k.evidence_status, k.verification_status, m.id model_id, m.name model, b.name brand
          ${from} WHERE ${w} ORDER BY b.name, m.name, k.kind, CASE k.importance WHEN 'Important' THEN 0 WHEN 'Medium' THEN 1 WHEN 'Optional' THEN 2 ELSE 3 END, k.code, k.title LIMIT ? OFFSET ?`,
       )

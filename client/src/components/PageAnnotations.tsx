@@ -24,7 +24,17 @@ function rowContext(el: Element) {
   const cells = Array.from(tr.children);
   return `${cells.slice(0, 2).map((c) => norm(c.textContent ?? '')).join('|')}#${cells.indexOf(cell)}`;
 }
-const keyFor = (el: Element, pathHash: string) => `ui:${pathHash}:${hashText(rowContext(el))}:${hashText(norm(el.textContent ?? ''))}`;
+/** The text layer over a manual page image: one annotatable block per page, keyed by manual revision + page (same everywhere the page is shown). */
+const PTL = '.ptl';
+/** Character offset of a point inside the element's text nodes (Selection.toString() adds line breaks between absolutely placed spans, so it is not used for offsets). */
+function offsetIn(el: Element, node: Node, off: number): number {
+  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  let pos = 0;
+  let n: Node | null;
+  while ((n = w.nextNode())) { if (n === node) return pos + off; pos += (n.textContent ?? '').length; }
+  return pos;
+}
+const keyFor = (el: Element, pathHash: string) => el.matches(PTL) ? `ui:pageimg:${el.getAttribute('data-ann-key') ?? ''}` : `ui:${pathHash}:${hashText(rowContext(el))}:${hashText(norm(el.textContent ?? ''))}`;
 
 /** The text of a block the way offsets are counted: textContent (not normalised, so offsets stay valid). */
 function rangeFromOffsets(el: Element, start: number, end: number): Range | null {
@@ -46,7 +56,12 @@ const supported = typeof CSS !== 'undefined' && 'highlights' in CSS && typeof (w
 
 interface Hit { range: Range; anns: Ann[] }
 
+/** Page-wide notes and highlights; not on Superadmin Panel pages. */
 export function PageAnnotations() {
+  return useLocation().pathname.startsWith('/superadmin') ? null : <PageAnnotationsOn />;
+}
+
+function PageAnnotationsOn() {
   const loc = useLocation();
   const { settings } = useAuth();
   const [anns, setAnns] = useState<Ann[]>([]);
@@ -55,13 +70,15 @@ export function PageAnnotations() {
   const [editor, setEditor] = useState<null | { key: string; hash: string; sel: any; ann?: Ann }>(null);
   const [panel, setPanel] = useState<null | Ann[]>(null);
   const hits = useRef<Hit[]>([]);
+  const scrolled = useRef('');
   const pathHash = hashText(loc.pathname);
   const d = settings?.annotation_display ?? { showOthersPublic: true, showOwn: true, showHighlightBackgrounds: true };
 
   // load this page's annotations
   useEffect(() => {
     let live = true;
-    get<Ann[]>('/annotations/for-prefix', { prefix: `ui:${pathHash}:` }).then((r) => live && setAnns(r)).catch(() => live && setAnns([]));
+    Promise.all([get<Ann[]>('/annotations/for-prefix', { prefix: `ui:${pathHash}:` }), get<Ann[]>('/annotations/for-prefix', { prefix: 'ui:pageimg:' })])
+      .then(([a, b]) => live && setAnns([...a, ...b])).catch(() => live && setAnns([]));
     return () => { live = false; };
   }, [pathHash, version]);
 
@@ -78,7 +95,8 @@ export function PageAnnotations() {
     if (!root) return;
     const groups = new Map<string, Range[]>();
     const add = (name: string, r: Range) => groups.set(name, [...(groups.get(name) ?? []), r]);
-    root.querySelectorAll(BLOCK).forEach((el) => {
+    const blocks = [...Array.from(root.querySelectorAll(BLOCK)).filter((el) => !el.closest(PTL)), ...Array.from(document.querySelectorAll(PTL))];
+    blocks.forEach((el) => {
       if (el.closest('.annot-host')) return;
       const found = byKey.get(keyFor(el, pathHash));
       if (!found) return;
@@ -93,7 +111,21 @@ export function PageAnnotations() {
       }
     });
     for (const [name, ranges] of groups) reg.set(name, new (window as any).Highlight(...ranges));
-  }, [anns, pathHash, d.showOwn, d.showOthersPublic, d.showHighlightBackgrounds]);
+    // opened from the notes list (?ann=<id>): scroll to that exact highlight, once (after the row / modal has finished opening)
+    const target = Number(new URLSearchParams(window.location.search).get('ann')) || 0;
+    if (target && scrolled.current !== `${loc.pathname}${loc.search}`) {
+      const h = hits.current.find((x) => x.anns.some((a) => a.id === target));
+      if (h) {
+        scrolled.current = `${loc.pathname}${loc.search}`;
+        setTimeout(() => {
+          h.range.startContainer.parentElement?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          // flash the exact text so it is clear what the note is about
+          reg.set('focus-ann', new (window as any).Highlight(h.range));
+          setTimeout(() => reg.delete('focus-ann'), 3500);
+        }, 450);
+      }
+    }
+  }, [anns, pathHash, loc.search, d.showOwn, d.showOthersPublic, d.showHighlightBackgrounds]);
 
   // repaint when the page content changes (rows, pagination, filters, data loading)
   useEffect(() => {
@@ -102,7 +134,7 @@ export function PageAnnotations() {
     if (!root) return;
     let t: ReturnType<typeof setTimeout> | undefined;
     const mo = new MutationObserver(() => { clearTimeout(t); t = setTimeout(paint, 200); });
-    mo.observe(root, { childList: true, subtree: true, characterData: true });
+    mo.observe(document.body, { childList: true, subtree: true, characterData: true });
     return () => { clearTimeout(t); mo.disconnect(); if (supported) for (const k of Array.from(((CSS as any).highlights as Map<string, unknown>).keys())) if (k.startsWith('ann-')) ((CSS as any).highlights as Map<string, unknown>).delete(k); };
   }, [paint]);
 
@@ -120,19 +152,36 @@ export function PageAnnotations() {
         const r = s.getRangeAt(0);
         const root = document.querySelector('.main .page');
         const anc = r.commonAncestorContainer.nodeType === 1 ? (r.commonAncestorContainer as Element) : r.commonAncestorContainer.parentElement;
-        if (!root || !anc || !root.contains(anc)) return hide();
-        if (anc.closest(SKIP)) return hide();
-        const el = anc.closest(BLOCK);
-        if (!el || !root.contains(el) || el.closest('.annot-host')) return hide();
-        const selected = r.toString();
-        if (!selected.trim() || selected.length > 5000) return hide();
-        const pre = document.createRange();
-        pre.selectNodeContents(el);
-        pre.setEnd(r.startContainer, r.startOffset);
-        const start = pre.toString().length;
-        const text = el.textContent ?? '';
-        const end = start + selected.length;
-        if (text.slice(start, end) !== selected) return hide();
+        if (!anc) return hide();
+        const layer = anc.closest(PTL);
+        let el: Element | null;
+        let start: number;
+        let end: number;
+        let text: string;
+        let selected: string;
+        if (layer) {
+          // selection on a manual page image: offsets are counted in the text layer's own text
+          el = layer;
+          text = layer.textContent ?? '';
+          start = offsetIn(layer, r.startContainer, r.startOffset);
+          end = offsetIn(layer, r.endContainer, r.endOffset);
+          selected = text.slice(start, end);
+          if (!selected.trim() || selected.length > 5000) return hide();
+        } else {
+          if (!root || !root.contains(anc)) return hide();
+          if (anc.closest(SKIP)) return hide();
+          el = anc.closest(BLOCK);
+          if (!el || !root.contains(el) || el.closest('.annot-host')) return hide();
+          selected = r.toString();
+          if (!selected.trim() || selected.length > 5000) return hide();
+          const pre = document.createRange();
+          pre.selectNodeContents(el);
+          pre.setEnd(r.startContainer, r.startOffset);
+          start = pre.toString().length;
+          text = el.textContent ?? '';
+          end = start + selected.length;
+          if (text.slice(start, end) !== selected) return hide();
+        }
         const rect = r.getBoundingClientRect();
         setMenu({ x: Math.max(8, Math.min(rect.left, window.innerWidth - 300)), y: Math.max(8, rect.top - 40), el, sel: { text: selected, start, end, prefix: text.slice(Math.max(0, start - 32), start), suffix: text.slice(end, end + 32) } });
       }, 0);
@@ -148,7 +197,7 @@ export function PageAnnotations() {
     const onClick = (e: MouseEvent) => {
       if (!hits.current.length || window.getSelection()?.toString()) return;
       const t = e.target as Element | null;
-      if (!t || !t.closest('.main .page') || t.closest('a,button,input,select,textarea,.annot-host,.sel-menu')) return;
+      if (!t || !(t.closest('.main .page') || t.closest(PTL)) || t.closest('a,button,input,select,textarea,.annot-host,.sel-menu')) return;
       const doc = document as any;
       let node: Node | null = null;
       let offset = 0;
@@ -162,7 +211,7 @@ export function PageAnnotations() {
     return () => document.removeEventListener('click', onClick);
   }, []);
 
-  const url = loc.pathname + loc.search;
+  const url = (loc.pathname + loc.search).replace(/([?&])ann=\d+&?/, '$1').replace(/[?&]$/, ''); // a saved address never carries the scroll target of an earlier visit
   const quickHighlight = async () => {
     if (!menu) return;
     await post('/annotations', {
@@ -186,7 +235,7 @@ export function PageAnnotations() {
   return (
     <AnnotationScope researchUrl={url} context={{}}>
       {menu && createPortal(
-        <span className="sel-menu" style={{ position: 'fixed', left: menu.x, top: menu.y, zIndex: 90 }} onMouseDown={(e) => e.preventDefault()}>
+        <span className="sel-menu" style={{ position: 'fixed', left: menu.x, top: menu.y, zIndex: 140 }} onMouseDown={(e) => e.preventDefault()}>
           <button onClick={() => { setEditor({ key: keyFor(menu.el, pathHash), hash: hashText(menu.el.textContent ?? ''), sel: menu.sel }); setMenu(null); }}>Add Comment</button>
           <button onClick={quickHighlight}>Highlight</button>
           <button onClick={() => { navigator.clipboard?.writeText(menu.sel.text); setMenu(null); }}>Copy</button>

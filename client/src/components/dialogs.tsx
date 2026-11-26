@@ -26,6 +26,8 @@ export function chooseDialog(message: string, choices: { label: string; value: s
   return new Promise((resolve) => (push ? push({ kind: 'choose', message, choices, ...(opts as object), resolve }) : resolve(null)));
 }
 
+import { Toaster } from './toast';
+
 export function DialogProvider({ children }: { children: ReactNode }) {
   const [queue, setQueue] = useState<Req[]>([]);
   useEffect(() => {
@@ -40,6 +42,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
   return (
     <>
       {children}
+      <Toaster />
       {cur && <DialogView key={queue.length + cur.message} req={cur} done={done} />}
     </>
   );

@@ -1,3 +1,4 @@
+import { toast } from '../components/toast';
 import { useEffect, useState } from 'react';
 import { del, get, patch, post, put, fmtDate } from '../lib/api';
 import { confirmDialog } from '../components/dialogs';
@@ -103,8 +104,8 @@ export function PremiumSettings() {
       const n = (v: string) => (String(v).trim() === '' ? null : Number(v));
       await put('/premium-admin/config', { ...cfg, max_upload_mb: n(cfg.max_upload_mb), max_comments: n(cfg.max_comments), max_highlights: n(cfg.max_highlights), max_bookmarks: n(cfg.max_bookmarks) });
       await reloadStatus();
-      setMsg({ ok: true, text: 'Saved.' });
-    } catch (e: any) { setMsg({ ok: false, text: e.message }); } finally { setBusy(false); }
+      setMsg({ ok: true, text: 'Saved.' }); toast('Premium settings saved');
+    } catch (e: any) { setMsg({ ok: false, text: e.message }); toast(e.message, 'error'); } finally { setBusy(false); }
   };
 
   return (
@@ -139,6 +140,13 @@ export function PremiumSettings() {
             {models.map((m) => <label key={m.id} className="lock-item"><input type="checkbox" checked={lockedModels.has(m.id)} onChange={(e) => toggleModel(m.id, e.target.checked)} /> {m.brand} {m.name}</label>)}
           </div>
         )}
+      </div>
+
+      <div className="card stack">
+        <h2 style={{ margin: 0 }}>Manual page images</h2>
+        <label className="lock-item"><input type="checkbox" checked={cfg.text_mapping !== false} onChange={(e) => set('text_mapping', e.target.checked)} /> Enable text mapping on manual images (text can be selected, copied, commented and highlighted)</label>
+        <label className="lock-item"><input type="checkbox" checked={cfg.highlight_matched !== false} onChange={(e) => set('highlight_matched', e.target.checked)} /> Highlight matched words on Manual image (the cited value is marked in yellow)</label>
+        <div className="small-text faint">Applies to all users. Highlighting needs text mapping.</div>
       </div>
 
       <div className="card stack">

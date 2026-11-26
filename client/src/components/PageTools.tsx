@@ -34,11 +34,12 @@ export function useSplitAvailable() {
 /** Global header toolbar: [Split — only where supported] [Notes] [Save] [Open PDF — always last]. */
 export function PageToolbar() {
   const { info, splitCount } = useContext(PageToolsCtx);
+  const adminPage = useLocation().pathname.startsWith('/superadmin'); // no notes / bookmarks on Superadmin Panel pages
   return (
     <div className="page-toolbar">
       {splitCount > 0 && <SplitToggle />}
-      <AnnotationDisplayControl />
-      <SaveBookmarkButton title={info?.title} context={info?.context ?? {}} />
+      {!adminPage && <AnnotationDisplayControl />}
+      {!adminPage && <SaveBookmarkButton title={info?.title} context={info?.context ?? {}} />}
       <span className="tb-pdf"><OriginalPdfButton modelId={info?.modelId} /></span>
     </div>
   );

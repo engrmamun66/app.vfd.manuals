@@ -610,6 +610,7 @@ button.get-pro.is-pro:hover { background: var(--bg-hover); color: var(--fg); opa
 .lock-group { border: 1px solid var(--line); padding: 8px 12px; margin: 0; min-width: 0; }
 .lock-group legend { padding: 0 6px; }
 .lock-item { display: flex; align-items: center; gap: 8px; font-weight: 400; padding: 2px 0; cursor: pointer; }
+.lock-item input[type="checkbox"] { flex: none; }
 .limits { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; align-items: end; }
 .limits .field input { width: 100%; }
 @media (max-width: 860px) { .plans { grid-template-columns: 1fr; } }
@@ -775,3 +776,26 @@ button.btn-grey { background: var(--bg-hover); border-color: var(--line); } /* a
 /* Compact standalone filter boxes (Knowledge topics, bookmarks) */
 .page > .searchbox input, .page .searchbox:not(.nav-filter .searchbox) input { height: 32px; font-size: .86rem; }
 .page .searchbox .sb-icon { width: 15px; height: 15px; }
+
+/* Knowledge table: clicked row stays marked while its details are open; details slide open/shut */
+tr.kn-row { cursor: pointer; }
+tr.kn-row > td:first-child { box-shadow: inset 3px 0 0 transparent; transition: box-shadow .2s ease; }
+tr.kn-row.kn-open > td { background: var(--bg-alt); }
+tr.kn-row.kn-open > td:first-child { box-shadow: inset 3px 0 0 var(--fg); }
+tr.kn-detail > td { padding: 0; background: var(--bg-alt); box-shadow: inset 3px 0 0 var(--fg); border-bottom: 2px solid var(--fg); }
+.slide { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .25s ease, opacity .25s ease; }
+.slide.on { grid-template-rows: 1fr; opacity: 1; }
+.slide-in { overflow: hidden; min-height: 0; padding: 0 14px; }
+.slide.on > .slide-in { padding: 12px 14px; }
+@media (prefers-reduced-motion: reduce) { .slide { transition: none; } }
+
+/* the highlight a note was opened for flashes briefly */
+::highlight(focus-ann) { background-color: rgba(255, 140, 0, .55); color: inherit; text-decoration: underline; text-decoration-thickness: 2px; }
+
+/* Toasts */
+.toasts { position: fixed; right: 18px; bottom: 18px; z-index: 300; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { pointer-events: auto; background: var(--inv-bg); color: var(--inv-fg); padding: 10px 16px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.3); font-size: .9rem; animation: toast-in .22s ease-out both; }
+.toast.error { outline: 2px solid var(--inv-fg); outline-offset: -4px; }
+.toast span { font-weight: 700; margin-right: 4px; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (max-width: 560px) { .toasts { left: 12px; right: 12px; bottom: 12px; } }

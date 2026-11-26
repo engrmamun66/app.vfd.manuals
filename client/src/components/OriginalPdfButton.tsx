@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { get } from '../lib/api';
 import { useModels } from '../lib/models';
-import { useAsync } from './ui';
+import { useAnimatedClose, useAsync } from './ui';
 
 /** `/api/revisions/:id/file?name=Brand-Model` — the name only makes the URL self-explanatory; the server ignores it. */
 export const pdfUrl = (revisionId: number, label: string, page?: number) =>
@@ -37,14 +37,15 @@ export function PdfSplitButton({ revisionId, label, page }: { revisionId: number
   );
 }
 
-function PdfModal({ url, title, onClose }: { url: string; title: string; onClose: () => void }) {
+function PdfModal({ url, title, onClose: onClosed }: { url: string; title: string; onClose: () => void }) {
+  const [closing, onClose] = useAnimatedClose(onClosed);
   useEffect(() => {
     const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     document.addEventListener('keydown', esc);
     return () => document.removeEventListener('keydown', esc);
   }, [onClose]);
   return createPortal(
-    <div className="fs-modal" role="dialog" aria-modal="true" aria-label="Original manual">
+    <div className={`fs-modal ${closing ? 'closing' : ''}`} role="dialog" aria-modal="true" aria-label="Original manual">
       <div className="fs-head">
         <h2 style={{ fontSize: '1.05rem' }}>{title}</h2>
         <span className="row">

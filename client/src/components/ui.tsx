@@ -180,6 +180,17 @@ const pagerStack: { current: { prev: () => void; next: () => void; jump: (n: num
  * Sticky pagination bar. Keys (no modifier, not while typing, no dialog open):
  * ← / → previous / next page; type a number (e.g. 10) to jump to that page (0 or 1 = first page; ignored when the page does not exist).
  */
+/** Plays the .fs-modal closing animation, then calls onClosed. Returns [closing, close]. */
+export function useAnimatedClose(onClosed: () => void): [boolean, () => void] {
+  const [closing, setClosing] = useState(false);
+  const close = () => {
+    if (closing) return;
+    setClosing(true);
+    window.setTimeout(onClosed, window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 200);
+  };
+  return [closing, close];
+}
+
 export function Pager({ page, limit, total, onPage }: { page: number; limit: number; total: number; onPage: (p: number) => void }) {
   const pages = Math.max(1, Math.ceil(total / limit));
   const [typed, setTyped] = useState('');

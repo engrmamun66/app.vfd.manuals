@@ -3,11 +3,12 @@ import { useSplitAvailable } from './PageTools';
 import { FullscreenIcon, SplitIcon } from './icons';
 import { createPortal } from 'react-dom';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { get } from '../lib/api';
 import { useAuth, useUiSettings } from '../lib/auth';
 import { Annotatable, AnnotationScope } from './Annotatable';
-import { ErrorBox, Loading, QuoteBadge, Spinner, useAsync } from './ui';
+import { usePremium } from '../lib/premium';
+import { ErrorBox, Loading, QuoteBadge, Spinner, useAnimatedClose, useAsync } from './ui';
 
 /** Resizable two-pane layout. Ratio/enabled state persisted per user in SQLite via settings. */
 export function SplitView({ enabled, left, right, leftTitle, rightTitle }: { enabled: boolean; left: ReactNode; right: ReactNode; leftTitle: string; rightTitle: ReactNode }) {
@@ -130,7 +131,7 @@ function TextOverlay({ revisionId, page, quote }: { revisionId: number; page: nu
     });
   }, [data, size.w, size.h]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
-    <div ref={box} className="ptl">
+    <div ref={box} className="ptl" data-ann-key={`${revisionId}:${page}`}>
       {items.map((it, i) => (
         <span key={i} className={marked.has(i) ? 'hl' : undefined} style={{ left: `${it.x * 100}%`, top: `${it.y * 100}%`, fontSize: it.h * size.h }}>{it.s}</span>
       ))}
@@ -141,6 +142,9 @@ function TextOverlay({ revisionId, page, quote }: { revisionId: number; page: nu
 /** Original manufacturer page: image (zoom/pan) and extracted text (annotatable). Never replaces the image with OCR. */
 export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuote, compact, overlay, inModal }: { revisionId: number; page: number; onPage?: (p: number) => void; quoteMatch?: string | null; highlightQuote?: string | null; compact?: boolean; overlay?: boolean; inModal?: boolean }) {
   const [full, setFull] = useState(false);
+  const premCfg = usePremium().status?.config;
+  const mapOn = premCfg?.text_mapping !== false; // Super Admin switches in Premium Settings
+  const hlOn = premCfg?.highlight_matched !== false;
   const loc = useLocation();
   const navigate = useNavigate();
   // on a manual page address (/library/revision/…) the tab lives in the URL (?tab=text): search results, annotations and bookmarks
@@ -230,7 +234,7 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
             {!imgLoaded && <Spinner label="Loading page image…" overlay />}
             <div style={{ position: 'relative', width: `${zoom * 100}%`, minWidth: '50%' }}>
               <img key={imgSrc} src={imgSrc} alt={`Manufacturer manual page ${page}`} style={{ display: 'block', width: '100%', opacity: imgLoaded ? 1 : 0, transition: 'opacity .2s ease' }} onLoad={() => setLoadedSrc(imgSrc)} onError={() => setImgErr(true)} ref={(el) => { if (el?.complete && el.naturalWidth > 0 && loadedSrc !== imgSrc) setLoadedSrc(imgSrc); }} />
-              {overlay && imgLoaded && <TextOverlay revisionId={revisionId} page={page} quote={highlightQuote} />}
+              {overlay && mapOn && imgLoaded && <TextOverlay revisionId={revisionId} page={page} quote={hlOn ? highlightQuote : null} />}
             </div>
           </div>
         )
@@ -259,32 +263,42 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
 }
 
 /** Full-screen copy of the "Manual page" tab (page image, zoom, paging). */
-export function FullPage({ revisionId, page, quoteMatch, highlightQuote, overlay, onClose }: { revisionId: number; page: number; quoteMatch?: string | null; highlightQuote?: string | null; overlay?: boolean; onClose: () => void }) {
+export function FullPage({ revisionId, page, quoteMatch, highlightQuote, overlay, onClose: onClosed, onPageChange }: { revisionId: number; page: number; quoteMatch?: string | null; highlightQuote?: string | null; overlay?: boolean; onClose: () => void; onPageChange?: (p: number) => void }) {
   const [p, setP] = useState(page);
+  const [closing, onClose] = useAnimatedClose(onClosed);
+  const first = useRef(page);
+  useEffect(() => { onPageChange?.(p); }, [p]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const esc = (e: KeyboardEvent) => e.key === 'Escape' && !e.defaultPrevented && onClose();
     document.addEventListener('keydown', esc);
     return () => document.removeEventListener('keydown', esc);
   }, [onClose]);
   return createPortal(
-    <div className="fs-modal pv-full" role="dialog" aria-modal="true" aria-label="Manual page">
+    <div className={`fs-modal pv-full ${closing ? 'closing' : ''}`} role="dialog" aria-modal="true" aria-label="Manual page">
       <div className="fs-head"><h2 style={{ fontSize: '1.05rem' }}>Manual page</h2><button onClick={onClose} aria-label="Close full screen" autoFocus>✕ Close</button></div>
       <div style={{ flex: 1, overflow: 'auto', padding: '12px 24px' }}>
-        <PageViewer revisionId={revisionId} page={p} onPage={setP} quoteMatch={p === page ? quoteMatch : undefined} highlightQuote={p === page ? highlightQuote : undefined} overlay={overlay} inModal />
+        <PageViewer revisionId={revisionId} page={p} onPage={setP} quoteMatch={p === first.current ? quoteMatch : undefined} highlightQuote={p === first.current ? highlightQuote : undefined} overlay={overlay} inModal />
       </div>
     </div>,
     document.body,
   );
 }
 
-/** "Manual" button for a table row: opens the cited manual page in a full-screen modal (Esc closes). */
-export function ManualButton({ manual }: { manual?: { revision_id: number; page: number; quote?: string | null } | null }) {
-  const [open, setOpen] = useState(false);
+/**
+ * "Manual" button for a table row: opens the cited manual page in a full-screen modal (Esc closes).
+ * The open modal lives in the address (?mp=<rowId>:<page>), so a saved comment / bookmark on this page re-opens the same modal.
+ */
+export function ManualButton({ manual, rowId }: { manual?: { revision_id: number; page: number; quote?: string | null } | null; rowId: string }) {
+  const [sp, setSp] = useSearchParams();
+  const cur = sp.get('mp') ?? '';
+  const open = cur.startsWith(`${rowId}:`);
+  const shown = open ? Number(cur.slice(rowId.length + 1)) || manual?.page || 1 : 0;
   if (!manual?.revision_id || !manual.page) return <span className="faint">—</span>;
+  const setMp = (v: string | null, replace: boolean) => { const n = new URLSearchParams(sp); if (v) n.set('mp', v); else n.delete('mp'); setSp(n, { replace }); };
   return (
     <>
-      <button type="button" className="small" onClick={(e) => { e.stopPropagation(); setOpen(true); }} title="Show the manual page for this row">Manual</button>
-      {open && <FullPage revisionId={manual.revision_id} page={manual.page} highlightQuote={manual.quote} overlay onClose={() => setOpen(false)} />}
+      <button type="button" className="small" onClick={(e) => { e.stopPropagation(); setMp(`${rowId}:${manual.page}`, false); }} title="Show the manual page for this row">Manual</button>
+      {open && <FullPage revisionId={manual.revision_id} page={shown} highlightQuote={manual.quote} overlay onClose={() => setMp(null, true)} onPageChange={(p) => { if (p !== shown) setMp(`${rowId}:${p}`, true); }} />}
     </>
   );
 }

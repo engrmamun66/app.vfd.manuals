@@ -32,10 +32,12 @@ export interface Ann {
 }
 
 /** Address of the place an annotation was made. A note on manual page text reopens on the "Searchable text" tab. */
-export function annUrl(a: Pick<Ann, 'researchUrl' | 'anchor'>): string | null {
-  const u = a.researchUrl;
+export function annUrl(a: Pick<Ann, 'researchUrl' | 'anchor'> & { id?: number }): string | null {
+  let u = a.researchUrl;
   if (!u) return null;
-  if (a.anchor?.contentKey?.startsWith('docpage:') && u.startsWith('/library/revision/') && !/[?&]tab=/.test(u)) return u + (u.includes('?') ? '&' : '?') + 'tab=text';
+  if (a.anchor?.contentKey?.startsWith('docpage:') && u.startsWith('/library/revision/') && !/[?&]tab=/.test(u)) u += (u.includes('?') ? '&' : '?') + 'tab=text';
+  // ann=<id>: the page scrolls to this exact highlight when it opens
+  if (a.id && !a.anchor?.contentKey?.startsWith('docpage:')) { const base = u.replace(/([?&])ann=\d+&?/, '$1').replace(/[?&]$/, ''); u = base + (base.includes('?') ? '&' : '?') + `ann=${a.id}`; }
   return u;
 }
 
