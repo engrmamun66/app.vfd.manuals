@@ -719,3 +719,11 @@ button.get-pro.is-pro:hover { background: var(--bg-hover); color: var(--fg); opa
 /* "Send message" moves into Settings on mobile */
 .fs-tabs .mobile-only { display: none; }
 @media (max-width: 960px) { .topbar .send-request { display: none; } .fs-tabs .mobile-only { display: block; } }
+
+/* ===== selectable text layer over the page image ===== */
+.ptl { position: absolute; inset: 0; overflow: hidden; line-height: 1; font-family: Arial, Helvetica, sans-serif; }
+.ptl span { position: absolute; white-space: pre; transform-origin: 0 0; color: transparent; cursor: text; line-height: 1; }
+.ptl span::selection { background: rgba(0, 110, 255, .35); color: transparent; }
+.ptl span.hl { background: rgba(255, 214, 0, .38); outline: 1px solid rgba(220, 160, 0, .8); border-radius: 2px; }
+.tabs .tab { position: relative; }
+.tab-admin { position: absolute; top: -9px; right: -4px; padding: 0 5px; font-size: .62rem; line-height: 1.5; letter-spacing: .03em; text-transform: uppercase; font-weight: 700; background: var(--inv-bg); color: var(--inv-fg); border-radius: 3px; pointer-events: none; white-space: nowrap; }

@@ -95,7 +95,7 @@ export function RevisionViewer() {
         {user?.role === 'super_admin' && <button className="small" onClick={() => setEdit(!edit)}>Add record from this page</button>}
       </div>
       {edit && rev && <ManualRecord revisionId={Number(rid)} page={p} onDone={() => setEdit(false)} />}
-      <PageViewer revisionId={Number(rid)} page={p} onPage={(n) => nav(`/library/revision/${rid}/page/${n}${search}`)} />
+      <PageViewer overlay revisionId={Number(rid)} page={p} onPage={(n) => nav(`/library/revision/${rid}/page/${n}${search}`)} />
     </div>
   );
 }

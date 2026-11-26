@@ -96,7 +96,7 @@ function ReviewDialog({ r, onClose, act }: { r: any; onClose: () => void; act: (
               </div>
             ) : <p className="muted">Already {r.status}{r.review_note ? ` — ${r.review_note}` : ''}.</p>}
           </div>
-          <div>{r.revision_id && p.page_index && rev ? <PageViewer revisionId={r.revision_id} page={p.page_index} quoteMatch={r.quote_match} highlightQuote={p.evidence_quote} /> : <div className="empty">No page reference to display.</div>}</div>
+          <div>{r.revision_id && p.page_index && rev ? <PageViewer overlay revisionId={r.revision_id} page={p.page_index} quoteMatch={r.quote_match} highlightQuote={p.evidence_quote} /> : <div className="empty">No page reference to display.</div>}</div>
         </div>
       </div>
     </div>

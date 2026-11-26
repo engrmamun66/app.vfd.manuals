@@ -919,29 +919,34 @@ test.describe('premium: free limits, plans dialog, subscription review (Super Ad
     await expect(alice.locator('.gs-chip')).toHaveCount(0);
   });
 
-  test('a manual page opened from search or from a note reopens on the "Searchable text" tab; the tab stays while turning pages', async () => {
-    const hit = (await (await alice.request.get('/api/search', { params: { q: 'frequency' } })).json()).pages[0];
+  test('Super Admin: a manual page opened from search or from a note reopens on the "Searchable text" tab; normal users have no such tab', async () => {
+    const hit = (await (await admin.request.get('/api/search', { params: { q: 'frequency' } })).json()).pages[0];
     // search result link
-    await alice.goto('/');
-    await alice.getByLabel('Global search').fill('frequency');
-    await alice.getByRole('link', { name: new RegExp(`Page ${hit.printed_page || hit.page_index}`) }).first().waitFor();
-    expect(await alice.locator('.sr-row[href*="/library/revision/"]').first().getAttribute('href')).toContain('?tab=text');
+    await admin.goto('/');
+    await admin.getByLabel('Global search').fill('frequency');
+    await admin.getByRole('link', { name: new RegExp(`Page ${hit.printed_page || hit.page_index}`) }).first().waitFor();
+    expect(await admin.locator('.sr-row[href*="/library/revision/"]').first().getAttribute('href')).toContain('?tab=text');
     // the page address decides the tab
-    await alice.goto(`/library/revision/${hit.revision_id}/page/${hit.page_index}?tab=text`);
-    await expect(alice.getByRole('button', { name: 'Searchable text' })).toHaveClass(/active/);
-    await expect(alice.getByRole('button', { name: 'Page image' })).not.toHaveClass(/active/);
+    await admin.goto(`/library/revision/${hit.revision_id}/page/${hit.page_index}?tab=text`);
+    await expect(admin.getByRole('button', { name: 'Searchable text' })).toHaveClass(/active/);
+    await expect(admin.getByRole('button', { name: 'Page image' })).not.toHaveClass(/active/);
     // turning the page keeps the tab
-    await alice.getByRole('button', { name: 'Next page →' }).click();
-    await expect(alice).toHaveURL(/tab=text/);
-    await expect(alice.getByRole('button', { name: 'Searchable text' })).toHaveClass(/active/);
+    await admin.getByRole('button', { name: 'Next page →' }).click();
+    await expect(admin).toHaveURL(/tab=text/);
+    await expect(admin.getByRole('button', { name: 'Searchable text' })).toHaveClass(/active/);
     // switching tabs is reflected in the address (so bookmarks and notes made here remember it)
-    await alice.getByRole('button', { name: 'Page image' }).click();
-    await expect(alice).not.toHaveURL(/tab=text/);
-    await alice.getByRole('button', { name: 'Searchable text' }).click();
-    await expect(alice).toHaveURL(/tab=text/);
+    await admin.getByRole('button', { name: 'Page image' }).click();
+    await expect(admin).not.toHaveURL(/tab=text/);
+    await admin.getByRole('button', { name: 'Searchable text' }).click();
+    await expect(admin).toHaveURL(/tab=text/);
     // without the parameter the page opens on the image
-    await alice.goto(`/library/revision/${hit.revision_id}/page/${hit.page_index}`);
-    await expect(alice.getByRole('button', { name: 'Page image' })).toHaveClass(/active/);
+    await admin.goto(`/library/revision/${hit.revision_id}/page/${hit.page_index}`);
+    await expect(admin.getByRole('button', { name: 'Page image' })).toHaveClass(/active/);
+    // normal users only get the page image (the text tab is for functional analysis)
+    await alice.goto(`/library/revision/${hit.revision_id}/page/${hit.page_index}?tab=text`);
+    await expect(alice.getByRole('button', { name: 'Next page →' })).toBeVisible();
+    await expect(alice.getByRole('button', { name: 'Searchable text' })).toHaveCount(0);
+    await expect(alice.locator('.page-img-wrap')).toBeVisible();
   });
 });
 

@@ -113,7 +113,7 @@ function ManualPages({ pages }: { pages: { revision_id: number; page_index: numb
           </button>
         ))}
       </div>
-      <PageViewer revisionId={cur.revision_id} page={cur.page_index} onPage={(p) => setSel((i) => (p > cur.page_index ? Math.min(i + 1, pages.length - 1) : Math.max(i - 1, 0)))} />
+      <PageViewer overlay revisionId={cur.revision_id} page={cur.page_index} onPage={(p) => setSel((i) => (p > cur.page_index ? Math.min(i + 1, pages.length - 1) : Math.max(i - 1, 0)))} />
     </div>
   );
 }

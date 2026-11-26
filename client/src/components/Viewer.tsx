@@ -1,7 +1,7 @@
 import { pdfUrl } from './OriginalPdfButton';
 import { useSplitAvailable } from './PageTools';
 import { SplitIcon } from './icons';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { get } from '../lib/api';
 import { useAuth } from '../lib/auth';
@@ -78,14 +78,75 @@ export function SplitToggle() {
   );
 }
 
+
+interface Run { s: string; x: number; y: number; w: number; h: number }
+const normRun = (s: string) => s.toLowerCase().replace(/[^a-z0-9.]+/g, ' ').trim();
+
+/** The runs of the page that make up the cited evidence quote: the best cluster of runs lying on the same part of the page. */
+function quoteRuns(items: Run[], quote: string | null | undefined): Set<number> {
+  const out = new Set<number>();
+  const q = ` ${normRun(quote ?? '')} `;
+  if (q.trim().length < 2) return out;
+  const cand: { i: number; y: number; len: number }[] = [];
+  items.forEach((it, i) => { const n = normRun(it.s); if (n.length >= 2 && q.includes(` ${n} `)) cand.push({ i, y: it.y, len: n.length }); });
+  if (!cand.length) return out;
+  cand.sort((a, b) => a.y - b.y);
+  const clusters: typeof cand[] = [[cand[0]]];
+  for (let k = 1; k < cand.length; k++) (cand[k].y - cand[k - 1].y < 0.07 ? clusters[clusters.length - 1] : clusters[clusters.push([]) - 1]).push(cand[k]);
+  const best = clusters.reduce((a, b) => (b.reduce((n, c) => n + c.len, 0) > a.reduce((n, c) => n + c.len, 0) ? b : a));
+  best.forEach((c) => out.add(c.i));
+  return out;
+}
+
+/**
+ * A text layer over the page image: the original design stays, and the text can be selected and copied.
+ * The runs of the cited evidence quote are marked on the image. Positions come from the PDF itself.
+ */
+function TextOverlay({ revisionId, page, quote }: { revisionId: number; page: number; quote?: string | null }) {
+  const { data } = useAsync<{ items: Run[] }>(() => get(`/revisions/${revisionId}/pages/${page}/words`), [revisionId, page]);
+  const box = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setSize({ w: el.clientWidth, h: el.clientHeight }));
+    ro.observe(el);
+    setSize({ w: el.clientWidth, h: el.clientHeight });
+    return () => ro.disconnect();
+  }, []);
+  const items = data?.items ?? [];
+  const marked = useMemo(() => quoteRuns(items, quote), [data, quote]); // eslint-disable-line react-hooks/exhaustive-deps
+  // stretch / shrink every run so its width equals the width it has on the page
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el || !size.w) return;
+    const spans = Array.from(el.children) as HTMLElement[];
+    spans.forEach((sp) => { sp.style.transform = 'none'; });
+    spans.forEach((sp, i) => {
+      const nat = sp.getBoundingClientRect().width;
+      const want = items[i].w * size.w;
+      if (nat > 0) sp.style.transform = `scaleX(${want / nat})`;
+    });
+  }, [data, size.w, size.h]); // eslint-disable-line react-hooks/exhaustive-deps
+  return (
+    <div ref={box} className="ptl">
+      {items.map((it, i) => (
+        <span key={i} className={marked.has(i) ? 'hl' : undefined} style={{ left: `${it.x * 100}%`, top: `${it.y * 100}%`, fontSize: it.h * size.h }}>{it.s}</span>
+      ))}
+    </div>
+  );
+}
+
 /** Original manufacturer page: image (zoom/pan) and extracted text (annotatable). Never replaces the image with OCR. */
-export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuote, compact }: { revisionId: number; page: number; onPage?: (p: number) => void; quoteMatch?: string | null; highlightQuote?: string | null; compact?: boolean }) {
+export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuote, compact, overlay }: { revisionId: number; page: number; onPage?: (p: number) => void; quoteMatch?: string | null; highlightQuote?: string | null; compact?: boolean; overlay?: boolean }) {
   const loc = useLocation();
   const navigate = useNavigate();
   // on a manual page address (/library/revision/…) the tab lives in the URL (?tab=text): search results, annotations and bookmarks
   // reopen the page on "Searchable text" when that is where the match / note is
   const onPageRoute = loc.pathname.startsWith('/library/revision/');
-  const urlTab: 'image' | 'text' = onPageRoute && new URLSearchParams(loc.search).get('tab') === 'text' ? 'text' : 'image';
+  // the text tab is a working view for the Super Admin (functional analysis); users see the page image only
+  const canText = useAuth().user?.role === 'super_admin';
+  const urlTab: 'image' | 'text' = canText && onPageRoute && new URLSearchParams(loc.search).get('tab') === 'text' ? 'text' : 'image';
   const [tab, setTabState] = useState<'image' | 'text'>(urlTab);
   useEffect(() => { setTabState(urlTab); }, [urlTab, page]);
   const setTab = (t: 'image' | 'text') => {
@@ -141,16 +202,19 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
       <div className="row" style={{ marginBottom: 8 }}>
         <button className="small" disabled={page <= 1} title="Previous page (←)" onClick={() => onPage?.(page - 1)}>← Prev page</button>
         <button className="small" disabled={page >= rev.page_count} title="Next page (→)" onClick={() => onPage?.(page + 1)}>Next page →</button>
-        <span className="tabs" style={{ margin: 0, border: 0 }}>
-          <button className={`tab ${tab === 'image' ? 'active' : ''}`} onClick={() => setTab('image')}>Page image</button>
-          <button className={`tab ${tab === 'text' ? 'active' : ''}`} onClick={() => setTab('text')}>Searchable text</button>
-        </span>
+        {canText && (
+          <span className="tabs" style={{ margin: 0, border: 0 }}>
+            <button className={`tab ${tab === 'image' ? 'active' : ''}`} onClick={() => setTab('image')}>Page image</button>
+            <button className={`tab ${tab === 'text' ? 'active' : ''}`} onClick={() => setTab('text')} title="Working view for the Super Admin (functional analysis). Normal users do not see this tab.">Searchable text<span className="tab-admin">Superadmin only</span></button>
+          </span>
+        )}
         {tab === 'image' && (
           <>
             <button className="small" onClick={() => setZoom(Math.max(0.5, zoom - 0.25))} aria-label="Zoom out">−</button>
             <span className="small-text">{Math.round(zoom * 100)}%</span>
             <button className="small" onClick={() => setZoom(Math.min(3, zoom + 0.25))} aria-label="Zoom in">+</button>
             <button className="small ghost" onClick={() => setZoom(1)}>Reset</button>
+            {overlay && <span className="small-text faint">Text on the page can be selected and copied. The cited value is marked.</span>}
           </>
         )}
       </div>
@@ -160,7 +224,10 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
         ) : (
           <div className="page-img-wrap" aria-busy={!imgLoaded} style={!imgLoaded ? { minHeight: 'calc(100vh - 220px)', position: 'relative' } : undefined}>
             {!imgLoaded && <Spinner label="Loading page image…" overlay />}
-            <img key={imgSrc} src={imgSrc} alt={`Manufacturer manual page ${page}`} style={{ width: `${zoom * 100}%`, minWidth: '50%', opacity: imgLoaded ? 1 : 0, transition: 'opacity .2s ease' }} onLoad={() => setLoadedSrc(imgSrc)} onError={() => setImgErr(true)} ref={(el) => { if (el?.complete && el.naturalWidth > 0 && loadedSrc !== imgSrc) setLoadedSrc(imgSrc); }} />
+            <div style={{ position: 'relative', width: `${zoom * 100}%`, minWidth: '50%' }}>
+              <img key={imgSrc} src={imgSrc} alt={`Manufacturer manual page ${page}`} style={{ display: 'block', width: '100%', opacity: imgLoaded ? 1 : 0, transition: 'opacity .2s ease' }} onLoad={() => setLoadedSrc(imgSrc)} onError={() => setImgErr(true)} ref={(el) => { if (el?.complete && el.naturalWidth > 0 && loadedSrc !== imgSrc) setLoadedSrc(imgSrc); }} />
+              {overlay && imgLoaded && <TextOverlay revisionId={revisionId} page={page} quote={highlightQuote} />}
+            </div>
           </div>
         )
       ) : p.text ? (

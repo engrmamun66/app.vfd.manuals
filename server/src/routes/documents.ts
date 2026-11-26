@@ -10,7 +10,7 @@ import { requireSuperAdmin } from '../auth/middleware.js';
 import { audit } from '../lib/audit.js';
 import { cdJoin, cdOrder, cdVisible, includeHidden } from '../services/visibility.js';
 import { DocumentIngestionService, matchQuote, ensureBrandModel } from '../services/ingestion/DocumentIngestionService.js';
-import { renderPdfPage } from '../services/ingestion/pdf.js';
+import { pdfPageWords, renderPdfPage } from '../services/ingestion/pdf.js';
 import { approveStaged, rejectStaged } from '../services/review.js';
 import { listCuratedFiles } from '../services/ingestion/curated.js';
 import { sniff } from '../services/storage.js';
@@ -169,6 +169,20 @@ docsRouter.get(
     } finally {
       renderQueue.splice(renderQueue.indexOf(job), 1);
     }
+  }),
+);
+
+/** Text runs with their position on the page (fractions of the page size): drives the selectable text layer over the page image. */
+docsRouter.get(
+  '/revisions/:id/pages/:page/words',
+  ah(async (req, res) => {
+    const id = intParam(req.params.id, 'id', { required: true })!;
+    const page = intParam(req.params.page, 'page', { required: true, min: 1 })!;
+    const r = getRevision(id);
+    if (r.file_format !== 'pdf' || page > r.page_count) return res.json({ width: 0, height: 0, items: [] });
+    const words = await pdfPageWords(revisionFile(r), page, `sha-${r.sha256.slice(0, 16)}`);
+    res.setHeader('Cache-Control', 'private, max-age=86400');
+    res.json(words);
   }),
 );
 
