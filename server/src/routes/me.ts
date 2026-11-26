@@ -34,6 +34,9 @@ function validate(key: string, v: any) {
     case 'theme':
       if (!['light', 'dark', 'system'].includes(v)) throw badRequest('theme must be light, dark or system');
       return v;
+    case 'accent':
+      if (!['mono', 'blue', 'green', 'red', 'orange', 'purple', 'teal'].includes(v)) throw badRequest('invalid accent');
+      return v;
     case 'page_transition_ms': {
       const ms = Number(v);
       if (!Number.isFinite(ms)) throw badRequest('page_transition_ms must be a number');

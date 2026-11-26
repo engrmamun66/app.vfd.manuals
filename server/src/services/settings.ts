@@ -37,6 +37,7 @@ export const USER_SETTING_DEFAULTS: Record<string, unknown> = {
   split_view: { enabled: false, ratio: 0.55, collapsed: null },
   language: 'en',
   theme: 'light',
+  accent: 'mono', // theme accent color: mono (black/white) | blue | green | red | orange | purple | teal
   explanation_levels_open: ['short'],
   selected_model: null, // model id used as the global filter on every page (null = all models)
   model_aliases: {}, // { [modelId]: short tab label }

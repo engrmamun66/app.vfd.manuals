@@ -217,6 +217,7 @@ export function Pager({ page, limit, total, onPage }: { page: number; limit: num
       if (k >= 0) pagerStack.splice(k, 1);
     };
   }, []);
+  if (pages <= 1) return null;
   return (
     <div className="row pager">
       <button disabled={page <= 1} onClick={() => onPage(page - 1)} title="Previous page (← key)" aria-keyshortcuts="ArrowLeft">← Prev</button>

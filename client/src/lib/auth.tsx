@@ -118,10 +118,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const mq = window.matchMedia?.('(prefers-color-scheme: dark)');
     const apply = () => { document.documentElement.dataset.theme = settings?.theme === 'dark' || (settings?.theme === 'system' && mq?.matches) ? 'dark' : 'light'; };
     apply();
+    document.documentElement.dataset.accent = settings?.accent && settings.accent !== 'mono' ? settings.accent : '';
     if (settings?.theme !== 'system' || !mq) return;
     mq.addEventListener('change', apply);
     return () => mq.removeEventListener('change', apply);
-  }, [settings?.theme]);
+  }, [settings?.theme, settings?.accent]);
 
   const value: Ctx = {
     user,

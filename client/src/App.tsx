@@ -22,7 +22,7 @@ import { FeedbackModal } from './components/FeedbackModal';
 import { AdminContent, AdminLogs, AdminSettings, AdminUsers, MySettings } from './pages/Admin';
 import { Loading, SearchBox, useAsync } from './components/ui';
 import { ModelsProvider, useModels, type ModelRow } from './lib/models';
-import { MonitorIcon, MoonIcon, NavIcon, SunIcon } from './components/icons';
+import { NavIcon } from './components/icons';
 import { PageToolbar, PageToolsProvider, TitleLinePdf } from './components/PageTools';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SettingsModal } from './components/SettingsModal';
@@ -390,13 +390,6 @@ function ShellInner() {
           <button className="small send-request" onClick={() => setFeedbackOpen(true)} title="Send a request or complaint to the administrator">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg> Send message
           </button>
-          {(() => { const cur = (settings?.theme ?? 'light') as 'system' | 'light' | 'dark'; const nextT = cur === 'system' ? 'light' : cur === 'light' ? 'dark' : 'system'; const label = { system: 'System', light: 'Light', dark: 'Dark' }; return (
-            <button type="button" className="ghost icon-btn theme-cycle" onClick={() => updateSettings({ theme: nextT } as any)} aria-label={`Theme: ${label[cur]}. Switch to ${label[nextT]}`} title={`Theme: ${label[cur]} (tap for ${label[nextT]})`}>{cur === 'system' ? <MonitorIcon /> : cur === 'light' ? <SunIcon /> : <MoonIcon />}</button>); })()}
-          <div className="theme-switch" role="radiogroup" aria-label="Theme mode">
-            {([['system', 'System', <MonitorIcon key="s" />], ['light', 'Light', <SunIcon key="l" />], ['dark', 'Dark', <MoonIcon key="d" />]] as const).map(([k, l, ic]) => (
-              <button key={k} role="radio" aria-checked={(settings?.theme ?? 'light') === k} aria-label={`${l} mode`} title={`${l} mode`} className={(settings?.theme ?? 'light') === k ? 'active' : ''} onClick={() => updateSettings({ theme: k } as any)}>{ic}</button>
-            ))}
-          </div>
           {!isAdmin && <button type="button" className={`small get-pro ${isPro ? 'is-pro' : ''}`} onClick={() => openPlans()} title={isPro ? 'You have Pro access' : 'See Pro plans'}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M12 2l3 6.5 7 1-5 5 1.2 7L12 18l-6.2 3.5L7 14.5l-5-5 7-1z" /></svg> <span className="gp-label">{isPro ? 'Pro' : 'Get Pro'}</span>
           </button>}

@@ -1,5 +1,7 @@
+import { FeedbackModal } from './FeedbackModal';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAuth } from '../lib/auth';
+import { MonitorIcon, MoonIcon, SunIcon } from './icons';
 import { shortName, useModels } from '../lib/models';
 import { AdminSettings, MySettings } from '../pages/Admin';
 import { MyCategoriesManager } from './MyCategories';
@@ -21,6 +23,9 @@ function ModelAliases() {
     return run({ model_aliases: next });
   };
   const toggle = (id: number, on: boolean) => run({ hidden_models: on ? off.filter((x) => x !== id) : [...off, id] });
+  const allOn = models.length > 0 && models.every((m) => isOn(m.id));
+  const noneOn = models.every((m) => !isOn(m.id));
+  const toggleAll = () => run({ hidden_models: allOn ? models.map((m) => m.id) : [] }); // all on -> hide every tab, otherwise show every tab
 
   // FLIP animation: rows slide from their old position to the new one when the order changes
   const body = useRef<HTMLTableSectionElement>(null);
@@ -63,7 +68,10 @@ function ModelAliases() {
       </p>
       {err && <div className="err" role="alert">{err}</div>}
       <div className="table-wrap"><table>
-        <thead><tr><th style={{ width: 90 }}>Order</th><th>Brand</th><th>Model</th><th>Alias</th><th>Status</th><th>Switch</th></tr></thead>
+        <thead><tr><th style={{ width: 90 }}>Order</th><th>Brand</th><th>Model</th><th>Alias</th><th>Status</th><th>
+          <div className="row" style={{ flexWrap: 'nowrap', gap: 8 }}>
+            <button role="switch" aria-checked={allOn} aria-label="Show all model tabs" title={allOn ? 'All models On — click to switch every tab Off' : noneOn ? 'All models Off — click to switch every tab On' : 'Some models Off — click to switch every tab On'} className={`switch ${allOn ? 'on' : ''}`} onClick={toggleAll} disabled={!models.length}><span /></button>
+          </div></th></tr></thead>
         <tbody ref={body}>
           {models.map((m, i) => (
             <tr key={m.id} data-id={m.id} draggable
@@ -138,6 +146,39 @@ function UiSettings() {
   );
 }
 
+const ACCENTS: [string, string, string][] = [['mono', 'Black & white', 'linear-gradient(90deg,#0a0a0a 50%,#fff 50%)'], ['blue', 'Blue', '#1d4ed8'], ['green', 'Green', '#15803d'], ['red', 'Red', '#b91c1c'], ['orange', 'Orange', '#c2410c'], ['purple', 'Purple', '#6d28d9'], ['teal', 'Teal', '#0f766e']];
+
+function ThemeSetting() {
+  const { settings, updateSettings } = useAuth();
+  const accent = settings?.accent ?? 'mono';
+  const pickAccent = async (k: string) => { try { setErr(null); await updateSettings({ accent: k } as any); } catch (e: any) { setErr(e.message); } };
+  const cur = (settings?.theme ?? 'light') as 'system' | 'light' | 'dark';
+  const [err, setErr] = useState<string | null>(null);
+  const pick = async (k: 'system' | 'light' | 'dark') => { try { setErr(null); await updateSettings({ theme: k } as any); } catch (e: any) { setErr(e.message); } };
+  const opts = [['system', 'System', <MonitorIcon key="s" />], ['light', 'Light', <SunIcon key="l" />], ['dark', 'Dark', <MoonIcon key="d" />]] as const;
+  return (
+    <div style={{ maxWidth: 720, marginBottom: 28 }}>
+      <h2>Theme</h2>
+      <p className="muted small-text">Light, dark, or follow your device (System). Applies on desktop and mobile. Personal: it only changes your own view.</p>
+      {err && <div className="err" role="alert">{err}</div>}
+      <div className="row" role="radiogroup" aria-label="Theme mode">
+        {opts.map(([k, label, icon]) => (
+          <button key={k} role="radio" aria-checked={cur === k} className={cur === k ? 'primary' : ''} onClick={() => pick(k)} style={{ gap: 8 }}>{icon}{label}</button>
+        ))}
+      </div>
+      <h3 style={{ marginTop: 18 }}>Accent color</h3>
+      <p className="muted small-text">Color of primary buttons, focus rings and highlights. Default is black &amp; white.</p>
+      <div className="row" role="radiogroup" aria-label="Accent color">
+        {ACCENTS.map(([k, label, c]) => (
+          <button key={k} role="radio" aria-checked={accent === k} className={accent === k ? 'primary' : ''} onClick={() => pickAccent(k)} style={{ gap: 8 }}>
+            <span aria-hidden style={{ width: 14, height: 14, borderRadius: '50%', background: c, border: '1px solid var(--line-strong)', display: 'inline-block' }} />{label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const TRANSITIONS: [string, string][] = [['none', 'None'], ['fade', 'Fade'], ['slide-up', 'Slide up'], ['slide-left', 'Slide from right'], ['slide-right', 'Slide from left'], ['zoom-in', 'Zoom in'], ['zoom-out', 'Zoom out'], ['blur', 'Blur in'], ['flip', 'Tilt']];
 
 function PageTransition() {
@@ -181,7 +222,7 @@ export function SettingsModal({ onClose: onClosed, initialTab }: { onClose: () =
   const onClose = () => { if (!closing) { setClosing(true); window.setTimeout(onClosed, window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 220); } };
   const { user } = useAuth();
   const isAdmin = user?.role === 'super_admin';
-  const tabs = [['models', 'Model aliases'], ['ui', 'UI settings'], ['categories', 'My categories'], ['profile', 'Profile & Preferences'], ['security', 'Change password'], ...(isAdmin ? [['app', 'Application & Backups']] : [])] as [string, string][];
+  const tabs = [['models', 'Model aliases'], ['ui', 'UI settings'], ['categories', 'My categories'], ['profile', 'Profile & Preferences'], ['security', 'Change password'], ['message', 'Send message'], ...(isAdmin ? [['app', 'Application & Backups']] : [])] as [string, string][];
   const [tab, setTab] = useState(initialTab ?? 'models');
   useEffect(() => {
     const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -192,14 +233,15 @@ export function SettingsModal({ onClose: onClosed, initialTab }: { onClose: () =
     <div className={`fs-modal ${closing ? 'closing' : ''}`} role="dialog" aria-modal="true" aria-label="Settings">
       <div className="fs-head"><h2>Settings</h2><button onClick={onClose} aria-label="Close settings">✕ Close</button></div>
       <div className="fs-body">
-        <div className="fs-tabs" role="tablist" aria-orientation="vertical">{tabs.map(([k, l]) => <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>{l}</button>)}</div>
+        <div className="fs-tabs" role="tablist" aria-orientation="vertical">{tabs.map(([k, l]) => <button key={k} role="tab" aria-selected={tab === k} className={`${tab === k ? 'active' : ''} ${k === 'message' ? 'mobile-only' : ''}`} onClick={() => setTab(k)}>{l}</button>)}</div>
         <div className="fs-content">
           <h2 className="fs-title">{tabs.find(([k]) => k === tab)?.[1]}</h2>
           {tab === 'profile' && <MySettings embedded />}
           {tab === 'models' && <ModelAliases />}
           {tab === 'categories' && <MyCategoriesManager />}
-          {tab === 'ui' && <><UiSettings /><PageTransition /></>}
+          {tab === 'ui' && <><ThemeSetting /><UiSettings /><PageTransition /></>}
           {tab === 'security' && <ChangePassword embedded />}
+          {tab === 'message' && <FeedbackModal onClose={() => setTab('models')} />}
           {tab === 'app' && isAdmin && <AdminSettings embedded />}
         </div>
       </div>

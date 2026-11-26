@@ -3,18 +3,26 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ApiError, get, post } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { ErrorBox, PasswordInput } from '../components/ui';
+import { VfdAnimation } from '../components/VfdAnimation';
 
 function Wrap({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="auth-wrap">
-      <div className="auth-card">
-        <div style={{ marginBottom: 16 }}>
-          <b style={{ fontSize: '1.05rem' }}>VFD Knowledge Base</b>
-          <div className="muted small-text">Technical Research Explorer</div>
+      <aside className="auth-art" aria-label="Product overview">
+        <div className="auth-art-brand"><img src="/favicon.svg" alt="" width="38" height="38" /><div><b>VFD Knowledge Base</b><span>Technical Research Explorer</span></div></div>
+        <VfdAnimation />
+        <p className="auth-art-tag">Parameters, Modbus registers and manual pages for every drive, verified against the original documentation.</p>
+      </aside>
+      <main className="auth-pane">
+        <div className="auth-card">
+          <div style={{ marginBottom: 16 }}>
+            <b style={{ fontSize: '1.05rem' }}>VFD Knowledge Base</b>
+            <div className="muted small-text">Technical Research Explorer</div>
+          </div>
+          <h1>{title}</h1>
+          {children}
         </div>
-        <h1>{title}</h1>
-        {children}
-      </div>
+      </main>
     </div>
   );
 }
