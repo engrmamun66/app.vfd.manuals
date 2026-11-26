@@ -98,17 +98,19 @@ function ModelAliases() {
 }
 
 function UiSettings() {
-  const { settings, updateSettings } = useAuth();
-  const u = (settings?.ui_settings ?? {}) as { show_verification_filter?: boolean; show_evidence_filter?: boolean; show_export_csv?: boolean; show_export_json?: boolean; importance_filter_style?: 'dropdown' | 'stars'; access_filter_style?: 'dropdown' | 'buttons' };
+  const { settings, updateSettings, user } = useAuth();
+  const u = (settings?.ui_settings ?? {}) as { show_verification_filter?: boolean; show_evidence_filter?: boolean; show_export_csv?: boolean; show_export_json?: boolean; show_searchable_text?: boolean; importance_filter_style?: 'dropdown' | 'stars'; access_filter_style?: 'dropdown' | 'buttons'; selection_menu_autohide?: boolean };
   const [err, setErr] = useState<string | null>(null);
   const set = async (k: keyof typeof u, v: boolean | string) => {
     try { setErr(null); await updateSettings({ ui_settings: { ...u, [k]: v } } as any); } catch (e: any) { setErr(e.message); }
   };
-  const rows: [Exclude<keyof typeof u, 'importance_filter_style' | 'access_filter_style'>, string, string][] = [
+  type RowKey = Exclude<keyof typeof u, 'importance_filter_style' | 'access_filter_style' | 'selection_menu_autohide'>;
+  const rows: [RowKey, string, string][] = [
     ['show_verification_filter', 'Show verification dropdown', 'Adds the "Any verification" filter to the Parameters and Modbus Register lists.'],
     ['show_evidence_filter', 'Show evidence dropdown', 'Adds the "Any evidence" filter to the Parameters list.'],
     ['show_export_csv', 'Show Export CSV button', 'Shows the "Export CSV" button on the Parameters, Modbus Register and Compare pages.'],
     ['show_export_json', 'Show Export JSON button', 'Shows the "Export JSON" button on the Parameters, Modbus Register and Compare pages.'],
+    ...(user?.role === 'super_admin' ? [['show_searchable_text', 'Show "Searchable text" tab (Superadmin only)', 'Adds the plain page-text tab next to "Page image" in manual page views. For functional analysis; normal users never see it.'] as [RowKey, string, string]] : []),
   ];
   return (
     <div style={{ maxWidth: 720 }}>
@@ -130,6 +132,11 @@ function UiSettings() {
             <td><div className="seg" role="radiogroup" aria-label="Access filter style">
               {([['dropdown', 'Dropdown'], ['buttons', 'Buttons']] as const).map(([k, l]) => <button key={k} role="radio" aria-checked={(u.access_filter_style ?? 'dropdown') === k} className={(u.access_filter_style ?? 'dropdown') === k ? 'active' : ''} onClick={() => set('access_filter_style', k)}>{l}</button>)}
             </div></td>
+          </tr>
+          <tr>
+            <td><b>Hide text-selection menu on outside click</b><div className="small-text muted">On: the Add Comment / Highlight / Copy menu closes when you click anywhere else. Off: it stays until you pick an action, press Esc or choose Cancel.</div></td>
+            <td><span className={`badge ${u.selection_menu_autohide !== false ? 'strong' : 'dashed'}`}>{u.selection_menu_autohide !== false ? 'On' : 'Off'}</span></td>
+            <td><button role="switch" aria-checked={u.selection_menu_autohide !== false} aria-label="Hide text-selection menu on outside click" className={`switch ${u.selection_menu_autohide !== false ? 'on' : ''}`} onClick={() => set('selection_menu_autohide', u.selection_menu_autohide === false)}><span /></button></td>
           </tr>
           {rows.map(([k, label, hint]) => {
             const on = u[k] === true;

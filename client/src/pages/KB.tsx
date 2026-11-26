@@ -163,7 +163,10 @@ export function FunctionPage() {
 }
 
 // ============ Research detail pages (dynamic URLs) ============
-const LEVELS = [['overview', 'Quick overview'], ['detailed', 'Detailed explanation'], ['advanced', 'Advanced technical'], ['source', 'Source investigation'], ['original', 'Original documentation']] as const;
+const LEVELS = [['overview', 'Details'], ['explanation', 'Explanation'], ['original', 'Manual page']] as const;
+/** Earlier tab addresses (/detailed, /advanced, /source, /purpose, /scaling) open the tab that now holds that content. */
+const LEVEL_ALIAS: Record<string, string> = { detailed: 'explanation', advanced: 'explanation', source: 'overview', purpose: 'overview', scaling: 'overview' };
+const levelOf = (lv?: string) => { const k = LEVEL_ALIAS[lv ?? ''] ?? lv; return (LEVELS.find(([x]) => x === k)?.[0] ?? 'overview') as string; };
 
 function EvidenceList({ evidence, selected, onSelect }: { evidence: any[]; selected: number | null; onSelect: (i: number) => void }) {
   if (!evidence.length) return <div className="err">Page Reference Not Verified — no source reference is recorded for this record.</div>;
@@ -325,7 +328,7 @@ function Field({ k, children, help }: { k: string; children: any; help?: string 
 
 export function ParameterResearch() {
   const { id, level: lv, brand, model } = useParams();
-  const level = (LEVELS.find(([k]) => k === lv)?.[0] ?? 'overview') as string;
+  const level = levelOf(lv);
   const { data: d, error, loading, reload } = useAsync(() => get(`/parameters/${id}`), [id]);
   const { settings, user } = useAuth();
   if (error) return <div className="page"><ErrorBox e={error} /><p>The referenced parameter is unavailable. You are not being redirected to a different record.</p></div>;
@@ -335,7 +338,7 @@ export function ParameterResearch() {
     <ResearchFrame
       level={level} base={base} evidence={d.evidence} others={d.otherBrandImplementations.concat(d.sameModelSameFunction)}
       crumbs={[{ label: 'Home', to: '/' }, { label: d.category ?? 'Parameters', to: d.category_slug ? `/kb/${d.category_slug}` : '/parameters' }, ...(d.function_slug ? [{ label: d.function_name, to: `/function/${d.function_slug}` }] : []), { label: <>{d.brand} <ModelName name={d.model} /></>, to: `/model/${d.model_id}` }, { label: `Parameter ${d.code}` }, { label: LEVELS.find(([k]) => k === level)![1] }]}
-      title={<span><span className="mono">{d.code}</span> — {d.name ?? 'Unnamed in extraction'} <InfoIcon title={d.function_name ?? d.code} text={d.function_short || d.description_en || 'No short description recorded.'} more={`${base}/detailed`} /></span>}
+      title={<span><span className="mono">{d.code}</span> — {d.name ?? 'Unnamed in extraction'} <InfoIcon title={d.function_name ?? d.code} text={d.function_short || d.description_en || 'No short description recorded.'} more={`${base}/explanation`} /></span>}
       subtitle={<>{d.brand} <ModelName name={d.model} /> · {d.function_name ? <>common function: <Link to={`/function/${d.function_slug}`}>{d.function_name}</Link></> : 'not mapped to a common function'}</>}
       entity={d}
       modelTabs={{ kind: 'parameter', modelId: d.model_id, level, counterparts: d.otherBrandImplementations }}
@@ -356,9 +359,11 @@ export function ParameterResearch() {
               </tbody></table></div>
               {d.equivalence_note && <div className="ok-box"><b>Equivalence note:</b> {d.equivalence_note}</div>}
               {user?.role === 'super_admin' && <ParameterEditor d={d} onSaved={reload} />}
+              <h3>Source in the manual</h3>
+              <EvidenceList evidence={d.evidence} selected={sel} onSelect={setSel} />
             </div>
           )}
-          {level === 'detailed' && (
+          {level === 'explanation' && (
             <div className="stack">
               <h3>Documented description</h3>
               {d.description_en ? <div className="prose"><Annotatable contentKey={`param:${d.id}:desc`} text={d.description_en} /></div> : <p className="muted">Not Documented</p>}
@@ -369,8 +374,8 @@ export function ParameterResearch() {
               <h3>Related parameters</h3><Related d={d} kind="parameter" />
             </div>
           )}
-          {level === 'advanced' && (
-            <div className="stack">
+          {level === 'explanation' && (
+            <div className="stack" style={{ marginTop: 18 }}>
               <h3>Advanced technical explanation</h3><Explanations items={d.explanations.filter((x: any) => x.level === 'advanced' || x.level === 'manufacturer')} />
               <h3>Differences between brands / models</h3>
               {d.otherBrandImplementations.length ? <div className="table-wrap"><table><thead><tr><th>Brand / Model</th><th>Code</th><th>Equivalence</th><th>Explanation</th></tr></thead><tbody>{d.otherBrandImplementations.map((s: any) => <tr key={s.id}><td>{s.brand} <ModelName name={s.model} /></td><td className="code"><Link to={`/parameter/${s.id}`}>{s.code}</Link></td><td><EquivBadge s={s.equivalence} /></td><td className="small-text">{s.name}</td></tr>)}</tbody></table></div> : <p className="muted">No other implementation of this function is recorded.</p>}
@@ -380,7 +385,6 @@ export function ParameterResearch() {
               {d.verificationHistory.length ? <ul>{d.verificationHistory.map((v: any) => <li key={v.id} className="small-text">{fmtDate(v.created_at)} — {v.action}: {v.from_status ?? '—'} → {v.to_status} {v.note ? `(${v.note})` : ''}</li>)}</ul> : <p className="muted">No manual verification recorded yet.</p>}
             </div>
           )}
-          {level === 'source' && <EvidenceList evidence={d.evidence} selected={sel} onSelect={setSel} />}
           {level === 'original' && (d.evidence.length ? <div className="stack">{d.evidence.length > 1 && <EvidenceList evidence={d.evidence} selected={sel} onSelect={setSel} />}{d.evidence[sel ?? 0] && <PageViewer compact overlay revisionId={d.evidence[sel ?? 0].revision_id} page={d.evidence[sel ?? 0].page_index ?? 1} quoteMatch={d.evidence[sel ?? 0].quote_match} highlightQuote={d.evidence[sel ?? 0].extracted_text} />}</div> : <EvidenceList evidence={[]} selected={null} onSelect={() => {}} />)}
         </>
       )}
@@ -388,10 +392,10 @@ export function ParameterResearch() {
   );
 }
 
-const REG_TABS = ['overview', 'purpose', 'scaling', 'explanation', 'source', 'original'] as const;
+const REG_TABS = LEVELS.map(([k]) => k);
 export function RegisterResearch() {
   const { id, brand, model, level: lv } = useParams();
-  const level = (REG_TABS.find((k) => k === lv) ?? 'overview') as string;
+  const level = levelOf(lv);
   const { data: d, error, loading } = useAsync(() => get(`/registers/${id}`), [id]);
   const nav = useNavigate();
   if (error) return <div className="page"><ErrorBox e={error} /><p>The referenced register is unavailable. You are not being redirected to a different record.</p></div>;
@@ -414,8 +418,8 @@ function RegisterBody({ d, base, level, nav }: any) {
   const loc = useLocation();
   const body = (
     <>
-      <div className="tabs" role="tablist">{REG_TABS.map((k) => <button key={k} role="tab" aria-selected={level === k} className={`tab ${level === k ? 'active' : ''}`} onClick={() => nav(k === 'overview' ? base : `${base}/${k}`)}>{{ overview: 'Register details', purpose: 'Purpose & bits', scaling: 'Scaling & addressing', explanation: 'Explanation', source: 'Source investigation', original: 'Original documentation' }[k]}</button>)}</div>
-      {level === 'overview' && (
+      <div className="tabs" role="tablist">{LEVELS.map(([k, l]) => <button key={k} role="tab" aria-selected={level === k} className={`tab ${level === k ? 'active' : ''}`} onClick={() => nav(k === 'overview' ? base : `${base}/${k}`)}>{l}</button>)}</div>
+      {level === 'overview' && (<div className="stack">
         <div className="table-wrap"><table><tbody>
           <Field k="Original manufacturer address" help="Kept exactly as printed. Never altered by conversion.">{d.original_address}</Field>
           <Field k="Original address format"><Val v={d.address_format} /></Field>
@@ -425,17 +429,17 @@ function RegisterBody({ d, base, level, nav }: any) {
           <Field k="Common function">{d.function_slug ? <Link to={`/function/${d.function_slug}`}>{d.function_name}</Link> : <Val v={null} />}</Field>
           <Field k="Verification"><VerifBadge s={d.verification_status} /> <EvBadge s={d.evidence_status} /></Field>
         </tbody></table></div>
-      )}
-      {level === 'purpose' && (<div className="stack"><h3>Description</h3>{d.description ? <div className="prose"><Annotatable contentKey={`reg:${d.id}:desc`} text={d.description} /></div> : <p className="muted">Not Documented</p>}
+        <h3>Description</h3>{d.description ? <div className="prose"><Annotatable contentKey={`reg:${d.id}:desc`} text={d.description} /></div> : <p className="muted">Not Documented</p>}
         {d.bit_definitions?.length > 0 && <><h3>Bit definitions (as documented)</h3><div className="table-wrap"><table><thead><tr><th>Bit</th><th>Meaning</th></tr></thead><tbody>{d.bit_definitions.map((b: any, i: number) => <tr key={i}><td className="code">{b.bit}</td><td>{b.meaning}</td></tr>)}</tbody></table></div></>}
-        <h3>Related</h3><Related d={d} kind="register" /></div>)}
-      {level === 'scaling' && (<div className="stack">
+        <h3>Related</h3><Related d={d} kind="register" />
+        <h3>Scaling &amp; addressing</h3>
         <div className="table-wrap"><table><tbody><Field k="Scaling factor (documented)"><Val v={d.scaling} /></Field><Field k="Unit"><Val v={d.unit} /></Field><Field k="Data type"><Val v={d.data_type} /></Field><Field k="Byte order / word order"><Val v={d.byte_order} /> / <Val v={d.word_order} /></Field></tbody></table></div>
         <h3>Mathematical address conversions <InfoIcon title="Conversion only" text="These are base-16/base-10 arithmetic on the original address. They do NOT claim a valid PLC address, a 4xxxx reference, or a zero/one-based convention. That depends on the communication manual and PLC instruction." /></h3>
         {d.conversions.length ? <div className="table-wrap"><table><thead><tr><th>Representation</th><th>Value</th><th>Method</th></tr></thead><tbody>{d.conversions.map((c: any) => <tr key={c.representation}><td>{c.representation}</td><td className="code">{c.value}</td><td className="mono">{c.method}</td></tr>)}</tbody></table></div> : <p className="muted">No mathematical conversion stored (address is not a plain number, e.g. a parameter-derived or symbolic address). Use the <Link to="/modbus/converter">Address Converter</Link> for plain values.</p>}
+        <h3>Source in the manual</h3>
+        <EvidenceList evidence={d.evidence} selected={sel} onSelect={setSel} />
       </div>)}
       {level === 'explanation' && <div className="stack"><Explanations items={d.explanations} />{d.restrictions && <><h3>Communication restrictions</h3><p>{d.restrictions}</p></>}</div>}
-      {level === 'source' && <EvidenceList evidence={d.evidence} selected={sel} onSelect={setSel} />}
       {level === 'original' && (d.evidence.length ? <div className="stack">{d.evidence.length > 1 && <EvidenceList evidence={d.evidence} selected={sel} onSelect={setSel} />}{ev && <PageViewer compact overlay revisionId={ev.revision_id} page={ev.page_index ?? 1} quoteMatch={ev.quote_match} highlightQuote={ev.extracted_text} />}</div> : <div className="err">Page Reference Not Verified — no source recorded.</div>)}
     </>
   );

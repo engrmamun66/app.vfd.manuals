@@ -160,25 +160,34 @@ test.describe('dashboard & knowledge base', () => {
     await expect(admin.getByRole('heading', { level: 1 })).toContainText(chosen.code);
     await expect(admin.locator('nav.crumbs')).toContainText(`Parameter ${chosen.code}`);
 
-    await admin.getByRole('tab', { name: 'Detailed explanation' }).click();
-    await expect(admin).toHaveURL(new RegExp('/detailed$'));
-    await admin.getByRole('tab', { name: 'Source investigation' }).click();
-    await expect(admin).toHaveURL(new RegExp('/source$'));
-    await expect(admin.getByText(/PDF page index/)).toBeVisible();
+    await admin.getByRole('tab', { name: 'Explanation' }).click();
+    await expect(admin).toHaveURL(new RegExp('/explanation$'));
+    await admin.getByRole('tab', { name: 'Manual page' }).click();
+    await expect(admin).toHaveURL(new RegExp('/original$'));
     await admin.goBack();
-    await expect(admin).toHaveURL(new RegExp('/detailed$'));
+    await expect(admin).toHaveURL(new RegExp('/explanation$'));
     await admin.goBack();
     await expect(admin).toHaveURL(new RegExp(`${paramId}$`));
+    await expect(admin.getByText(/PDF page index/)).toBeVisible(); // the source is part of the Details tab
     await admin.goForward();
     await admin.reload();
-    await expect(admin).toHaveURL(new RegExp('/detailed$'));
-    await expect(admin.getByRole('tab', { name: 'Detailed explanation' })).toHaveAttribute('aria-selected', 'true');
+    await expect(admin).toHaveURL(new RegExp('/explanation$'));
+    await expect(admin.getByRole('tab', { name: 'Explanation' })).toHaveAttribute('aria-selected', 'true');
+    // earlier addresses still open the tab that holds that content
+    await admin.goto(`${paramUrl}/detailed`);
+    await expect(admin.getByRole('tab', { name: 'Explanation' })).toHaveAttribute('aria-selected', 'true');
+    await admin.goto(`${paramUrl}/source`);
+    await expect(admin.getByRole('tab', { name: 'Details' })).toHaveAttribute('aria-selected', 'true');
     // breadcrumb click navigates to the earlier location
     await admin.locator('nav.crumbs a').first().click();
     await expect(admin).toHaveURL(/\/$/);
   });
 
   test('original documentation tab shows the real manual page image with source reference', async () => {
+    // the Searchable text tab is off by default for the Super Admin (Settings → UI settings); switch it on for the checks below
+    const me0 = await (await admin.request.get('/api/auth/me')).json();
+    expect(me0.settings.ui_settings.show_searchable_text).toBe(false);
+    await admin.request.patch('/api/me/settings', { data: { ui_settings: { ...me0.settings.ui_settings, show_searchable_text: true } }, headers: { 'X-CSRF-Token': me0.csrfToken } });
     await admin.goto(`${paramUrl}/original`);
     const img = admin.locator('.page-img-wrap img');
     await expect(img).toBeVisible({ timeout: 45_000 });
@@ -207,7 +216,7 @@ test.describe('dashboard & knowledge base', () => {
     await admin.getByRole('link', { name: withConv.original_address }).first().click();
     await expect(admin).toHaveURL(/\/research\/modbus\/.+\/registers\/\d+$/);
     await expect(admin.getByRole('heading', { level: 1 })).toContainText(withConv.original_address);
-    await admin.getByRole('tab', { name: 'Scaling & addressing' }).click();
+    await expect(admin.getByRole('tab', { name: 'Details' })).toHaveAttribute('aria-selected', 'true'); // scaling & addressing is part of Details
     await expect(admin.getByText('Mathematical address conversions')).toBeVisible();
     await expect(admin.getByText(/mathematical|base-16|base-10/i).first()).toBeVisible();
   });
@@ -308,7 +317,7 @@ test.describe('curation by Super Admin', () => {
     await expect(admin.getByRole('status').filter({ hasText: 'Explanation added' })).toBeVisible();
     // normal user sees it
     await alice.goto(paramUrl);
-    await alice.getByRole('tab', { name: 'Detailed explanation' }).click();
+    await alice.getByRole('tab', { name: 'Explanation' }).click();
     await expect(alice.getByText('E2E documented explanation text.')).toBeVisible();
     // technical values unchanged
     const after = await (await admin.request.get(`/api/parameters/${paramId}`)).json();

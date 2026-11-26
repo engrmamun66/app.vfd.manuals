@@ -4,7 +4,7 @@ import { SplitIcon } from './icons';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { get } from '../lib/api';
-import { useAuth } from '../lib/auth';
+import { useAuth, useUiSettings } from '../lib/auth';
 import { Annotatable, AnnotationScope } from './Annotatable';
 import { ErrorBox, Loading, QuoteBadge, Spinner, useAsync } from './ui';
 
@@ -145,7 +145,9 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
   // reopen the page on "Searchable text" when that is where the match / note is
   const onPageRoute = loc.pathname.startsWith('/library/revision/');
   // the text tab is a working view for the Super Admin (functional analysis); users see the page image only
-  const canText = useAuth().user?.role === 'super_admin';
+  const isSuper = useAuth().user?.role === 'super_admin';
+  const { showSearchableText } = useUiSettings();
+  const canText = isSuper && showSearchableText; // the Super Admin switches it on in Settings → UI settings (off by default)
   const urlTab: 'image' | 'text' = canText && onPageRoute && new URLSearchParams(loc.search).get('tab') === 'text' ? 'text' : 'image';
   const [tab, setTabState] = useState<'image' | 'text'>(urlTab);
   useEffect(() => { setTabState(urlTab); }, [urlTab, page]);
@@ -181,21 +183,16 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
   const imgLoaded = loadedSrc === imgSrc;
   return (
     <div>
-      <div className="row between" style={{ marginBottom: 8, justifyContent: compact ? 'flex-end' : undefined }}>
-        {!compact && <div>
+      {!compact && <div className="row between" style={{ marginBottom: 8 }}>
+        <div>
           <b>{rev.title}</b>
           <div className="small-text muted">
             {rev.revision_label ? `Rev ${rev.revision_label} · ` : ''}PDF page {page}/{rev.page_count}
             {p.printed_page ? ` · printed page ${p.printed_page}` : ' · printed page not verified'}
             {' · '}text: {p.text_source === 'pdf-text' ? 'PDF text layer' : p.text_source === 'ocr' ? `OCR (${p.ocr_confidence ? Math.round(p.ocr_confidence) + '% conf.' : 'unverified'})` : 'none'}
           </div>
-        </div>}
-        <div className="row">
-          {quoteMatch !== undefined && <QuoteBadge s={quoteMatch} />}
-          <a className="btn small" href={pdfUrl(revisionId, rev.title ?? 'manual', page)} target="_blank" rel="noreferrer">Open original PDF <span aria-hidden="true">↗</span></a>
-          {!loc.pathname.startsWith('/library/revision/') && <Link className="btn small" to={`/library/revision/${revisionId}/page/${page}`}>Full viewer</Link>}
         </div>
-      </div>
+      </div>}
       {highlightQuote && !compact && (
         <div className="evidence-quote" title="Text recorded as evidence for this value"><span className="faint">Evidence quote: </span>{highlightQuote}</div>
       )}
@@ -213,10 +210,14 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
             <button className="small" onClick={() => setZoom(Math.max(0.5, zoom - 0.25))} aria-label="Zoom out">−</button>
             <span className="small-text">{Math.round(zoom * 100)}%</span>
             <button className="small" onClick={() => setZoom(Math.min(3, zoom + 0.25))} aria-label="Zoom in">+</button>
-            <button className="small ghost" onClick={() => setZoom(1)}>Reset</button>
-            {overlay && <span className="small-text faint">Text on the page can be selected and copied. The cited value is marked.</span>}
+            <button className="small btn-grey" onClick={() => setZoom(1)}>Reset</button>
           </>
         )}
+        <span className="viewer-actions">
+          {quoteMatch !== undefined && quoteMatch !== 'normalized' && <QuoteBadge s={quoteMatch} />}
+          <a className="btn small" href={pdfUrl(revisionId, rev.title ?? 'manual', page)} target="_blank" rel="noreferrer">Open original PDF <span aria-hidden="true">↗</span></a>
+          {!loc.pathname.startsWith('/library/revision/') && <Link className="btn small" to={`/library/revision/${revisionId}/page/${page}`}>Full viewer</Link>}
+        </span>
       </div>
       {tab === 'image' ? (
         imgErr ? (

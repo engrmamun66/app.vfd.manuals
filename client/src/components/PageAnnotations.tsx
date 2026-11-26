@@ -106,35 +106,38 @@ export function PageAnnotations() {
     return () => { clearTimeout(t); mo.disconnect(); if (supported) for (const k of Array.from(((CSS as any).highlights as Map<string, unknown>).keys())) if (k.startsWith('ann-')) ((CSS as any).highlights as Map<string, unknown>).delete(k); };
   }, [paint]);
 
+  const autoHide = useRef(true);
+  autoHide.current = settings?.ui_settings?.selection_menu_autohide !== false;
   // selection → floating menu
   useEffect(() => {
+    const hide = () => { if (autoHide.current) setMenu(null); };
     const onUp = (e: MouseEvent) => {
       const target = e.target as Element | null;
       if (target?.closest('.sel-menu')) return;
       setTimeout(() => {
         const s = window.getSelection();
-        if (!s || s.isCollapsed || !s.rangeCount) return setMenu(null);
+        if (!s || s.isCollapsed || !s.rangeCount) return hide();
         const r = s.getRangeAt(0);
         const root = document.querySelector('.main .page');
         const anc = r.commonAncestorContainer.nodeType === 1 ? (r.commonAncestorContainer as Element) : r.commonAncestorContainer.parentElement;
-        if (!root || !anc || !root.contains(anc)) return setMenu(null);
-        if (anc.closest(SKIP)) return setMenu(null);
+        if (!root || !anc || !root.contains(anc)) return hide();
+        if (anc.closest(SKIP)) return hide();
         const el = anc.closest(BLOCK);
-        if (!el || !root.contains(el) || el.closest('.annot-host')) return setMenu(null);
+        if (!el || !root.contains(el) || el.closest('.annot-host')) return hide();
         const selected = r.toString();
-        if (!selected.trim() || selected.length > 5000) return setMenu(null);
+        if (!selected.trim() || selected.length > 5000) return hide();
         const pre = document.createRange();
         pre.selectNodeContents(el);
         pre.setEnd(r.startContainer, r.startOffset);
         const start = pre.toString().length;
         const text = el.textContent ?? '';
         const end = start + selected.length;
-        if (text.slice(start, end) !== selected) return setMenu(null);
+        if (text.slice(start, end) !== selected) return hide();
         const rect = r.getBoundingClientRect();
         setMenu({ x: Math.max(8, Math.min(rect.left, window.innerWidth - 300)), y: Math.max(8, rect.top - 40), el, sel: { text: selected, start, end, prefix: text.slice(Math.max(0, start - 32), start), suffix: text.slice(end, end + 32) } });
       }, 0);
     };
-    const onDown = (e: MouseEvent) => { if (!(e.target as Element | null)?.closest('.sel-menu')) setMenu(null); };
+    const onDown = (e: MouseEvent) => { if (autoHide.current && !(e.target as Element | null)?.closest('.sel-menu')) setMenu(null); };
     document.addEventListener('mouseup', onUp);
     document.addEventListener('mousedown', onDown);
     return () => { document.removeEventListener('mouseup', onUp); document.removeEventListener('mousedown', onDown); };

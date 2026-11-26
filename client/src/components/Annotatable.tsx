@@ -130,9 +130,17 @@ export function Annotatable({ contentKey, text, as = 'div', className, children 
     for (const a of segments.lost) if (a.isOwn && a.status !== 'Requires Reattachment') post(`/annotations/anchors/${a.anchorId}/status`, { status: 'requires_reattachment' }).catch(() => {});
   }, [segments.lost]);
 
+  const autoHide = (settings?.ui_settings?.selection_menu_autohide) !== false;
+  const hide = () => { if (autoHide) setMenu(null); };
+  useEffect(() => {
+    if (!menu || !autoHide) return;
+    const d = (e: MouseEvent) => { if (!(e.target as Element | null)?.closest('.sel-menu') && !host.current?.contains(e.target as Node)) setMenu(null); };
+    document.addEventListener('mousedown', d);
+    return () => document.removeEventListener('mousedown', d);
+  }, [menu, autoHide]);
   const onMouseUp = () => {
     const s = window.getSelection();
-    if (!s || s.isCollapsed || !host.current || !s.rangeCount) return setMenu(null);
+    if (!s || s.isCollapsed || !host.current || !s.rangeCount) return hide();
     const r = s.getRangeAt(0);
     if (!host.current.contains(r.commonAncestorContainer)) return;
     const pre = document.createRange();
@@ -140,9 +148,9 @@ export function Annotatable({ contentKey, text, as = 'div', className, children 
     pre.setEnd(r.startContainer, r.startOffset);
     const start = pre.toString().length;
     const selected = r.toString();
-    if (!selected.trim() || selected.length > 5000) return setMenu(null);
+    if (!selected.trim() || selected.length > 5000) return hide();
     const end = start + selected.length;
-    if (text.slice(start, end) !== selected) return setMenu(null); // DOM text differs from source text: do not guess
+    if (text.slice(start, end) !== selected) return hide(); // DOM text differs from source text: do not guess
     const rect = r.getBoundingClientRect();
     const hostRect = host.current.getBoundingClientRect();
     setMenu({
@@ -303,42 +311,37 @@ export function AnnotationEditor({ contentKey, contentHash, sel, ann, onClose, o
 
   return (
     <Modal title={ann ? 'Edit annotation' : 'Add comment'} onClose={onClose}>
-      <div className="evidence-quote" style={{ maxHeight: 90, overflow: 'auto' }}>{sel.text}</div>
-      <div className="field">
-        <label htmlFor="ann-comment">Comment</label>
-        <textarea id="ann-comment" value={comment} onChange={(e) => setComment(e.target.value)} autoFocus />
-      </div>
-      <div className="field">
-        <label>Highlight color</label>
-        <div className="row">
-          {COLORS.map((c) => (
-            <button key={c} type="button" className={`ghost small`} onClick={() => setColor(c)} aria-pressed={color === c} aria-label={`Highlight ${c}`}>
-              <span className={`swatch c-${c} ${color === c ? 'sel' : ''}`} />
-            </button>
-          ))}
-          <button type="button" className="small ghost" onClick={() => setColor(null)} aria-pressed={color === null}>{color === null ? '✓ ' : ''}No highlight</button>
+      <div className="ann-ed">
+      <div className="evidence-quote ann-quote">{sel.text}</div>
+      <textarea id="ann-comment" rows={3} placeholder="Write a comment…" aria-label="Comment" value={comment} onChange={(e) => setComment(e.target.value)} autoFocus />
+      <div className="ann-opts">
+        <div className="ann-opt">
+          <span className="ann-lbl">Highlight</span>
+          <span className="ann-colors">
+            {COLORS.map((c) => (
+              <button key={c} type="button" className="ghost" onClick={() => setColor(c)} aria-pressed={color === c} aria-label={`Highlight ${c}`} title={c}>
+                <span className={`swatch c-${c} ${color === c ? 'sel' : ''}`} />
+              </button>
+            ))}
+            <button type="button" className={`ann-none ${color === null ? 'on' : ''}`} onClick={() => setColor(null)} aria-pressed={color === null} title="No highlight">None</button>
+          </span>
         </div>
-      </div>
-      <div className="field">
-        <label>Visibility</label>
-        <div className="row">
-          <label style={{ display: 'inline-flex', gap: 5, margin: 0 }}><input type="radio" checked={vis === 'private'} onChange={() => setVis('private')} /> Private (only me)</label>
-          <label style={{ display: 'inline-flex', gap: 5, margin: 0 }}><input type="radio" checked={vis === 'public'} onChange={() => setVis('public')} /> Public (all signed-in users, read-only)</label>
-        </div>
-      </div>
-      <div className="field">
-        <label>Links</label>
-        {links.map((l, i) => (
-          <div className="row" key={i} style={{ marginBottom: 4 }}>
-            <input style={{ flex: 2 }} placeholder="https://…" value={l.url} onChange={(e) => setLinks(links.map((x, k) => (k === i ? { ...x, url: e.target.value } : x)))} />
-            <input style={{ flex: 1 }} placeholder="Display text" value={l.text} onChange={(e) => setLinks(links.map((x, k) => (k === i ? { ...x, text: e.target.value } : x)))} />
-            <button className="small" onClick={() => setLinks(links.filter((_, k) => k !== i))}>Remove</button>
+        <div className="ann-opt">
+          <span className="ann-lbl">Visibility</span>
+          <div className="seg" role="radiogroup" aria-label="Visibility">
+            <button type="button" role="radio" aria-checked={vis === 'private'} className={vis === 'private' ? 'active' : ''} onClick={() => setVis('private')} title="Only you can see it">Private</button>
+            <button type="button" role="radio" aria-checked={vis === 'public'} className={vis === 'public' ? 'active' : ''} onClick={() => setVis('public')} title="All signed-in users, read-only">Public</button>
           </div>
-        ))}
-        <button className="small" onClick={() => setLinks([...links, { url: '', text: '' }])}>+ Add link</button>
+        </div>
       </div>
-      <div className="field">
-        <label>Images (JPEG, PNG, WebP)</label>
+      {links.map((l, i) => (
+        <div className="row ann-link" key={i}>
+          <input style={{ flex: 2 }} placeholder="https://…" aria-label="Link URL" value={l.url} onChange={(e) => setLinks(links.map((x, k) => (k === i ? { ...x, url: e.target.value } : x)))} />
+          <input style={{ flex: 1 }} placeholder="Display text" aria-label="Link text" value={l.text} onChange={(e) => setLinks(links.map((x, k) => (k === i ? { ...x, text: e.target.value } : x)))} />
+          <button className="small" onClick={() => setLinks(links.filter((_, k) => k !== i))} aria-label="Remove link">✕</button>
+        </div>
+      ))}
+      {(existing.length > 0 || previews.length > 0) && (
         <div className="att-grid">
           {existing.map((a) => (
             <div key={a.id}>
@@ -362,12 +365,16 @@ export function AnnotationEditor({ contentKey, contentHash, sel, ann, onClose, o
             </div>
           ))}
         </div>
-        <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(e) => setFiles([...files, ...Array.from(e.target.files ?? [])])} />
+      )}
+      <div className="ann-add">
+        <button type="button" className="small" onClick={() => setLinks([...links, { url: '', text: '' }])}>+ Link</button>
+        <label className="ann-file small" title="JPEG, PNG or WebP">+ Image<input type="file" accept="image/jpeg,image/png,image/webp" multiple hidden onChange={(e) => { setFiles([...files, ...Array.from(e.target.files ?? [])]); e.target.value = ''; }} /></label>
+      </div>
       </div>
       <ErrorBox e={err} />
-      <div className="row">
-        <button className="primary" disabled={busy || (!comment.trim() && !color)} onClick={save}>Save</button>
+      <div className="row" style={{ justifyContent: 'flex-end', marginTop: 12 }}>
         <button onClick={onClose}>Cancel</button>
+        <button className="primary" disabled={busy || (!comment.trim() && !color)} onClick={save}>Save</button>
       </div>
     </Modal>
   );

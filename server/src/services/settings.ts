@@ -41,7 +41,7 @@ export const USER_SETTING_DEFAULTS: Record<string, unknown> = {
   explanation_levels_open: ['short'],
   selected_model: null, // model id used as the global filter on every page (null = all models)
   model_aliases: {}, // { [modelId]: short tab label }
-  ui_settings: { show_verification_filter: false, show_evidence_filter: false, show_export_csv: false, show_export_json: false, importance_filter_style: 'dropdown', access_filter_style: 'dropdown' }, // optional list filters / export buttons, hidden by default
+  ui_settings: { show_verification_filter: false, show_evidence_filter: false, show_export_csv: false, show_export_json: false, show_searchable_text: false, importance_filter_style: 'dropdown', access_filter_style: 'dropdown', selection_menu_autohide: true }, // optional list filters / export buttons, hidden by default
   page_transition_ms: 300, // duration of that animation in milliseconds
   page_transition: 'slide-up', // animation played when navigating between pages
   model_order: [], // personal tab/list order: model ids, first = leftmost
