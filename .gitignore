@@ -12,3 +12,4 @@ test-results/
 playwright-report/
 scripts/*.log
 scripts/import-run.json
+CLAUDE.local.md

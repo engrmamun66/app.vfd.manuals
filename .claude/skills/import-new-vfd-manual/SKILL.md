@@ -100,6 +100,6 @@ npm run topics:pages -- --apply                # links every manual topic (fault
 - Counts: parameters (Important / Medium / Optional), Modbus registers, knowledge items per kind.
 - How many records are `Verified` vs `Requires Manual Verification` (and why, e.g. scanned pages or glyph-image codes).
 - Anything not extractable or uncertain, with page numbers.
-- Where to look in the app: Parameters (filter by model tab and Importance), Modbus Register Explorer, Troubleshooting & Manual Topics, Library.
+- Where to look in the app: All Parameters (model tab + Importance filter), Register Explorer, the manual-topic menus (Faults, Alarms, Warnings, Troubleshooting, Wiring & Terminals, Installation, Safety, Specifications, Communication, Maintenance, Notes), Manuals (Library). Page images get the selectable text layer by themselves (no extra step). A new model is unlocked for free users unless the Super Admin locks it in Premium Settings.
 
 Do not restart the server; the running app shows the new data after a page refresh.
