@@ -47,8 +47,8 @@ export const useAuth = () => useContext(AuthCtx);
 /** Optional UI toggles from Settings → UI settings (all default to off). */
 export function useUiSettings() {
   const { settings } = useAuth();
-  const u = (settings?.ui_settings ?? {}) as { show_verification_filter?: boolean; show_evidence_filter?: boolean; show_export_csv?: boolean; show_export_json?: boolean; show_searchable_text?: boolean; importance_filter_style?: 'dropdown' | 'stars'; access_filter_style?: 'dropdown' | 'buttons' };
-  return { showSearchableText: u.show_searchable_text === true, showVerification: u.show_verification_filter === true, showEvidence: u.show_evidence_filter === true, showExportCsv: u.show_export_csv === true, showExportJson: u.show_export_json === true, showStars: u.importance_filter_style === 'stars', accessButtons: u.access_filter_style === 'buttons' };
+  const u = (settings?.ui_settings ?? {}) as { show_verification_filter?: boolean; show_evidence_filter?: boolean; show_export_csv?: boolean; show_export_json?: boolean; show_searchable_text?: boolean; show_verification_column?: boolean; importance_filter_style?: 'dropdown' | 'stars'; access_filter_style?: 'dropdown' | 'buttons' };
+  return { showVerificationCol: u.show_verification_column !== false, showSearchableText: u.show_searchable_text === true, showVerification: u.show_verification_filter === true, showEvidence: u.show_evidence_filter === true, showExportCsv: u.show_export_csv === true, showExportJson: u.show_export_json === true, showStars: u.importance_filter_style === 'stars', accessButtons: u.access_filter_style === 'buttons' };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

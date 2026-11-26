@@ -1,6 +1,7 @@
-import { pdfUrl } from './OriginalPdfButton';
+import { PdfSplitButton } from './OriginalPdfButton';
 import { useSplitAvailable } from './PageTools';
-import { SplitIcon } from './icons';
+import { FullscreenIcon, SplitIcon } from './icons';
+import { createPortal } from 'react-dom';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { get } from '../lib/api';
@@ -138,7 +139,8 @@ function TextOverlay({ revisionId, page, quote }: { revisionId: number; page: nu
 }
 
 /** Original manufacturer page: image (zoom/pan) and extracted text (annotatable). Never replaces the image with OCR. */
-export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuote, compact, overlay }: { revisionId: number; page: number; onPage?: (p: number) => void; quoteMatch?: string | null; highlightQuote?: string | null; compact?: boolean; overlay?: boolean }) {
+export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuote, compact, overlay, inModal }: { revisionId: number; page: number; onPage?: (p: number) => void; quoteMatch?: string | null; highlightQuote?: string | null; compact?: boolean; overlay?: boolean; inModal?: boolean }) {
+  const [full, setFull] = useState(false);
   const loc = useLocation();
   const navigate = useNavigate();
   // on a manual page address (/library/revision/…) the tab lives in the URL (?tab=text): search results, annotations and bookmarks
@@ -166,6 +168,7 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
     if (!onPage || !pageCount) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.defaultPrevented) return;
+      if (!inModal && document.querySelector('.fs-modal.pv-full')) return; // the full-screen copy handles the keys
       const t = e.target as HTMLElement | null;
       if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
       if (e.key === 'ArrowLeft' && page > 1) { e.preventDefault(); onPage(page - 1); }
@@ -215,8 +218,8 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
         )}
         <span className="viewer-actions">
           {quoteMatch !== undefined && quoteMatch !== 'normalized' && <QuoteBadge s={quoteMatch} />}
-          <a className="btn small" href={pdfUrl(revisionId, rev.title ?? 'manual', page)} target="_blank" rel="noreferrer">Open original PDF <span aria-hidden="true">↗</span></a>
-          {!loc.pathname.startsWith('/library/revision/') && <Link className="btn small" to={`/library/revision/${revisionId}/page/${page}`}>Full viewer</Link>}
+          <PdfSplitButton revisionId={revisionId} label={rev.title ?? 'manual'} page={page} />
+          {!inModal && !loc.pathname.startsWith('/library/revision/') && <button type="button" className="small" onClick={() => setFull(true)} aria-label="Full screen" title="Show this manual page in full screen"><FullscreenIcon /></button>}
         </span>
       </div>
       {tab === 'image' ? (
@@ -250,6 +253,26 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
           ))}
         </details>
       )}
+      {full && <FullPage revisionId={revisionId} page={page} quoteMatch={quoteMatch} highlightQuote={highlightQuote} overlay={overlay} onClose={() => setFull(false)} />}
     </div>
+  );
+}
+
+/** Full-screen copy of the "Manual page" tab (page image, zoom, paging). */
+function FullPage({ revisionId, page, quoteMatch, highlightQuote, overlay, onClose }: { revisionId: number; page: number; quoteMatch?: string | null; highlightQuote?: string | null; overlay?: boolean; onClose: () => void }) {
+  const [p, setP] = useState(page);
+  useEffect(() => {
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && !e.defaultPrevented && onClose();
+    document.addEventListener('keydown', esc);
+    return () => document.removeEventListener('keydown', esc);
+  }, [onClose]);
+  return createPortal(
+    <div className="fs-modal pv-full" role="dialog" aria-modal="true" aria-label="Manual page">
+      <div className="fs-head"><h2 style={{ fontSize: '1.05rem' }}>Manual page</h2><button onClick={onClose} aria-label="Close full screen" autoFocus>✕ Close</button></div>
+      <div style={{ flex: 1, overflow: 'auto', padding: '12px 24px' }}>
+        <PageViewer revisionId={revisionId} page={p} onPage={setP} quoteMatch={p === page ? quoteMatch : undefined} highlightQuote={p === page ? highlightQuote : undefined} overlay={overlay} inModal />
+      </div>
+    </div>,
+    document.body,
   );
 }

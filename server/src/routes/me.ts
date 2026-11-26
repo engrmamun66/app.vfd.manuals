@@ -56,7 +56,7 @@ function validate(key: string, v: any) {
     }
     case 'ui_settings': {
       if (typeof v !== 'object' || v === null || Array.isArray(v)) throw badRequest('ui_settings must be an object');
-      return { show_verification_filter: v.show_verification_filter === true, show_evidence_filter: v.show_evidence_filter === true, show_export_csv: v.show_export_csv === true, show_export_json: v.show_export_json === true, show_searchable_text: v.show_searchable_text === true, importance_filter_style: v.importance_filter_style === 'stars' ? 'stars' : 'dropdown', access_filter_style: v.access_filter_style === 'buttons' ? 'buttons' : 'dropdown', selection_menu_autohide: v.selection_menu_autohide !== false };
+      return { show_verification_filter: v.show_verification_filter === true, show_evidence_filter: v.show_evidence_filter === true, show_export_csv: v.show_export_csv === true, show_export_json: v.show_export_json === true, show_searchable_text: v.show_searchable_text === true, importance_filter_style: v.importance_filter_style === 'stars' ? 'stars' : 'dropdown', access_filter_style: v.access_filter_style === 'buttons' ? 'buttons' : 'dropdown', selection_menu_autohide: v.selection_menu_autohide !== false, show_verification_column: v.show_verification_column !== false };
     }
     case 'model_order':
       if (!Array.isArray(v)) throw badRequest('model_order must be an array');

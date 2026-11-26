@@ -4,6 +4,7 @@ import { get } from '../lib/api';
 import { Crumbs, ErrorBox, Loading, Pager, SearchBox, VerifBadge, useAsync, ModelName } from '../components/ui';
 import { ModelTabs } from '../components/ModelTabs';
 import { useModels } from '../lib/models';
+import { useUiSettings } from '../lib/auth';
 import { PageViewer } from '../components/Viewer';
 
 /** One-line description shown under each topic page title. */
@@ -42,6 +43,7 @@ export function ImportanceBadge({ v }: { v?: string | null }) {
 
 /** Faults, alarms, warnings, troubleshooting, wiring, installation, specs and other non-parameter manual knowledge. */
 export function KnowledgePage() {
+  const { showVerificationCol } = useUiSettings();
   const { kind = '' } = useParams();
   const [sp, setSp] = useSearchParams();
   const { selected } = useModels();
@@ -67,7 +69,7 @@ export function KnowledgePage() {
       {loading && !data ? <Loading /> : (
         <>
           <div className="table-wrap"><table>
-            <thead><tr><th>Model</th><th>Code</th><th>Title</th><th>Importance</th><th>Verification</th><th>Source</th></tr></thead>
+            <thead><tr><th>Model</th><th>Code</th><th>Title</th><th>Importance</th>{showVerificationCol && <th>Verification</th>}<th>Source</th></tr></thead>
             <tbody>
               {data?.rows.map((r: any) => (
                 <Fragment key={r.id}>
@@ -76,11 +78,11 @@ export function KnowledgePage() {
                     <td className="code">{r.code ?? <span className="faint">—</span>}</td>
                     <td><b>{r.title}</b>{r.description && <div className="small-text muted" style={{ maxWidth: 520 }}>{open === r.id ? r.description : r.description.slice(0, 120) + (r.description.length > 120 ? '…' : '')}</div>}</td>
                     <td><ImportanceBadge v={r.importance} /></td>
-                    <td><VerifBadge s={r.verification_status} /></td>
+                    {showVerificationCol && <td><VerifBadge s={r.verification_status} /></td>}
                     <td className="small-text">{r.pages?.length ? r.pages.map((pg: any, i: number) => <Fragment key={pg.page_index}>{i > 0 && ', '}<Link to={`/library/revision/${pg.revision_id}/page/${pg.page_index}`} onClick={(e) => e.stopPropagation()}>p.{pg.printed_page ?? pg.page_index}</Link></Fragment>) : '—'}</td>
                   </tr>
                   {open === r.id && (
-                    <tr><td colSpan={6} style={{ background: 'var(--bg-alt)' }}>
+                    <tr><td colSpan={showVerificationCol ? 6 : 5} style={{ background: 'var(--bg-alt)' }}>
                       {r.cause && <p><b>Cause:</b> {r.cause}</p>}
                       {r.remedy && <p><b>Remedy:</b> {r.remedy}</p>}
                       {r.section && <p className="small-text muted">Section: {r.section}</p>}
@@ -89,7 +91,7 @@ export function KnowledgePage() {
                       <ManualPages pages={r.pages ?? []} />
                     </td></tr>)}
                 </Fragment>))}
-              {!data?.rows.length && <tr><td colSpan={6} className="empty">No topics yet for this selection. They appear after a manual's extraction file with knowledge_items is imported.</td></tr>}
+              {!data?.rows.length && <tr><td colSpan={showVerificationCol ? 6 : 5} className="empty">No topics yet for this selection. They appear after a manual's extraction file with knowledge_items is imported.</td></tr>}
             </tbody>
           </table></div>
           {data && <Pager page={data.page} limit={data.limit} total={data.total} onPage={(p) => set('page', String(p))} />}

@@ -453,12 +453,12 @@ option.opt-mine { font-weight: 600; }
 .nav-gear:hover { color: var(--fg); background: var(--sidebar-hover); }
 
 /* ---------- page-wide annotations (CSS Custom Highlight API: no DOM changes) ---------- */
-::highlight(ann-yellow) { background-color: var(--hl-yellow); }
-::highlight(ann-green) { background-color: var(--hl-green); }
-::highlight(ann-blue) { background-color: var(--hl-blue); }
-::highlight(ann-pink) { background-color: var(--hl-pink); }
-::highlight(ann-orange) { background-color: var(--hl-orange); }
-::highlight(ann-purple) { background-color: var(--hl-purple); }
+::highlight(ann-yellow) { background-color: color-mix(in srgb, var(--hl-yellow) 50%, transparent); }
+::highlight(ann-green) { background-color: color-mix(in srgb, var(--hl-green) 50%, transparent); }
+::highlight(ann-blue) { background-color: color-mix(in srgb, var(--hl-blue) 50%, transparent); }
+::highlight(ann-pink) { background-color: color-mix(in srgb, var(--hl-pink) 50%, transparent); }
+::highlight(ann-orange) { background-color: color-mix(in srgb, var(--hl-orange) 50%, transparent); }
+::highlight(ann-purple) { background-color: color-mix(in srgb, var(--hl-purple) 50%, transparent); }
 ::highlight(ann-own) { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
 ::highlight(ann-other) { text-decoration: underline dotted; }
 
@@ -754,3 +754,20 @@ button.btn-grey { background: var(--bg-hover); border-color: var(--line); } /* a
 /* Viewer action row: quote badge matches the height of the Open PDF / Full viewer buttons */
 .viewer-actions { margin-left: auto; display: inline-flex; align-items: stretch; gap: 8px; flex-wrap: wrap; }
 .viewer-actions .badge { display: inline-flex; align-items: center; padding: 2px 10px; font-size: .82rem; line-height: 1.5; border-radius: 2px; }
+
+/* Button group: joined buttons (split button) */
+.btn-group { display: inline-flex; }
+.btn-group > button, .btn-group > .btn { border-radius: 0; }
+.btn-group > :first-child { border-radius: 2px 0 0 2px; }
+.btn-group > :last-child { border-radius: 0 2px 2px 0; border-left-width: 1px; padding-left: 9px; padding-right: 9px; }
+
+/* Compact list filter row (desktop) */
+.row:has(> .searchbox) .searchbox input { height: 32px; font-size: .86rem; }
+.row:has(> .searchbox) select.ctl { height: 32px; padding: 0 28px 0 10px; font-size: .86rem; }
+.row:has(> .searchbox) .star-group button { min-height: 30px; padding: 3px 10px; font-size: .86rem; }
+.row:has(> .searchbox) .star-group svg { width: 12px; height: 12px; }
+.row:has(> .searchbox) .sb-icon { width: 15px; height: 15px; }
+
+/* Header shadow */
+.topbar { box-shadow: 0 2px 10px rgba(0, 0, 0, .12); }
+:root[data-theme='dark'] .topbar { box-shadow: 0 2px 12px rgba(0, 0, 0, .6); }

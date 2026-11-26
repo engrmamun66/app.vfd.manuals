@@ -4,6 +4,7 @@ import { get } from '../lib/api';
 import { Crumbs, InfoIcon, useAsync, ModelName } from '../components/ui';
 import { ModelTabs } from '../components/ModelTabs';
 import { useModels } from '../lib/models';
+import { useUiSettings } from '../lib/auth';
 
 /** Pure arithmetic only. Never decides that a result is a valid PLC address or a 4xxxx reference. */
 function parseAddr(s: string): { value: number; base: 'hex' | 'dec'; error?: string } | { error: string } {
@@ -63,6 +64,7 @@ export function AddressConverter() {
 }
 
 export function CommSettings() {
+  const { showVerificationCol } = useUiSettings();
   const { data } = useAsync(() => get('/parameters', { category: 'modbus-rs485', limit: 500 }), []);
   const { selected } = useModels();
   const rows = data?.rows.filter((p: any) => selected == null || p.model_id === selected) ?? [];
@@ -74,9 +76,9 @@ export function CommSettings() {
       <div className="row between" style={{ marginBottom: 8 }}><h1 style={{ margin: 0 }}>Communication Settings</h1></div>
       <p className="muted">Slave address, baud rate, parity/stop bits, timeouts and loss behavior — only parameters from approved records.</p>
       <ModelTabs />
-      <div className="table-wrap"><table><thead><tr><th>Function</th><th>Brand / Model</th><th>Code</th><th>Name</th><th>Default</th><th>Range</th><th>Verification</th></tr></thead><tbody>
-        {rows.map((p: any) => <tr key={p.id}><td>{p.function_name ?? '—'}</td><td>{p.brand} <span className="muted"><ModelName name={p.model} /></span></td><td className="code"><Link to={`/parameter/${p.id}`}>{p.code}</Link></td><td>{p.name}</td><td>{p.default_value ?? <span className="faint">Not Documented</span>}</td><td>{p.min_value || p.max_value ? `${p.min_value ?? '?'} … ${p.max_value ?? '?'}` : <span className="faint">Not Documented</span>}</td><td><span className="badge dashed">{p.verification_status}</span></td></tr>)}
-        {!rows.length && <tr><td colSpan={7} className="empty">No communication parameters approved yet.</td></tr>}
+      <div className="table-wrap"><table><thead><tr><th>Function</th><th>Brand / Model</th><th>Code</th><th>Name</th><th>Default</th><th>Range</th>{showVerificationCol && <th>Verification</th>}</tr></thead><tbody>
+        {rows.map((p: any) => <tr key={p.id}><td>{p.function_name ?? '—'}</td><td>{p.brand} <span className="muted"><ModelName name={p.model} /></span></td><td className="code"><Link to={`/parameter/${p.id}`}>{p.code}</Link></td><td>{p.name}</td><td>{p.default_value ?? <span className="faint">Not Documented</span>}</td><td>{p.min_value || p.max_value ? `${p.min_value ?? '?'} … ${p.max_value ?? '?'}` : <span className="faint">Not Documented</span>}</td>{showVerificationCol && <td><span className="badge dashed">{p.verification_status}</span></td>}</tr>)}
+        {!rows.length && <tr><td colSpan={showVerificationCol ? 7 : 6} className="empty">No communication parameters approved yet.</td></tr>}
       </tbody></table></div>
     </div>
   );

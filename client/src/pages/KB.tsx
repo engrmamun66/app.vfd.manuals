@@ -68,7 +68,7 @@ export function Parameters({ category, userCategory }: { category?: string; user
   const q = Object.fromEntries(sp.entries());
   const page = Number(q.page) || 1;
   const { selected } = useModels();
-  const { showVerification, showEvidence, showExportCsv, showExportJson, showStars, accessButtons } = useUiSettings();
+  const { showVerification, showVerificationCol, showEvidence, showExportCsv, showExportJson, showStars, accessButtons } = useUiSettings();
   const { data: tax } = useAsync(() => get('/taxonomy'), []);
   const mineCats = useMyCategories();
   const { data, error, loading, setData, reload } = useAsync(() => get('/parameters', { ...q, verification: showVerification ? q.verification : undefined, evidence: showEvidence ? q.evidence : undefined, model: selected, category: category ?? q.category, ucat: userCategory ?? q.ucat, page, limit: 50 }), [sp.toString(), category, userCategory, selected, showVerification, showEvidence]);
@@ -103,7 +103,7 @@ export function Parameters({ category, userCategory }: { category?: string; user
       {loading && !data ? <Loading /> : (
         <>
           <div className="table-wrap"><table>
-            <thead><tr><th>Brand / Model</th><th>Code</th><th>Name</th><th>Common function</th><th>Unit</th><th>Default</th><th>Range</th><th>Importance</th><th>Verification</th><th>Action</th></tr></thead>
+            <thead><tr><th>Brand / Model</th><th>Code</th><th>Name</th><th>Common function</th><th>Unit</th><th>Default</th><th>Range</th><th>Importance</th>{showVerificationCol && <th>Verification</th>}<th>Action</th></tr></thead>
             <tbody>{data?.rows.map((p: any) => (
               <tr key={p.id} className={split && preview === p.id ? 'sel' : ''} style={split ? { cursor: 'pointer' } : undefined} onClick={(e) => { if (split && !(e.target as HTMLElement).closest('a')) setPreview(p.id); }}>
                 <td>{p.brand}<div className="small-text muted"><ModelName name={p.model} brand={p.brand} /></div></td>
@@ -113,10 +113,10 @@ export function Parameters({ category, userCategory }: { category?: string; user
                 <td><Val v={p.unit} /></td><td><Val v={p.default_value} /></td>
                 <td>{p.min_value || p.max_value ? `${p.min_value ?? '?'} … ${p.max_value ?? '?'}` : <Val v={null} />}</td>
                 <td><ImportanceBadge v={p.importance} /></td>
-                <td><VerifBadge s={p.verification_status} /></td>
+                {showVerificationCol && <td><VerifBadge s={p.verification_status} /></td>}
                 <td onClick={(e) => e.stopPropagation()}><CategoryPicker parameterId={p.id} value={p.my_category_ids ?? []} onChange={(ids) => { if (userCategory && !ids.includes(userCategory)) reload(); else data && setData({ ...data, rows: data.rows.map((r: any) => (r.id === p.id ? { ...r, my_category_ids: ids } : r)) }); }} /></td>
               </tr>))}
-              {!data?.rows.length && <tr><td colSpan={9} className="empty">No parameters match. Parameters appear after staged import records are approved in the Verification Center.</td></tr>}</tbody></table></div>
+              {!data?.rows.length && <tr><td colSpan={showVerificationCol ? 10 : 9} className="empty">No parameters match. Parameters appear after staged import records are approved in the Verification Center.</td></tr>}</tbody></table></div>
           {data && <Pager page={data.page} limit={data.limit} total={data.total} onPage={(p) => { const n = new URLSearchParams(sp); n.set('page', String(p)); setSp(n); }} />}
         </>)}
       </>} />
@@ -542,7 +542,7 @@ export function Registers() {
   const [sp, setSp] = useSearchParams();
   const q = Object.fromEntries(sp.entries());
   const { selected } = useModels();
-  const { showVerification, showExportCsv, showExportJson, accessButtons } = useUiSettings();
+  const { showVerification, showVerificationCol, showExportCsv, showExportJson, accessButtons } = useUiSettings();
   const { data, error, loading } = useAsync(() => get('/registers', { ...q, verification: showVerification ? q.verification : undefined, model: selected, page: q.page || 1, limit: 100 }), [sp.toString(), selected, showVerification]);
   const { settings } = useAuth();
   const split = !!settings?.split_view?.enabled;
@@ -563,13 +563,13 @@ export function Registers() {
       <p className="muted small-text">Search matches only addresses present in the database (original text and stored mathematical conversions).</p>
       <ErrorBox e={error} />
       {loading && !data ? <Loading /> : (<>
-        <div className="table-wrap"><table><thead><tr><th>Brand / Model</th><th>Original address</th><th>Math. conversion</th><th>Name</th><th>FC</th><th>Access</th><th>Type</th><th>Scaling</th><th>Verification</th></tr></thead>
+        <div className="table-wrap"><table><thead><tr><th>Brand / Model</th><th>Original address</th><th>Math. conversion</th><th>Name</th><th>FC</th><th>Access</th><th>Type</th><th>Scaling</th>{showVerificationCol && <th>Verification</th>}</tr></thead>
           <tbody>{data?.rows.map((r: any) => (
             <tr key={r.id} className={split && preview === r.id ? 'sel' : ''} style={split ? { cursor: 'pointer' } : undefined} onClick={(e) => { if (split && !(e.target as HTMLElement).closest('a')) setPreview(r.id); }}><td>{r.brand}<div className="small-text muted"><ModelName name={r.model} brand={r.brand} /></div></td>
               <td className="code"><Link to={`/register/${r.id}`} onClick={(e) => { if (split) { e.preventDefault(); setPreview(r.id); } }}>{r.original_address}</Link><div className="small-text faint">{r.address_format ?? ''}</div></td>
               <td className="code small-text">{r.conversions.length ? r.conversions.map((c: any) => <div key={c.representation}>{c.representation}: {c.value}</div>) : <span className="faint">—</span>}</td>
-              <td>{r.name}{r.function_name && <div className="small-text muted">{r.function_name}</div>}</td><td className="code"><Val v={r.function_codes} /></td><td><Val v={r.access} /></td><td><Val v={r.data_type} /></td><td><Val v={r.scaling} /></td><td><VerifBadge s={r.verification_status} /></td></tr>))}
-            {!data?.rows.length && <tr><td colSpan={9} className="empty">No registers match.</td></tr>}</tbody></table></div>
+              <td>{r.name}{r.function_name && <div className="small-text muted">{r.function_name}</div>}</td><td className="code"><Val v={r.function_codes} /></td><td><Val v={r.access} /></td><td><Val v={r.data_type} /></td><td><Val v={r.scaling} /></td>{showVerificationCol && <td><VerifBadge s={r.verification_status} /></td>}</tr>))}
+            {!data?.rows.length && <tr><td colSpan={showVerificationCol ? 9 : 8} className="empty">No registers match.</td></tr>}</tbody></table></div>
         {data && <Pager page={data.page} limit={data.limit} total={data.total} onPage={(p) => { const n = new URLSearchParams(sp); n.set('page', String(p)); setSp(n); }} />}</>)}
       </>} />
     </div>
