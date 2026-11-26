@@ -197,7 +197,7 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
         </div>
       </div>}
       {highlightQuote && !compact && (
-        <div className="evidence-quote" title="Text recorded as evidence for this value"><span className="faint">Evidence quote: </span>{highlightQuote}</div>
+        <details className="evidence-quote" title="Text recorded as evidence for this value"><summary className="faint" style={{ cursor: 'pointer' }}>Evidence quote</summary>{highlightQuote}</details>
       )}
       <div className="row" style={{ marginBottom: 8 }}>
         <button className="small" disabled={page <= 1} title="Previous page (←)" onClick={() => onPage?.(page - 1)}>← Prev page</button>
@@ -259,7 +259,7 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
 }
 
 /** Full-screen copy of the "Manual page" tab (page image, zoom, paging). */
-function FullPage({ revisionId, page, quoteMatch, highlightQuote, overlay, onClose }: { revisionId: number; page: number; quoteMatch?: string | null; highlightQuote?: string | null; overlay?: boolean; onClose: () => void }) {
+export function FullPage({ revisionId, page, quoteMatch, highlightQuote, overlay, onClose }: { revisionId: number; page: number; quoteMatch?: string | null; highlightQuote?: string | null; overlay?: boolean; onClose: () => void }) {
   const [p, setP] = useState(page);
   useEffect(() => {
     const esc = (e: KeyboardEvent) => e.key === 'Escape' && !e.defaultPrevented && onClose();
@@ -274,5 +274,17 @@ function FullPage({ revisionId, page, quoteMatch, highlightQuote, overlay, onClo
       </div>
     </div>,
     document.body,
+  );
+}
+
+/** "Manual" button for a table row: opens the cited manual page in a full-screen modal (Esc closes). */
+export function ManualButton({ manual }: { manual?: { revision_id: number; page: number; quote?: string | null } | null }) {
+  const [open, setOpen] = useState(false);
+  if (!manual?.revision_id || !manual.page) return <span className="faint">—</span>;
+  return (
+    <>
+      <button type="button" className="small" onClick={(e) => { e.stopPropagation(); setOpen(true); }} title="Show the manual page for this row">Manual</button>
+      {open && <FullPage revisionId={manual.revision_id} page={manual.page} highlightQuote={manual.quote} overlay onClose={() => setOpen(false)} />}
+    </>
   );
 }

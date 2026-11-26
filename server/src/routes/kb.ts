@@ -257,7 +257,8 @@ kbRouter.get(
     const rows = db
       .prepare(
         `SELECT p.id, p.code, p.name, p.unit, p.default_value, p.min_value, p.max_value, p.access_type, p.verification_status, p.evidence_status, p.equivalence, p.is_demo, p.importance, p.param_group,
-           m.id model_id, m.name model, b.name brand, b.slug brand_slug, f.slug function_slug, f.name function_name, f.name_bn function_name_bn, c.slug category_slug, c.name category
+           m.id model_id, m.name model, b.name brand, b.slug brand_slug, f.slug function_slug, f.name function_name, f.name_bn function_name_bn, c.slug category_slug, c.name category,
+           (SELECT json_object('revision_id', sr.revision_id, 'page', sr.page_index, 'quote', sr.extracted_text) FROM evidence_records e JOIN source_references sr ON sr.id=e.source_reference_id WHERE e.entity_type='parameter' AND e.entity_id=p.id ORDER BY CASE e.role WHEN 'original' THEN 0 ELSE 1 END, e.id LIMIT 1) manual_json
          ${PARAM_FROM} WHERE ${where} ORDER BY ${cdOrder('cdb')}, b.name, ${cdOrder('cdm')}, m.name, ${basicFirst}${cdOrder('cdp')}, CASE p.importance WHEN 'Important' THEN 0 WHEN 'Medium' THEN 1 WHEN 'Optional' THEN 2 ELSE 3 END, p.code LIMIT ? OFFSET ?`,
       )
       .all(...args, limit, offset) as any[];
@@ -268,7 +269,7 @@ kbRouter.get(
       for (const m of db.prepare(`SELECT puc.parameter_id pid, puc.user_category_id cid FROM parameter_user_categories puc JOIN user_categories uc ON uc.id = puc.user_category_id WHERE uc.user_id = ? AND puc.parameter_id IN (${ph})`).all(req.user.id, ...rows.map((r) => r.id)) as any[])
         (mine.get(m.pid) ?? mine.set(m.pid, []).get(m.pid)!).push(m.cid);
     }
-    res.json({ total, page, limit, rows: rows.map((r) => ({ ...r, my_category_ids: mine.get(r.id) ?? [] })) });
+    res.json({ total, page, limit, rows: rows.map((r) => ({ ...r, manual: parseJson(r.manual_json, null), manual_json: undefined, my_category_ids: mine.get(r.id) ?? [] })) });
   }),
 );
 
@@ -517,11 +518,12 @@ kbRouter.get(
       .prepare(
         `SELECT r.id, r.name, r.original_address, r.address_format, r.register_type, r.function_codes, r.access, r.data_type, r.scaling, r.unit, r.verification_status, r.evidence_status,
            m.id model_id, m.name model, b.name brand, b.slug brand_slug, f.slug function_slug, f.name function_name,
-           (SELECT json_group_array(json_object('representation', representation, 'value', value, 'method', method)) FROM modbus_address_conversions mc WHERE mc.register_id = r.id) conversions_json
+           (SELECT json_group_array(json_object('representation', representation, 'value', value, 'method', method)) FROM modbus_address_conversions mc WHERE mc.register_id = r.id) conversions_json,
+           (SELECT json_object('revision_id', sr.revision_id, 'page', sr.page_index, 'quote', sr.extracted_text) FROM evidence_records e JOIN source_references sr ON sr.id=e.source_reference_id WHERE e.entity_type='modbus_register' AND e.entity_id=r.id ORDER BY e.id LIMIT 1) manual_json
          ${REG_FROM} WHERE ${where.join(' AND ')} ORDER BY b.name, m.name, ${cdOrder('cdr')}, r.original_address LIMIT ? OFFSET ?`,
       )
       .all(...args, limit, offset)
-      .map((r: any) => ({ ...r, conversions: parseJson(r.conversions_json, []), conversions_json: undefined }));
+      .map((r: any) => ({ ...r, conversions: parseJson(r.conversions_json, []), conversions_json: undefined, manual: parseJson(r.manual_json, null), manual_json: undefined }));
     res.json({ total, page, limit, rows });
   }),
 );

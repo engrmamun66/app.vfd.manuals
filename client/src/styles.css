@@ -771,3 +771,7 @@ button.btn-grey { background: var(--bg-hover); border-color: var(--line); } /* a
 /* Header shadow */
 .topbar { box-shadow: 0 2px 10px rgba(0, 0, 0, .12); }
 :root[data-theme='dark'] .topbar { box-shadow: 0 2px 12px rgba(0, 0, 0, .6); }
+
+/* Compact standalone filter boxes (Knowledge topics, bookmarks) */
+.page > .searchbox input, .page .searchbox:not(.nav-filter .searchbox) input { height: 32px; font-size: .86rem; }
+.page .searchbox .sb-icon { width: 15px; height: 15px; }

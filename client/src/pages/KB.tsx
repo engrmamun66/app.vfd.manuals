@@ -11,7 +11,7 @@ import { useUiSettings } from '../lib/auth';
 import { Crumbs, ModelName, Tip, truncate, ErrorBox, EquivBadge, EvBadge, InfoIcon, Loading, Pager, QuoteBadge, SearchBox, Val, VerifBadge, download, useAsync } from '../components/ui';
 import { pdfUrl } from '../components/OriginalPdfButton';
 import { usePageInfo } from '../components/PageTools';
-import { PageViewer, SplitView } from '../components/Viewer';
+import { ManualButton, PageViewer, SplitView } from '../components/Viewer';
 import { Annotatable, AnnotationScope } from '../components/Annotatable';
 import { SaveBookmarkButton } from './Bookmarks';
 import { useMyCategories } from '../lib/myCategories';
@@ -114,7 +114,7 @@ export function Parameters({ category, userCategory }: { category?: string; user
                 <td>{p.min_value || p.max_value ? `${p.min_value ?? '?'} … ${p.max_value ?? '?'}` : <Val v={null} />}</td>
                 <td><ImportanceBadge v={p.importance} /></td>
                 {showVerificationCol && <td><VerifBadge s={p.verification_status} /></td>}
-                <td onClick={(e) => e.stopPropagation()}><CategoryPicker parameterId={p.id} value={p.my_category_ids ?? []} onChange={(ids) => { if (userCategory && !ids.includes(userCategory)) reload(); else data && setData({ ...data, rows: data.rows.map((r: any) => (r.id === p.id ? { ...r, my_category_ids: ids } : r)) }); }} /></td>
+                <td onClick={(e) => e.stopPropagation()}><div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6 }}><ManualButton manual={p.manual} /><CategoryPicker parameterId={p.id} value={p.my_category_ids ?? []} onChange={(ids) => { if (userCategory && !ids.includes(userCategory)) reload(); else data && setData({ ...data, rows: data.rows.map((r: any) => (r.id === p.id ? { ...r, my_category_ids: ids } : r)) }); }} /></div></td>
               </tr>))}
               {!data?.rows.length && <tr><td colSpan={showVerificationCol ? 10 : 9} className="empty">No parameters match. Parameters appear after staged import records are approved in the Verification Center.</td></tr>}</tbody></table></div>
           {data && <Pager page={data.page} limit={data.limit} total={data.total} onPage={(p) => { const n = new URLSearchParams(sp); n.set('page', String(p)); setSp(n); }} />}
@@ -563,13 +563,13 @@ export function Registers() {
       <p className="muted small-text">Search matches only addresses present in the database (original text and stored mathematical conversions).</p>
       <ErrorBox e={error} />
       {loading && !data ? <Loading /> : (<>
-        <div className="table-wrap"><table><thead><tr><th>Brand / Model</th><th>Original address</th><th>Math. conversion</th><th>Name</th><th>FC</th><th>Access</th><th>Type</th><th>Scaling</th>{showVerificationCol && <th>Verification</th>}</tr></thead>
+        <div className="table-wrap"><table><thead><tr><th>Brand / Model</th><th>Original address</th><th>Math. conversion</th><th>Name</th><th>FC</th><th>Access</th><th>Type</th><th>Scaling</th>{showVerificationCol && <th>Verification</th>}<th>Action</th></tr></thead>
           <tbody>{data?.rows.map((r: any) => (
             <tr key={r.id} className={split && preview === r.id ? 'sel' : ''} style={split ? { cursor: 'pointer' } : undefined} onClick={(e) => { if (split && !(e.target as HTMLElement).closest('a')) setPreview(r.id); }}><td>{r.brand}<div className="small-text muted"><ModelName name={r.model} brand={r.brand} /></div></td>
               <td className="code"><Link to={`/register/${r.id}`} onClick={(e) => { if (split) { e.preventDefault(); setPreview(r.id); } }}>{r.original_address}</Link><div className="small-text faint">{r.address_format ?? ''}</div></td>
               <td className="code small-text">{r.conversions.length ? r.conversions.map((c: any) => <div key={c.representation}>{c.representation}: {c.value}</div>) : <span className="faint">—</span>}</td>
-              <td>{r.name}{r.function_name && <div className="small-text muted">{r.function_name}</div>}</td><td className="code"><Val v={r.function_codes} /></td><td><Val v={r.access} /></td><td><Val v={r.data_type} /></td><td><Val v={r.scaling} /></td>{showVerificationCol && <td><VerifBadge s={r.verification_status} /></td>}</tr>))}
-            {!data?.rows.length && <tr><td colSpan={showVerificationCol ? 9 : 8} className="empty">No registers match.</td></tr>}</tbody></table></div>
+              <td>{r.name}{r.function_name && <div className="small-text muted">{r.function_name}</div>}</td><td className="code"><Val v={r.function_codes} /></td><td><Val v={r.access} /></td><td><Val v={r.data_type} /></td><td><Val v={r.scaling} /></td>{showVerificationCol && <td><VerifBadge s={r.verification_status} /></td>}<td><ManualButton manual={r.manual} /></td></tr>))}
+            {!data?.rows.length && <tr><td colSpan={showVerificationCol ? 10 : 9} className="empty">No registers match.</td></tr>}</tbody></table></div>
         {data && <Pager page={data.page} limit={data.limit} total={data.total} onPage={(p) => { const n = new URLSearchParams(sp); n.set('page', String(p)); setSp(n); }} />}</>)}
       </>} />
     </div>

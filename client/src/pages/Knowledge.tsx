@@ -6,6 +6,7 @@ import { ModelTabs } from '../components/ModelTabs';
 import { useModels } from '../lib/models';
 import { useUiSettings } from '../lib/auth';
 import { PageViewer } from '../components/Viewer';
+import { StarIcon } from '../components/icons';
 
 /** One-line description shown under each topic page title. */
 const KIND_HELP: Record<string, string> = {
@@ -38,7 +39,10 @@ export const KIND_LABELS: Record<string, string> = {
 
 export function ImportanceBadge({ v }: { v?: string | null }) {
   if (!v) return <span className="faint small-text">—</span>;
-  return <span className={`badge ${v === 'Important' || v === 'Medium' ? 'strong' : 'dashed'}`}>{v}</span>;
+  const { showStars } = useUiSettings();
+  const n = v === 'Important' ? 3 : v === 'Medium' ? 2 : v === 'Optional' ? 1 : 0;
+  if (showStars && n) return <span title={`${v}`} aria-label={`${v}: ${n} of 3 stars`} style={{ display: 'inline-flex', gap: 1 }}>{Array.from({ length: n }, (_, i) => <StarIcon key={i} />)}</span>;
+  return <span style={{ fontWeight: v === 'Important' || v === 'Medium' ? 700 : 400 }}>{v}</span>;
 }
 
 /** Faults, alarms, warnings, troubleshooting, wiring, installation, specs and other non-parameter manual knowledge. */
@@ -64,7 +68,7 @@ export function KnowledgePage() {
       <Crumbs items={[{ label: 'Knowledge Base', to: '/parameters' }, { label }]} />
       <div style={{ marginBottom: 8 }}><h1 style={{ margin: 0 }}>{label}</h1><p className="muted" style={{ margin: '4px 0 0' }}>{KIND_HELP[kind]}</p></div>
       <ModelTabs />
-      <SearchBox icon="filter" placeholder="Filter topics: code, title, cause, remedy…" value={q} onChange={(v) => set('q', v)} style={{ minWidth: 340, marginBottom: 12 }} aria-label="Search topics" />
+      <SearchBox icon="filter" placeholder="Filter topics: code, title, cause, remedy…" value={q} onChange={(v) => set('q', v)} style={{ minWidth: 300, marginBottom: 12 }} aria-label="Search topics" />
       <ErrorBox e={error} />
       {loading && !data ? <Loading /> : (
         <>
