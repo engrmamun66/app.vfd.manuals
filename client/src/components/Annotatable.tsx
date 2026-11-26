@@ -31,7 +31,7 @@ export interface Ann {
   anchor: { contentKey: string; selectedText: string; start: number | null; end: number | null; prefix: string | null; suffix: string | null; contentHash: string | null; brand?: string | null; model?: string | null };
 }
 
-/** Address of the place an annotation was made. A note on manual page text reopens on the "Extracted text" tab. */
+/** Address of the place an annotation was made. A note on manual page text reopens on the "Searchable text" tab. */
 export function annUrl(a: Pick<Ann, 'researchUrl' | 'anchor'>): string | null {
   const u = a.researchUrl;
   if (!u) return null;
@@ -204,6 +204,7 @@ export function Annotatable({ contentKey, text, as = 'div', className, children 
           {segments.lost.filter((a) => a.isOwn).length} annotation(s) require reattachment
         </span>
       )}
+      {menu && <EscClose onEsc={() => { setMenu(null); window.getSelection()?.removeAllRanges(); }} />}
       {menu && (
         <span className="sel-menu" style={{ left: Math.max(0, menu.x), top: Math.max(0, menu.y) }} onMouseDown={(e) => e.preventDefault()}>
           <button onClick={() => setEditor({ sel: menu.sel })}>Add Comment</button>
@@ -499,4 +500,14 @@ export function AnnotationDisplayControl() {
     {listOpen && <NotesListModal onClose={() => setListOpen(false)} />}
     </span>
   );
+}
+
+/** Calls onEsc when Escape is pressed (selection popup). */
+function EscClose({ onEsc }: { onEsc: () => void }) {
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => { if (e.key === 'Escape') onEsc(); };
+    document.addEventListener('keydown', k);
+    return () => document.removeEventListener('keydown', k);
+  }, [onEsc]);
+  return null;
 }

@@ -186,7 +186,7 @@ test.describe('dashboard & knowledge base', () => {
     // the source card and the page title / evidence-quote block are not shown on this tab; the page controls are
     await expect(admin.getByText(/PDF page \d+\//)).toHaveCount(0);
     await expect(admin.getByText('Evidence quote:')).toHaveCount(0);
-    await expect(admin.getByRole('button', { name: 'Extracted text' })).toBeVisible();
+    await expect(admin.getByRole('button', { name: 'Searchable text' })).toBeVisible();
     await expect(admin.getByRole('link', { name: 'Open original PDF' }).first()).toBeVisible();
   });
 
@@ -522,7 +522,7 @@ test.describe('library, import and verification (Super Admin)', () => {
     await admin.getByRole('link', { name: 'View pages' }).first().click();
     await expect(admin).toHaveURL(/\/library\/revision\/\d+\/page\/1$/);
     await expect(admin.locator('.page-img-wrap img')).toBeVisible({ timeout: 45_000 });
-    await admin.getByRole('button', { name: 'Extracted text' }).click();
+    await admin.getByRole('button', { name: 'Searchable text' }).click();
     await expect(admin.locator('pre.annot-host')).toBeVisible();
     // highlight text on the manual page text, then open it: must show the annotation panel, not a blank view
     const pre = admin.locator('pre.annot-host');
@@ -919,7 +919,7 @@ test.describe('premium: free limits, plans dialog, subscription review (Super Ad
     await expect(alice.locator('.gs-chip')).toHaveCount(0);
   });
 
-  test('a manual page opened from search or from a note reopens on the "Extracted text" tab; the tab stays while turning pages', async () => {
+  test('a manual page opened from search or from a note reopens on the "Searchable text" tab; the tab stays while turning pages', async () => {
     const hit = (await (await alice.request.get('/api/search', { params: { q: 'frequency' } })).json()).pages[0];
     // search result link
     await alice.goto('/');
@@ -928,16 +928,16 @@ test.describe('premium: free limits, plans dialog, subscription review (Super Ad
     expect(await alice.locator('.sr-row[href*="/library/revision/"]').first().getAttribute('href')).toContain('?tab=text');
     // the page address decides the tab
     await alice.goto(`/library/revision/${hit.revision_id}/page/${hit.page_index}?tab=text`);
-    await expect(alice.getByRole('button', { name: 'Extracted text' })).toHaveClass(/active/);
+    await expect(alice.getByRole('button', { name: 'Searchable text' })).toHaveClass(/active/);
     await expect(alice.getByRole('button', { name: 'Page image' })).not.toHaveClass(/active/);
     // turning the page keeps the tab
     await alice.getByRole('button', { name: 'Next page →' }).click();
     await expect(alice).toHaveURL(/tab=text/);
-    await expect(alice.getByRole('button', { name: 'Extracted text' })).toHaveClass(/active/);
+    await expect(alice.getByRole('button', { name: 'Searchable text' })).toHaveClass(/active/);
     // switching tabs is reflected in the address (so bookmarks and notes made here remember it)
     await alice.getByRole('button', { name: 'Page image' }).click();
     await expect(alice).not.toHaveURL(/tab=text/);
-    await alice.getByRole('button', { name: 'Extracted text' }).click();
+    await alice.getByRole('button', { name: 'Searchable text' }).click();
     await expect(alice).toHaveURL(/tab=text/);
     // without the parameter the page opens on the image
     await alice.goto(`/library/revision/${hit.revision_id}/page/${hit.page_index}`);
@@ -1262,7 +1262,8 @@ test.describe('theme & accessibility basics', () => {
     await expect(dlg.getByRole('tab', { name: 'Model aliases' })).toHaveAttribute('aria-selected', 'true'); // opens on this tab
     await dlg.getByRole('button', { name: /^Move .* up$/ }).nth(1).click(); // back to the original order
     await expect.poll(firstRow).toBe(before);
-    const sw = dlg.getByRole('switch').nth(1);
+    await admin.waitForTimeout(1000); // let the saved order come back from the server before the next change
+    const sw = dlg.locator('tbody tr').nth(1).getByRole('switch'); // the header switch is "all models"
     await expect(dlg.locator('tbody tr').nth(1).locator('.badge')).toHaveText('On');
     await sw.click();
     await expect(dlg.locator('tbody tr').nth(1).locator('.badge')).toHaveText('Off');

@@ -83,7 +83,7 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
   const loc = useLocation();
   const navigate = useNavigate();
   // on a manual page address (/library/revision/…) the tab lives in the URL (?tab=text): search results, annotations and bookmarks
-  // reopen the page on "Extracted text" when that is where the match / note is
+  // reopen the page on "Searchable text" when that is where the match / note is
   const onPageRoute = loc.pathname.startsWith('/library/revision/');
   const urlTab: 'image' | 'text' = onPageRoute && new URLSearchParams(loc.search).get('tab') === 'text' ? 'text' : 'image';
   const [tab, setTabState] = useState<'image' | 'text'>(urlTab);
@@ -143,7 +143,7 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
         <button className="small" disabled={page >= rev.page_count} title="Next page (→)" onClick={() => onPage?.(page + 1)}>Next page →</button>
         <span className="tabs" style={{ margin: 0, border: 0 }}>
           <button className={`tab ${tab === 'image' ? 'active' : ''}`} onClick={() => setTab('image')}>Page image</button>
-          <button className={`tab ${tab === 'text' ? 'active' : ''}`} onClick={() => setTab('text')}>Extracted text</button>
+          <button className={`tab ${tab === 'text' ? 'active' : ''}`} onClick={() => setTab('text')}>Searchable text</button>
         </span>
         {tab === 'image' && (
           <>
@@ -165,6 +165,7 @@ export function PageViewer({ revisionId, page, onPage, quoteMatch, highlightQuot
         )
       ) : p.text ? (
         <AnnotationScope researchUrl={`/library/revision/${revisionId}/page/${page}?tab=text`} context={{ entityType: 'document_page', entityId: p.id, documentId: rev.document_id, revisionId, pageId: p.id }}>
+          <div className="small-text muted" style={{ marginBottom: 6 }}>This is the text found in the PDF, used for search, highlights and notes. Its layout differs from the page: for tables and exact design see the <b>Page image</b> tab.</div>
           {p.text_source === 'ocr' && <div className="ok-box small-text">OCR text — may contain recognition errors. Verify against the page image.</div>}
           <Annotatable as="pre" contentKey={`docpage:${revisionId}:${page}`} text={p.text} className="mono" />
         </AnnotationScope>
