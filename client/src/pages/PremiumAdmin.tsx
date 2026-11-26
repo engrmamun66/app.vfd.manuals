@@ -2,7 +2,7 @@ import { toast } from '../components/toast';
 import { useEffect, useState } from 'react';
 import { del, get, patch, post, put, fmtDate } from '../lib/api';
 import { confirmDialog } from '../components/dialogs';
-import { Crumbs, ErrorBox, Loading, Modal, Pager, SearchBox, useAsync } from '../components/ui';
+import { Crumbs, DateField, ErrorBox, Loading, Modal, Pager, SearchBox, useAsync } from '../components/ui';
 import { mainSections } from '../lib/nav';
 import { usePremium, type PremiumConfig } from '../lib/premium';
 
@@ -154,6 +154,7 @@ export function PremiumSettings() {
         <label className="lock-item"><input type="checkbox" checked={cfg.lock_search} onChange={(e) => set('lock_search', e.target.checked)} /> Search needs Pro</label>
         <label className="lock-item"><input type="checkbox" checked={cfg.lock_custom_category} onChange={(e) => set('lock_custom_category', e.target.checked)} /> Custom categories need Pro</label>
         <label className="lock-item"><input type="checkbox" checked={cfg.lock_requests} onChange={(e) => set('lock_requests', e.target.checked)} /> Sending a “Request” (e.g. a new VFD manual) needs Pro</label>
+        <div className="field" style={{ maxWidth: 340 }}><label htmlFor="trial-days">Free full access after registration (days)</label><input id="trial-days" type="number" min={0} max={365} step={1} value={cfg.trial_days ?? 1} onChange={(e) => set('trial_days', e.target.value)} /><div className="small-text faint">0 = none. A new user gets Pro features for this many days; you can change the end date of any user in Users &amp; Monitoring.</div></div>
         <div className="limits">
           {([['max_upload_mb', 'Max upload for comments (MB)', 0.1], ['max_comments', 'Max comments (count)', 1], ['max_highlights', 'Max highlights (count)', 1], ['max_bookmarks', 'Max bookmarks (count)', 1]] as const).map(([k, label, step]) => (
             <div className="field" key={k}><label htmlFor={`lim-${k}`}>{label}</label><input id={`lim-${k}`} type="number" min={0} step={step} value={cfg[k]} placeholder="no limit" onChange={(e) => set(k, e.target.value)} /></div>
@@ -232,8 +233,8 @@ export function PaymentsAdmin() {
         <SearchBox placeholder="Search name, phone, e-mail, transaction ID, note, amount…" value={q} onChange={setQ} aria-label="Search payments" style={{ minWidth: 280, flex: 1 }} />
         <select value={method} onChange={(e) => { setMethod(e.target.value); setPage(1); }} aria-label="Method filter"><option value="">All methods</option>{Object.entries(METHOD).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
         <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} aria-label="Status filter"><option value="">All statuses</option><option value="received">Received</option><option value="refunded">Refunded</option></select>
-        <label className="row small-text">From <input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(1); }} aria-label="From date" /></label>
-        <label className="row small-text">To <input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(1); }} aria-label="To date" /></label>
+        <label className="row small-text">From <DateField clearable label="From date" value={from} onChange={(v) => { setFrom(v); setPage(1); }} /></label>
+        <label className="row small-text">To <DateField clearable label="To date" value={to} onChange={(v) => { setTo(v); setPage(1); }} /></label>
         {filtered && <button className="small" onClick={() => { setQ(''); setMethod(''); setStatus(''); setFrom(''); setTo(''); }}>Clear filters</button>}
       </div>
       <ErrorBox e={error ?? err} />
@@ -291,7 +292,7 @@ function PaymentForm({ row, onClose, onSaved }: { row: any | null; onClose: () =
         <div className="limits">
           <div className="field"><label htmlFor="pm-amt">Amount (৳)</label><input id="pm-amt" type="number" min={0} step={1} value={f.amount} onChange={set('amount')} required autoFocus /></div>
           <div className="field"><label htmlFor="pm-method">Method</label><select id="pm-method" value={f.method} onChange={set('method')}>{Object.entries(METHOD).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
-          <div className="field"><label htmlFor="pm-date">Paid at</label><input id="pm-date" type="datetime-local" value={f.paid_at} onChange={set('paid_at')} required /></div>
+          <div className="field"><label htmlFor="pm-date">Paid at</label><DateField id="pm-date" withTime required label="Paid at" value={f.paid_at} onChange={(v) => setF((x) => ({ ...x, paid_at: v }))} /></div>
           <div className="field"><label htmlFor="pm-status">Status</label><select id="pm-status" value={f.status} onChange={set('status')}><option value="received">Received</option><option value="refunded">Refunded</option></select></div>
         </div>
         <div className="field"><label htmlFor="pm-user">User e-mail <span className="faint">(optional, links the payment to an account)</span></label><input id="pm-user" type="email" value={f.user_email} onChange={set('user_email')} style={{ width: '100%' }} /></div>

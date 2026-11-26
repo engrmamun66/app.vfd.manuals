@@ -11,6 +11,7 @@ export interface PremiumConfig {
   lock_requests: boolean;
   lock_text_mapping?: boolean;
   lock_highlight_matched?: boolean;
+  trial_days?: number;
   max_upload_mb: number | null;
   max_comments: number | null;
   max_highlights: number | null;
@@ -20,8 +21,9 @@ export interface PremiumConfig {
 }
 export interface PremiumStatus {
   isPro: boolean;
-  plan: 'monthly' | 'yearly' | 'admin' | null;
+  plan: 'monthly' | 'yearly' | 'admin' | 'trial' | null;
   endsAt: string | null;
+  trialEndsAt: string | null;
   pending: { id: number; plan: 'monthly' | 'yearly'; amount: number; created_at: string } | null;
   profileComplete: boolean;
   config: PremiumConfig;

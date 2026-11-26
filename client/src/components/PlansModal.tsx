@@ -107,7 +107,7 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
         <div className="stack">
           {reason && <div className="err" role="status"><b>Upgrade needed.</b> {reason}</div>}
           {isPro && (
-            <div className="ok-box" role="status"><b>You have Pro access</b>{status.plan === 'admin' ? ' (administrator).' : <> — {status.plan} plan, valid until {fmtDate(status.endsAt)}.</>}</div>
+            <div className="ok-box" role="status"><b>You have Pro access</b>{status.plan === 'admin' ? ' (administrator).' : status.plan === 'trial' ? <> — free full access until {fmtDate(status.trialEndsAt)}. Subscribe to keep Pro after that.</> : <> — {status.plan} plan, valid until {fmtDate(status.endsAt)}.</>}</div>
           )}
           {status.pending && (
             <div className="ok-box" role="status">

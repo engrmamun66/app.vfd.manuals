@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { del, get, patch, post, put, fmtBytes, fmtDate, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
-import { Crumbs, ErrorBox, Loading, Modal, PasswordInput, useAsync, download } from '../components/ui';
+import { Crumbs, DateField, ErrorBox, Loading, Modal, PasswordInput, useAsync, download } from '../components/ui';
 import { confirmDialog } from '../components/dialogs';
 
 const TYPES: [string, string][] = [['brand', 'Brands'], ['model', 'Models'], ['category', 'Categories'], ['common_function', 'Common functions'], ['parameter', 'Parameters'], ['modbus_register', 'Modbus registers'], ['document', 'Documents']];
@@ -117,6 +117,8 @@ function CreateUser({ onClose }: { onClose: () => void }) {
   );
 }
 
+const toLocalInput = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
 function UserDetail({ id, onClose }: { id: number; onClose: () => void }) {
   const { data: u, reload } = useAsync(() => get(`/admin/users/${id}`), [id]);
   const { data: rec } = useAsync(() => get(`/admin/users/${id}/storage/reconcile`), [id]);
@@ -124,6 +126,8 @@ function UserDetail({ id, onClose }: { id: number; onClose: () => void }) {
   const [lim, setLim] = useState<any>(null);
   const [newPw, setNewPw] = useState('');
   const [mustChange, setMustChange] = useState(true);
+  const [fa, setFa] = useState('');
+  useEffect(() => { if (u) setFa(u.full_access_until ? toLocalInput(new Date(u.full_access_until)) : ''); }, [u?.full_access_until]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (u) setLim({ quotaMB: Math.round(u.limits.quotaBytes / 1048576), fileMB: Math.round(u.limits.maxFileBytes / 1048576), att: u.limits.maxAttachmentsPerComment }); }, [u]);
   const run = async (fn: () => Promise<any>) => { try { setMsg(await fn()); reload(); } catch (e) { setMsg(e); } };
   if (!u || !lim) return <Modal title="User" onClose={onClose}><Loading /></Modal>;
@@ -135,11 +139,18 @@ function UserDetail({ id, onClose }: { id: number; onClose: () => void }) {
       <div className="grid2">
         <div><h3>Account</h3><table><tbody>
           <tr><th>ID</th><td>{u.id}</td></tr><tr><th>Role</th><td>{u.role}</td></tr><tr><th>Status</th><td>{u.status}</td></tr><tr><th>Registered</th><td>{fmtDate(u.created_at)}</td></tr><tr><th>Last login</th><td>{fmtDate(u.last_login_at)}</td></tr><tr><th>Logins / failed</th><td>{u.login_count} / {u.failed_login_count}</td></tr>
-          <tr><th>Phone</th><td>{u.phone ?? '—'}</td></tr><tr><th>Company</th><td>{u.company ?? '—'}</td></tr><tr><th>Designation</th><td>{u.designation ?? '—'}</td></tr></tbody></table>
+          <tr><th>Full access until</th><td>{u.full_access_until ? <>{fmtDate(u.full_access_until)} {new Date(u.full_access_until) > new Date() ? <span className="badge solid">active</span> : <span className="badge dashed">expired</span>}</> : '—'}</td></tr><tr><th>Phone</th><td>{u.phone ?? '—'}</td></tr><tr><th>Company</th><td>{u.company ?? '—'}</td></tr><tr><th>Designation</th><td>{u.designation ?? '—'}</td></tr></tbody></table>
           <div className="row" style={{ marginTop: 8 }}>
             <select value={u.role} onChange={(e) => run(() => patch(`/admin/users/${u.id}`, { role: e.target.value }))} aria-label="Role"><option value="user">Normal User</option><option value="super_admin">Super Admin</option></select>
             <button className="small" onClick={async () => (await confirmDialog('Generate a one-time temporary password? All sessions of this user will end.')) && run(() => post(`/admin/users/${u.id}/reset-password`))}>Reset password</button>
             <button className="small" onClick={() => run(() => post(`/admin/users/${u.id}/revoke-all`, {}))}>Log out all sessions</button></div>
+          <h3 style={{ marginTop: 12 }}>Free full access until</h3>
+          <div className="row">
+            <DateField withTime label="Full access until" value={fa} onChange={setFa} />
+            <button className="small primary" onClick={() => run(() => patch(`/admin/users/${u.id}`, { fullAccessUntil: fa ? new Date(fa).toISOString() : null }))}>Save date</button>
+            <button className="small" onClick={() => { const d = new Date(Date.now() + 1 * 86400000); setFa(toLocalInput(d)); }}>+1 day from now</button>
+            <button className="small" onClick={() => run(() => patch(`/admin/users/${u.id}`, { fullAccessUntil: null }))}>Remove</button></div>
+          <div className="small-text faint">Until this date the user has Pro features without a subscription. After it passes, a subscription is needed.</div>
           <h3 style={{ marginTop: 12 }}>Set password</h3>
           <div className="row"><PasswordInput value={newPw} onChange={(e) => setNewPw(e.target.value)} autoComplete="new-password" placeholder="New password for this user" />
             <button className="small primary" disabled={!newPw} onClick={async () => (await confirmDialog(`Set this password for ${u.email}? All sessions of this user will end.`)) && run(async () => { const r = await post(`/admin/users/${u.id}/reset-password`, { password: newPw, mustChange }); setNewPw(''); return r; })}>Set password</button></div>

@@ -6,7 +6,7 @@ import { ah, badRequest, conflict, HttpError, intParam, notFound, oneOf, paging,
 import { audit, logActivity } from '../lib/audit.js';
 import { safeResolve, saveUserImage, userRoot } from '../services/storage.js';
 import { setAppSetting } from '../services/settings.js';
-import { activeSubscription, getPremiumConfig, isPro, usage, type PremiumConfig } from '../services/premium.js';
+import { activeSubscription, activeTrialEnd, getPremiumConfig, isPro, usage, type PremiumConfig } from '../services/premium.js';
 import { isValidEmail, normalizeEmail } from '../auth/password.js';
 
 /** Pricing and subscription requests (with a payment receipt) for every user. */
@@ -22,12 +22,14 @@ premiumRouter.get(
     const u = req.user!;
     const db = getDb();
     const sub = activeSubscription(u.id);
+    const trial = activeTrialEnd(u.id);
     const pending = db.prepare("SELECT id, plan, amount, created_at FROM subscriptions WHERE user_id = ? AND status = 'draft' ORDER BY id DESC LIMIT 1").get(u.id) ?? null;
     const me = db.prepare('SELECT phone, display_name FROM users WHERE id = ?').get(u.id) as { phone: string | null; display_name: string | null };
     res.json({
       isPro: isPro(u.id, u.role),
-      plan: u.role === 'super_admin' ? 'admin' : sub?.plan ?? null,
+      plan: u.role === 'super_admin' ? 'admin' : sub?.plan ?? (trial ? 'trial' : null),
       endsAt: sub?.ends_at ?? null,
+      trialEndsAt: trial,
       pending,
       profileComplete: !!me.phone && !!me.display_name?.trim() && !!u.email,
       config: getPremiumConfig(),
@@ -146,6 +148,7 @@ premiumAdminRouter.put(
       lock_requests: !!b.lock_requests,
       lock_text_mapping: !!b.lock_text_mapping,
       lock_highlight_matched: !!b.lock_highlight_matched,
+      trial_days: Number.isFinite(Number(b.trial_days)) && String(b.trial_days).trim() !== '' ? Math.max(0, Math.min(365, Math.round(Number(b.trial_days)))) : 1,
       max_upload_mb: limitVal(b.max_upload_mb, 'Max upload (MB)', 1000, true),
       max_comments: limitVal(b.max_comments, 'Max comments', 1_000_000),
       max_highlights: limitVal(b.max_highlights, 'Max highlights', 1_000_000),

@@ -10,6 +10,7 @@ import { sqliteRateLimit } from '../auth/rateLimit.js';
 import { clientIp } from '../auth/clientIp.js';
 import { getAppSetting, getUserSettings } from '../services/settings.js';
 import { ensureUserDirs } from '../services/storage.js';
+import { newUserTrialEnd } from '../services/premium.js';
 
 export const authRouter = Router();
 
@@ -81,10 +82,10 @@ authRouter.post(
       userId = Number(
         db
           .prepare(
-            `INSERT INTO users(email, email_normalized, password_hash, role, status, phone, company, designation, display_name, login_count, last_login_at)
-             VALUES (?,?,?,'user','enabled',?,?,?,?,1,?)`,
+            `INSERT INTO users(email, email_normalized, password_hash, role, status, phone, company, designation, display_name, login_count, last_login_at, full_access_until)
+             VALUES (?,?,?,'user','enabled',?,?,?,?,1,?,?)`,
           )
-          .run(emailRaw, email, hash, phone, company, designation, fullName, new Date().toISOString()).lastInsertRowid,
+          .run(emailRaw, email, hash, phone, company, designation, fullName, new Date().toISOString(), newUserTrialEnd()).lastInsertRowid,
       );
     } catch (e) {
       if ((e as any).code?.startsWith('SQLITE_CONSTRAINT'))

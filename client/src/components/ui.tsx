@@ -342,3 +342,19 @@ export function ModelName({ name, brand, max = 35 }: { name: string | null | und
   const t = truncate(name, max);
   return t === name ? <>{name}</> : <Tip text={`${brand ? brand + ' ' : ''}${name}`}>{t}</Tip>;
 }
+
+/**
+ * The project's date picker: the browser's own calendar (works with keyboard and touch), one look everywhere.
+ * `value` is "YYYY-MM-DD" (date) or "YYYY-MM-DDTHH:mm" (withTime). Clicking anywhere on the field opens the calendar.
+ */
+export function DateField({ value, onChange, withTime, id, label, required, min, max, clearable }: { value: string; onChange: (v: string) => void; withTime?: boolean; id?: string; label: string; required?: boolean; min?: string; max?: string; clearable?: boolean }) {
+  const ref = useRef<HTMLInputElement>(null);
+  return (
+    <span className="date-field">
+      <svg className="date-ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2" /><path d="M3 9.5h18M8 2.5v4M16 2.5v4" /></svg>
+      <input ref={ref} id={id} type={withTime ? 'datetime-local' : 'date'} value={value} min={min} max={max} required={required} aria-label={label}
+        onChange={(e) => onChange(e.target.value)} onClick={() => { try { ref.current?.showPicker?.(); } catch { /* the browser decides */ } }} />
+      {clearable && value && <button type="button" className="ghost date-clear" onClick={() => onChange('')} aria-label={`Clear ${label}`} title="Clear">✕</button>}
+    </span>
+  );
+}

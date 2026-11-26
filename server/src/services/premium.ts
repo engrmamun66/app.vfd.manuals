@@ -15,6 +15,7 @@ export interface PremiumConfig {
   lock_requests: boolean; // "request" messages (new manual / model requests)
   lock_text_mapping: boolean; // selectable text layer over manual page images needs Pro
   lock_highlight_matched: boolean; // cited words marked on the manual page image need Pro
+  trial_days: number; // full access for a newly registered user, in days (0 = none)
   max_upload_mb: number | null; // largest comment image a free user may upload (null = no limit)
   max_comments: number | null;
   max_highlights: number | null;
@@ -31,6 +32,7 @@ export const PREMIUM_DEFAULTS: PremiumConfig = {
   lock_requests: true,
   lock_text_mapping: false,
   lock_highlight_matched: false,
+  trial_days: 1,
   max_upload_mb: 2,
   max_comments: 20,
   max_highlights: 50,
@@ -60,7 +62,17 @@ export function getPremiumConfig(): PremiumConfig {
 export function activeSubscription(userId: number) {
   return getDb().prepare("SELECT id, plan, starts_at, ends_at FROM subscriptions WHERE user_id = ? AND status = 'active' AND ends_at > ? ORDER BY ends_at DESC LIMIT 1").get(userId, new Date().toISOString()) as { id: number; plan: 'monthly' | 'yearly'; starts_at: string; ends_at: string } | undefined;
 }
-export const isPro = (userId: number, role?: string) => role === 'super_admin' || !!activeSubscription(userId);
+/** The end of a user's free full-access period, when it is still running. */
+export function activeTrialEnd(userId: number): string | null {
+  const r = getDb().prepare('SELECT full_access_until FROM users WHERE id = ?').get(userId) as { full_access_until: string | null } | undefined;
+  return r?.full_access_until && r.full_access_until > new Date().toISOString() ? r.full_access_until : null;
+}
+/** Full access date for a user who registers now (null when the Super Admin set 0 days). */
+export function newUserTrialEnd(): string | null {
+  const days = getPremiumConfig().trial_days;
+  return days > 0 ? new Date(Date.now() + days * 86_400_000).toISOString() : null;
+}
+export const isPro = (userId: number, role?: string) => role === 'super_admin' || !!activeSubscription(userId) || !!activeTrialEnd(userId);
 
 export function usage(userId: number) {
   const db = getDb();

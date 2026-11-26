@@ -1,6 +1,6 @@
 import { Fragment, createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserRouter, Link, NavLink, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { get } from './lib/api';
+import { get, fmtDate } from './lib/api';
 import { AuthProvider, useAuth } from './lib/auth';
 import { escSnippet, AddressConverter, CommSettings } from './pages/ModbusTools';
 import { ChangePassword, Login, Register } from './pages/AuthPages';
@@ -208,6 +208,7 @@ function Shell() {
 function ShellInner() {
   const { user, logout, settings, updateSettings, impersonation, stopImpersonation } = useAuth();
   const loc = useLocation();
+  const { status: premStatus, openPlans: openPlansNow } = usePremium();
   const mainRef = useRef<HTMLDivElement>(null);
   const splitRef = useRef({ settings, updateSettings });
   splitRef.current = { settings, updateSettings };
@@ -371,6 +372,17 @@ function ShellInner() {
             {inAdmin ? 'Back to app' : 'Superadmin Panel'}
           </Link>
         )}
+        {!isAdmin && premStatus?.plan === 'trial' && premStatus.trialEndsAt && (() => {
+          const ms = new Date(premStatus.trialEndsAt).getTime() - Date.now();
+          const left = ms >= 86_400_000 ? `${Math.floor(ms / 86_400_000)} day${Math.floor(ms / 86_400_000) > 1 ? 's' : ''} left` : `${Math.max(1, Math.floor(ms / 3_600_000))} hour${Math.floor(ms / 3_600_000) > 1 ? 's' : ''} left`;
+          return (
+            <button type="button" className="trial-note" onClick={() => openPlansNow()} title="Your free full access ends on this date. Click to see the plans.">
+              <span className="trial-head">Free full access</span>
+              <span className="trial-date">until {fmtDate(premStatus.trialEndsAt)}</span>
+              <span className="trial-left">{left}</span>
+            </button>
+          );
+        })()}
         <div className="userbox">
           <span className="avatar" aria-hidden="true">{(user.displayName ?? user.email).trim().charAt(0).toUpperCase()}</span>
           <span className="who" title={`${user.displayName ?? user.email} — ${user.email}`}>{user.displayName ?? user.email}</span>

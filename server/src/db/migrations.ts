@@ -813,4 +813,12 @@ ALTER TABLE user_sessions ADD COLUMN impersonator_session_id INTEGER;
 CREATE VIRTUAL TABLE IF NOT EXISTS document_pages_vocab USING fts5vocab(document_pages_fts, 'row');
 `,
   },
+  {
+    version: 15,
+    name: 'user_full_access_until',
+    sql: /* sql */ `
+-- free full (Pro) access for a new user until this moment; the Super Admin can change it per user
+ALTER TABLE users ADD COLUMN full_access_until TEXT;
+`,
+  },
 ];

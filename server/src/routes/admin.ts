@@ -33,7 +33,7 @@ adminRouter.get(
     const now = new Date().toISOString();
     const rows = db
       .prepare(
-        `SELECT u.id, u.email, u.display_name, u.role, u.status, u.phone, u.company, u.designation, u.created_at, u.last_login_at, u.login_count, u.must_change_password,
+        `SELECT u.id, u.email, u.display_name, u.role, u.status, u.phone, u.company, u.designation, u.created_at, u.last_login_at, u.login_count, u.must_change_password, u.full_access_until,
            (SELECT COUNT(*) FROM user_sessions s WHERE s.user_id=u.id AND s.revoked_at IS NULL AND s.expires_at > ?) active_sessions,
            (SELECT COUNT(*) FROM research_annotations a WHERE a.user_id=u.id) annotations_total,
            (SELECT COUNT(*) FROM research_annotations a WHERE a.user_id=u.id AND a.comment_text IS NOT NULL AND a.deletion_status='active') comments_active,
@@ -75,7 +75,7 @@ adminRouter.get(
   ah(async (req, res) => {
     const db = getDb();
     const id = intParam(req.params.id, 'id', { required: true })!;
-    const u = db.prepare('SELECT id, email, display_name, role, status, phone, company, designation, created_at, updated_at, last_login_at, login_count, failed_login_count, must_change_password FROM users WHERE id = ?').get(id) as any;
+    const u = db.prepare('SELECT id, email, display_name, role, status, phone, company, designation, created_at, updated_at, last_login_at, login_count, failed_login_count, must_change_password, full_access_until FROM users WHERE id = ?').get(id) as any;
     if (!u) throw notFound('User not found');
     const lim = userLimits(id);
     const usage = storageUsage(id);
@@ -143,6 +143,16 @@ adminRouter.patch(
     if (req.body.status !== undefined) changes.status = oneOf(req.body.status, 'status', ['enabled', 'disabled'] as const);
     if (req.body.role !== undefined) changes.role = oneOf(req.body.role, 'role', ['user', 'super_admin'] as const);
     if (req.body.displayName !== undefined) changes.display_name = str(req.body.displayName, 'displayName', { max: 100 });
+    // free full-access end date (null / empty = none)
+    if (req.body.fullAccessUntil !== undefined) {
+      const raw = req.body.fullAccessUntil;
+      if (raw === null || raw === '') changes.full_access_until = null;
+      else {
+        const d = new Date(String(raw));
+        if (Number.isNaN(d.getTime())) throw badRequest('Invalid full-access date');
+        changes.full_access_until = d.toISOString();
+      }
+    }
     const losingAdmin = u.role === 'super_admin' && u.status === 'enabled' && (changes.status === 'disabled' || changes.role === 'user');
     if (losingAdmin && activeSuperAdmins() <= 1) throw conflict('This is the last active Super Admin. Create or enable another Super Admin first.');
     if (!Object.keys(changes).length) throw badRequest('Nothing to update');
