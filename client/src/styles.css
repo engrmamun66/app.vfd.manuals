@@ -866,3 +866,8 @@ tr.kn-detail > td { padding: 0; background: var(--bg-alt); box-shadow: inset 3px
 .modal-bg.closing .modal { animation: md-out .2s ease-in both; }
 .auto-h { transition: height .25s ease; }
 @media (prefers-reduced-motion: reduce) { .modal-bg, .modal-bg .modal, .modal-bg.closing, .modal-bg.closing .modal { animation: none; } .auto-h { transition: none; } }
+
+/* Sign-in shortcut, top right of the auth artwork */
+.auth-art-login { position: absolute; top: 28px; right: 32px; background: transparent; color: #fff; border-color: #777; padding: 6px 18px; border-radius: 6px; z-index: 2; }
+.auth-art-login:hover { background: #fff; color: #0a0a0a; border-color: #fff; }
+@media (max-width: 960px) { .auth-art-login { top: 14px; right: 16px; padding: 4px 12px; } }

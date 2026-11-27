@@ -5,11 +5,12 @@ import { useAuth } from '../lib/auth';
 import { ErrorBox, PasswordInput } from '../components/ui';
 import { VfdAnimation } from '../components/VfdAnimation';
 
-function Wrap({ title, children }: { title: string; children: React.ReactNode }) {
+function Wrap({ title, children, top }: { title: string; children: React.ReactNode; top?: React.ReactNode }) {
   return (
     <div className="auth-wrap">
       <aside className="auth-art" aria-label="Product overview">
         <div className="auth-art-brand"><img src="/favicon.svg" alt="" width="38" height="38" /><div><b>VFD Knowledge Base</b><span>Technical Research Explorer</span></div></div>
+        {top ?? (title !== 'Sign in' && <Link to="/login" className="btn auth-art-login">Sign in now</Link>)}
         <VfdAnimation />
         <p className="auth-art-tag">Parameters, Modbus registers and manual pages for every drive, verified against the original documentation.</p>
       </aside>
@@ -52,7 +53,7 @@ export function Login() {
     }
   };
   return (
-    <Wrap title="Sign in">
+    <Wrap title="Sign in" top={regOn ? <Link to="/register" className="btn auth-art-login">Register now</Link> : null}>
       {notice && <div className="ok-box" role="status">{notice} <button className="small ghost" onClick={clearNotice}>Dismiss</button></div>}
       <form onSubmit={submit}>
         <div className="field"><label htmlFor="email">Email address</label><input id="email" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
