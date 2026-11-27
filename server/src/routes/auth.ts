@@ -11,6 +11,8 @@ import { clientIp } from '../auth/clientIp.js';
 import { getAppSetting, getUserSettings } from '../services/settings.js';
 import { ensureUserDirs } from '../services/storage.js';
 import { newUserTrialEnd } from '../services/premium.js';
+import { googleConfig, verifyGoogleIdToken } from '../services/google.js';
+import crypto from 'node:crypto';
 
 export const authRouter = Router();
 
@@ -145,6 +147,66 @@ authRouter.post(
     const s = createSession(req, res, u.id);
     logActivity({ userId: u.id, event: 'login', entityType: 'session', entityId: s.sessionId, ip });
     res.json({ user: publicUser(u), csrfToken: s.csrf, settings: getUserSettings(u.id) });
+  }),
+);
+
+/** Public: is "Sign in with Google" on, and with which client id (the id is public by design). */
+authRouter.get(
+  '/google-config',
+  ah(async (_req, res) => {
+    const g = googleConfig();
+    res.json({ enabled: g.enabled, clientId: g.enabled ? g.clientId : null });
+  }),
+);
+
+/**
+ * Sign in (or sign up) with a Google ID token. A user is matched by Google account id, else by the verified e-mail address
+ * (and then linked). A new e-mail address creates a Normal User (when registration is open) with the free full-access period.
+ */
+authRouter.post(
+  '/google',
+  loginLimiter,
+  requireJson,
+  ah(async (req, res) => {
+    const db = getDb();
+    const g = googleConfig();
+    if (!g.enabled) throw new HttpError(403, 'Google sign-in is not enabled.');
+    const claims = await verifyGoogleIdToken(String(req.body?.credential || ''), g.clientId);
+    const email = normalizeEmail(claims.email);
+    const ip = clientIp(req);
+    const ua = String(req.headers['user-agent'] || '').slice(0, 300);
+    const now = new Date().toISOString();
+    let u = (db.prepare('SELECT * FROM users WHERE google_sub = ?').get(claims.sub) ?? db.prepare('SELECT * FROM users WHERE email_normalized = ?').get(email)) as any;
+    const fail = (reason: string, userId: number | null) => {
+      db.prepare('INSERT INTO user_login_history(user_id, success, reason, ip, user_agent) VALUES (?,?,?,?,?)').run(userId, 0, reason, ip, ua);
+      if (userId) logActivity({ userId, event: 'login_failed', meta: { reason }, ip });
+    };
+    if (u) {
+      if (u.google_sub && u.google_sub !== claims.sub) { fail('google_mismatch', u.id); throw new HttpError(403, 'This account is linked to a different Google account.'); }
+      if (u.status !== 'enabled') { fail('account_disabled', u.id); throw new HttpError(403, 'This account is disabled. Contact the administrator.'); }
+      if (!u.google_sub) db.prepare('UPDATE users SET google_sub = ? WHERE id = ?').run(claims.sub, u.id);
+      db.prepare('UPDATE users SET failed_login_count = 0, locked_until = NULL, login_count = login_count + 1, last_login_at = ? WHERE id = ?').run(now, u.id);
+      db.prepare('INSERT INTO user_login_history(user_id, success, reason, ip, user_agent) VALUES (?,?,?,?,?)').run(u.id, 1, 'google_login', ip, ua);
+    } else {
+      if (!getAppSetting<boolean>('registration_enabled')) throw new HttpError(403, 'New registrations are currently disabled by the administrator.');
+      const name = claims.name?.trim() || claims.email.split('@')[0];
+      // no password is ever used for this account: a random one is stored (it can be replaced from "Forgot / change password" by the admin)
+      const hash = await hashPassword(crypto.randomBytes(24).toString('base64url') + 'aA1!');
+      const id = Number(
+        db
+          .prepare("INSERT INTO users(email, email_normalized, password_hash, role, status, display_name, login_count, last_login_at, full_access_until, google_sub) VALUES (?,?,?,'user','enabled',?,1,?,?,?)")
+          .run(claims.email, email, hash, name, now, newUserTrialEnd(), claims.sub).lastInsertRowid,
+      );
+      ensureUserDirs(id);
+      db.prepare('INSERT INTO user_login_history(user_id, success, reason, ip, user_agent) VALUES (?,?,?,?,?)').run(id, 1, 'google_registration', ip, ua);
+      logActivity({ userId: id, event: 'register', meta: { via: 'google' }, ip });
+      u = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+    }
+    ensureUserDirs(u.id);
+    const s = createSession(req, res, u.id);
+    logActivity({ userId: u.id, event: 'login', entityType: 'session', entityId: s.sessionId, meta: { via: 'google' }, ip });
+    const fresh = db.prepare('SELECT * FROM users WHERE id = ?').get(u.id);
+    res.json({ user: publicUser(fresh), csrfToken: s.csrf, settings: getUserSettings(u.id) });
   }),
 );
 

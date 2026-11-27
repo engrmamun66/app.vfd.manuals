@@ -249,6 +249,16 @@ export function AdminSettings({ embedded }: { embedded?: boolean } = {}) {
           <p className="small-text muted">When disabled, new registrations are rejected; existing users can still sign in. New registrations always receive the Normal User role.</p>
           <div className="field"><label>Application title</label><input defaultValue={s.app_title} onBlur={(e) => e.target.value !== s.app_title && patch('/admin/settings', { app_title: e.target.value }).then(reload)} /></div>
         </div>)}
+      {s && (
+        <div className="card stack" style={{ maxWidth: 640, marginTop: 12 }}>
+          <h3 style={{ margin: 0 }}>Sign in with Google</h3>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--fg)', fontWeight: 400 }}><input type="checkbox" checked={!!s.google_login_enabled} onChange={async (e) => { const v = e.target.checked; try { await patch('/admin/settings', { google_login_enabled: v }); setS((x: any) => ({ ...x, google_login_enabled: v })); setMsg(null); } catch (err) { setMsg(err); } }} /> Allow users to sign in / sign up with Google</label>
+          <div className="field"><label htmlFor="g-cid">Google OAuth client ID</label><input id="g-cid" style={{ width: '100%' }} placeholder="1234567890-abc….apps.googleusercontent.com" defaultValue={s.google_client_id} onBlur={(e) => e.target.value.trim() !== (s.google_client_id ?? '') && patch('/admin/settings', { google_client_id: e.target.value.trim() }).then(reload).catch(setMsg)} /></div>
+          <p className="small-text muted" style={{ margin: 0 }}>
+            Create a <b>Web application</b> OAuth client in Google Cloud Console (APIs &amp; Services → Credentials) and add <b>{window.location.origin}</b> under “Authorized JavaScript origins”. No client secret is needed.
+            A Google user with the same e-mail address as an existing account is linked to it. A new e-mail address creates a Normal User (when registration is open) with the free full-access period.
+          </p>
+        </div>)}
       <h2 style={{ marginTop: 20 }}>Database backups</h2>
       <div className="row"><button className="primary" disabled={busy} onClick={async () => { setBusy(true); try { setMsg(await post('/admin/backups')); reloadB(); } catch (e) { setMsg(e); } finally { setBusy(false); } }}>Create verified backup now</button>
         <button onClick={() => download('/export?scope=taxonomy&format=json')}>Export taxonomy JSON</button></div>

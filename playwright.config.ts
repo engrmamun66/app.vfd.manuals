@@ -12,6 +12,7 @@ const env = {
   INITIAL_SUPERADMIN_PASSWORD: 'Initial-Pass-9876!',
   REGISTRATION_RATE_LIMIT_MAX: '100',
   LOGIN_RATE_LIMIT_MAX: '1000',
+  GOOGLE_CLIENT_ID: '', // tests run with Google sign-in off, whatever .env says
 };
 
 export default defineConfig({

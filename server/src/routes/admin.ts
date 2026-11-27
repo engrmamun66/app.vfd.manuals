@@ -321,6 +321,12 @@ adminRouter.patch(
   ah(async (req, res) => {
     const allowed: Record<string, (v: unknown) => unknown> = {
       registration_enabled: (v) => !!v,
+      google_login_enabled: (v) => !!v,
+      google_client_id: (v) => {
+        const t = String(v ?? '').trim();
+        if (t && !/^[A-Za-z0-9._-]{10,200}$/.test(t)) throw badRequest('That does not look like a Google client ID (it ends with .apps.googleusercontent.com).');
+        return t;
+      },
       app_title: (v) => str(v, 'app_title', { required: true, max: 150 }),
       default_language: (v) => oneOf(v, 'default_language', ['en', 'bn'] as const),
     };

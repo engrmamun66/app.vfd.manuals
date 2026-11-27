@@ -645,6 +645,21 @@ test.describe('administration', () => {
     await admin.getByLabel(/Allow new user registration/).check();
   });
 
+  test('Google sign-in: off by default; the Super Admin turns it on with a client ID; a bad token is refused', async () => {
+    const cfg0 = await (await alice.request.get('/api/auth/google-config')).json();
+    expect(cfg0.enabled).toBe(false);
+    expect((await alice.request.post('/api/auth/google', { data: { credential: 'x' } })).status()).toBe(403);
+    const csrf = (await (await admin.request.get('/api/auth/me')).json()).csrfToken as string;
+    const bad = await admin.request.patch('/api/admin/settings', { data: { google_client_id: 'not a client id!' }, headers: { 'X-CSRF-Token': csrf } });
+    expect(bad.status()).toBe(400);
+    await admin.request.patch('/api/admin/settings', { data: { google_client_id: 'e2e-client-123456.apps.googleusercontent.com', google_login_enabled: true }, headers: { 'X-CSRF-Token': csrf } });
+    const cfg1 = await (await alice.request.get('/api/auth/google-config')).json();
+    expect(cfg1).toEqual({ enabled: true, clientId: 'e2e-client-123456.apps.googleusercontent.com' });
+    expect((await alice.request.post('/api/auth/google', { data: { credential: 'not-a-real-token' } })).status()).toBe(401);
+    await admin.request.patch('/api/admin/settings', { data: { google_login_enabled: false, google_client_id: '' }, headers: { 'X-CSRF-Token': csrf } });
+    expect((await (await alice.request.get('/api/auth/google-config')).json()).enabled).toBe(false);
+  });
+
   test('backups can be created and verified from the UI', async () => {
     await admin.goto('/admin/settings');
     await admin.getByRole('button', { name: 'Create verified backup now' }).click();
@@ -672,6 +687,21 @@ test.describe('premium: free limits, plans dialog, subscription review (Super Ad
     expect(r.status()).toBe(200);
   };
   const csrfOf = async (p: Page) => (await (await p.request.get('/api/auth/me')).json()).csrfToken as string;
+
+  test('a new user has free full access for a few days; the Super Admin can end it, then the user is on the free plan', async () => {
+    const st0 = await (await alice.request.get('/api/premium/status')).json();
+    expect(st0.isPro).toBe(true);
+    expect(st0.plan).toBe('trial');
+    expect(new Date(st0.trialEndsAt).getTime()).toBeGreaterThan(Date.now() + 36 * 3600_000); // default: 2 days
+    const list = await (await admin.request.get(`/api/admin/users?q=${encodeURIComponent(ALICE.email)}`)).json();
+    const row = (list.rows ?? list).find((u: any) => u.email === ALICE.email);
+    expect(row.full_access_until).toBeTruthy();
+    const r = await admin.request.patch(`/api/admin/users/${row.id}`, { data: { fullAccessUntil: null }, headers: { 'X-CSRF-Token': await csrfOf(admin) } });
+    expect(r.status()).toBe(200);
+    const st1 = await (await alice.request.get('/api/premium/status')).json();
+    expect(st1.isPro).toBe(false);
+    expect(st1.plan).toBeNull();
+  });
 
   test('normal users cannot read or change premium settings; the Superadmin Panel button is admin-only', async () => {
     expect((await alice.request.get('/api/premium-admin/config')).status()).toBe(403);

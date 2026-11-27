@@ -859,4 +859,13 @@ ALTER TABLE payments ADD COLUMN plan_type TEXT;
 CREATE INDEX idx_sub_plan ON subscriptions(pricing_plan_id);
 `,
   },
+  {
+    version: 17,
+    name: 'google_login',
+    sql: /* sql */ `
+-- "Sign in with Google": the Google account id (the "sub" claim) of a linked user
+ALTER TABLE users ADD COLUMN google_sub TEXT;
+CREATE UNIQUE INDEX idx_users_google_sub ON users(google_sub) WHERE google_sub IS NOT NULL;
+`,
+  },
 ];

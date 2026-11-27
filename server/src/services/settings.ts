@@ -5,6 +5,8 @@ import { parseJson } from '../lib/util.js';
 /** Global application settings (Super Admin controlled). */
 export const APP_SETTING_DEFAULTS: Record<string, unknown> = {
   registration_enabled: true,
+  google_login_enabled: false,
+  google_client_id: '',
   app_title: 'VFD Knowledge Base & Technical Research Explorer',
   default_language: 'en',
   allowed_image_types: ['image/jpeg', 'image/png', 'image/webp'],

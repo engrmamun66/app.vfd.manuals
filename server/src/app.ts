@@ -24,11 +24,12 @@ export function createApp(opts: { dev?: boolean } = {}) {
         useDefaults: true,
         directives: {
           // dev only: Vite injects an inline React-refresh preamble. Production keeps script-src 'self'.
-          'script-src': opts.dev ? ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'"] : ["'self'", "'wasm-unsafe-eval'"],
+          'script-src': opts.dev ? ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'", 'https://accounts.google.com/gsi/client'] : ["'self'", "'wasm-unsafe-eval'", 'https://accounts.google.com/gsi/client'],
+          'frame-src': ["'self'", 'https://accounts.google.com/gsi/'], // Google sign-in button / prompt
           'worker-src': ["'self'", 'blob:'],
-          'img-src': ["'self'", 'data:', 'blob:'],
-          'connect-src': ["'self'", 'ws:', 'wss:'],
-          'style-src': ["'self'", "'unsafe-inline'"],
+          'img-src': ["'self'", 'data:', 'blob:', 'https://*.googleusercontent.com'],
+          'connect-src': ["'self'", 'ws:', 'wss:', 'https://accounts.google.com/gsi/'],
+          'style-src': ["'self'", "'unsafe-inline'", 'https://accounts.google.com/gsi/style'],
           'upgrade-insecure-requests': null,
         },
       },

@@ -35,6 +35,7 @@ interface Ctx {
   stopImpersonation(): Promise<void>;
   login(email: string, password: string): Promise<void>;
   register(data: Record<string, string>): Promise<void>;
+  loginWithGoogle(credential: string): Promise<void>;
   logout(): Promise<void>;
   refresh(): Promise<void>;
   updateSettings(patch: Partial<Settings>): Promise<void>;
@@ -141,6 +142,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     async register(data) {
       apply(await post('/auth/register', data));
+      setNotice(null);
+    },
+    async loginWithGoogle(credential) {
+      apply(await post('/auth/google', { credential }));
       setNotice(null);
     },
     async logout() {

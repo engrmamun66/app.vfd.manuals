@@ -58,14 +58,17 @@ function SaveDialog({ title, url, context, onClose }: { title: string; url: stri
   const [newFolder, setNewFolder] = useState('');
   const [fav, setFav] = useState(false);
   const [err, setErr] = useState<any>(null);
+  const [adding, setAdding] = useState(false);
   const addFolder = async () => {
-    if (!newFolder.trim()) return;
+    const name = newFolder.trim();
+    if (!name || adding) return;
+    setAdding(true); // one folder at a time: the next one is created inside the one just made
+    setNewFolder('');
     try {
-      const r = await post('/bookmarks/folders', { name: newFolder.trim(), parent_id: folder });
-      setNewFolder('');
-      setFolder(r.id); // select the new folder at once, so the next subfolder is created inside it even before the list reloads
+      const r = await post('/bookmarks/folders', { name, parent_id: folder });
+      setFolder(r.id);
       await reload();
-    } catch (e) { setErr(e); }
+    } catch (e) { setNewFolder(name); setErr(e); } finally { setAdding(false); }
   };
   const save = async (allowDuplicate = false) => {
     try {
@@ -82,7 +85,7 @@ function SaveDialog({ title, url, context, onClose }: { title: string; url: stri
         <div className="field"><label htmlFor="bm-name">Name</label><input id="bm-name" value={name} onChange={(e) => setName(e.target.value)} autoFocus /></div>
         <div className="field"><label htmlFor="bm-notes">Personal notes</label><textarea id="bm-notes" value={notes} onChange={(e) => setNotes(e.target.value)} /></div>
         <div className="field"><label>Folder</label><div className="row">{folders && <FolderSelect folders={folders} value={folder} onChange={setFolder} />}</div>
-          <div className="row" style={{ marginTop: 6 }}><input placeholder="New subfolder name here…" value={newFolder} onChange={(e) => setNewFolder(e.target.value)} /><button className="small" onClick={addFolder}>+ Create folder</button></div></div>
+          <div className="row" style={{ marginTop: 6 }}><input placeholder="New subfolder name here…" value={newFolder} onChange={(e) => setNewFolder(e.target.value)} /><button className="small" onClick={addFolder} disabled={adding}>+ Create folder</button></div></div>
         <div className="field"><label htmlFor="bm-tags">Tags (comma separated)</label><input id="bm-tags" value={tags} onChange={(e) => setTags(e.target.value)} /></div>
         <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}><input type="checkbox" checked={fav} onChange={(e) => setFav(e.target.checked)} /> Favorite</label>
         <ErrorBox e={err} />

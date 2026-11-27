@@ -4,6 +4,7 @@ import { ApiError, get, post } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { ErrorBox, PasswordInput } from '../components/ui';
 import { VfdAnimation } from '../components/VfdAnimation';
+import { GoogleButton } from '../components/GoogleButton';
 
 function Wrap({ title, children, top }: { title: string; children: React.ReactNode; top?: React.ReactNode }) {
   return (
@@ -61,6 +62,7 @@ export function Login() {
         <ErrorBox e={err} />
         <button className="primary" disabled={busy} style={{ width: '100%', justifyContent: 'center' }}>{busy ? 'Signing in…' : 'Sign in'}</button>
       </form>
+      <GoogleButton onDone={() => nav('/', { replace: true })} onError={setErr} />
       <p className="muted small-text" style={{ marginTop: 14 }}>
         {regOn ? <>No account? <Link to="/register">Create one</Link></> : 'New registrations are currently disabled.'}
       </p>
@@ -104,6 +106,7 @@ export function Register() {
     );
   return (
     <Wrap title="Create account">
+      <GoogleButton first onDone={() => nav('/', { replace: true })} onError={setErr} />
       <form onSubmit={submit}>
         <div className="field"><label htmlFor="r-name">Full name *</label><input id="r-name" required minLength={2} maxLength={100} autoComplete="name" value={f.displayName} onChange={set('displayName')} /></div>
         <div className="field"><label htmlFor="r-email">Email address *</label><input id="r-email" type="email" required autoComplete="email" value={f.email} onChange={set('email')} /></div>
