@@ -139,7 +139,7 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
           )}
           <div className="plans">
             <div className={`plan ${!isPro ? 'current' : ''}`}>
-              <h3>Free</h3>
+              <h3>Free <span className="faint" style={{ fontWeight: 400 }}>(limited use)</span></h3>
               <div className="plan-price">৳0</div>
               <ul>
                 <li>{limit(cfg.max_comments, 'comments')}</li>

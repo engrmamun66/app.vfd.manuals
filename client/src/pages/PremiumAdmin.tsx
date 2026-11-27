@@ -49,7 +49,7 @@ function SubscriptionCard({ r, onSaved, onReceipt }: { r: any; onSaved: () => vo
     const ask = action === 'activate'
       ? `Approve this payment? ${r.display_name ?? r.email} gets ${PLAN[r.plan as 'monthly' | 'yearly']} access and a payment record of ৳${r.amount} is created.`
       : action === 'reject' ? 'Reject this payment? Use this when the amount transferred is lower than the payable amount or the receipt is not valid.'
-      : 'Cancel this subscription now? The user becomes a Free user immediately.';
+      : 'Cancel this subscription now? The user becomes a Free user (limited use) immediately.';
     if (!(await confirmDialog(ask))) return;
     setErr(null); setBusy(true);
     try { await patch(`/premium-admin/subscriptions/${r.id}`, { action, note }); onSaved(); } catch (e) { setErr(e); } finally { setBusy(false); }
@@ -124,7 +124,7 @@ export function PremiumSettings() {
     <div className="page">
       <Crumbs items={[{ label: 'Superadmin Panel' }, { label: 'Premium Settings' }]} />
       <h1>Premium Settings</h1>
-      <p className="muted prose">Free users can open everything, but the items you mark here need a Pro plan. When a free user opens a locked menu or model, or reaches a limit, the pricing dialog opens instead.</p>
+      <p className="muted prose">Free users (limited use) can open everything, but the items you mark here need a Pro plan. When a free user opens a locked menu or model, or reaches a limit, the pricing dialog opens instead.</p>
 
       <div className="card stack">
         <h2 style={{ margin: 0 }}>Locked menus</h2>
@@ -158,11 +158,11 @@ export function PremiumSettings() {
         <h2 style={{ margin: 0 }}>Manual page images</h2>
         <label className="lock-item"><input type="checkbox" checked={!!cfg.lock_highlight_matched} onChange={(e) => set('lock_highlight_matched', e.target.checked)} /> Highlighting matched words on Manual image needs Pro (the cited value marked in yellow)</label>
         <label className="lock-item"><input type="checkbox" checked={!!cfg.lock_text_mapping} onChange={(e) => set('lock_text_mapping', e.target.checked)} /> Text mapping on manual images needs Pro (selecting, copying, commenting and highlighting text on the page image)</label>
-        <div className="small-text faint">Checked = not available to free users. Pro users and Super Admins always have both. The yellow mark needs text mapping.</div>
+        <div className="small-text faint">Checked = not available to free users (limited use). Pro users and Super Admins always have both. The yellow mark needs text mapping.</div>
       </div>
 
       <div className="card stack">
-        <h2 style={{ margin: 0 }}>Features and limits for free users</h2>
+        <h2 style={{ margin: 0 }}>Features and limits for free users (limited use)</h2>
         <label className="lock-item"><input type="checkbox" checked={cfg.lock_search} onChange={(e) => set('lock_search', e.target.checked)} /> Search needs Pro</label>
         <label className="lock-item"><input type="checkbox" checked={cfg.lock_custom_category} onChange={(e) => set('lock_custom_category', e.target.checked)} /> Custom categories need Pro</label>
         <label className="lock-item"><input type="checkbox" checked={cfg.lock_requests} onChange={(e) => set('lock_requests', e.target.checked)} /> Sending a “Request” (e.g. a new VFD manual) needs Pro</label>

@@ -25,7 +25,7 @@ export function SubmitPayment() {
     try { await fn(); await reload(); setVersion((v) => v + 1); toast(done); } catch (e) { setErr(e); } finally { setBusy(false); }
   };
   const cancel = async () => {
-    if (!(await confirmDialog('Cancel your subscription now? The cancellation takes effect immediately: your account becomes a Free account at once and the rest of the paid period is not kept. If you subscribe again later, it is a completely new subscription.', { confirmLabel: 'Cancel subscription', danger: true }))) return;
+    if (!(await confirmDialog('Cancel your subscription now? The cancellation takes effect immediately: your account becomes a Free account (limited use) at once and the rest of the paid period is not kept. If you subscribe again later, it is a completely new subscription.', { confirmLabel: 'Cancel subscription', danger: true }))) return;
     await run(() => post('/premium/cancel', {}), 'Subscription cancelled');
   };
 
@@ -40,7 +40,7 @@ export function SubmitPayment() {
             <tr><th>Paid amount</th><td>৳{sub.amount}</td></tr>
             <tr><th>Subscribed</th><td>{fmtDate(sub.subscribed_at)}</td></tr>
             <tr><th>Started</th><td>{fmtDate(sub.starts_at)}</td></tr>
-            <tr><th>Expires</th><td><b>{fmtDate(sub.ends_at)}</b> — after that you become a Free user unless you pay for the next period</td></tr>
+            <tr><th>Expires</th><td><b>{fmtDate(sub.ends_at)}</b> — after that you become a Free user (limited use) unless you pay for the next period</td></tr>
             {status.queued && <tr><th>Next period</th><td>{LABEL[status.queued.billing]} · paid · {fmtDate(status.queued.starts_at)} → {fmtDate(status.queued.ends_at)}</td></tr>}
             {sub.migrate_to && <tr><th>Scheduled change</th><td><span className="hl-note">Switches to {LABEL[sub.migrate_to]} from {fmtDate(sub.ends_at)}</span> (your next billing cycle)</td></tr>}
           </tbody></table>
@@ -49,7 +49,7 @@ export function SubmitPayment() {
         ) : status.plan === 'admin' ? (
           <p style={{ margin: 0 }}>Administrator accounts have every feature.</p>
         ) : (
-          <p style={{ margin: 0 }}>You are on the <b>Free</b> plan.</p>
+          <p style={{ margin: 0 }}>You are on the <b>Free</b> plan (limited use).</p>
         )}
         {status.needsPlanMigration && <div className="err" role="status">The pricing plan you subscribed to was discontinued. Your paid period stays valid, but your next payment has to be for one of the current plans.</div>}
         <div className="row" style={{ flexWrap: 'wrap' }}>

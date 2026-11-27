@@ -63,8 +63,8 @@ function SaveDialog({ title, url, context, onClose }: { title: string; url: stri
     try {
       const r = await post('/bookmarks/folders', { name: newFolder.trim(), parent_id: folder });
       setNewFolder('');
+      setFolder(r.id); // select the new folder at once, so the next subfolder is created inside it even before the list reloads
       await reload();
-      setFolder(r.id);
     } catch (e) { setErr(e); }
   };
   const save = async (allowDuplicate = false) => {

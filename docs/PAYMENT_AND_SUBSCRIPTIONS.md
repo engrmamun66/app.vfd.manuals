@@ -27,7 +27,7 @@ Otherwise the user is **Free**. Expiry is evaluated on every request (no backgro
 
 Stored in `app_settings.premium_config` (Super Admin → Premium Settings). Pro users and Super Admins are never limited.
 
-| Setting | Effect for Free users |
+| Setting | Effect for Free users (limited use) |
 |---|---|
 | `locked_menus` | Sidebar items open a "Pro feature" page (UI lock) |
 | `locked_models` | Those VFD models need Pro (UI lock) |

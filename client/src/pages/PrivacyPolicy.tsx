@@ -49,9 +49,9 @@ export function PrivacyPolicy() {
             <li>Pricing plans have a <b>Monthly</b> and a <b>Yearly</b> option, each with an original and a discounted price; you pay the discounted price shown when you submit the payment.</li>
             <li>Payments are made manually (for example bKash or bank transfer) and are <b>checked by hand</b>. A submitted payment is <b>Pending verification</b> until the administrator confirms it.</li>
             <li>If the amount you transfer is <b>lower than the payable amount</b>, the administrator may <b>reject</b> the payment. You can follow the status of every submission in Settings → Submit Payment.</li>
-            <li>When a payment is approved your subscription starts at the <b>next full hour</b> (for example, approval at 10:35 starts at 11:00). A <b>Monthly</b> subscription lasts one month and a <b>Yearly</b> subscription one year. When it ends your account becomes a Free account.</li>
+            <li>When a payment is approved your subscription starts at the <b>next full hour</b> (for example, approval at 10:35 starts at 11:00). A <b>Monthly</b> subscription lasts one month and a <b>Yearly</b> subscription one year. When it ends your account becomes a Free account (limited use).</li>
             <li>You can switch between Monthly and Yearly. The change applies <b>only from your next billing cycle</b>; until then your current subscription does not change. The effective date is shown before you confirm.</li>
-            <li>You can <b>cancel at any time</b>. Cancellation takes effect <b>immediately</b>: your account becomes a Free account at once. The subscription records are kept (soft-deleted) for auditing. A later subscription is a completely new subscription.</li>
+            <li>You can <b>cancel at any time</b>. Cancellation takes effect <b>immediately</b>: your account becomes a Free account (limited use) at once. The subscription records are kept (soft-deleted) for auditing. A later subscription is a completely new subscription.</li>
             <li>If the pricing plan you are on is discontinued, your paid period stays valid, but your next payment has to be for one of the active plans.</li>
           </ul>
         </section>
