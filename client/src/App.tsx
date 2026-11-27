@@ -1,6 +1,6 @@
 import { Fragment, createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserRouter, Link, NavLink, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { get, fmtDate } from './lib/api';
+import { get } from './lib/api';
 import { AuthProvider, useAuth } from './lib/auth';
 import { escSnippet, AddressConverter, CommSettings } from './pages/ModbusTools';
 import { ChangePassword, Login, Register } from './pages/AuthPages';
@@ -377,9 +377,8 @@ function ShellInner() {
           const left = ms >= 86_400_000 ? `${Math.floor(ms / 86_400_000)} day${Math.floor(ms / 86_400_000) > 1 ? 's' : ''} left` : `${Math.max(1, Math.floor(ms / 3_600_000))} hour${Math.floor(ms / 3_600_000) > 1 ? 's' : ''} left`;
           return (
             <button type="button" className="trial-note" onClick={() => openPlansNow()} title="Your free full access ends on this date. Click to see the plans.">
-              <span className="trial-head">Free full access</span>
-              <span className="trial-date">until {fmtDate(premStatus.trialEndsAt)}</span>
-              <span className="trial-left">{left}</span>
+              <span className="trial-head">Free full access <span className="trial-left">· {left}</span></span>
+              <span className="trial-date">Until {new Date(premStatus.trialEndsAt).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}</span>
             </button>
           );
         })()}

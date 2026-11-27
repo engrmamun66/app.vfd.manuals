@@ -32,7 +32,7 @@ export const PREMIUM_DEFAULTS: PremiumConfig = {
   lock_requests: true,
   lock_text_mapping: false,
   lock_highlight_matched: false,
-  trial_days: 1,
+  trial_days: 2,
   max_upload_mb: 2,
   max_comments: 20,
   max_highlights: 50,

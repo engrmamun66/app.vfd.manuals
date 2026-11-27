@@ -148,7 +148,7 @@ premiumAdminRouter.put(
       lock_requests: !!b.lock_requests,
       lock_text_mapping: !!b.lock_text_mapping,
       lock_highlight_matched: !!b.lock_highlight_matched,
-      trial_days: Number.isFinite(Number(b.trial_days)) && String(b.trial_days).trim() !== '' ? Math.max(0, Math.min(365, Math.round(Number(b.trial_days)))) : 1,
+      trial_days: Number.isFinite(Number(b.trial_days)) && String(b.trial_days).trim() !== '' ? Math.max(0, Math.min(365, Math.round(Number(b.trial_days)))) : 2,
       max_upload_mb: limitVal(b.max_upload_mb, 'Max upload (MB)', 1000, true),
       max_comments: limitVal(b.max_comments, 'Max comments', 1_000_000),
       max_highlights: limitVal(b.max_highlights, 'Max highlights', 1_000_000),

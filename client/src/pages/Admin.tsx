@@ -148,7 +148,7 @@ function UserDetail({ id, onClose }: { id: number; onClose: () => void }) {
           <div className="row">
             <DateField withTime label="Full access until" value={fa} onChange={setFa} />
             <button className="small primary" onClick={() => run(() => patch(`/admin/users/${u.id}`, { fullAccessUntil: fa ? new Date(fa).toISOString() : null }))}>Save date</button>
-            <button className="small" onClick={() => { const d = new Date(Date.now() + 1 * 86400000); setFa(toLocalInput(d)); }}>+1 day from now</button>
+            <button className="small" onClick={() => { const d = new Date(Date.now() + 2 * 86400000); setFa(toLocalInput(d)); }}>+2 days from now</button>
             <button className="small" onClick={() => run(() => patch(`/admin/users/${u.id}`, { fullAccessUntil: null }))}>Remove</button></div>
           <div className="small-text faint">Until this date the user has Pro features without a subscription. After it passes, a subscription is needed.</div>
           <h3 style={{ marginTop: 12 }}>Set password</h3>
