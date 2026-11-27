@@ -11,10 +11,9 @@ npm run backup
 node -e "const D=require('better-sqlite3');const d=new D('database/vfd-knowledge.db');d.pragma('wal_checkpoint(TRUNCATE)');d.close()"
 ```
 
-Upload these to the server (same relative paths):
+Upload to the server (same relative paths). `vfd-manuals/` PDFs come with `git clone`, no upload needed:
 
 - `database/vfd-knowledge.db`
-- `vfd-manuals/`
 - `storage/` (only if you want existing user uploads/receipts)
 
 ## 2. Server — first time
@@ -43,7 +42,7 @@ SMTP_PASS=...
 NOTIFY_EMAIL=...
 ```
 
-Copy the uploaded `database/vfd-knowledge.db`, `vfd-manuals/`, `storage/` into the project folder.
+Copy the uploaded `database/vfd-knowledge.db` (and `storage/` if uploaded) into the project folder.
 
 ## 3. Build, migrate, start
 
