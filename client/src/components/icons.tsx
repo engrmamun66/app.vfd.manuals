@@ -46,6 +46,7 @@ const NAV_PATHS: Record<string, string> = {
   '/bookmarks': 'M6 3h12v18l-6-4-6 4z',
   '/annotations': 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z',
   '/library': 'M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zM20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z',
+  '/superadmin/pricing': 'M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8zM7 7h0',
   '/superadmin/subscriptions': 'M12 2l3 6.5 7 1-5 5 1.2 7L12 18l-6.2 3.5L7 14.5l-5-5 7-1z',
   '/superadmin/payments': 'M2 6h20v12H2zM2 10h20M6 15h4',
   '/superadmin/premium': 'M4 6h16M4 12h16M4 18h16M8 4v4M16 10v4M10 16v4',
