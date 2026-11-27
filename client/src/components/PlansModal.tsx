@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { api, del, fmtDate, get, patch } from '../lib/api';
+import { api, del, fmtDate, get, patch, post } from '../lib/api';
+import { confirmDialog } from './dialogs';
+import { toast } from './toast';
 import { useAuth } from '../lib/auth';
 import { usePremium, type PremiumConfig } from '../lib/premium';
 import { ErrorBox, Loading, Modal } from './ui';
@@ -23,7 +25,6 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
   const { status, reload, isPro } = usePremium();
   const [stage, setStage] = useState<Stage>('plans');
   const [plan, setPlan] = useState<'monthly' | 'yearly'>('monthly');
-  const [planId, setPlanId] = useState<number | null>(null);
   const [phone, setPhone] = useState(user?.phone ?? '');
   const [name, setName] = useState(user?.displayName ?? '');
   const [file, setFile] = useState<File | null>(null);
@@ -31,14 +32,16 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  const [showPlans, setShowPlans] = useState(false); // subscribers: compare all plans instead of the subscription overview
   const preview = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
 
   if (!status) return <Modal title="Get Pro" onClose={onClose}><Loading /></Modal>;
   const cfg = status.config;
   const plans = status.pricingPlans ?? [];
-  const chosen = plans.find((p) => p.id === planId) ?? plans[0];
   const sub = status.subscription;
+  // no plan picker: a subscriber stays on their own plan while it is active; everyone else gets the newest active plan
+  const chosen = plans.find((p) => p.id === sub?.pricing_plan_id) ?? plans[plans.length - 1];
   const migrateTo = sub?.migrate_to ?? null; // a billing-type change is scheduled: the next payment has to be for it
   const monthly = chosen?.monthly_price ?? 0;
   const yearly = chosen?.yearly_price ?? 0;
@@ -113,8 +116,15 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
 
   return (
     <Modal title={stage === 'plans' ? 'Get Pro' : stage === 'done' ? 'Request sent' : stage === 'profile' ? 'Complete your profile' : `${PLAN_LABEL[plan]} plan`} onClose={onClose} wide={stage === 'plans'}>
-      {stage === 'plans' && (
+      {stage === 'plans' && sub && isPro && !showPlans && (
         <div className="stack">
+          {reason && <div className="err" role="status"><b>Upgrade needed.</b> {reason}</div>}
+          <SubscriberView onPay={(p) => choose(p)} onPlans={() => setShowPlans(true)} />
+        </div>
+      )}
+      {stage === 'plans' && !(sub && isPro && !showPlans) && (
+        <div className="stack">
+          {sub && isPro && <div><button className="small" onClick={() => setShowPlans(false)}>← Back to my subscription</button></div>}
           {reason && <div className="err" role="status"><b>Upgrade needed.</b> {reason}</div>}
           {isPro && (
             <div className="ok-box" role="status"><b>You have Pro access</b>{status.plan === 'admin' ? ' (administrator).' : status.plan === 'trial' ? <> — free full access until {fmtDate(status.trialEndsAt)}. Subscribe to keep Pro after that.</> : <> — {status.plan} plan, valid until {fmtDate(status.endsAt)}.</>}</div>
@@ -132,10 +142,6 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
               Your <b>{PLAN_LABEL[status.pending.plan]}</b> request (sent {fmtDate(status.pending.created_at)}) is waiting for the administrator.
               <div style={{ marginTop: 6 }}><button className="small" disabled={busy} onClick={withdraw}>Withdraw this request</button></div>
             </div>
-          )}
-          {plans.length > 1 && (
-            <div className="field" style={{ maxWidth: 360 }}><label htmlFor="pp-sel">Pricing plan</label>
-              <select id="pp-sel" value={chosen?.id} onChange={(e) => setPlanId(Number(e.target.value))}>{plans.map((p) => <option key={p.id} value={p.id}>{p.name} (ID {p.id})</option>)}</select></div>
           )}
           <div className="plans">
             <div className={`plan ${!isPro ? 'current' : ''}`}>
@@ -217,7 +223,7 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
       {stage === 'done' && (
         <div className="stack">
           <p role="status">
-            <b>Thank you for selecting the {PLAN_LABEL[plan]} subscription.</b> Your payment is now <b>pending verification</b>. The administrator will check it. If everything is okay, your account will be active with all premium features within 3 days at maximum. You can follow the status in Settings → Submit Payment.
+            <b>Thank you for selecting the {PLAN_LABEL[plan]} subscription.</b> Your payment is now <b>pending verification</b>. The administrator will check it. If everything is okay, your account will be active with all premium features within a short time. You can follow the status in Settings → Submit Payment.
           </p>
           <div className="row" style={{ justifyContent: 'flex-end' }}><button className="primary" onClick={onClose}>Close</button></div>
         </div>
@@ -225,6 +231,85 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
       {stage === 'plans' && <ErrorBox e={error ? { message: error } : null} />}
       {stage === 'plans' && <MyRequests />}
     </Modal>
+  );
+}
+
+/** Overview for a paying subscriber: status, time left, and the choices — pay the next cycle, switch billing type, cancel. */
+function SubscriberView({ onPay, onPlans }: { onPay: (p: 'monthly' | 'yearly') => void; onPlans: () => void }) {
+  const { status, reload } = usePremium();
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<any>(null);
+  const sub = status?.subscription;
+  if (!status || !sub) return null;
+  const other = sub.billing === 'monthly' ? 'yearly' : 'monthly';
+  const start = new Date(sub.starts_at).getTime();
+  const end = new Date(sub.ends_at).getTime();
+  const now = Date.now();
+  const total = Math.max(1, end - start);
+  const left = Math.max(0, end - now);
+  const pct = Math.min(100, Math.max(0, Math.round(((now - start) / total) * 100)));
+  const days = Math.ceil(left / 86400000);
+  const queued = status.queued;
+  const pending = status.pending;
+  const next = sub.migrate_to ?? sub.billing; // the next payment has to match a scheduled change
+
+  const run = async (fn: () => Promise<unknown>, done: string) => {
+    setBusy(true); setErr(null);
+    try { await fn(); await reload(); toast(done); } catch (e) { setErr(e); } finally { setBusy(false); }
+  };
+  const switchTo = async () => {
+    if (!(await confirmDialog(`Switch from ${PLAN_LABEL[sub.billing]} to ${PLAN_LABEL[other]}? Nothing changes now: your current subscription continues until ${fmtDate(sub.ends_at)}, and the ${PLAN_LABEL[other]} subscription applies from that date (your next billing cycle).`, { confirmLabel: `Switch from ${fmtDate(sub.ends_at)}` }))) return;
+    await run(() => post('/premium/migrate', { to: other }), `Switch to ${PLAN_LABEL[other]} scheduled`);
+  };
+  const cancel = async () => {
+    if (!(await confirmDialog('Cancel your subscription now? The cancellation takes effect immediately: your account becomes a Free account (limited use) at once and the rest of the paid period is not kept. If you subscribe again later, it is a completely new subscription.', { confirmLabel: 'Cancel subscription', danger: true }))) return;
+    await run(() => post('/premium/cancel', {}), 'Subscription cancelled');
+  };
+
+  return (
+    <div className="sub-view">
+      <div className="sub-hero">
+        <div className="sub-check" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12.5l5 5L20 6.5" /></svg></div>
+        <div className="sub-hero-text">
+          <h3>You’re all set — Pro is active</h3>
+          <p>Every feature is unlocked on your <b>{PLAN_LABEL[sub.billing]}</b> subscription. Thank you for supporting the project!</p>
+        </div>
+        <div className="sub-days"><b>{days}</b><span>{days === 1 ? 'day left' : 'days left'}</span></div>
+      </div>
+
+      <div className="sub-progress" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Subscription period used">
+        <div className="sub-bar"><i style={{ width: `${pct}%` }} /></div>
+        <div className="sub-dates"><span>Started {fmtDate(sub.starts_at)}</span><span>Renews / ends <b>{fmtDate(sub.ends_at)}</b></span></div>
+      </div>
+
+      {status.needsPlanMigration && <div className="err" role="status"><b>Your pricing plan ({sub.plan_name}) was discontinued.</b> Your paid period stays valid until {fmtDate(sub.ends_at)}. For your next payment please choose one of the current plans.</div>}
+      {sub.migrate_to && <div className="ok-box" role="status"><b>Switch scheduled:</b> {PLAN_LABEL[sub.migrate_to]} from {fmtDate(sub.ends_at)}.</div>}
+      {queued && <div className="ok-box" role="status"><b>Next period paid:</b> {PLAN_LABEL[queued.billing]}, {fmtDate(queued.starts_at)} → {fmtDate(queued.ends_at)}. Nothing more to do.</div>}
+      {pending && <div className="ok-box" role="status">Your <b>{PLAN_LABEL[pending.plan]}</b> payment is <b>pending verification</b> (sent {fmtDate(pending.created_at)}).</div>}
+
+      <div className="sub-ask">What would you like to do?</div>
+      <div className="sub-actions">
+        <div className="sub-card">
+          <h4>Submit your payment</h4>
+          <p>{queued ? 'Your next period is already paid.' : `Renew for your next billing cycle (${PLAN_LABEL[next]}), starting ${fmtDate(sub.ends_at)}.`}</p>
+          <button className="primary" disabled={busy || !!pending || !!queued} onClick={() => onPay(next)}>{pending ? 'Payment pending' : queued ? 'Already paid' : `Submit payment`}</button>
+        </div>
+        <div className="sub-card">
+          <h4>Switch to {PLAN_LABEL[other]}</h4>
+          <p>{sub.migrate_to ? `A change to ${PLAN_LABEL[sub.migrate_to]} is already scheduled.` : queued ? 'Not possible once the next period is paid.' : `Applies only from ${fmtDate(sub.ends_at)}. Until then nothing changes.`}</p>
+          {sub.migrate_to
+            ? <button disabled={busy} onClick={() => run(() => post('/premium/migrate', { to: null }), 'Scheduled change withdrawn')}>Withdraw the change</button>
+            : <button disabled={busy || !!queued} onClick={switchTo}>Switch to {PLAN_LABEL[other]}</button>}
+        </div>
+        <div className="sub-card">
+          <h4>Cancel</h4>
+          <p>Ends Pro immediately; your account becomes Free (limited use).</p>
+          <button className="danger" disabled={busy} onClick={cancel}>Cancel subscription</button>
+        </div>
+      </div>
+      <ErrorBox e={err} />
+      <div className="small-text muted"><button className="small" onClick={onPlans}>Compare all plans &amp; prices</button></div>
+    </div>
   );
 }
 

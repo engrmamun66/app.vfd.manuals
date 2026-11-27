@@ -6,7 +6,7 @@ import { ErrorBox, PasswordInput } from '../components/ui';
 import { VfdAnimation } from '../components/VfdAnimation';
 import { GoogleButton } from '../components/GoogleButton';
 
-function Wrap({ title, children, top }: { title: string; children: React.ReactNode; top?: React.ReactNode }) {
+function Wrap({ title, children, top, sub, footer }: { title: string; children: React.ReactNode; top?: React.ReactNode; sub?: string; footer?: React.ReactNode }) {
   return (
     <div className="auth-wrap">
       <aside className="auth-art" aria-label="Product overview">
@@ -17,12 +17,17 @@ function Wrap({ title, children, top }: { title: string; children: React.ReactNo
       </aside>
       <main className="auth-pane">
         <div className="auth-card">
-          <div style={{ marginBottom: 16 }}>
-            <b style={{ fontSize: '1.05rem' }}>VFD Knowledge Base</b>
-            <div className="muted small-text">Technical Research Explorer</div>
-          </div>
-          <h1>{title}</h1>
+          <header className="auth-head">
+            <img src="/favicon.svg" alt="" width="40" height="40" />
+            <div><b>VFD Knowledge Base</b><span>Technical Research Explorer</span></div>
+          </header>
+          <h1 className="auth-title">{title}</h1>
+          {sub && <p className="auth-sub">{sub}</p>}
           {children}
+          <footer className="auth-foot">
+            {footer}
+            <div className="auth-legal">By continuing you accept our <Link to="/privacy">Privacy Policy &amp; Service Terms</Link></div>
+          </footer>
         </div>
       </main>
     </div>
@@ -54,7 +59,7 @@ export function Login() {
     }
   };
   return (
-    <Wrap title="Sign in" top={regOn ? <Link to="/register" className="btn auth-art-login">Register now</Link> : null}>
+    <Wrap title="Sign in" sub="Welcome back. Sign in to continue." footer={<p>{regOn ? <>No account? <Link to="/register">Create one</Link></> : 'New registrations are currently disabled.'}</p>} top={regOn ? <Link to="/register" className="btn auth-art-login">Register now</Link> : null}>
       {notice && <div className="ok-box" role="status">{notice} <button className="small ghost" onClick={clearNotice}>Dismiss</button></div>}
       <form onSubmit={submit}>
         <div className="field"><label htmlFor="email">Email address</label><input id="email" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
@@ -63,10 +68,6 @@ export function Login() {
         <button className="primary" disabled={busy} style={{ width: '100%', justifyContent: 'center' }}>{busy ? 'Signing in…' : 'Sign in'}</button>
       </form>
       <GoogleButton onDone={() => nav('/', { replace: true })} onError={setErr} />
-      <p className="muted small-text" style={{ marginTop: 14 }}>
-        {regOn ? <>No account? <Link to="/register">Create one</Link></> : 'New registrations are currently disabled.'}
-      </p>
-      <p className="muted small-text" style={{ marginTop: 6 }}><Link to="/privacy">Privacy Policy &amp; Service Terms</Link></p>
     </Wrap>
   );
 }
@@ -137,7 +138,7 @@ export function Register() {
       </Wrap>
     );
   return (
-    <Wrap title="Create account">
+    <Wrap title="Create account" sub="Free to start. Pro features are included for a trial period." footer={<p>Already registered? <Link to="/login">Sign in</Link></p>}>
       <GoogleButton first onDone={() => nav('/', { replace: true })} onError={setErr} />
       <form onSubmit={submit}>
         <div className="field"><label htmlFor="r-name">Full name *</label><input id="r-name" required minLength={2} maxLength={100} autoComplete="name" value={f.displayName} onChange={set('displayName')} /></div>
@@ -150,13 +151,9 @@ export function Register() {
           {mismatch && <div className="small-text" role="alert">Passwords do not match.</div>}
         </div>
         <div className="field"><label htmlFor="r-ph">Phone number (optional)</label><input id="r-ph" type="tel" autoComplete="tel" value={f.phone} onChange={set('phone')} /></div>
-        <div className="field"><label htmlFor="r-co">Current company (optional)</label><input id="r-co" autoComplete="organization" value={f.company} onChange={set('company')} /></div>
-        <div className="field"><label htmlFor="r-de">Designation (optional)</label><input id="r-de" autoComplete="organization-title" value={f.designation} onChange={set('designation')} /></div>
         <ErrorBox e={err} />
         <button className="primary" disabled={busy || mismatch} style={{ width: '100%', justifyContent: 'center' }}>{busy ? 'Creating…' : 'Create account'}</button>
       </form>
-      <p className="muted small-text" style={{ marginTop: 14 }}>By creating an account you accept our <Link to="/privacy">Privacy Policy &amp; Service Terms</Link>.</p>
-      <p className="muted small-text" style={{ marginTop: 6 }}>Already registered? <Link to="/login">Sign in</Link></p>
     </Wrap>
   );
 }

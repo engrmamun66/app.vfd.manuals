@@ -800,7 +800,7 @@ test.describe('premium: free limits, plans dialog, subscription review (Super Ad
     await expect(pay.getByRole('alert')).toContainText('receipt');
     await pay.getByLabel('Payment receipt').setInputFiles({ name: 'receipt.png', mimeType: 'image/png', buffer: png });
     await pay.getByRole('button', { name: /Submit Monthly request/ }).click();
-    await expect(alice.getByRole('dialog', { name: 'Request sent' })).toContainText('within 3 days at maximum');
+    await expect(alice.getByRole('dialog', { name: 'Request sent' })).toContainText('within a short time');
     await alice.getByRole('dialog', { name: 'Request sent' }).getByRole('button', { name: 'Close' }).last().click();
     const st = await (await alice.request.get('/api/premium/status')).json();
     expect(st.isPro).toBe(false);

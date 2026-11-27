@@ -874,3 +874,50 @@ tr.kn-detail > td { padding: 0; background: var(--bg-alt); box-shadow: inset 3px
 .auth-art-login { position: absolute; top: 28px; right: 32px; background: transparent; color: #fff; border-color: #777; padding: 6px 18px; border-radius: 6px; z-index: 2; }
 .auth-art-login:hover { background: #fff; color: #0a0a0a; border-color: #fff; }
 @media (max-width: 960px) { .auth-art-login { top: 14px; right: 16px; padding: 4px 12px; } }
+
+/* Get Pro dialog for a paying subscriber */
+.sub-view { display: grid; gap: 14px; }
+.sub-hero { display: flex; align-items: center; gap: 16px; padding: 18px 20px; background: var(--inv-bg); color: var(--inv-fg); }
+.sub-check { flex: none; width: 52px; height: 52px; border-radius: 50%; border: 2px solid currentColor; display: grid; place-items: center; animation: sub-pop .5s cubic-bezier(.2,1.4,.4,1) both; }
+.sub-check svg path { stroke-dasharray: 30; stroke-dashoffset: 30; animation: sub-draw .5s .25s ease forwards; }
+.sub-hero-text { flex: 1; min-width: 0; }
+.sub-hero-text h3 { margin: 0 0 4px; font-size: 1.25rem; }
+.sub-hero-text p { margin: 0; opacity: .85; font-size: .92rem; }
+.sub-days { flex: none; text-align: center; border-left: 1px solid currentColor; padding-left: 16px; display: grid; }
+.sub-days b { font-size: 2.2rem; line-height: 1; }
+.sub-days span { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; opacity: .85; }
+.sub-bar { height: 10px; border: 1px solid var(--fg); background: var(--bg); }
+.sub-bar i { display: block; height: 100%; background: var(--fg); transition: width .6s ease; }
+.sub-dates { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: .82rem; color: var(--fg-muted); margin-top: 6px; }
+.sub-ask { font-weight: 700; font-size: 1.05rem; margin-top: 4px; }
+.sub-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.sub-card { display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--line-strong); padding: 14px 16px; background: var(--bg); }
+.sub-card h4 { margin: 0; font-size: 1.02rem; }
+.sub-card p { margin: 0; flex: 1; font-size: .88rem; color: var(--fg-muted); }
+.sub-card button { align-self: flex-start; }
+@keyframes sub-pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes sub-draw { to { stroke-dashoffset: 0; } }
+@media (max-width: 860px) { .sub-actions { grid-template-columns: 1fr; } .sub-hero { flex-wrap: wrap; } }
+@media (prefers-reduced-motion: reduce) { .sub-check, .sub-check svg path { animation: none; stroke-dashoffset: 0; } }
+
+/* Auth card header / footer */
+.auth-head { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
+.auth-head img { border-radius: 9px; box-shadow: 0 0 0 1px var(--line-strong); }
+.auth-head b { display: block; font-size: 1.05rem; line-height: 1.2; }
+.auth-head span { color: var(--fg-muted); font-size: .82rem; }
+.auth-title { margin: 0 0 4px; }
+.auth-sub { margin: 0 0 16px; color: var(--fg-muted); font-size: .92rem; }
+.auth-accept { margin: 12px 0 0; color: var(--fg-muted); font-size: .8rem; text-align: center; }
+.auth-foot { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--line); text-align: center; font-size: .88rem; color: var(--fg-muted); }
+.auth-foot p { margin: 0 0 8px; }
+.auth-legal { font-size: .78rem; }
+.auth-card { border-radius: 14px; box-shadow: 0 18px 50px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.06); padding: 28px 32px 22px; }
+.auth-head { margin: -28px -32px 22px; padding: 18px 32px; background: var(--inv-bg); color: var(--inv-fg); border-bottom: 0; border-radius: 14px 14px 0 0; }
+.auth-head img { box-shadow: 0 0 0 1px #444; }
+.auth-head span { color: inherit; opacity: .7; }
+.auth-title { font-size: 1.6rem; letter-spacing: -.01em; }
+.auth-foot { margin: 20px -32px -22px; padding: 14px 32px 16px; background: var(--bg-alt); border-radius: 0 0 14px 14px; }
+.auth-foot p { font-size: .92rem; color: var(--fg); }
+.auth-foot a { font-weight: 600; }
+.auth-legal { color: var(--fg-faint); }
+@media (max-width: 480px) { .auth-card { padding: 22px 18px 18px; } .auth-head { margin: -22px -18px 18px; padding: 14px 18px; } .auth-foot { margin: 18px -18px -18px; padding: 12px 18px 14px; } }
