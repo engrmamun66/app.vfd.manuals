@@ -13,6 +13,7 @@ import { ensureUserDirs, reconcileStorage, storageUsage } from '../services/stor
 import { presenceSnapshot } from '../services/presence.js';
 import { createBackup, listBackups, verifyBackup } from '../services/backup.js';
 import { parseJson } from '../lib/util.js';
+import { notifyRecipient, smtpConfig, sendMail } from '../services/mailer.js';
 
 /** Super Admin only (router mounted behind requireSuperAdmin). */
 export const adminRouter = Router();
@@ -25,7 +26,7 @@ adminRouter.get(
   ah(async (req, res) => {
     const db = getDb();
     const q = req.query as any;
-    const where = ['1=1'];
+    const where = ['u.deleted_at IS NULL'];
     const args: unknown[] = [];
     if (q.q) (where.push('(u.email LIKE ? OR u.display_name LIKE ? OR u.company LIKE ?)'), args.push(`%${q.q}%`, `%${q.q}%`, `%${q.q}%`));
     if (q.status) (where.push('u.status = ?'), args.push(String(q.status)));
@@ -43,11 +44,12 @@ adminRouter.get(
            (SELECT COUNT(*) FROM research_bookmark_folders f WHERE f.user_id=u.id) folders,
            (SELECT COUNT(*) FROM user_uploads up WHERE up.user_id=u.id AND up.purged_at IS NULL) files,
            (SELECT COALESCE(SUM(size_bytes + thumbnail_bytes),0) FROM user_uploads up WHERE up.user_id=u.id AND up.purged_at IS NULL) storage_bytes
-         FROM users u WHERE ${where.join(' AND ')} ORDER BY u.id`,
+         FROM users u WHERE ${where.join(' AND ')} ORDER BY (u.role = 'super_admin') DESC, (u.role = 'super_admin' AND u.status = 'enabled') DESC, u.id`,
       )
       .all(now, ...args) as any[];
     const sortKey = String(q.sort || '');
     if (['storage_bytes', 'last_login_at', 'created_at', 'files', 'comments_active'].includes(sortKey)) rows.sort((a, b) => (b[sortKey] ?? '') > (a[sortKey] ?? '') ? 1 : -1);
+    rows.sort((a, b) => Number(b.role === 'super_admin') - Number(a.role === 'super_admin')); // Super Admins always first (stable, keeps the chosen order inside each group)
     res.json(rows.map((r) => ({ ...r, quota_bytes: userLimits(r.id).quotaBytes })));
   }),
 );
@@ -58,13 +60,13 @@ adminRouter.get(
     const db = getDb();
     const now = new Date().toISOString();
     res.json({
-      total: (db.prepare('SELECT COUNT(*) c FROM users').get() as any).c,
-      enabled: (db.prepare("SELECT COUNT(*) c FROM users WHERE status='enabled'").get() as any).c,
-      disabled: (db.prepare("SELECT COUNT(*) c FROM users WHERE status='disabled'").get() as any).c,
-      neverLoggedIn: (db.prepare('SELECT COUNT(*) c FROM users WHERE last_login_at IS NULL').get() as any).c,
-      recentRegistrations: db.prepare('SELECT id, email, created_at FROM users ORDER BY created_at DESC LIMIT 10').all(),
+      total: (db.prepare('SELECT COUNT(*) c FROM users WHERE deleted_at IS NULL').get() as any).c,
+      enabled: (db.prepare("SELECT COUNT(*) c FROM users WHERE deleted_at IS NULL AND status='enabled'").get() as any).c,
+      disabled: (db.prepare("SELECT COUNT(*) c FROM users WHERE deleted_at IS NULL AND status='disabled'").get() as any).c,
+      neverLoggedIn: (db.prepare('SELECT COUNT(*) c FROM users WHERE deleted_at IS NULL AND last_login_at IS NULL').get() as any).c,
+      recentRegistrations: db.prepare('SELECT id, email, created_at FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 10').all(),
       activeSessions: (db.prepare('SELECT COUNT(*) c FROM user_sessions WHERE revoked_at IS NULL AND expires_at > ?').get(now) as any).c,
-      lastLogins: db.prepare('SELECT id, email, last_login_at FROM users WHERE last_login_at IS NOT NULL ORDER BY last_login_at DESC LIMIT 10').all(),
+      lastLogins: db.prepare('SELECT id, email, last_login_at FROM users WHERE deleted_at IS NULL AND last_login_at IS NOT NULL ORDER BY last_login_at DESC LIMIT 10').all(),
       presence: presenceSnapshot(),
     });
   }),
@@ -184,6 +186,46 @@ adminRouter.patch(
         meta: { from: u[k === 'display_name' ? 'display_name' : k], to: changes[k], reason, revokedSessions: revoked.length },
       });
     res.json({ ok: true, revokedSessions: revoked.length, deactivatedSuperAdmins: deactivated });
+  }),
+);
+
+/**
+ * Delete an account (any user, Super Admins included) after the client's confirmation window.
+ * The account is anonymised and its private content is removed; payments, subscriptions, audit entries and authored
+ * content stay (they point at the id), so records and reports remain consistent.
+ */
+adminRouter.post(
+  '/users/:id/delete',
+  ah(async (req, res) => {
+    const db = getDb();
+    const id = intParam(req.params.id, 'id', { required: true })!;
+    if (req.body?.confirm !== true) throw badRequest('Deleting an account has to be confirmed.');
+    if (id === req.user!.id) throw conflict('You cannot delete the account you are signed in with.');
+    const u = db.prepare('SELECT * FROM users WHERE id = ? AND deleted_at IS NULL').get(id) as any;
+    if (!u) throw notFound('User not found');
+    if (u.role === 'super_admin' && u.status === 'enabled' && activeSuperAdmins() <= 1) throw conflict('This is the last active Super Admin. Activate another Super Admin first.');
+    const now = new Date().toISOString();
+    const dead = `deleted-${id}@deleted.invalid`;
+    db.transaction(() => {
+      const bm = "SELECT id FROM research_bookmarks WHERE user_id = ?";
+      db.prepare(`DELETE FROM research_bookmark_tag_relations WHERE bookmark_id IN (${bm})`).run(id);
+      db.prepare('DELETE FROM research_bookmark_history WHERE user_id = ?').run(id);
+      db.prepare('DELETE FROM research_bookmarks WHERE user_id = ?').run(id);
+      db.prepare('DELETE FROM research_bookmark_folders WHERE user_id = ?').run(id);
+      db.prepare('DELETE FROM research_bookmark_tags WHERE user_id = ?').run(id);
+      db.prepare('DELETE FROM parameter_user_categories WHERE user_category_id IN (SELECT id FROM user_categories WHERE user_id = ?)').run(id);
+      db.prepare('DELETE FROM user_categories WHERE user_id = ?').run(id);
+      db.prepare('DELETE FROM user_settings WHERE user_id = ?').run(id);
+      // their notes disappear for everyone (trashed, not erased)
+      db.prepare("UPDATE research_annotations SET deletion_status = 'trashed', deleted_at = ?, deleted_by_user_id = ? WHERE user_id = ? AND deletion_status = 'active'").run(now, req.user!.id, id);
+      db.prepare("UPDATE users SET email = ?, email_normalized = ?, display_name = 'Deleted user', phone = NULL, company = NULL, designation = NULL, password_hash = ?, status = 'disabled', must_change_password = 0, google_sub = NULL, full_access_until = NULL, locked_until = NULL, deleted_at = ?, updated_at = ? WHERE id = ?")
+        .run(dead, dead, 'deleted-account-no-login', now, now, id);
+      // sessions of this account, and sessions in which it was "logged in as" someone else
+      db.prepare("UPDATE user_sessions SET revoked_at = ?, revoke_reason = 'account_deleted' WHERE (user_id = ? OR impersonator_user_id = ?) AND revoked_at IS NULL").run(now, id, id);
+    })();
+    revokeSessions({ userId: id }, 'account_deleted'); // also closes live connections
+    logActivity({ userId: id, actorUserId: req.user!.id, event: 'admin_delete_user', entityType: 'user', entityId: id, meta: { email: u.email, role: u.role } });
+    res.json({ ok: true });
   }),
 );
 
@@ -321,7 +363,17 @@ adminRouter.patch(
   ah(async (req, res) => {
     const allowed: Record<string, (v: unknown) => unknown> = {
       registration_enabled: (v) => !!v,
+      registration_otp_enabled: (v) => !!v,
       google_login_enabled: (v) => !!v,
+      notify_email: (v) => {
+        const t = String(v ?? '').trim();
+        if (t && !isValidEmail(normalizeEmail(t))) throw badRequest('That e-mail address looks invalid.');
+        return t;
+      },
+      notify_on_register: (v) => !!v,
+      notify_on_payment: (v) => !!v,
+      notify_on_message: (v) => !!v,
+      notify_on_subscription: (v) => !!v,
       google_client_id: (v) => {
         const t = String(v ?? '').trim();
         if (t && !/^[A-Za-z0-9._-]{10,200}$/.test(t)) throw badRequest('That does not look like a Google client ID (it ends with .apps.googleusercontent.com).');
@@ -336,6 +388,25 @@ adminRouter.patch(
       logActivity({ userId: req.user!.id, event: 'admin_setting_change', meta: { key: k, value: v } });
     }
     res.json(getAllAppSettings());
+  }),
+);
+
+/** SMTP status (no secrets) and a test mail, so the administrator can check the setup. */
+adminRouter.get('/mail', ah(async (_req, res) => {
+  const c = smtpConfig();
+  res.json({ configured: c.configured, host: c.host || null, port: c.port, from: c.from || null, recipient: notifyRecipient() || null });
+}));
+adminRouter.post(
+  '/mail/test',
+  ah(async (req, res) => {
+    const to = notifyRecipient() || (req.user as any)?.email;
+    if (!to) throw badRequest('Set the notification e-mail address first.');
+    try {
+      await sendMail(to, '[VFD KB] Test e-mail', 'SMTP works. You will get a mail when a user registers, submits a payment or sends a message.');
+    } catch (e) {
+      throw badRequest(`The test e-mail could not be sent: ${(e as Error).message}`);
+    }
+    res.json({ ok: true, to });
   }),
 );
 

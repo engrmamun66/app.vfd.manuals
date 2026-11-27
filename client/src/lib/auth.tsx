@@ -34,7 +34,8 @@ interface Ctx {
   impersonation: { byUserId: number; byEmail: string; byName: string | null } | null;
   stopImpersonation(): Promise<void>;
   login(email: string, password: string): Promise<void>;
-  register(data: Record<string, string>): Promise<void>;
+  register(data: Record<string, string>): Promise<{ otpRequired: true; email: string; expiresInMinutes: number; resendAfterSeconds: number } | void>;
+  verifyRegistration(email: string, otp: string): Promise<void>;
   loginWithGoogle(credential: string): Promise<void>;
   logout(): Promise<void>;
   refresh(): Promise<void>;
@@ -141,7 +142,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setNotice(null);
     },
     async register(data) {
-      apply(await post('/auth/register', data));
+      const r = await post('/auth/register', data);
+      if (r?.otpRequired) return r; // an e-mail code has to be entered first
+      apply(r);
+      setNotice(null);
+    },
+    async verifyRegistration(email, otp) {
+      apply(await post('/auth/register/verify', { email, otp }));
       setNotice(null);
     },
     async loginWithGoogle(credential) {

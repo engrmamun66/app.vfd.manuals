@@ -72,7 +72,11 @@ export function Login() {
 }
 
 export function Register() {
-  const { register } = useAuth();
+  const { register, verifyRegistration } = useAuth();
+  const [otp, setOtp] = useState<null | { email: string; minutes: number }>(null);
+  const [code, setCode] = useState('');
+  const [wait, setWait] = useState(0); // seconds until a new code may be asked for
+  useEffect(() => { if (wait <= 0) return; const t = setTimeout(() => setWait((w) => w - 1), 1000); return () => clearTimeout(t); }, [wait]);
   const nav = useNavigate();
   const [f, setF] = useState({ email: '', displayName: '', password: '', confirmPassword: '', phone: '', company: '', designation: '' });
   const [err, setErr] = useState<any>(null);
@@ -89,7 +93,8 @@ export function Register() {
     setBusy(true);
     setErr(null);
     try {
-      await register(f);
+      const r = await register(f);
+      if (r && r.otpRequired) { setOtp({ email: r.email, minutes: r.expiresInMinutes }); setWait(r.resendAfterSeconds); setCode(''); return; }
       nav('/', { replace: true });
     } catch (e) {
       setErr(e instanceof ApiError && e.status === 429 ? new Error(`${e.message}`) : e);
@@ -97,6 +102,33 @@ export function Register() {
       setBusy(false);
     }
   };
+  const confirm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otp) return;
+    setBusy(true);
+    setErr(null);
+    try { await verifyRegistration(otp.email, code.trim()); nav('/', { replace: true }); } catch (e2) { setErr(e2); } finally { setBusy(false); }
+  };
+  const resend = async () => {
+    if (!otp) return;
+    setErr(null);
+    try { const r = await post('/auth/register/resend', { email: otp.email }); setWait(r.resendAfterSeconds); setCode(''); } catch (e2) { setErr(e2); }
+  };
+  if (otp)
+    return (
+      <Wrap title="Check your e-mail">
+        <form onSubmit={confirm}>
+          <p>We sent a 6-digit code to <b>{otp.email}</b>. Enter it to finish creating your account. It is valid for {otp.minutes} minutes.</p>
+          <div className="field"><label htmlFor="r-otp">Verification code</label><input id="r-otp" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required autoFocus value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} style={{ letterSpacing: '.4em', fontSize: '1.3rem', textAlign: 'center' }} /></div>
+          <ErrorBox e={err} />
+          <button className="primary" disabled={busy || code.length !== 6} style={{ width: '100%', justifyContent: 'center' }}>{busy ? 'Checking…' : 'Verify and create account'}</button>
+        </form>
+        <div className="row between" style={{ marginTop: 12 }}>
+          <button type="button" className="small" onClick={() => { setOtp(null); setErr(null); }}>← Change details</button>
+          <button type="button" className="small" disabled={wait > 0} onClick={resend}>{wait > 0 ? `Send a new code (${wait}s)` : 'Send a new code'}</button>
+        </div>
+      </Wrap>
+    );
   if (!regOn)
     return (
       <Wrap title="Registration closed">

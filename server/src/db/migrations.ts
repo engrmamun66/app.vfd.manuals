@@ -868,4 +868,31 @@ ALTER TABLE users ADD COLUMN google_sub TEXT;
 CREATE UNIQUE INDEX idx_users_google_sub ON users(google_sub) WHERE google_sub IS NOT NULL;
 `,
   },
+  {
+    version: 18,
+    name: 'user_deleted_at',
+    sql: /* sql */ `
+-- a deleted account is anonymised and kept as an empty shell (payments, audit and authorship still point at it)
+ALTER TABLE users ADD COLUMN deleted_at TEXT;
+`,
+  },
+  {
+    version: 19,
+    name: 'registration_otp',
+    sql: /* sql */ `
+-- a registration waits here until the e-mail code (OTP) is entered; only then the user is created
+CREATE TABLE registration_otps (
+  id INTEGER PRIMARY KEY,
+  email_normalized TEXT NOT NULL UNIQUE,
+  payload_json TEXT NOT NULL,
+  otp_hash TEXT NOT NULL,
+  salt TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  sends INTEGER NOT NULL DEFAULT 1,
+  last_sent_at TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+`,
+  },
 ];

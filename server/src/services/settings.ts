@@ -5,7 +5,13 @@ import { parseJson } from '../lib/util.js';
 /** Global application settings (Super Admin controlled). */
 export const APP_SETTING_DEFAULTS: Record<string, unknown> = {
   registration_enabled: true,
+  registration_otp_enabled: true, // e-mail code for form registrations (needs SMTP; Google sign-up skips it)
   google_login_enabled: false,
+  notify_email: '',
+  notify_on_register: true,
+  notify_on_payment: true,
+  notify_on_message: true,
+  notify_on_subscription: true,
   google_client_id: '',
   app_title: 'VFD Knowledge Base & Technical Research Explorer',
   default_language: 'en',

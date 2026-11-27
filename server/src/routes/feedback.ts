@@ -8,6 +8,7 @@ import { purgeUpload, safeResolve, saveUserImage, userRoot } from '../services/s
 import { requireSuperAdmin } from '../auth/middleware.js';
 import { isValidEmail, normalizeEmail } from '../auth/password.js';
 import { assertFeature } from '../services/premium.js';
+import { notifyAdmin } from '../services/mailer.js';
 
 /**
  * Requests and complaints sent by users (message + optional images).
@@ -58,6 +59,8 @@ feedbackRouter.post(
       throw e;
     }
     logActivity({ userId: uid, event: 'feedback_sent', entityType: 'feedback', entityId: id, meta: { kind, images: files.length } });
+    const who = db.prepare('SELECT email, display_name, phone FROM users WHERE id = ?').get(uid) as { email: string; display_name: string | null; phone: string | null };
+    notifyAdmin('message', `New ${kind} from ${who.display_name || who.email}`, { From: who.display_name, Email: who.email, 'Account phone': who.phone, Type: kind, 'Contact phone': phoneRaw, 'Contact e-mail': emailRaw, Images: files.length, Time: new Date().toISOString() }, message);
     res.status(201).json({ id });
   }),
 );

@@ -6,6 +6,7 @@ import { ah, badRequest, conflict, HttpError, intParam, notFound, oneOf, paging,
 import { audit, logActivity } from '../lib/audit.js';
 import { safeResolve, saveUserImage, userRoot } from '../services/storage.js';
 import { setAppSetting } from '../services/settings.js';
+import { notifyAdmin } from '../services/mailer.js';
 import { activePricingPlans, activeSubscription, activeTrialEnd, addPeriod, ceilHour, getPremiumConfig, isPro, priceOf, queuedSubscription, subState, usage, type PremiumConfig } from '../services/premium.js';
 import { isValidEmail, normalizeEmail } from '../auth/password.js';
 
@@ -70,6 +71,9 @@ premiumRouter.post(
     if (to && queuedSubscription(req.user!.id)) throw conflict('Your next billing period is already paid. It cannot be changed.');
     db.prepare("UPDATE subscriptions SET migrate_to = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?").run(to, sub.id);
     logActivity({ userId: req.user!.id, event: to ? 'subscription_migrate_schedule' : 'subscription_migrate_clear', entityType: 'subscription', entityId: sub.id, meta: { from: sub.billing, to, effective: sub.ends_at } });
+    const who = db.prepare('SELECT email, display_name, phone FROM users WHERE id = ?').get(req.user!.id) as { email: string; display_name: string | null; phone: string | null };
+    notifyAdmin('subscription', to ? `Subscription change scheduled: ${sub.billing} → ${to} (${who.display_name || who.email})` : `Subscription change withdrawn (${who.display_name || who.email})`,
+      { User: who.display_name, Email: who.email, Phone: who.phone, 'Pricing plan': sub.plan_name ? `${sub.plan_name} (ID ${sub.pricing_plan_id})` : null, 'Current type': sub.billing, 'Change to': to ?? '(withdrawn)', 'Effective from': to ? sub.ends_at : null, Time: new Date().toISOString() });
     res.json({ ok: true, migrate_to: to, effective_at: sub.ends_at });
   }),
 );
@@ -117,6 +121,7 @@ premiumRouter.post(
       throw e;
     }
     logActivity({ userId: uid, event: 'subscription_request', entityType: 'subscription', entityId: id, meta: { plan, amount, pricingPlanId: planId } });
+    notifyAdmin('payment', `Payment submitted: ৳${amount} (${plan}) by ${me.display_name || me.email}`, { User: me.display_name, Email: me.email, Phone: me.phone, 'Pricing plan': `${pricing.name} (ID ${planId})`, Type: plan, 'Payable amount': `৳${amount}`, Note: note, Status: 'Pending verification', Time: new Date().toISOString() });
     res.status(201).json({ id, plan, amount, pricing_plan_id: planId });
   }),
 );

@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { config } from '../config.js';
 import { getDb } from '../db/index.js';
 import { ah, badRequest, HttpError, intParam, str } from '../lib/http.js';
@@ -12,6 +12,7 @@ import { getAppSetting, getUserSettings } from '../services/settings.js';
 import { ensureUserDirs } from '../services/storage.js';
 import { newUserTrialEnd } from '../services/premium.js';
 import { googleConfig, verifyGoogleIdToken } from '../services/google.js';
+import { notifyAdmin, sendMail, smtpConfig } from '../services/mailer.js';
 import crypto from 'node:crypto';
 
 export const authRouter = Router();
@@ -56,6 +57,50 @@ authRouter.get(
   }),
 );
 
+const OTP_MINUTES = 10;
+const OTP_MAX_TRIES = 5;
+const OTP_RESEND_SECONDS = 60;
+const OTP_MAX_SENDS = 5;
+/** Form registrations are confirmed with an e-mail code when SMTP works and the Super Admin has not turned it off. */
+const otpActive = () => getAppSetting<boolean>('registration_otp_enabled') !== false && smtpConfig().configured;
+const otpHash = (otp: string, salt: string) => crypto.createHash('sha256').update(`${salt}:${otp}`).digest('hex');
+
+interface RegFields { emailRaw: string; email: string; hash: string; phone: string | null; company: string | null; designation: string | null; fullName: string }
+
+/** Creates the user, signs them in and answers (shared by direct registration and OTP confirmation). */
+function completeRegistration(req: Request, res: Response, f: RegFields) {
+  const db = getDb();
+  let userId: number;
+  try {
+    userId = Number(
+      db
+        .prepare(
+          `INSERT INTO users(email, email_normalized, password_hash, role, status, phone, company, designation, display_name, login_count, last_login_at, full_access_until)
+           VALUES (?,?,?,'user','enabled',?,?,?,?,1,?,?)`,
+        )
+        .run(f.emailRaw, f.email, f.hash, f.phone, f.company, f.designation, f.fullName, new Date().toISOString(), newUserTrialEnd()).lastInsertRowid,
+    );
+  } catch (e) {
+    if ((e as any).code?.startsWith('SQLITE_CONSTRAINT'))
+      // generic message: does not confirm whether this email belongs to someone
+      throw badRequest('Registration could not be completed with these details. If you already have an account, please sign in.');
+    throw e;
+  }
+  ensureUserDirs(userId);
+  const s = createSession(req, res, userId);
+  db.prepare('INSERT INTO user_login_history(user_id, success, reason, ip, user_agent) VALUES (?,?,?,?,?)').run(userId, 1, 'registration', clientIp(req), String(req.headers['user-agent'] || '').slice(0, 300));
+  logActivity({ userId, event: 'register', ip: clientIp(req) });
+  notifyAdmin('register', `New user registered: ${f.emailRaw}`, { Name: f.fullName, Email: f.emailRaw, Phone: f.phone, Company: f.company, Designation: f.designation, Via: 'registration form', IP: clientIp(req), Time: new Date().toISOString() });
+  const u = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+  res.status(201).json({ user: publicUser(u), csrfToken: s.csrf, settings: getUserSettings(userId) });
+}
+
+async function mailOtp(to: string, name: string, otp: string) {
+  await sendMail(to, 'Your VFD Knowledge Base verification code', `Hello ${name},\n\nYour verification code is: ${otp}\n\nIt is valid for ${OTP_MINUTES} minutes. Enter it on the registration page to finish creating your account.\nIf you did not try to register, ignore this e-mail.`);
+}
+
+const otpLimiter = sqliteRateLimit({ bucket: 'register_otp', max: () => 30, windowMinutes: () => 15, message: 'Too many attempts. Please wait and try again.' });
+
 authRouter.post(
   '/register',
   regLimiter,
@@ -79,28 +124,77 @@ authRouter.post(
     const designation = str(req.body.designation, 'Designation', { max: 150 });
     // Role is NEVER taken from the request: new registrations are always Normal User.
     const hash = await hashPassword(password);
-    let userId: number;
+    const fields: RegFields = { emailRaw, email, hash, phone, company, designation, fullName };
+    if (!otpActive()) return completeRegistration(req, res, fields);
+
+    // e-mail confirmation: nothing is created until the code is entered
+    if (db.prepare('SELECT 1 FROM users WHERE email_normalized = ?').get(email)) throw badRequest('Registration could not be completed with these details. If you already have an account, please sign in.');
+    const otp = String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
+    const salt = crypto.randomBytes(12).toString('hex');
+    const now = new Date();
+    db.prepare(
+      `INSERT INTO registration_otps(email_normalized, payload_json, otp_hash, salt, expires_at, last_sent_at) VALUES (?,?,?,?,?,?)
+       ON CONFLICT(email_normalized) DO UPDATE SET payload_json = excluded.payload_json, otp_hash = excluded.otp_hash, salt = excluded.salt, expires_at = excluded.expires_at, attempts = 0, sends = 1, last_sent_at = excluded.last_sent_at, created_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')`,
+    ).run(email, JSON.stringify(fields), otpHash(otp, salt), salt, new Date(now.getTime() + OTP_MINUTES * 60_000).toISOString(), now.toISOString());
     try {
-      userId = Number(
-        db
-          .prepare(
-            `INSERT INTO users(email, email_normalized, password_hash, role, status, phone, company, designation, display_name, login_count, last_login_at, full_access_until)
-             VALUES (?,?,?,'user','enabled',?,?,?,?,1,?,?)`,
-          )
-          .run(emailRaw, email, hash, phone, company, designation, fullName, new Date().toISOString(), newUserTrialEnd()).lastInsertRowid,
-      );
+      await mailOtp(emailRaw, fullName, otp);
     } catch (e) {
-      if ((e as any).code?.startsWith('SQLITE_CONSTRAINT'))
-        // generic message: does not confirm whether this email belongs to someone
-        throw badRequest('Registration could not be completed with these details. If you already have an account, please sign in.');
-      throw e;
+      db.prepare('DELETE FROM registration_otps WHERE email_normalized = ?').run(email);
+      console.warn('[mail] verification code could not be sent:', (e as Error).message);
+      throw new HttpError(502, 'We could not send the verification e-mail. Please check the address or try again later.');
     }
-    ensureUserDirs(userId);
-    const s = createSession(req, res, userId);
-    db.prepare('INSERT INTO user_login_history(user_id, success, reason, ip, user_agent) VALUES (?,?,?,?,?)').run(userId, 1, 'registration', clientIp(req), String(req.headers['user-agent'] || '').slice(0, 300));
-    logActivity({ userId, event: 'register', ip: clientIp(req) });
-    const u = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
-    res.status(201).json({ user: publicUser(u), csrfToken: s.csrf, settings: getUserSettings(userId) });
+    res.status(202).json({ otpRequired: true, email: emailRaw, expiresInMinutes: OTP_MINUTES, resendAfterSeconds: OTP_RESEND_SECONDS });
+  }),
+);
+
+/** Step 2: the code from the e-mail completes the registration. */
+authRouter.post(
+  '/register/verify',
+  otpLimiter,
+  requireJson,
+  ah(async (req, res) => {
+    const db = getDb();
+    const email = normalizeEmail(String(req.body?.email || ''));
+    const otp = String(req.body?.otp || '').trim();
+    const row = db.prepare('SELECT * FROM registration_otps WHERE email_normalized = ?').get(email) as any;
+    if (!row || new Date(row.expires_at).getTime() < Date.now()) {
+      if (row) db.prepare('DELETE FROM registration_otps WHERE id = ?').run(row.id);
+      throw badRequest('This code has expired. Please register again.');
+    }
+    if (row.attempts >= OTP_MAX_TRIES) {
+      db.prepare('DELETE FROM registration_otps WHERE id = ?').run(row.id);
+      throw badRequest('Too many wrong codes. Please register again.');
+    }
+    const ok = /^\d{6}$/.test(otp) && crypto.timingSafeEqual(Buffer.from(otpHash(otp, row.salt)), Buffer.from(row.otp_hash));
+    if (!ok) {
+      db.prepare('UPDATE registration_otps SET attempts = attempts + 1 WHERE id = ?').run(row.id);
+      throw badRequest(`Wrong code. ${Math.max(0, OTP_MAX_TRIES - row.attempts - 1)} tries left.`);
+    }
+    db.prepare('DELETE FROM registration_otps WHERE id = ?').run(row.id);
+    completeRegistration(req, res, JSON.parse(row.payload_json) as RegFields);
+  }),
+);
+
+/** A new code for a pending registration (one per minute, a few per registration). */
+authRouter.post(
+  '/register/resend',
+  otpLimiter,
+  requireJson,
+  ah(async (req, res) => {
+    const db = getDb();
+    const email = normalizeEmail(String(req.body?.email || ''));
+    const row = db.prepare('SELECT * FROM registration_otps WHERE email_normalized = ?').get(email) as any;
+    if (!row) throw badRequest('There is no pending registration for this e-mail. Please register again.');
+    const wait = OTP_RESEND_SECONDS - (Date.now() - new Date(row.last_sent_at).getTime()) / 1000;
+    if (wait > 0) throw new HttpError(429, `Please wait ${Math.ceil(wait)} seconds before asking for a new code.`);
+    if (row.sends >= OTP_MAX_SENDS) throw badRequest('Too many codes were sent. Please register again later.');
+    const f = JSON.parse(row.payload_json) as RegFields;
+    const otp = String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
+    const salt = crypto.randomBytes(12).toString('hex');
+    const now = new Date();
+    db.prepare('UPDATE registration_otps SET otp_hash = ?, salt = ?, expires_at = ?, attempts = 0, sends = sends + 1, last_sent_at = ? WHERE id = ?').run(otpHash(otp, salt), salt, new Date(now.getTime() + OTP_MINUTES * 60_000).toISOString(), now.toISOString(), row.id);
+    try { await mailOtp(f.emailRaw, f.fullName, otp); } catch { throw new HttpError(502, 'We could not send the verification e-mail. Please try again later.'); }
+    res.json({ ok: true, expiresInMinutes: OTP_MINUTES, resendAfterSeconds: OTP_RESEND_SECONDS });
   }),
 );
 
@@ -200,6 +294,7 @@ authRouter.post(
       ensureUserDirs(id);
       db.prepare('INSERT INTO user_login_history(user_id, success, reason, ip, user_agent) VALUES (?,?,?,?,?)').run(id, 1, 'google_registration', ip, ua);
       logActivity({ userId: id, event: 'register', meta: { via: 'google' }, ip });
+      notifyAdmin('register', `New user registered: ${claims.email}`, { Name: name, Email: claims.email, Via: 'Google sign-in', IP: ip, Time: now });
       u = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
     }
     ensureUserDirs(u.id);

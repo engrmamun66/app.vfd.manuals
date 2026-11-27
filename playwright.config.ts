@@ -13,6 +13,8 @@ const env = {
   REGISTRATION_RATE_LIMIT_MAX: '100',
   LOGIN_RATE_LIMIT_MAX: '1000',
   GOOGLE_CLIENT_ID: '', // tests run with Google sign-in off, whatever .env says
+  SMTP_HOST: '', // ... and without sending mail
+  MAIL_CAPTURE: '',
 };
 
 export default defineConfig({

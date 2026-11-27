@@ -33,6 +33,7 @@
     "express": "^5.3.0",
     "helmet": "^8.3.0",
     "multer": "^2.5.0",
+    "nodemailer": "^10.6.1",
     "pdfjs-dist": "^6.5.438",
     "socket.io": "^4.8.4",
     "tesseract.js": "^7.0.0"
@@ -43,6 +44,7 @@
     "@types/express": "^5.0.6",
     "@types/multer": "^2.3.0",
     "@types/node": "^26.6.6",
+    "@types/nodemailer": "^8.0.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/supertest": "^7.2.1",

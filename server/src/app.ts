@@ -34,6 +34,8 @@ export function createApp(opts: { dev?: boolean } = {}) {
         },
       },
       crossOriginEmbedderPolicy: false,
+      // Google sign-in opens a popup and talks back to this page: the default "same-origin" would cut that link (blank white popup)
+      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
       strictTransportSecurity: false,
     }),
   );

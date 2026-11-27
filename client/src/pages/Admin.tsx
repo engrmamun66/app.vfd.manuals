@@ -61,6 +61,10 @@ export function AdminUsers() {
     return () => void socket.off('presence:update', h);
   }, [socket]);
   const refresh = () => { reload(); reloadSum(); };
+  const removeUser = async (u: any) => {
+    if (!(await confirmDialog(`Delete ${u.email}${u.role === 'super_admin' ? ' (a Super Admin)' : ''}? The account is closed for good: the person is signed out at once, personal details and private bookmarks are removed and their notes are hidden. Payment and audit records stay. This cannot be undone.`, { danger: true, confirmLabel: 'Delete account' }))) return;
+    try { setMsg(await post(`/admin/users/${u.id}/delete`, { confirm: true })); refresh(); } catch (e) { setMsg(e); }
+  };
   const toggle = async (u: any) => {
     const to = u.status === 'enabled' ? 'disabled' : 'enabled';
     if (to === 'enabled' && u.role === 'super_admin') {
@@ -99,7 +103,7 @@ export function AdminUsers() {
               <td className="small-text" data-label="Registered">{new Date(u.created_at).toLocaleDateString()}</td><td className="small-text" data-label="Last login">{fmtDate(u.last_login_at)}</td><td className="num" data-label="Logins">{u.login_count}</td>
               <td className="num" data-label="Comments">{u.comments_active}</td><td className="num" data-label="Annotations">{u.annotations_total}</td><td className="num" data-label="Bookmarks">{u.bookmarks}/{u.folders}</td><td className="num" data-label="Files">{u.files}</td>
               <td className="small-text rt-wide" data-label="Storage">{fmtBytes(u.storage_bytes)} / {fmtBytes(u.quota_bytes)}<div style={{ height: 4, background: 'var(--line)' }}><div style={{ height: 4, width: `${Math.min(100, (u.storage_bytes / (u.quota_bytes || 1)) * 100)}%`, background: 'var(--fg)' }} /></div></td>
-              <td className="rt-actions"><div className="row" style={{ flexWrap: 'wrap' }}><button className="small" onClick={() => setDetail(u.id)}>Details</button>{u.id !== me?.id && <button className="small" onClick={() => toggle(u)}>{u.status === 'enabled' ? 'Disable' : 'Enable'}</button>}{u.id !== me?.id && u.role !== 'super_admin' && u.status === 'enabled' && <button className="small primary" title="Open the app as this user (2 hours). Your admin session stays active." onClick={async () => { if (!(await confirmDialog(`Sign in as ${u.email}? You will see the app exactly as this user. Use \"Return to admin\" to come back.`))) return; try { await post(`/admin/users/${u.id}/impersonate`, {}); window.location.assign('/'); } catch (e) { alert((e as Error).message); } }}>Login as</button>}</div></td></tr>);
+              <td className="rt-actions"><div className="row" style={{ flexWrap: 'wrap' }}><button className="small" onClick={() => setDetail(u.id)}>Details</button>{u.id !== me?.id && <button className="small" onClick={() => toggle(u)}>{u.status === 'enabled' ? 'Disable' : 'Enable'}</button>}{u.id !== me?.id && <button className="small" onClick={() => removeUser(u)}>Delete</button>}{u.id !== me?.id && u.role !== 'super_admin' && u.status === 'enabled' && <button className="small primary" title="Open the app as this user (2 hours). Your admin session stays active." onClick={async () => { if (!(await confirmDialog(`Sign in as ${u.email}? You will see the app exactly as this user. Use \"Return to admin\" to come back.`))) return; try { await post(`/admin/users/${u.id}/impersonate`, {}); window.location.assign('/'); } catch (e) { alert((e as Error).message); } }}>Login as</button>}</div></td></tr>);
         })}</tbody></table></div>
       {detail && <UserDetail id={detail} onClose={() => { setDetail(null); refresh(); }} />}
       {create && <CreateUser onClose={() => { setCreate(false); refresh(); }} />}
@@ -259,6 +263,7 @@ export function AdminSettings({ embedded }: { embedded?: boolean } = {}) {
             A Google user with the same e-mail address as an existing account is linked to it. A new e-mail address creates a Normal User (when registration is open) with the free full-access period.
           </p>
         </div>)}
+      {s && <MailSettings s={s} setS={setS} setMsg={setMsg} />}
       <h2 style={{ marginTop: 20 }}>Database backups</h2>
       <div className="row"><button className="primary" disabled={busy} onClick={async () => { setBusy(true); try { setMsg(await post('/admin/backups')); reloadB(); } catch (e) { setMsg(e); } finally { setBusy(false); } }}>Create verified backup now</button>
         <button onClick={() => download('/export?scope=taxonomy&format=json')}>Export taxonomy JSON</button></div>
@@ -294,6 +299,31 @@ export function MySettings({ embedded }: { embedded?: boolean } = {}) {
       </div>
       <h2 style={{ marginTop: 20 }}>Active sessions</h2>
       <div className="table-wrap"><table><thead><tr><th>Device</th><th>Created</th><th>Last seen</th><th>Expires</th><th></th></tr></thead><tbody>{sessions?.filter((s) => !s.revoked_at && new Date(s.expires_at) > new Date()).map((s) => <tr key={s.id}><td className="small-text">{(s.user_agent ?? '').slice(0, 70)} {s.current && <span className="badge solid">this session</span>}</td><td className="small-text">{fmtDate(s.created_at)}</td><td className="small-text">{fmtDate(s.last_seen_at)}</td><td className="small-text">{fmtDate(s.expires_at)}</td><td>{!s.current && <button className="small" onClick={async () => { await del(`/auth/sessions/${s.id}`); reload(); }}>Sign out</button>}</td></tr>)}</tbody></table></div>
+    </div>
+  );
+}
+
+/** E-mail notifications to the administrator: who gets them and for which events. The SMTP server itself is set in .env. */
+function MailSettings({ s, setS, setMsg }: { s: any; setS: (f: (x: any) => any) => void; setMsg: (m: any) => void }) {
+  const { data: mail, reload } = useAsync(() => get('/admin/mail'), []);
+  const [busy, setBusy] = useState(false);
+  const save = async (k: string, v: unknown) => { try { await patch('/admin/settings', { [k]: v }); setS((x: any) => ({ ...x, [k]: v })); setMsg(null); reload(); } catch (e) { setMsg(e); } };
+  const test = async () => {
+    setBusy(true);
+    try { const r = await post('/admin/mail/test', {}); setMsg({ ok: true, note: `Test e-mail sent to ${r.to}.` }); } catch (e) { setMsg(e); } finally { setBusy(false); }
+  };
+  return (
+    <div className="card stack" style={{ maxWidth: 640, marginTop: 12 }}>
+      <h3 style={{ margin: 0 }}>E-mail notifications</h3>
+      {mail && (mail.configured
+        ? <div className="ok-box small-text">SMTP is set: <b>{mail.host}:{mail.port}</b>, sending as <b>{mail.from}</b>.</div>
+        : <div className="err small-text">SMTP is <b>not configured</b>. Add <code>SMTP_HOST</code>, <code>SMTP_PORT</code>, <code>SMTP_USER</code>, <code>SMTP_PASS</code> and <code>SMTP_FROM</code> to the <code>.env</code> file and restart the server.</div>)}
+      <div className="field"><label htmlFor="n-mail">Send notifications to</label><input id="n-mail" type="email" style={{ width: '100%' }} placeholder="you@example.com" defaultValue={s.notify_email} onBlur={(e) => e.target.value.trim() !== (s.notify_email ?? '') && save('notify_email', e.target.value.trim())} /></div>
+      <label style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--fg)', fontWeight: 400 }}><input type="checkbox" checked={s.registration_otp_enabled !== false} onChange={(e) => save('registration_otp_enabled', e.target.checked)} /> Confirm new registrations with an e-mail code (OTP) — form sign-ups only, needs SMTP</label>
+      {([['notify_on_register', 'A user registers'], ['notify_on_payment', 'A user submits a payment'], ['notify_on_message', 'A user sends a message (request / complaint)'], ['notify_on_subscription', 'A user changes the subscription type (monthly ↔ yearly)']] as const).map(([k, l]) => (
+        <label key={k} style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--fg)', fontWeight: 400 }}><input type="checkbox" checked={s[k] !== false} onChange={(e) => save(k, e.target.checked)} /> Mail me when {l.charAt(0).toLowerCase() + l.slice(1)}</label>
+      ))}
+      <div className="row"><button disabled={busy || !mail?.configured} onClick={test}>{busy ? 'Sending…' : 'Send test e-mail'}</button></div>
     </div>
   );
 }

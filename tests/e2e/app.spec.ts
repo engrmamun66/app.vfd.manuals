@@ -660,6 +660,41 @@ test.describe('administration', () => {
     expect((await (await alice.request.get('/api/auth/google-config')).json()).enabled).toBe(false);
   });
 
+  test('users list shows Super Admins first; a user can be deleted (anonymised, signed out) but not yourself or the last active Super Admin', async () => {
+    const csrf = (await (await admin.request.get('/api/auth/me')).json()).csrfToken as string;
+    const H = { 'X-CSRF-Token': csrf };
+    const users = async () => (await (await admin.request.get('/api/admin/users')).json()) as any[];
+    const rows0 = await users();
+    expect(rows0[0].role).toBe('super_admin');
+    // a throw-away user
+    const mk = await admin.request.post('/api/admin/users', { data: { email: 'gone@e2e.test', password: 'Gone-Pass-12345!', displayName: 'Gone User', role: 'user' }, headers: H });
+    expect(mk.status()).toBe(201);
+    const id = (await mk.json()).id;
+    const me = rows0.find((u: any) => u.role === 'super_admin');
+    expect((await admin.request.post(`/api/admin/users/${id}/delete`, { data: {}, headers: H })).status()).toBe(400); // needs the confirmation
+    expect((await admin.request.post(`/api/admin/users/${me.id}/delete`, { data: { confirm: true }, headers: H })).status()).toBe(409); // not yourself
+    expect((await admin.request.post(`/api/admin/users/${id}/delete`, { data: { confirm: true }, headers: H })).status()).toBe(200);
+    expect((await users()).some((u: any) => u.id === id)).toBe(false);
+    // the e-mail address is free again and the old login no longer works
+    const login = await admin.request.post('/api/auth/login', { data: { email: 'gone@e2e.test', password: 'Gone-Pass-12345!' } });
+    expect(login.status()).toBe(401);
+    expect((await admin.request.post(`/api/admin/users/${id}/delete`, { data: { confirm: true }, headers: H })).status()).toBe(404);
+  });
+
+  test('e-mail notifications: SMTP status is reported, settings are validated, a test mail fails clearly when SMTP is not set', async () => {
+    const csrf = (await (await admin.request.get('/api/auth/me')).json()).csrfToken as string;
+    const H = { 'X-CSRF-Token': csrf };
+    const st = await (await admin.request.get('/api/admin/mail')).json();
+    expect(st.configured).toBe(false); // tests run without SMTP
+    expect((await admin.request.patch('/api/admin/settings', { data: { notify_email: 'nope' }, headers: H })).status()).toBe(400);
+    expect((await admin.request.patch('/api/admin/settings', { data: { notify_email: 'boss@e2e.test', notify_on_payment: false }, headers: H })).status()).toBe(200);
+    const test = await admin.request.post('/api/admin/mail/test', { data: {}, headers: H });
+    expect(test.status()).toBe(400);
+    expect((await test.json()).error?.message ?? (await test.text())).toContain('SMTP');
+    expect((await alice.request.get('/api/admin/mail')).status()).toBe(403);
+    await admin.request.patch('/api/admin/settings', { data: { notify_email: '', notify_on_payment: true }, headers: H });
+  });
+
   test('backups can be created and verified from the UI', async () => {
     await admin.goto('/admin/settings');
     await admin.getByRole('button', { name: 'Create verified backup now' }).click();
