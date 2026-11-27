@@ -851,9 +851,12 @@ tr.kn-detail > td { padding: 0; background: var(--bg-alt); box-shadow: inset 3px
 .ud-bar > div { height: 100%; background: var(--inv-bg); }
 @media (max-width: 700px) { .ud-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-/* Wide dialogs keep a fixed top; height changes only grow/shrink at the bottom */
-.modal-bg:has(> .modal.wide) { align-items: flex-start; padding-top: 5vh; }
-.modal.wide { max-height: 90vh; }
+/* Every dialog keeps a fixed top; height changes only grow / shrink at the bottom */
+.modal-bg { align-items: flex-start; padding-top: 6vh; }
+.modal-bg:has(> .modal.wide) { padding-top: 5vh; }
+.modal { max-height: calc(100vh - 6vh - 16px); }
+.modal.wide { max-height: calc(100vh - 5vh - 16px); }
+@media (max-width: 700px) { .modal-bg, .modal-bg:has(> .modal.wide) { padding-top: 12px; } .modal, .modal.wide { max-height: calc(100vh - 24px); } }
 
 /* Dialog animation: backdrop fades, panel pops in / out; height changes glide */
 @keyframes md-bg-in { from { opacity: 0; } to { opacity: 1; } }

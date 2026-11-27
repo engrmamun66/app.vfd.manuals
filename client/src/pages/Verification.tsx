@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { get, patch, post } from '../lib/api';
-import { Crumbs, ErrorBox, Loading, Pager, QuoteBadge, useAsync, ModelName } from '../components/ui';
+import { Crumbs, ErrorBox, Loading, Pager, QuoteBadge, useAsync, ModelName, useAnimatedClose } from '../components/ui';
 import { PageViewer } from '../components/Viewer';
 import { confirmDialog, promptDialog } from '../components/dialogs';
 
@@ -68,13 +68,14 @@ export function VerificationCenter() {
   );
 }
 
-function ReviewDialog({ r, onClose, act }: { r: any; onClose: () => void; act: (fn: () => Promise<any>) => void }) {
+function ReviewDialog({ r, onClose: onClosed, act }: { r: any; onClose: () => void; act: (fn: () => Promise<any>) => void }) {
+  const [closing, onClose] = useAnimatedClose(onClosed); // same open / close animation as every other dialog
   const p = r.payload;
   const needsDecision = ['Possible Duplicate', 'Uncertain Match'].includes(r.comparison);
   const { data: rev } = useAsync(() => (r.revision_id ? get(`/revisions/${r.revision_id}`) : Promise.resolve(null)), [r.revision_id]);
   const fields = r.record_type === 'parameter' ? ['code', 'name', 'unit', 'default_value', 'min_value', 'max_value', 'resolution', 'access', 'setting_conditions'] : ['original_address', 'name', 'address_format', 'register_type', 'function_codes', 'access', 'data_length_words', 'data_type', 'scaling', 'unit'];
   return (
-    <div className="modal-bg" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div className={`modal-bg ${closing ? 'closing' : ''}`} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal wide" role="dialog" aria-label="Review staged record" style={{ maxWidth: 1400 }}>
         <div className="row between"><h2 style={{ margin: 0 }}>Review {r.record_type === 'parameter' ? 'parameter' : 'register'} <span className="mono">{p.code ?? p.original_address}</span></h2><button className="ghost" onClick={onClose}>✕</button></div>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 1fr) minmax(380px, 1.3fr)', gap: 16, marginTop: 10 }}>

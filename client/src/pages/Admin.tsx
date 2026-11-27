@@ -4,6 +4,7 @@ import { del, get, patch, post, put, fmtBytes, fmtDate, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { Crumbs, DateField, ErrorBox, Loading, Modal, PasswordInput, useAsync, download } from '../components/ui';
 import { confirmDialog } from '../components/dialogs';
+import { toast } from '../components/toast';
 
 const TYPES: [string, string][] = [['brand', 'Brands'], ['model', 'Models'], ['category', 'Categories'], ['common_function', 'Common functions'], ['parameter', 'Parameters'], ['modbus_register', 'Modbus registers'], ['document', 'Documents']];
 
@@ -63,17 +64,17 @@ export function AdminUsers() {
   const refresh = () => { reload(); reloadSum(); };
   const removeUser = async (u: any) => {
     if (!(await confirmDialog(`Delete ${u.email}${u.role === 'super_admin' ? ' (a Super Admin)' : ''}? The account is closed for good: the person is signed out at once, personal details and private bookmarks are removed and their notes are hidden. Payment and audit records stay. This cannot be undone.`, { danger: true, confirmLabel: 'Delete account' }))) return;
-    try { setMsg(await post(`/admin/users/${u.id}/delete`, { confirm: true })); refresh(); } catch (e) { setMsg(e); }
+    try { await post(`/admin/users/${u.id}/delete`, { confirm: true }); setMsg(null); toast('Account deleted'); refresh(); } catch (e) { setMsg(e); }
   };
   const toggle = async (u: any) => {
     const to = u.status === 'enabled' ? 'disabled' : 'enabled';
     if (to === 'enabled' && u.role === 'super_admin') {
       if (!(await confirmDialog(`Activate the Super Admin ${u.email}? Only one Super Admin can be active at a time: every other Super Admin account (including yours, if you are one) becomes inactive and is signed out immediately.`, { danger: true, confirmLabel: 'Activate and deactivate the others' }))) return;
-      try { setMsg(await patch(`/admin/users/${u.id}`, { status: to })); refresh(); } catch (e) { setMsg(e); }
+      try { await patch(`/admin/users/${u.id}`, { status: to }); setMsg(null); toast('Super Admin activated; the other Super Admins are inactive now'); refresh(); } catch (e) { setMsg(e); }
       return;
     }
     if (!(await confirmDialog(to === 'disabled' ? `Disable ${u.email}? All their sessions end immediately. Their data is kept.` : `Re-enable ${u.email}? Previously revoked sessions are NOT restored.`, { danger: true }))) return;
-    try { setMsg(await patch(`/admin/users/${u.id}`, { status: to })); refresh(); } catch (e) { setMsg(e); }
+    try { await patch(`/admin/users/${u.id}`, { status: to }); setMsg(null); toast(to === 'disabled' ? 'Account disabled' : 'Account enabled'); refresh(); } catch (e) { setMsg(e); }
   };
   const P = sum?.presence;
   return (
@@ -81,7 +82,6 @@ export function AdminUsers() {
       <Crumbs items={[{ label: 'Admin' }, { label: 'Users & Monitoring' }]} />
       <div className="row between"><h1>Users & Monitoring</h1><button className="primary" onClick={() => setCreate(true)}>Create user</button></div>
       <ErrorBox e={error || (msg instanceof Error ? msg : null)} />
-      {msg && !(msg instanceof Error) && <div className="ok-box small-text">{JSON.stringify(msg)}</div>}
       {sum && (<>
         <div className="stat-grid">
           {([['Registered users', sum.total], ['Enabled', sum.enabled], ['Disabled', sum.disabled], ['Never logged in', sum.neverLoggedIn], ['Active authenticated sessions (DB)', sum.activeSessions], ['Unique users online (live)', P?.uniqueOnlineUsers], ['Live socket connections', P?.socketConnections], ['Sessions with a live socket', P?.connectedSessions]] as [string, number][]).map(([l, v]) => <div className="stat" key={l}><b>{v ?? '…'}</b><span>{l}</span></div>)}
@@ -139,7 +139,7 @@ function UserDetail({ id, onClose }: { id: number; onClose: () => void }) {
   const [tab, setTab] = useState('overview');
   useEffect(() => { if (u) setFa(u.full_access_until ? toLocalInput(new Date(u.full_access_until)) : ''); }, [u?.full_access_until]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (u) setLim({ quotaMB: Math.round(u.limits.quotaBytes / 1048576), fileMB: Math.round(u.limits.maxFileBytes / 1048576), att: u.limits.maxAttachmentsPerComment }); }, [u]);
-  const run = async (fn: () => Promise<any>) => { try { setMsg(await fn()); reload(); } catch (e) { setMsg(e); } };
+  const run = async (fn: () => Promise<any>) => { try { const r = await fn(); if (r?.temporaryPassword || r?.note) setMsg(r); else { setMsg(null); toast('Done'); } reload(); } catch (e) { setMsg(e); } }; // a plain {ok:true} is not shown; a temporary password / note is
   if (!u || !lim) return <Modal title="User" onClose={onClose}><Loading /></Modal>;
   const s = u.storage;
   const online = u.presence.length > 0;
@@ -164,7 +164,7 @@ function UserDetail({ id, onClose }: { id: number; onClose: () => void }) {
         {([['overview', 'Overview'], ['access', 'Access & security'], ['storage', 'Storage & limits'], ['sessions', `Sessions (${u.sessions.length})`], ['history', 'Login history']] as [string, string][]).map(([k, l]) => <button key={k} role="tab" aria-selected={tab === k} className={`tab ${tab === k ? 'active' : ''}`} onClick={() => setTab(k)}>{l}</button>)}
       </div>
       <ErrorBox e={msg instanceof Error ? msg : null} />
-      {msg && !(msg instanceof Error) && <div className="ok-box mono small-text">{JSON.stringify(msg)}</div>}
+      {msg && !(msg instanceof Error) && <div className="ok-box small-text">{msg.note && <div>{msg.note}</div>}{msg.temporaryPassword && <div>Temporary password: <b className="mono">{msg.temporaryPassword}</b></div>}</div>}
       {tab === 'overview' && (<>
         <table className="ud-table"><tbody>
           <tr><th>ID</th><td>{u.id}</td></tr><tr><th>Role</th><td>{u.role}</td></tr><tr><th>Status</th><td>{u.status}</td></tr><tr><th>Registered</th><td>{fmtDate(u.created_at)}</td></tr><tr><th>Last login</th><td>{fmtDate(u.last_login_at)}</td></tr><tr><th>Logins / failed</th><td>{u.login_count} / {u.failed_login_count}</td></tr>
