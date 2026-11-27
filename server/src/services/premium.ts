@@ -58,10 +58,57 @@ export function getPremiumConfig(): PremiumConfig {
   };
 }
 
-/** The active subscription of a user, if any (ends in the future). */
-export function activeSubscription(userId: number) {
-  return getDb().prepare("SELECT id, plan, starts_at, ends_at FROM subscriptions WHERE user_id = ? AND status = 'active' AND ends_at > ? ORDER BY ends_at DESC LIMIT 1").get(userId, new Date().toISOString()) as { id: number; plan: 'monthly' | 'yearly'; starts_at: string; ends_at: string } | undefined;
+/** Next full hour (a time already on the hour stays as it is). 10:35:45 → 11:00:00. */
+export function ceilHour(d: Date): Date {
+  const x = new Date(d);
+  if (x.getMinutes() || x.getSeconds() || x.getMilliseconds()) { x.setMinutes(0, 0, 0); x.setHours(x.getHours() + 1); }
+  return x;
 }
+/** One calendar month / year after `start` (31 Jan + 1 month = 28/29 Feb, never a date in the month after). */
+export function addPeriod(start: Date, billing: 'monthly' | 'yearly'): Date {
+  const e = new Date(start);
+  const day = e.getDate();
+  e.setDate(1);
+  if (billing === 'monthly') e.setMonth(e.getMonth() + 1); else e.setFullYear(e.getFullYear() + 1);
+  e.setDate(Math.min(day, new Date(e.getFullYear(), e.getMonth() + 1, 0).getDate()));
+  return e;
+}
+
+export interface PricingPlan { id: number; name: string; monthly_original: number; monthly_price: number; yearly_original: number; yearly_price: number; currency: string; active: number }
+export const activePricingPlans = () => getDb().prepare('SELECT id, name, monthly_original, monthly_price, yearly_original, yearly_price, currency, active FROM pricing_plans WHERE active = 1 ORDER BY id').all() as PricingPlan[];
+export const priceOf = (p: PricingPlan, billing: 'monthly' | 'yearly') => (billing === 'monthly' ? p.monthly_price : p.yearly_price);
+
+const SUB_COLS = 's.id, s.plan billing, s.amount, s.currency, s.status, s.pricing_plan_id, p.name plan_name, p.active plan_active, s.subscribed_at, s.starts_at, s.ends_at, s.migrate_to';
+/**
+ * The subscription that gives the user Pro right now: approved, not soft-deleted, not expired, already started
+ * (a start up to an hour ahead counts, because the start time is rounded up to the next full hour).
+ */
+export function activeSubscription(userId: number) {
+  const now = new Date();
+  return getDb()
+    .prepare(`SELECT ${SUB_COLS} FROM subscriptions s LEFT JOIN pricing_plans p ON p.id = s.pricing_plan_id
+      WHERE s.user_id = ? AND s.status = 'active' AND s.deleted_at IS NULL AND s.ends_at > ? AND s.starts_at <= ? ORDER BY s.ends_at DESC LIMIT 1`)
+    .get(userId, now.toISOString(), new Date(now.getTime() + 3_600_000).toISOString()) as (SubView & { plan: 'monthly' | 'yearly' }) | undefined;
+}
+interface SubView { id: number; billing: 'monthly' | 'yearly'; amount: number; currency: string; status: string; pricing_plan_id: number | null; plan_name: string | null; plan_active: number | null; subscribed_at: string | null; starts_at: string; ends_at: string; migrate_to: 'monthly' | 'yearly' | null }
+/** The next paid period (approved, starts after the running one ends). */
+export function queuedSubscription(userId: number) {
+  return getDb()
+    .prepare(`SELECT ${SUB_COLS} FROM subscriptions s LEFT JOIN pricing_plans p ON p.id = s.pricing_plan_id
+      WHERE s.user_id = ? AND s.status = 'active' AND s.deleted_at IS NULL AND s.starts_at > ? ORDER BY s.starts_at LIMIT 1`)
+    .get(userId, new Date(Date.now() + 3_600_000).toISOString()) as SubView | undefined;
+}
+/** State shown to people: pending | active | scheduled | expired | rejected | cancelled. */
+export function subState(r: { status: string; outcome?: string | null; starts_at?: string | null; ends_at?: string | null; deleted_at?: string | null }): string {
+  if (r.status === 'draft') return 'pending';
+  if (r.status === 'cancelled') return r.outcome === 'rejected' ? 'rejected' : 'cancelled';
+  if (r.deleted_at) return 'cancelled';
+  const now = Date.now();
+  if (r.ends_at && new Date(r.ends_at).getTime() <= now) return 'expired';
+  if (r.starts_at && new Date(r.starts_at).getTime() > now + 3_600_000) return 'scheduled';
+  return 'active';
+}
+
 /** The end of a user's free full-access period, when it is still running. */
 export function activeTrialEnd(userId: number): string | null {
   const r = getDb().prepare('SELECT full_access_until FROM users WHERE id = ?').get(userId) as { full_access_until: string | null } | undefined;

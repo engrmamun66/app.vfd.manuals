@@ -120,10 +120,12 @@ adminRouter.post(
     const problems = passwordProblems(pw, email);
     if (problems.length) throw badRequest(problems.join(' '));
     if (db.prepare('SELECT 1 FROM users WHERE email_normalized = ?').get(email)) throw conflict('A user with this email already exists');
+    // only one Super Admin is active at a time: a new one starts inactive and has to be activated explicitly
+    const startStatus = role === 'super_admin' && activeSuperAdmins() > 0 ? 'disabled' : 'enabled';
     const id = Number(
       db
-        .prepare("INSERT INTO users(email, email_normalized, password_hash, role, status, must_change_password, display_name, company, designation, phone) VALUES (?,?,?,?, 'enabled', 1, ?,?,?,?)")
-        .run(emailRaw, email, await hashPassword(pw), role, str(req.body.displayName, 'Full name', { required: true, max: 100 })!, str(req.body.company, 'company', { max: 150 }), str(req.body.designation, 'designation', { max: 150 }), str(req.body.phone, 'phone', { max: 30 })).lastInsertRowid,
+        .prepare("INSERT INTO users(email, email_normalized, password_hash, role, status, must_change_password, display_name, company, designation, phone) VALUES (?,?,?,?, ?, 1, ?,?,?,?)")
+        .run(emailRaw, email, await hashPassword(pw), role, startStatus, str(req.body.displayName, 'Full name', { required: true, max: 100 })!, str(req.body.company, 'company', { max: 150 }), str(req.body.designation, 'designation', { max: 150 }), str(req.body.phone, 'phone', { max: 30 })).lastInsertRowid,
     );
     ensureUserDirs(id);
     logActivity({ userId: id, actorUserId: req.user!.id, event: 'admin_create_user', entityType: 'user', entityId: id, meta: { role } });
@@ -153,10 +155,22 @@ adminRouter.patch(
         changes.full_access_until = d.toISOString();
       }
     }
+    // promoting someone to Super Admin does not make a second active Super Admin: the account stays inactive until it is activated
+    if (changes.role === 'super_admin' && u.role !== 'super_admin' && changes.status === undefined && u.status === 'enabled' && activeSuperAdmins() > 0) changes.status = 'disabled';
     const losingAdmin = u.role === 'super_admin' && u.status === 'enabled' && (changes.status === 'disabled' || changes.role === 'user');
     if (losingAdmin && activeSuperAdmins() <= 1) throw conflict('This is the last active Super Admin. Create or enable another Super Admin first.');
     if (!Object.keys(changes).length) throw badRequest('Nothing to update');
     db.prepare(`UPDATE users SET ${Object.keys(changes).map((k) => `${k} = ?`).join(', ')}, updated_at = ? WHERE id = ?`).run(...Object.values(changes), new Date().toISOString(), id);
+    // only one Super Admin is active: activating one deactivates every other Super Admin (their sessions end at once)
+    const deactivated: number[] = [];
+    if (changes.status === 'enabled' && (changes.role ?? u.role) === 'super_admin') {
+      for (const o of db.prepare("SELECT id FROM users WHERE role = 'super_admin' AND status = 'enabled' AND id <> ?").all(id) as { id: number }[]) {
+        db.prepare("UPDATE users SET status = 'disabled', updated_at = ? WHERE id = ?").run(new Date().toISOString(), o.id);
+        revokeSessions({ userId: o.id }, 'superadmin_deactivated');
+        logActivity({ userId: o.id, actorUserId: req.user!.id, event: 'admin_disable_account', entityType: 'user', entityId: o.id, meta: { reason: 'another Super Admin was activated' } });
+        deactivated.push(o.id);
+      }
+    }
     let revoked: number[] = [];
     if (changes.status === 'disabled') revoked = revokeSessions({ userId: id }, 'account_disabled');
     else if (changes.role && changes.role !== u.role) revoked = revokeSessions({ userId: id }, 'role_changed'); // privilege change → new session required
@@ -169,7 +183,7 @@ adminRouter.patch(
         entityId: id,
         meta: { from: u[k === 'display_name' ? 'display_name' : k], to: changes[k], reason, revokedSessions: revoked.length },
       });
-    res.json({ ok: true, revokedSessions: revoked.length });
+    res.json({ ok: true, revokedSessions: revoked.length, deactivatedSuperAdmins: deactivated });
   }),
 );
 

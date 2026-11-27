@@ -23,6 +23,7 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
   const { status, reload, isPro } = usePremium();
   const [stage, setStage] = useState<Stage>('plans');
   const [plan, setPlan] = useState<'monthly' | 'yearly'>('monthly');
+  const [planId, setPlanId] = useState<number | null>(null);
   const [phone, setPhone] = useState(user?.phone ?? '');
   const [name, setName] = useState(user?.displayName ?? '');
   const [file, setFile] = useState<File | null>(null);
@@ -35,11 +36,19 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
 
   if (!status) return <Modal title="Get Pro" onClose={onClose}><Loading /></Modal>;
   const cfg = status.config;
-  const monthly = cfg.plans.monthly.price;
-  const yearly = cfg.plans.yearly.price;
+  const plans = status.pricingPlans ?? [];
+  const chosen = plans.find((p) => p.id === planId) ?? plans[0];
+  const sub = status.subscription;
+  const migrateTo = sub?.migrate_to ?? null; // a billing-type change is scheduled: the next payment has to be for it
+  const monthly = chosen?.monthly_price ?? 0;
+  const yearly = chosen?.yearly_price ?? 0;
   const saving = monthly > 0 ? Math.max(0, Math.round((1 - yearly / (monthly * 12)) * 100)) : 0;
+  // a paid period is running: the new payment is for the next billing cycle, which starts when the running one ends
+  const startsAt = sub ? status.queued?.ends_at ? null : sub.ends_at : null;
 
   const choose = (p: 'monthly' | 'yearly') => {
+    if (!chosen) return setError('No pricing plan is available right now.');
+    if (migrateTo && p !== migrateTo) return setError(`You scheduled a change to the ${migrateTo} subscription. Your next payment has to be a ${migrateTo} one.`);
     setPlan(p);
     setError(null);
     // an account needs an e-mail address and a phone number before it can become a paid account
@@ -80,6 +89,7 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
     try {
       const form = new FormData();
       form.append('plan', plan);
+      form.append('pricing_plan_id', String(chosen?.id ?? ''));
       form.append('receipt', file);
       if (note.trim()) form.append('note', note.trim());
       await api('/premium/subscribe', { method: 'POST', form });
@@ -99,7 +109,7 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
   };
 
   const pay = cfg.payment;
-  const amount = cfg.plans[plan].price;
+  const amount = plan === 'monthly' ? monthly : yearly;
 
   return (
     <Modal title={stage === 'plans' ? 'Get Pro' : stage === 'done' ? 'Request sent' : stage === 'profile' ? 'Complete your profile' : `${PLAN_LABEL[plan]} plan`} onClose={onClose} wide={stage === 'plans'}>
@@ -109,11 +119,23 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
           {isPro && (
             <div className="ok-box" role="status"><b>You have Pro access</b>{status.plan === 'admin' ? ' (administrator).' : status.plan === 'trial' ? <> — free full access until {fmtDate(status.trialEndsAt)}. Subscribe to keep Pro after that.</> : <> — {status.plan} plan, valid until {fmtDate(status.endsAt)}.</>}</div>
           )}
+          {status.needsPlanMigration && (
+            <div className="err" role="status"><b>Your pricing plan ({sub?.plan_name}) was discontinued.</b> Your paid period stays valid until {fmtDate(sub?.ends_at)}. For your next payment please choose one of the plans below.</div>
+          )}
+          {sub && !status.needsPlanMigration && (
+            <div className="ok-box" role="status">
+              {status.queued ? <>Your next billing period is already paid ({PLAN_LABEL[status.queued.billing]}, {fmtDate(status.queued.starts_at)} → {fmtDate(status.queued.ends_at)}).</> : <>A new payment now is for your <b>next billing cycle</b>, starting {fmtDate(sub.ends_at)}.</>}
+            </div>
+          )}
           {status.pending && (
             <div className="ok-box" role="status">
               Your <b>{PLAN_LABEL[status.pending.plan]}</b> request (sent {fmtDate(status.pending.created_at)}) is waiting for the administrator.
               <div style={{ marginTop: 6 }}><button className="small" disabled={busy} onClick={withdraw}>Withdraw this request</button></div>
             </div>
+          )}
+          {plans.length > 1 && (
+            <div className="field" style={{ maxWidth: 360 }}><label htmlFor="pp-sel">Pricing plan</label>
+              <select id="pp-sel" value={chosen?.id} onChange={(e) => setPlanId(Number(e.target.value))}>{plans.map((p) => <option key={p.id} value={p.id}>{p.name} (ID {p.id})</option>)}</select></div>
           )}
           <div className="plans">
             <div className={`plan ${!isPro ? 'current' : ''}`}>
@@ -133,15 +155,15 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
             </div>
             <div className="plan pro">
               <h3>Monthly</h3>
-              <div className="plan-price">৳{monthly}<span> / month</span></div>
+              <div className="plan-price">{chosen && chosen.monthly_original > monthly && <s className="faint">৳{chosen.monthly_original}</s>} ৳{monthly}<span> / month</span></div>
               <ul>{PRO_FEATURES.map((f) => <li key={f}>{f}</li>)}</ul>
-              <div className="plan-foot"><button className="primary" disabled={!!status.pending} onClick={() => choose('monthly')}>Choose Monthly</button></div>
+              <div className="plan-foot"><button className="primary" disabled={!!status.pending || !chosen || (!!migrateTo && migrateTo !== 'monthly')} onClick={() => choose('monthly')}>Choose Monthly</button></div>
             </div>
             <div className="plan pro best">
               <h3>Yearly {saving > 0 && <span className="badge solid">Save {saving}%</span>}</h3>
-              <div className="plan-price">৳{yearly}<span> / year</span></div>
+              <div className="plan-price">{chosen && chosen.yearly_original > yearly && <s className="faint">৳{chosen.yearly_original}</s>} ৳{yearly}<span> / year</span></div>
               <ul>{PRO_FEATURES.map((f) => <li key={f}>{f}</li>)}</ul>
-              <div className="plan-foot"><button className="primary" disabled={!!status.pending} onClick={() => choose('yearly')}>Choose Yearly</button></div>
+              <div className="plan-foot"><button className="primary" disabled={!!status.pending || !chosen || (!!migrateTo && migrateTo !== 'yearly')} onClick={() => choose('yearly')}>Choose Yearly</button></div>
             </div>
           </div>
           <PaymentSummary cfg={cfg} compact />
@@ -164,7 +186,15 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
 
       {stage === 'pay' && (
         <form className="stack" onSubmit={submit}>
-          <div className="ok-box"><b>{PLAN_LABEL[plan]} plan — ৳{amount}</b> {plan === 'monthly' ? 'for 30 days' : 'for 365 days'}</div>
+          <table className="pay-info"><tbody>
+            <tr><th>Pricing plan ID</th><td>{chosen?.id}</td></tr>
+            <tr><th>Pricing plan name</th><td>{chosen?.name}</td></tr>
+            <tr><th>Pricing type</th><td>{PLAN_LABEL[plan]} ({plan === 'monthly' ? 'one month' : 'one year'})</td></tr>
+            <tr><th>Payment amount</th><td><b>৳{amount}</b> {chosen && (plan === 'monthly' ? chosen.monthly_original : chosen.yearly_original) > amount && <s className="faint">৳{plan === 'monthly' ? chosen.monthly_original : chosen.yearly_original}</s>}</td></tr>
+            <tr><th>Starts</th><td>{startsAt ? <b>{fmtDate(startsAt)} (your next billing cycle)</b> : 'At the next full hour after the administrator approves the payment'}</td></tr>
+          </tbody></table>
+          <p className="small-text muted" style={{ margin: 0 }}>By submitting you accept our <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy &amp; Service Terms</a>.</p>
+          <div className="err" role="note">Please transfer <b>at least ৳{amount}</b>. If the amount you pay is lower than the payable amount, the payment may be rejected.</div>
           <PaymentSummary cfg={cfg} />
           <div className="field">
             <label htmlFor="rc-file">Payment receipt <span className="faint">(required — screenshot or photo, JPEG / PNG / WebP)</span></label>
@@ -187,7 +217,7 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
       {stage === 'done' && (
         <div className="stack">
           <p role="status">
-            <b>Thank you for selecting the {PLAN_LABEL[plan]} subscription.</b> The administrator will check your subscription request. If everything is okay, your account will be active with all premium features within 3 days at maximum.
+            <b>Thank you for selecting the {PLAN_LABEL[plan]} subscription.</b> Your payment is now <b>pending verification</b>. The administrator will check it. If everything is okay, your account will be active with all premium features within 3 days at maximum. You can follow the status in Settings → Submit Payment.
           </p>
           <div className="row" style={{ justifyContent: 'flex-end' }}><button className="primary" onClick={onClose}>Close</button></div>
         </div>
@@ -199,7 +229,7 @@ export function PlansModal({ reason, onClose }: { reason?: string; onClose: () =
 }
 
 /** bKash number, bank accounts and the instructions the administrator configured. */
-function PaymentSummary({ cfg, compact }: { cfg: PremiumConfig; compact?: boolean }) {
+export function PaymentSummary({ cfg, compact }: { cfg: PremiumConfig; compact?: boolean }) {
   const p = cfg.payment;
   const hasBank = p.banks.length > 0;
   if (!p.bkash_number && !hasBank && !p.receipt_email && compact) return null;
@@ -225,20 +255,21 @@ function PaymentSummary({ cfg, compact }: { cfg: PremiumConfig; compact?: boolea
   );
 }
 
-/** The user's earlier requests with their state. */
-function MyRequests() {
+/** The user's submitted payments with their state. */
+export function MyRequests({ open }: { open?: boolean }) {
   const [rows, setRows] = useState<any[] | null>(null);
   useEffect(() => { get('/premium/mine').then((r) => setRows(r.rows)).catch(() => setRows([])); }, []);
   if (!rows || !rows.length) return null;
   return (
-    <details>
-      <summary className="small-text">My subscription requests ({rows.length})</summary>
-      <div className="table-wrap"><table><thead><tr><th>Sent</th><th>Plan</th><th>Amount</th><th>Status</th><th>Valid until</th><th>Note</th></tr></thead><tbody>
+    <details open={open}>
+      <summary className="small-text">My payment submissions ({rows.length})</summary>
+      <div className="table-wrap"><table><thead><tr><th>Submitted</th><th>Plan</th><th>Type</th><th>Amount</th><th>Status</th><th>Period</th><th>Note</th></tr></thead><tbody>
         {rows.map((r) => (
-          <tr key={r.id}><td>{fmtDate(r.created_at)}</td><td>{PLAN_LABEL[r.plan as 'monthly' | 'yearly']}</td><td>৳{r.amount}</td>
-            <td><span className={`badge ${r.status === 'active' ? 'solid' : 'dashed'}`}>{r.status === 'draft' ? 'Waiting for review' : r.status === 'active' ? 'Active' : 'Cancelled'}</span></td>
-            <td>{r.status === 'active' ? fmtDate(r.ends_at) : '—'}</td><td className="small-text">{r.admin_note ?? ''}</td></tr>))}
+          <tr key={r.id}><td>{fmtDate(r.created_at)}</td><td>{r.plan_name ?? '—'}{r.pricing_plan_id ? <span className="faint"> #{r.pricing_plan_id}</span> : null}</td><td>{PLAN_LABEL[r.plan as 'monthly' | 'yearly']}</td><td>৳{r.amount}</td>
+            <td><span className={`badge ${r.state === 'active' ? 'solid' : r.state === 'pending' ? 'strong' : 'dashed'}`}>{STATE_TEXT[r.state] ?? r.state}</span></td>
+            <td className="small-text">{r.starts_at ? `${fmtDate(r.starts_at)} → ${fmtDate(r.ends_at)}` : '—'}</td><td className="small-text">{r.admin_note ?? ''}</td></tr>))}
       </tbody></table></div>
     </details>
   );
 }
+export const STATE_TEXT: Record<string, string> = { pending: 'Pending verification', active: 'Active', scheduled: 'Scheduled', expired: 'Expired', rejected: 'Rejected', cancelled: 'Cancelled' };

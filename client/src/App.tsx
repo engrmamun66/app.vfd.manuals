@@ -11,7 +11,7 @@ import { AnnotationsPage } from './pages/AnnotationsPage';
 import { DocumentPage, Library, RevisionViewer } from './pages/Library';
 import { VerificationCenter } from './pages/Verification';
 import { FeedbackAdmin } from './pages/Feedback';
-import { PaymentsAdmin, PremiumSettings, SubscriptionsAdmin } from './pages/PremiumAdmin';
+import { PaymentsAdmin, PremiumSettings, PricingAdmin, SubscriptionsAdmin } from './pages/PremiumAdmin';
 import { PremiumProvider, usePremium } from './lib/premium';
 import { ADMIN_HOME, adminSections, isAdminPath, mainSections } from './lib/nav';
 import { MyCategoriesProvider, useMyCategories } from './lib/myCategories';
@@ -26,6 +26,7 @@ import { NavIcon } from './components/icons';
 import { PageToolbar, PageToolsProvider, TitleLinePdf } from './components/PageTools';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SettingsModal } from './components/SettingsModal';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { DialogProvider } from './components/dialogs';
 
 const HotkeyCtx = createContext<{ keys: Map<string, string>; show: boolean }>({ keys: new Map(), show: false });
@@ -45,7 +46,7 @@ export const LockIcon = () => (
 /** Shown instead of a page the Super Admin marked as Pro-only. */
 function LockedPage() {
   const { openPlans, status } = usePremium();
-  const m = status?.config.plans.monthly.price;
+  const m = status?.pricingPlans?.[0]?.monthly_price;
   return (
     <div className="page locked-page">
       <div className="locked-card">
@@ -398,15 +399,15 @@ function ShellInner() {
           <button className="ghost icon-btn" onClick={toggleSidebar} aria-label={(isMobile ? !navOpen : collapsed) ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={isMobile ? navOpen : !collapsed} title={`${collapsed ? 'Expand sidebar' : 'Collapse sidebar'} (${/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl'} + /)`}>☰</button>
           <GlobalSearch /><span className="spacer" />
           <PageToolbar />
-          <button className="small send-request" onClick={() => setFeedbackOpen(true)} title="Send a request or complaint to the administrator">
+          {!inAdmin && <button className="small send-request" onClick={() => setFeedbackOpen(true)} title="Send a request or complaint to the administrator">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg> Send message
-          </button>
+          </button>}
           {!isAdmin && <button type="button" className={`small get-pro ${isPro ? 'is-pro' : ''}`} onClick={() => openPlans()} title={isPro ? 'You have Pro access' : 'See Pro plans'}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true"><path d="M12 2l3 6.5 7 1-5 5 1.2 7L12 18l-6.2 3.5L7 14.5l-5-5 7-1z" /></svg> <span className="gp-label">{isPro ? 'Pro' : 'Get Pro'}</span>
           </button>}
-          <button className="ghost icon-btn" onClick={() => { setSettingsTab(undefined); setSettingsOpen(true); }} aria-label="Settings" title="Settings">
+          {!inAdmin && <button className="ghost icon-btn" onClick={() => { setSettingsTab(undefined); setSettingsOpen(true); }} aria-label="Settings" title="Settings">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
-          </button>
+          </button>}
         </div>
         <MyCategoriesModal />
         <PageAnnotations />
@@ -437,6 +438,7 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route element={<Shell />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/parameters" element={<Parameters />} />
@@ -460,6 +462,7 @@ export default function App() {
         <Route path="/library/document/:id" element={<DocumentPage />} />
         <Route path="/library/revision/:rid/page/:page" element={<RevisionViewer />} />
         <Route path="/superadmin" element={<Navigate to="/superadmin/subscriptions" replace />} />
+        <Route path="/superadmin/pricing" element={<AdminOnly><PricingAdmin /></AdminOnly>} />
         <Route path="/superadmin/subscriptions" element={<AdminOnly><SubscriptionsAdmin /></AdminOnly>} />
         <Route path="/superadmin/payments" element={<AdminOnly><PaymentsAdmin /></AdminOnly>} />
         <Route path="/superadmin/premium" element={<AdminOnly><PremiumSettings /></AdminOnly>} />

@@ -20,7 +20,7 @@ export const isAdminPath = (p: string) => p === ADMIN_HOME || p.startsWith(ADMIN
 
 /** Everything that belongs to the Super Admin lives under /superadmin. */
 export const adminSections: NavSection[] = [
-  { title: 'Premium', items: [['/superadmin/subscriptions', 'Subscriptions'], ['/superadmin/payments', 'Payments'], ['/superadmin/premium', 'Premium Settings']] },
+  { title: 'Premium', items: [['/superadmin/pricing', 'Pricing'], ['/superadmin/subscriptions', 'Subscriptions'], ['/superadmin/payments', 'Payments'], ['/superadmin/premium', 'Premium Settings']] },
   { title: 'Content', items: [['/superadmin/verification', 'Verification Center'], ['/superadmin/content', 'Content & Order']] },
   { title: 'Users', items: [['/superadmin/users', 'Users & Monitoring'], ['/superadmin/requests', 'User Requests'], ['/superadmin/logs', 'Activity & Audit']] },
 ];

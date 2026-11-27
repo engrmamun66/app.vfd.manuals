@@ -734,14 +734,15 @@ test.describe('premium: free limits, plans dialog, subscription review (Super Ad
     expect(st.pending.plan).toBe('monthly');
     // a second open request is refused
     const csrf = await csrfOf(alice);
-    const again = await alice.request.post('/api/premium/subscribe', { multipart: { plan: 'yearly', receipt: { name: 'r.png', mimeType: 'image/png', buffer: png } }, headers: { 'X-CSRF-Token': csrf } });
+    const again = await alice.request.post('/api/premium/subscribe', { multipart: { plan: 'yearly', pricing_plan_id: '1', receipt: { name: 'r.png', mimeType: 'image/png', buffer: png } }, headers: { 'X-CSRF-Token': csrf } });
     expect(again.status()).toBe(409);
     // Super Admin reviews it
     await admin.goto('/superadmin/subscriptions');
     const card = admin.locator('.fb-card', { hasText: 'alice@e2e.test' }).first();
-    await expect(card).toContainText('Waiting for review');
+    await expect(card).toContainText('Pending verification');
     await expect(card.locator('img')).toBeVisible();
-    await card.getByRole('button', { name: 'Make premium' }).click();
+    await card.getByRole('button', { name: 'Approve payment' }).click();
+    await admin.getByRole('dialog', { name: 'Please confirm' }).getByRole('button', { name: 'Confirm' }).click();
     await expect(admin.locator('.fb-card', { hasText: 'alice@e2e.test' })).toHaveCount(0); // leaves the "waiting" list
     await expect.poll(async () => (await (await alice.request.get('/api/premium/status')).json()).isPro).toBe(true);
     // Pro: limits and locked menus no longer apply
@@ -755,6 +756,7 @@ test.describe('premium: free limits, plans dialog, subscription review (Super Ad
     await admin.goto('/superadmin/subscriptions');
     await admin.getByLabel('Status filter').selectOption('active');
     await admin.locator('.fb-card', { hasText: 'alice@e2e.test' }).first().getByRole('button', { name: 'Cancel subscription' }).click();
+    await admin.getByRole('dialog', { name: 'Please confirm' }).getByRole('button', { name: 'Confirm' }).click();
     await expect.poll(async () => (await (await alice.request.get('/api/premium/status')).json()).isPro).toBe(false);
     expect((await alice.request.get('/api/search?q=abc')).status()).toBe(402);
     await alice.request.delete(`/api/bookmarks/${(await bm.json()).id}`, { headers: { 'X-CSRF-Token': csrf } });

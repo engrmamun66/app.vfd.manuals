@@ -6,6 +6,7 @@ import { shortName, useModels } from '../lib/models';
 import { AdminSettings, MySettings } from '../pages/Admin';
 import { MyCategoriesManager } from './MyCategories';
 import { ChangePassword } from '../pages/AuthPages';
+import { SubmitPayment } from './SubmitPayment';
 
 function ModelAliases() {
   const { settings, updateSettings } = useAuth();
@@ -234,12 +235,14 @@ export function SettingsModal({ onClose: onClosed, initialTab }: { onClose: () =
   const onClose = () => { if (!closing) { setClosing(true); window.setTimeout(onClosed, window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 220); } };
   const { user } = useAuth();
   const isAdmin = user?.role === 'super_admin';
-  const tabs = [['models', 'Model aliases'], ['ui', 'UI settings'], ['categories', 'My categories'], ['profile', 'Profile & Preferences'], ['security', 'Change password'], ['message', 'Send message'], ...(isAdmin ? [['app', 'Application & Backups']] : [])] as [string, string][];
+  const tabs = [['models', 'Model aliases'], ['ui', 'UI settings'], ['categories', 'My categories'], ['profile', 'Profile & Preferences'], ...(isAdmin ? [] : [['payment', 'Submit Payment']]), ['security', 'Change password'], ['message', 'Send message'], ...(isAdmin ? [['app', 'Application & Backups']] : [])] as [string, string][];
   const [tab, setTab] = useState(initialTab ?? 'models');
   useEffect(() => {
     const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     document.addEventListener('keydown', esc);
-    return () => document.removeEventListener('keydown', esc);
+    const closeNow = () => onClose();
+    window.addEventListener('close-settings', closeNow);
+    return () => { document.removeEventListener('keydown', esc); window.removeEventListener('close-settings', closeNow); };
   }, [onClose]);
   return (
     <div className={`fs-modal ${closing ? 'closing' : ''}`} role="dialog" aria-modal="true" aria-label="Settings">
@@ -254,6 +257,7 @@ export function SettingsModal({ onClose: onClosed, initialTab }: { onClose: () =
           {tab === 'ui' && <><ThemeSetting /><UiSettings /><PageTransition /></>}
           {tab === 'security' && <ChangePassword embedded />}
           {tab === 'message' && <FeedbackModal onClose={() => setTab('models')} />}
+          {tab === 'payment' && !isAdmin && <SubmitPayment />}
           {tab === 'app' && isAdmin && <AdminSettings embedded />}
         </div>
       </div>

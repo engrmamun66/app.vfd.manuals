@@ -63,6 +63,11 @@ export function AdminUsers() {
   const refresh = () => { reload(); reloadSum(); };
   const toggle = async (u: any) => {
     const to = u.status === 'enabled' ? 'disabled' : 'enabled';
+    if (to === 'enabled' && u.role === 'super_admin') {
+      if (!(await confirmDialog(`Activate the Super Admin ${u.email}? Only one Super Admin can be active at a time: every other Super Admin account (including yours, if you are one) becomes inactive and is signed out immediately.`, { danger: true, confirmLabel: 'Activate and deactivate the others' }))) return;
+      try { setMsg(await patch(`/admin/users/${u.id}`, { status: to })); refresh(); } catch (e) { setMsg(e); }
+      return;
+    }
     if (!(await confirmDialog(to === 'disabled' ? `Disable ${u.email}? All their sessions end immediately. Their data is kept.` : `Re-enable ${u.email}? Previously revoked sessions are NOT restored.`, { danger: true }))) return;
     try { setMsg(await patch(`/admin/users/${u.id}`, { status: to })); refresh(); } catch (e) { setMsg(e); }
   };

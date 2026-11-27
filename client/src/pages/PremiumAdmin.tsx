@@ -1,5 +1,6 @@
 import { toast } from '../components/toast';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { del, get, patch, post, put, fmtDate } from '../lib/api';
 import { confirmDialog } from '../components/dialogs';
 import { Crumbs, DateField, ErrorBox, Loading, Modal, Pager, SearchBox, useAsync } from '../components/ui';
@@ -19,13 +20,13 @@ export function SubscriptionsAdmin() {
     <div className="page">
       <Crumbs items={[{ label: 'Superadmin Panel' }, { label: 'Subscriptions' }]} />
       <h1>Subscriptions</h1>
-      <p className="muted prose">Open the receipt, confirm the payment arrived, then press <b>Make premium</b>. The user becomes Pro for the plan period (a running period is extended). <b>Cancel</b> rejects a request or ends a subscription.</p>
+      <p className="muted prose">Open the receipt, confirm the payment arrived, then press <b>Approve payment</b> — the subscription starts at the next full hour (or when the running period ends) and its payment record is created automatically. Press <b>Reject payment</b> when the amount is too low or the receipt is not valid. <b>Cancel subscription</b> ends a running one now.</p>
       <div className="row" style={{ marginBottom: 12 }}>
         <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} aria-label="Status filter">
           <option value="">All</option>
           <option value="draft">Waiting for review{counts.draft ? ` (${counts.draft})` : ''}</option>
           <option value="active">Active{counts.active ? ` (${counts.active})` : ''}</option>
-          <option value="cancelled">Cancelled{counts.cancelled ? ` (${counts.cancelled})` : ''}</option>
+          <option value="cancelled">Rejected / cancelled{counts.cancelled ? ` (${counts.cancelled})` : ''}</option>
         </select>
       </div>
       <ErrorBox e={error} />
@@ -38,37 +39,48 @@ export function SubscriptionsAdmin() {
   );
 }
 
+const STATE_LABEL: Record<string, string> = { pending: 'Pending verification', active: 'Active', scheduled: 'Scheduled (next billing cycle)', expired: 'Expired', rejected: 'Rejected', cancelled: 'Cancelled' };
+
 function SubscriptionCard({ r, onSaved, onReceipt }: { r: any; onSaved: () => void; onReceipt: (id: number) => void }) {
   const [note, setNote] = useState(r.admin_note ?? '');
   const [err, setErr] = useState<any>(null);
   const [busy, setBusy] = useState(false);
-  const act = async (action: 'activate' | 'cancel') => {
+  const act = async (action: 'activate' | 'reject' | 'cancel') => {
+    const ask = action === 'activate'
+      ? `Approve this payment? ${r.display_name ?? r.email} gets ${PLAN[r.plan as 'monthly' | 'yearly']} access and a payment record of ৳${r.amount} is created.`
+      : action === 'reject' ? 'Reject this payment? Use this when the amount transferred is lower than the payable amount or the receipt is not valid.'
+      : 'Cancel this subscription now? The user becomes a Free user immediately.';
+    if (!(await confirmDialog(ask))) return;
     setErr(null); setBusy(true);
     try { await patch(`/premium-admin/subscriptions/${r.id}`, { action, note }); onSaved(); } catch (e) { setErr(e); } finally { setBusy(false); }
   };
+  const state: string = r.state ?? 'pending';
   return (
     <div className={`card fb-card ${r.status}`}>
       <div className="row between" style={{ flexWrap: 'wrap' }}>
         <div className="row">
-          <span className={`badge ${r.status === 'active' ? 'solid' : r.status === 'draft' ? 'strong' : 'dashed'}`}>{r.status === 'draft' ? 'Waiting for review' : r.status === 'active' ? 'Active' : 'Cancelled'}</span>
+          <span className={`badge ${state === 'active' ? 'solid' : state === 'pending' ? 'strong' : 'dashed'}`}>{STATE_LABEL[state] ?? state}</span>
           <b>{r.display_name ?? r.email}</b>
           <span className="small-text muted">{r.email}</span>
         </div>
-        <span className="small-text muted">{fmtDate(r.created_at)}</span>
+        <span className="small-text muted">Submitted {fmtDate(r.created_at)}</span>
       </div>
       <div className="small-text" style={{ marginTop: 6 }}>
-        <b>{PLAN[r.plan as 'monthly' | 'yearly']}</b> · ৳{r.amount} {r.currency}
+        <b>{r.plan_name ?? 'Plan'}</b> (plan ID {r.pricing_plan_id ?? '—'}) · <b>{PLAN[r.plan as 'monthly' | 'yearly']}</b> · payable <b>৳{r.amount}</b> {r.currency}
         {r.phone && <> · ☎ <a href={`tel:${r.phone}`}>{r.phone}</a></>}
         {r.status === 'active' && <> · valid {fmtDate(r.starts_at)} → {fmtDate(r.ends_at)}</>}
+        {r.deleted_at && <> · soft-deleted {fmtDate(r.deleted_at)}</>}
       </div>
       {r.user_note && <p className="small-text" style={{ margin: '6px 0' }}><b>User note:</b> {r.user_note}</p>}
       {r.receipt_upload_id && (
         <div className="thumbs"><button type="button" className="thumb" onClick={() => onReceipt(r.receipt_upload_id)} title="Open the receipt"><img src={`/api/premium/receipt/${r.receipt_upload_id}?thumb=1`} alt="Payment receipt" /></button></div>
       )}
+      {state === 'pending' && <div className="small-text faint">Check that the amount transferred is at least <b>৳{r.amount}</b>. If it is lower, reject the payment (write the reason in the note).</div>}
       <div className="row" style={{ marginTop: 8, flexWrap: 'wrap' }}>
         <input value={note} maxLength={500} onChange={(e) => setNote(e.target.value)} placeholder="Note to the user (optional)" aria-label="Admin note" style={{ flex: 1, minWidth: 200 }} />
-        {r.status !== 'active' && <button className="primary small" disabled={busy} onClick={() => act('activate')}>Make premium</button>}
-        {r.status !== 'cancelled' && <button className="small" disabled={busy} onClick={() => act('cancel')}>{r.status === 'active' ? 'Cancel subscription' : 'Cancel request'}</button>}
+        {r.status === 'draft' && <button className="primary small" disabled={busy} onClick={() => act('activate')}>Approve payment</button>}
+        {r.status === 'draft' && <button className="small" disabled={busy} onClick={() => act('reject')}>Reject payment</button>}
+        {r.status === 'active' && !r.deleted_at && <button className="small" disabled={busy} onClick={() => act('cancel')}>Cancel subscription</button>}
       </div>
       <ErrorBox e={err} />
     </div>
@@ -164,11 +176,8 @@ export function PremiumSettings() {
       </div>
 
       <div className="card stack">
-        <h2 style={{ margin: 0 }}>Prices (৳)</h2>
-        <div className="limits">
-          <div className="field"><label htmlFor="price-m">Monthly (30 days)</label><input id="price-m" type="number" min={1} value={cfg.plans.monthly.price} onChange={(e) => set('plans', { ...cfg.plans, monthly: { ...cfg.plans.monthly, price: e.target.value } })} /></div>
-          <div className="field"><label htmlFor="price-y">Yearly (365 days)</label><input id="price-y" type="number" min={1} value={cfg.plans.yearly.price} onChange={(e) => set('plans', { ...cfg.plans, yearly: { ...cfg.plans.yearly, price: e.target.value } })} /></div>
-        </div>
+        <h2 style={{ margin: 0 }}>Prices</h2>
+        <p className="small-text muted" style={{ margin: 0 }}>Prices live in pricing plans now (original and discounted price, monthly and yearly). Create and disable them in <Link to="/superadmin/pricing">Pricing</Link>.</p>
       </div>
 
       <div className="card stack">
@@ -256,7 +265,7 @@ export function PaymentsAdmin() {
               <td><b>{taka(r.amount)}</b></td>
               <td>{METHOD[r.method as keyof typeof METHOD]}</td>
               <td className="mono small-text">{r.trx_id ?? '—'}</td>
-              <td>{r.subscription_plan ? PLAN[r.subscription_plan as 'monthly' | 'yearly'] : '—'}</td>
+              <td>{r.pricing_plan_name ? <>{r.pricing_plan_name} <span className="faint">#{r.pricing_plan_id}</span><div className="small-text muted">{PLAN[(r.plan_type ?? r.subscription_plan) as 'monthly' | 'yearly']}</div></> : r.subscription_plan ? PLAN[r.subscription_plan as 'monthly' | 'yearly'] : '—'}</td>
               <td><span className={`badge ${r.status === 'received' ? 'strong' : 'dashed'}`}>{r.status === 'received' ? 'Received' : 'Refunded'}</span></td>
               <td className="small-text">{r.note ?? ''}</td>
               <td><div className="row"><button className="small" onClick={() => setEdit(r)}>Edit</button><button className="small" onClick={() => remove(r)}>Delete</button></div></td>
@@ -305,6 +314,82 @@ function PaymentForm({ row, onClose, onSaved }: { row: any | null; onClose: () =
         <div className="field"><label htmlFor="pm-note">Note</label><textarea id="pm-note" rows={3} maxLength={1000} value={f.note} onChange={set('note')} /></div>
         <ErrorBox e={err} />
         <div className="row" style={{ justifyContent: 'flex-end' }}><button type="button" onClick={onClose}>Cancel</button><button className="primary" disabled={busy}>{busy ? 'Saving…' : 'Save'}</button></div>
+      </form>
+    </Modal>
+  );
+}
+
+/** Super Admin: pricing plans. A plan has a monthly and a yearly price (original + discounted). It cannot be edited once created, only disabled. */
+export function PricingAdmin() {
+  const { data, error, reload } = useAsync(() => get('/premium-admin/pricing'), []);
+  const { reload: reloadStatus } = usePremium();
+  const [adding, setAdding] = useState(false);
+  const [err, setErr] = useState<any>(null);
+  const disable = async (p: any) => {
+    if (!(await confirmDialog(`Disable the pricing plan "${p.name}" (ID ${p.id})? This cannot be undone and the plan cannot be edited or enabled again. Users on this plan keep their paid period, but their next payment has to be for one of the active plans.`))) return;
+    setErr(null);
+    try { await post(`/premium-admin/pricing/${p.id}/disable`, { confirm: true }); toast('Pricing plan disabled'); await reload(); await reloadStatus(); } catch (e) { setErr(e); toast((e as Error).message, 'error'); }
+  };
+  const money = (orig: number, price: number) => (orig > price ? <><s className="faint">৳{orig}</s> <b>৳{price}</b></> : <b>৳{price}</b>);
+  return (
+    <div className="page">
+      <Crumbs items={[{ label: 'Superadmin Panel' }, { label: 'Pricing' }]} />
+      <div className="row between" style={{ flexWrap: 'wrap' }}>
+        <h1 style={{ margin: 0 }}>Pricing</h1>
+        <button className="primary" onClick={() => setAdding(true)}>New pricing plan</button>
+      </div>
+      <p className="muted prose">Each plan has a <b>Monthly</b> and a <b>Yearly</b> price, each with an original and a discounted price (users pay the discounted price). <b>A plan cannot be edited after it is created</b> — not even by a Super Admin. It can only be disabled, after a confirmation.</p>
+      <ErrorBox e={error ?? err} />
+      {!data && !error && <Loading />}
+      {data && data.rows.length === 0 && <div className="empty">No pricing plan yet.</div>}
+      {data && data.rows.length > 0 && (
+        <div className="table-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>Monthly</th><th>Yearly</th><th>Status</th><th>Subscribers</th><th>Created</th><th></th></tr></thead><tbody>
+          {data.rows.map((p: any) => (
+            <tr key={p.id} style={p.active ? undefined : { opacity: 0.65 }}>
+              <td className="mono">{p.id}</td>
+              <td><b>{p.name}</b></td>
+              <td>{money(p.monthly_original, p.monthly_price)}</td>
+              <td>{money(p.yearly_original, p.yearly_price)}</td>
+              <td><span className={`badge ${p.active ? 'solid' : 'dashed'}`}>{p.active ? 'Active' : 'Disabled'}</span>{!p.active && <div className="small-text faint">{fmtDate(p.disabled_at)}{p.disabled_by_email ? ` · ${p.disabled_by_email}` : ''}</div>}</td>
+              <td>{p.subscribers}</td>
+              <td className="small-text">{fmtDate(p.created_at)}<div className="muted">{p.created_by_name ?? p.created_by_email ?? '—'}</div></td>
+              <td>{p.active ? <button className="small" onClick={() => disable(p)}>Disable</button> : null}</td>
+            </tr>))}
+        </tbody></table></div>
+      )}
+      {adding && <PricingForm onClose={() => setAdding(false)} onSaved={async () => { setAdding(false); toast('Pricing plan created'); await reload(); await reloadStatus(); }} />}
+    </div>
+  );
+}
+
+function PricingForm({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
+  const [f, setF] = useState({ name: '', monthly_original: '', monthly_price: '', yearly_original: '', yearly_price: '' });
+  const [err, setErr] = useState<any>(null);
+  const [busy, setBusy] = useState(false);
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF((x) => ({ ...x, [k]: e.target.value }));
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!(await confirmDialog('Create this pricing plan? It cannot be edited afterwards, only disabled.'))) return;
+    setBusy(true); setErr(null);
+    try {
+      await post('/premium-admin/pricing', { name: f.name, monthly_original: Number(f.monthly_original), monthly_price: Number(f.monthly_price), yearly_original: Number(f.yearly_original), yearly_price: Number(f.yearly_price) });
+      onSaved();
+    } catch (e2) { setErr(e2); } finally { setBusy(false); }
+  };
+  const num = (k: keyof typeof f, label: string) => <div className="field"><label htmlFor={`pp-${k}`}>{label}</label><input id={`pp-${k}`} type="number" min={0} step={1} value={f[k]} onChange={set(k)} required /></div>;
+  return (
+    <Modal title="New pricing plan" onClose={onClose}>
+      <form className="stack" onSubmit={submit}>
+        <div className="field"><label htmlFor="pp-name">Plan name</label><input id="pp-name" value={f.name} maxLength={80} onChange={set('name')} required autoFocus style={{ width: '100%' }} /></div>
+        <div className="limits">
+          {num('monthly_original', 'Monthly — original price (৳)')}
+          {num('monthly_price', 'Monthly — discounted price (৳)')}
+          {num('yearly_original', 'Yearly — original price (৳)')}
+          {num('yearly_price', 'Yearly — discounted price (৳)')}
+        </div>
+        <div className="small-text faint">Users pay the discounted price. If there is no discount, enter the same amount twice. A plan cannot be edited after it is created.</div>
+        <ErrorBox e={err} />
+        <div className="row" style={{ justifyContent: 'flex-end' }}><button type="button" onClick={onClose}>Cancel</button><button className="primary" disabled={busy}>{busy ? 'Saving…' : 'Create plan'}</button></div>
       </form>
     </Modal>
   );

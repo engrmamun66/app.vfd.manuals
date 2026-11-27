@@ -19,12 +19,18 @@ export interface PremiumConfig {
   plans: { monthly: { price: number; days: number }; yearly: { price: number; days: number } };
   payment: { bkash_number: string; bkash_type: string; banks: BankAccount[]; receipt_email: string; instructions: string };
 }
+export interface PricingPlan { id: number; name: string; monthly_original: number; monthly_price: number; yearly_original: number; yearly_price: number; currency: string }
+export interface SubInfo { id: number; billing: 'monthly' | 'yearly'; amount: number; pricing_plan_id: number | null; plan_name: string | null; plan_active: number | null; subscribed_at: string | null; starts_at: string; ends_at: string; migrate_to: 'monthly' | 'yearly' | null }
 export interface PremiumStatus {
   isPro: boolean;
   plan: 'monthly' | 'yearly' | 'admin' | 'trial' | null;
   endsAt: string | null;
   trialEndsAt: string | null;
-  pending: { id: number; plan: 'monthly' | 'yearly'; amount: number; created_at: string } | null;
+  pending: { id: number; plan: 'monthly' | 'yearly'; amount: number; created_at: string; pricing_plan_id: number | null; plan_name: string | null } | null;
+  subscription: SubInfo | null;
+  queued: SubInfo | null;
+  needsPlanMigration: boolean;
+  pricingPlans: PricingPlan[];
   profileComplete: boolean;
   config: PremiumConfig;
   usage: { comments: number; highlights: number; bookmarks: number };

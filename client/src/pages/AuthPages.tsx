@@ -63,6 +63,7 @@ export function Login() {
       <p className="muted small-text" style={{ marginTop: 14 }}>
         {regOn ? <>No account? <Link to="/register">Create one</Link></> : 'New registrations are currently disabled.'}
       </p>
+      <p className="muted small-text" style={{ marginTop: 6 }}><Link to="/privacy">Privacy Policy &amp; Service Terms</Link></p>
     </Wrap>
   );
 }
@@ -118,7 +119,8 @@ export function Register() {
         <ErrorBox e={err} />
         <button className="primary" disabled={busy || mismatch} style={{ width: '100%', justifyContent: 'center' }}>{busy ? 'Creating…' : 'Create account'}</button>
       </form>
-      <p className="muted small-text" style={{ marginTop: 14 }}>Already registered? <Link to="/login">Sign in</Link></p>
+      <p className="muted small-text" style={{ marginTop: 14 }}>By creating an account you accept our <Link to="/privacy">Privacy Policy &amp; Service Terms</Link>.</p>
+      <p className="muted small-text" style={{ marginTop: 6 }}>Already registered? <Link to="/login">Sign in</Link></p>
     </Wrap>
   );
 }

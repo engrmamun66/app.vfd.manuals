@@ -6,7 +6,7 @@ import { ah, badRequest, conflict, HttpError, intParam, notFound, oneOf, paging,
 import { audit, logActivity } from '../lib/audit.js';
 import { safeResolve, saveUserImage, userRoot } from '../services/storage.js';
 import { setAppSetting } from '../services/settings.js';
-import { activeSubscription, activeTrialEnd, getPremiumConfig, isPro, usage, type PremiumConfig } from '../services/premium.js';
+import { activePricingPlans, activeSubscription, activeTrialEnd, addPeriod, ceilHour, getPremiumConfig, isPro, priceOf, queuedSubscription, subState, usage, type PremiumConfig } from '../services/premium.js';
 import { isValidEmail, normalizeEmail } from '../auth/password.js';
 
 /** Pricing and subscription requests (with a payment receipt) for every user. */
@@ -22,14 +22,20 @@ premiumRouter.get(
     const u = req.user!;
     const db = getDb();
     const sub = activeSubscription(u.id);
+    const queued = queuedSubscription(u.id) ?? null;
     const trial = activeTrialEnd(u.id);
-    const pending = db.prepare("SELECT id, plan, amount, created_at FROM subscriptions WHERE user_id = ? AND status = 'draft' ORDER BY id DESC LIMIT 1").get(u.id) ?? null;
+    const pending = db.prepare("SELECT s.id, s.plan, s.amount, s.created_at, s.pricing_plan_id, p.name plan_name FROM subscriptions s LEFT JOIN pricing_plans p ON p.id = s.pricing_plan_id WHERE s.user_id = ? AND s.status = 'draft' ORDER BY s.id DESC LIMIT 1").get(u.id) ?? null;
     const me = db.prepare('SELECT phone, display_name FROM users WHERE id = ?').get(u.id) as { phone: string | null; display_name: string | null };
     res.json({
       isPro: isPro(u.id, u.role),
-      plan: u.role === 'super_admin' ? 'admin' : sub?.plan ?? (trial ? 'trial' : null),
+      plan: u.role === 'super_admin' ? 'admin' : sub?.billing ?? (trial ? 'trial' : null),
       endsAt: sub?.ends_at ?? null,
       trialEndsAt: trial,
+      subscription: sub ?? null,
+      queued,
+      // the plan the user is on was disabled: the next payment has to be for one of the active plans
+      needsPlanMigration: !!sub && !sub.plan_active,
+      pricingPlans: activePricingPlans(),
       pending,
       profileComplete: !!me.phone && !!me.display_name?.trim() && !!u.email,
       config: getPremiumConfig(),
@@ -41,7 +47,45 @@ premiumRouter.get(
 premiumRouter.get(
   '/mine',
   ah(async (req, res) => {
-    res.json({ rows: getDb().prepare('SELECT id, plan, amount, currency, status, receipt_upload_id, admin_note, starts_at, ends_at, created_at FROM subscriptions WHERE user_id = ? ORDER BY id DESC LIMIT 50').all(req.user!.id) });
+    const rows = getDb()
+      .prepare(`SELECT s.id, s.plan, s.amount, s.currency, s.status, s.outcome, s.receipt_upload_id, s.admin_note, s.subscribed_at, s.starts_at, s.ends_at, s.deleted_at, s.cancelled_at, s.migrate_to, s.created_at, s.pricing_plan_id, p.name plan_name
+        FROM subscriptions s LEFT JOIN pricing_plans p ON p.id = s.pricing_plan_id WHERE s.user_id = ? ORDER BY s.id DESC LIMIT 100`)
+      .all(req.user!.id) as any[];
+    res.json({ rows: rows.map((r) => ({ ...r, state: subState(r) })) });
+  }),
+);
+
+/**
+ * Billing-type change (monthly ↔ yearly). It only schedules the change: the running subscription stays as it is,
+ * the new type applies from the next billing cycle (when the running period ends). `to: null` withdraws a scheduled change.
+ */
+premiumRouter.post(
+  '/migrate',
+  ah(async (req, res) => {
+    const db = getDb();
+    const sub = activeSubscription(req.user!.id);
+    if (!sub) throw conflict('You have no running subscription to change.');
+    const to = req.body?.to === null ? null : oneOf(req.body?.to, 'to', ['monthly', 'yearly'] as const);
+    if (to && to === sub.billing) throw badRequest(`You are already on the ${to} subscription.`);
+    if (to && queuedSubscription(req.user!.id)) throw conflict('Your next billing period is already paid. It cannot be changed.');
+    db.prepare("UPDATE subscriptions SET migrate_to = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?").run(to, sub.id);
+    logActivity({ userId: req.user!.id, event: to ? 'subscription_migrate_schedule' : 'subscription_migrate_clear', entityType: 'subscription', entityId: sub.id, meta: { from: sub.billing, to, effective: sub.ends_at } });
+    res.json({ ok: true, migrate_to: to, effective_at: sub.ends_at });
+  }),
+);
+
+/** Cancellation: immediate. The user becomes a Free user now; the subscription rows are soft-deleted (kept for audit). */
+premiumRouter.post(
+  '/cancel',
+  ah(async (req, res) => {
+    const db = getDb();
+    const now = new Date().toISOString();
+    const r = db
+      .prepare("UPDATE subscriptions SET status = 'cancelled', outcome = 'cancelled_by_user', cancelled_at = ?, deleted_at = ?, migrate_to = NULL, updated_at = ? WHERE user_id = ? AND status = 'active' AND deleted_at IS NULL AND ends_at > ?")
+      .run(now, now, now, req.user!.id, now);
+    if (!r.changes) throw conflict('You have no active subscription to cancel.');
+    logActivity({ userId: req.user!.id, event: 'subscription_cancel', entityType: 'user', entityId: req.user!.id, meta: { subscriptions: r.changes } });
+    res.json({ ok: true, cancelled: r.changes });
   }),
 );
 
@@ -52,13 +96,19 @@ premiumRouter.post(
     const db = getDb();
     const uid = req.user!.id;
     const plan = oneOf(req.body.plan, 'plan', ['monthly', 'yearly'] as const);
+    const planId = intParam(req.body.pricing_plan_id, 'pricing_plan_id', { required: true, min: 1 })!;
+    const pricing = activePricingPlans().find((p) => p.id === planId);
+    if (!pricing) throw badRequest('This pricing plan is not available. Please choose one of the active plans.');
+    const running = activeSubscription(uid);
+    if (running?.migrate_to && plan !== running.migrate_to) throw badRequest(`You scheduled a change to the ${running.migrate_to} subscription. The next payment has to be a ${running.migrate_to} one.`);
+    if (running && queuedSubscription(uid)) throw conflict('Your next billing period is already paid.');
     const me = db.prepare('SELECT email, phone, display_name FROM users WHERE id = ?').get(uid) as { email: string; phone: string | null; display_name: string | null };
     if (!me.email || !me.phone || !me.display_name?.trim()) throw new HttpError(400, 'Please complete your profile (full name, email and phone number) first.', { code: 'PROFILE_INCOMPLETE' });
     if (db.prepare("SELECT 1 FROM subscriptions WHERE user_id = ? AND status = 'draft'").get(uid)) throw conflict('You already have a subscription request waiting for review. Withdraw it first to send a new one.');
     if (!req.file) throw badRequest('Please attach your payment receipt (JPEG, PNG or WebP image).');
     const note = str(req.body.note, 'note', { max: 500 });
-    const amount = getPremiumConfig().plans[plan].price;
-    const id = Number(db.prepare('INSERT INTO subscriptions(user_id, plan, amount, user_note) VALUES (?,?,?,?)').run(uid, plan, amount, note).lastInsertRowid);
+    const amount = priceOf(pricing, plan);
+    const id = Number(db.prepare('INSERT INTO subscriptions(user_id, plan, amount, user_note, pricing_plan_id) VALUES (?,?,?,?,?)').run(uid, plan, amount, note, planId).lastInsertRowid);
     try {
       const uploadId = await saveUserImage({ userId: uid, buf: req.file.buffer, originalName: req.file.originalname, kind: 'upload', subdir: `subscriptions/${id}` });
       db.prepare('UPDATE subscriptions SET receipt_upload_id = ? WHERE id = ?').run(uploadId, id);
@@ -66,8 +116,8 @@ premiumRouter.post(
       db.prepare('DELETE FROM subscriptions WHERE id = ?').run(id);
       throw e;
     }
-    logActivity({ userId: uid, event: 'subscription_request', entityType: 'subscription', entityId: id, meta: { plan, amount } });
-    res.status(201).json({ id, plan, amount });
+    logActivity({ userId: uid, event: 'subscription_request', entityType: 'subscription', entityId: id, meta: { plan, amount, pricingPlanId: planId } });
+    res.status(201).json({ id, plan, amount, pricing_plan_id: planId });
   }),
 );
 
@@ -79,7 +129,7 @@ premiumRouter.delete(
     const id = intParam(req.params.id, 'id', { required: true })!;
     const s = db.prepare("SELECT * FROM subscriptions WHERE id = ? AND user_id = ? AND status = 'draft'").get(id, req.user!.id) as any;
     if (!s) throw notFound('Request not found');
-    db.prepare("UPDATE subscriptions SET status = 'cancelled', admin_note = 'Withdrawn by the user', updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?").run(id);
+    db.prepare("UPDATE subscriptions SET status = 'cancelled', outcome = 'withdrawn', admin_note = 'Withdrawn by the user', updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?").run(id);
     logActivity({ userId: req.user!.id, event: 'subscription_withdraw', entityType: 'subscription', entityId: id });
     res.json({ ok: true });
   }),
@@ -168,6 +218,53 @@ premiumAdminRouter.put(
   }),
 );
 
+// ================= Pricing plans (created once, never edited; only disabled) =================
+const priceInt = (v: unknown, field: string) => intParam(v, field, { required: true, min: 0, max: 10_000_000 })!;
+
+premiumAdminRouter.get(
+  '/pricing',
+  ah(async (_req, res) => {
+    const rows = getDb()
+      .prepare(`SELECT p.*, c.email created_by_email, c.display_name created_by_name, d.email disabled_by_email,
+          (SELECT COUNT(*) FROM subscriptions s WHERE s.pricing_plan_id = p.id AND s.status = 'active' AND s.deleted_at IS NULL AND s.ends_at > ?) subscribers
+        FROM pricing_plans p LEFT JOIN users c ON c.id = p.created_by LEFT JOIN users d ON d.id = p.disabled_by ORDER BY p.active DESC, p.id DESC`)
+      .all(new Date().toISOString());
+    res.json({ rows });
+  }),
+);
+
+premiumAdminRouter.post(
+  '/pricing',
+  ah(async (req, res) => {
+    const b = req.body ?? {};
+    const name = str(b.name, 'Plan name', { required: true, max: 80 })!;
+    const f = { mo: priceInt(b.monthly_original, 'Monthly original price'), mp: priceInt(b.monthly_price, 'Monthly discounted price'), yo: priceInt(b.yearly_original, 'Yearly original price'), yp: priceInt(b.yearly_price, 'Yearly discounted price') };
+    if (f.mp > f.mo) throw badRequest('The monthly discounted price cannot be higher than the original price.');
+    if (f.yp > f.yo) throw badRequest('The yearly discounted price cannot be higher than the original price.');
+    const id = Number(getDb().prepare('INSERT INTO pricing_plans(name, monthly_original, monthly_price, yearly_original, yearly_price, created_by) VALUES (?,?,?,?,?,?)').run(name, f.mo, f.mp, f.yo, f.yp, req.user!.id).lastInsertRowid);
+    audit({ entityType: 'pricing_plan', entityId: id, operation: 'create', next: { name, ...f }, userId: req.user!.id, source: 'admin' });
+    res.status(201).json({ id });
+  }),
+);
+
+/** Disabling is the only change a plan allows (no edit, no re-enable, no delete). The client asks for confirmation first; `confirm: true` proves it. */
+premiumAdminRouter.post(
+  '/pricing/:id/disable',
+  ah(async (req, res) => {
+    const db = getDb();
+    const id = intParam(req.params.id, 'id', { required: true })!;
+    if (req.body?.confirm !== true) throw badRequest('Disabling a pricing plan has to be confirmed.');
+    const cur = db.prepare('SELECT * FROM pricing_plans WHERE id = ?').get(id) as any;
+    if (!cur) throw notFound('Pricing plan not found');
+    if (!cur.active) throw conflict('This pricing plan is already disabled.');
+    if ((db.prepare('SELECT COUNT(*) c FROM pricing_plans WHERE active = 1').get() as { c: number }).c <= 1) throw conflict('This is the only active pricing plan. Create another plan first, so users can move to it.');
+    db.prepare('UPDATE pricing_plans SET active = 0, disabled_by = ?, disabled_at = ?, disabled_reason = ? WHERE id = ?').run(req.user!.id, new Date().toISOString(), str(req.body?.reason, 'reason', { max: 300 }), id);
+    audit({ entityType: 'pricing_plan', entityId: id, operation: 'update', previous: { active: 1 }, next: { active: 0 }, userId: req.user!.id, source: 'admin' });
+    res.json({ ok: true });
+  }),
+);
+
+// ================= Subscriptions (manual payment review) =================
 const STATUSES = ['draft', 'active', 'cancelled'] as const;
 
 premiumAdminRouter.get(
@@ -183,15 +280,21 @@ premiumAdminRouter.get(
     const w = where.length ? 'WHERE ' + where.join(' AND ') : '';
     const { limit, offset, page } = paging(req.query as any, 30, 200);
     const total = (db.prepare(`SELECT COUNT(*) c FROM subscriptions s ${w}`).get(...args) as any).c;
-    const rows = db
-      .prepare(`SELECT s.*, u.email, u.display_name, u.phone FROM subscriptions s JOIN users u ON u.id = s.user_id ${w} ORDER BY (s.status = 'draft') DESC, s.id DESC LIMIT ? OFFSET ?`)
-      .all(...args, limit, offset);
+    const rows = (
+      db
+        .prepare(`SELECT s.*, u.email, u.display_name, u.phone, p.name plan_name FROM subscriptions s JOIN users u ON u.id = s.user_id LEFT JOIN pricing_plans p ON p.id = s.pricing_plan_id ${w} ORDER BY (s.status = 'draft') DESC, s.id DESC LIMIT ? OFFSET ?`)
+        .all(...args, limit, offset) as any[]
+    ).map((r) => ({ ...r, state: subState(r) }));
     const counts = db.prepare('SELECT status, COUNT(*) n FROM subscriptions GROUP BY status').all();
     res.json({ total, page, limit, rows, counts });
   }),
 );
 
-/** activate = the user becomes Pro for the plan's period (extends a period that is still running); cancel = reject a request / end a subscription. */
+/**
+ * activate = approve the payment: the subscription starts (rounded up to the next full hour, or when the running period ends),
+ * and its payment record is created from the plan price. reject = the payment was not accepted (e.g. too little was transferred).
+ * cancel = end an approved subscription now (soft delete).
+ */
 premiumAdminRouter.patch(
   '/subscriptions/:id',
   ah(async (req, res) => {
@@ -199,25 +302,34 @@ premiumAdminRouter.patch(
     const id = intParam(req.params.id, 'id', { required: true })!;
     const cur = db.prepare('SELECT * FROM subscriptions WHERE id = ?').get(id) as any;
     if (!cur) throw notFound('Subscription not found');
-    const action = oneOf(req.body.action, 'action', ['activate', 'cancel'] as const);
+    const action = oneOf(req.body.action, 'action', ['activate', 'reject', 'cancel'] as const);
     const note = str(req.body.note, 'note', { max: 500 });
     const now = new Date();
+    const nowIso = now.toISOString();
     if (action === 'activate') {
-      if (cur.status === 'active') throw conflict('Already active');
-      const running = db.prepare("SELECT MAX(ends_at) e FROM subscriptions WHERE user_id = ? AND status = 'active' AND ends_at > ?").get(cur.user_id, now.toISOString()) as { e: string | null };
-      const start = running.e ? new Date(running.e) : now;
-      const days = getPremiumConfig().plans[cur.plan as 'monthly' | 'yearly'].days;
-      const end = new Date(start.getTime() + days * 86_400_000);
-      db.prepare("UPDATE subscriptions SET status = 'active', starts_at = ?, ends_at = ?, admin_note = ?, decided_by = ?, decided_at = ?, updated_at = ? WHERE id = ?").run(start.toISOString(), end.toISOString(), note, req.user!.id, now.toISOString(), now.toISOString(), id);
-      if (!db.prepare('SELECT 1 FROM payments WHERE subscription_id = ?').get(id)) {
-        const u = db.prepare('SELECT display_name, phone FROM users WHERE id = ?').get(cur.user_id) as { display_name: string | null; phone: string | null };
-        db.prepare("INSERT INTO payments(user_id, subscription_id, payer_name, payer_phone, amount, method, paid_at, note, created_by) VALUES (?,?,?,?,?,'other',?,?,?)").run(cur.user_id, id, u.display_name, u.phone, cur.amount, now.toISOString(), 'Recorded automatically when the subscription was activated. Set the payment method and transaction ID.', req.user!.id);
-      }
+      if (cur.status !== 'draft') throw conflict('Only a payment that waits for review can be approved.');
+      const running = db.prepare("SELECT MAX(ends_at) e FROM subscriptions WHERE user_id = ? AND status = 'active' AND deleted_at IS NULL AND ends_at > ?").get(cur.user_id, nowIso) as { e: string | null };
+      // a paid period that is still running: the new one follows it (next billing cycle); otherwise it starts at the next full hour
+      const start = running.e ? new Date(running.e) : ceilHour(now);
+      const end = addPeriod(start, cur.plan);
+      db.transaction(() => {
+        db.prepare("UPDATE subscriptions SET status = 'active', subscribed_at = ?, starts_at = ?, ends_at = ?, admin_note = ?, decided_by = ?, decided_at = ?, updated_at = ? WHERE id = ?").run(nowIso, start.toISOString(), end.toISOString(), note, req.user!.id, nowIso, nowIso, id);
+        // the scheduled billing-type change is now carried out by this next period
+        if (running.e) db.prepare("UPDATE subscriptions SET migrate_to = NULL WHERE user_id = ? AND status = 'active' AND id <> ?").run(cur.user_id, id);
+        if (!db.prepare('SELECT 1 FROM payments WHERE subscription_id = ?').get(id)) {
+          const u = db.prepare('SELECT display_name, phone FROM users WHERE id = ?').get(cur.user_id) as { display_name: string | null; phone: string | null };
+          db.prepare("INSERT INTO payments(user_id, subscription_id, payer_name, payer_phone, amount, method, paid_at, note, created_by, pricing_plan_id, plan_type) VALUES (?,?,?,?,?,'other',?,?,?,?,?)")
+            .run(cur.user_id, id, u.display_name, u.phone, cur.amount, nowIso, `Recorded automatically when the ${cur.plan} subscription payment was approved`, req.user!.id, cur.pricing_plan_id, cur.plan);
+        }
+      })();
+    } else if (action === 'reject') {
+      if (cur.status !== 'draft') throw conflict('Only a payment that waits for review can be rejected.');
+      db.prepare("UPDATE subscriptions SET status = 'cancelled', outcome = 'rejected', admin_note = ?, decided_by = ?, decided_at = ?, updated_at = ? WHERE id = ?").run(note, req.user!.id, nowIso, nowIso, id);
     } else {
-      if (cur.status === 'cancelled') throw conflict('Already cancelled');
-      db.prepare("UPDATE subscriptions SET status = 'cancelled', ends_at = CASE WHEN status = 'active' THEN ? ELSE ends_at END, admin_note = ?, decided_by = ?, decided_at = ?, updated_at = ? WHERE id = ?").run(now.toISOString(), note, req.user!.id, now.toISOString(), now.toISOString(), id);
+      if (cur.status !== 'active' || cur.deleted_at) throw conflict('Only a running subscription can be cancelled.');
+      db.prepare("UPDATE subscriptions SET status = 'cancelled', outcome = 'cancelled_by_admin', cancelled_at = ?, deleted_at = ?, migrate_to = NULL, admin_note = ?, decided_by = ?, decided_at = ?, updated_at = ? WHERE id = ?").run(nowIso, nowIso, note, req.user!.id, nowIso, nowIso, id);
     }
-    audit({ entityType: 'subscription', entityId: id, operation: 'update', previous: { status: cur.status }, next: { status: action === 'activate' ? 'active' : 'cancelled' }, userId: req.user!.id, source: 'admin' });
+    audit({ entityType: 'subscription', entityId: id, operation: 'update', previous: { status: cur.status }, next: { action }, userId: req.user!.id, source: 'admin' });
     res.json({ ok: true });
   }),
 );
@@ -281,10 +393,10 @@ premiumAdminRouter.get(
     if (from && !Number.isNaN(from.getTime())) { where.push('p.paid_at >= ?'); args.push(from.toISOString()); }
     if (to && !Number.isNaN(to.getTime())) { where.push('p.paid_at < ?'); args.push(new Date(to.getTime() + 86_400_000).toISOString()); } // "to" day included
     const w = where.length ? 'WHERE ' + where.join(' AND ') : '';
-    const from_ = 'FROM payments p LEFT JOIN users u ON u.id = p.user_id LEFT JOIN subscriptions s ON s.id = p.subscription_id';
+    const from_ = 'FROM payments p LEFT JOIN users u ON u.id = p.user_id LEFT JOIN subscriptions s ON s.id = p.subscription_id LEFT JOIN pricing_plans pp ON pp.id = p.pricing_plan_id';
     const { limit, offset, page } = paging(req.query as any, 25, 200);
     const t = db.prepare(`SELECT COUNT(*) total, COALESCE(SUM(CASE WHEN p.status = 'received' THEN p.amount END), 0) received, COALESCE(SUM(CASE WHEN p.status = 'refunded' THEN p.amount END), 0) refunded ${from_} ${w}`).get(...args) as any;
-    const rows = db.prepare(`SELECT p.*, u.email user_email, u.display_name user_name, s.plan subscription_plan ${from_} ${w} ORDER BY p.paid_at DESC, p.id DESC LIMIT ? OFFSET ?`).all(...args, limit, offset);
+    const rows = db.prepare(`SELECT p.*, u.email user_email, u.display_name user_name, s.plan subscription_plan, pp.name pricing_plan_name, p.plan_type ${from_} ${w} ORDER BY p.paid_at DESC, p.id DESC LIMIT ? OFFSET ?`).all(...args, limit, offset);
     res.json({ total: t.total, page, limit, rows, sums: { received: t.received, refunded: t.refunded } });
   }),
 );

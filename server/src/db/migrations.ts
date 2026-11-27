@@ -821,4 +821,42 @@ CREATE VIRTUAL TABLE IF NOT EXISTS document_pages_vocab USING fts5vocab(document
 ALTER TABLE users ADD COLUMN full_access_until TEXT;
 `,
   },
+  {
+    version: 16,
+    name: 'pricing_plans_and_subscription_tracking',
+    sql: /* sql */ `
+-- pricing plans: created once, never edited; they can only be disabled (soft) by a Super Admin
+CREATE TABLE pricing_plans (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  monthly_original INTEGER NOT NULL CHECK (monthly_original >= 0),
+  monthly_price INTEGER NOT NULL CHECK (monthly_price >= 0),
+  yearly_original INTEGER NOT NULL CHECK (yearly_original >= 0),
+  yearly_price INTEGER NOT NULL CHECK (yearly_price >= 0),
+  currency TEXT NOT NULL DEFAULT 'BDT',
+  active INTEGER NOT NULL DEFAULT 1,
+  created_by INTEGER REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+  disabled_by INTEGER REFERENCES users(id),
+  disabled_at TEXT,
+  disabled_reason TEXT
+);
+-- the plan that existed before pricing plans were introduced
+INSERT INTO pricing_plans(name, monthly_original, monthly_price, yearly_original, yearly_price, created_by)
+  VALUES ('Pro', 99, 99, 450, 450, (SELECT id FROM users WHERE role = 'super_admin' ORDER BY id LIMIT 1));
+
+ALTER TABLE subscriptions ADD COLUMN pricing_plan_id INTEGER REFERENCES pricing_plans(id);
+ALTER TABLE subscriptions ADD COLUMN subscribed_at TEXT;   -- exact moment the subscription was activated
+ALTER TABLE subscriptions ADD COLUMN deleted_at TEXT;      -- soft delete (cancellation)
+ALTER TABLE subscriptions ADD COLUMN cancelled_at TEXT;
+ALTER TABLE subscriptions ADD COLUMN outcome TEXT;         -- rejected | withdrawn | cancelled_by_user | cancelled_by_admin
+ALTER TABLE subscriptions ADD COLUMN migrate_to TEXT;      -- monthly | yearly: billing type from the next billing cycle
+UPDATE subscriptions SET pricing_plan_id = (SELECT MIN(id) FROM pricing_plans), subscribed_at = decided_at WHERE pricing_plan_id IS NULL;
+UPDATE subscriptions SET outcome = 'cancelled_by_admin' WHERE status = 'cancelled' AND outcome IS NULL;
+
+ALTER TABLE payments ADD COLUMN pricing_plan_id INTEGER REFERENCES pricing_plans(id);
+ALTER TABLE payments ADD COLUMN plan_type TEXT;
+CREATE INDEX idx_sub_plan ON subscriptions(pricing_plan_id);
+`,
+  },
 ];
