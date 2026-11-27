@@ -3,11 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 /** Privacy policy and service terms. Public page (also readable before registering). */
 export function PrivacyPolicy() {
   const nav = useNavigate();
+  const back = () => (window.history.length > 1 ? nav(-1) : nav('/'));
   return (
     <div className="page" style={{ maxWidth: 860, margin: '0 auto', padding: '24px 16px 60px' }}>
       <div className="row between" style={{ flexWrap: 'wrap' }}>
         <h1 style={{ margin: 0 }}>Privacy Policy &amp; Service Terms</h1>
-        <button onClick={() => (window.history.length > 1 ? nav(-1) : nav('/'))}>← Back</button>
+        <button onClick={back}>← Back</button>
       </div>
       <p className="muted small-text">VFD Knowledge Base · applies to every registered user</p>
 
@@ -78,7 +79,10 @@ export function PrivacyPolicy() {
           <p>We may update this page. The version on this page is the one that applies.</p>
         </section>
       </div>
-      <p className="small-text muted" style={{ marginTop: 24 }}><Link to="/">Home</Link> · <Link to="/login">Sign in</Link></p>
+      <div className="row between" style={{ marginTop: 24, flexWrap: 'wrap' }}>
+        <button onClick={back}>← Back</button>
+        <span className="small-text muted"><Link to="/">Home</Link> · <Link to="/login">Sign in</Link></span>
+      </div>
     </div>
   );
 }
