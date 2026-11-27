@@ -89,17 +89,17 @@ export function AdminUsers() {
         <select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Status"><option value="">Any status</option><option value="enabled">Enabled</option><option value="disabled">Disabled</option></select>
         <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort"><option value="">By id</option><option value="storage_bytes">Storage used</option><option value="last_login_at">Last login</option><option value="created_at">Registered</option><option value="files">Uploads</option><option value="comments_active">Comments</option></select>
       </div>
-      <div className="table-wrap"><table><thead><tr><th>User</th><th>Role</th><th>Status</th><th>Online</th><th>Sessions</th><th>Registered</th><th>Last login</th><th>Logins</th><th>Comments</th><th>Annot.</th><th>Bookmarks</th><th>Files</th><th>Storage</th><th></th></tr></thead><tbody>
+      <div className="table-wrap"><table className="rtable"><thead><tr><th>User</th><th>Role</th><th>Status</th><th>Online</th><th>Sessions</th><th>Registered</th><th>Last login</th><th>Logins</th><th>Comments</th><th>Annot.</th><th>Bookmarks</th><th>Files</th><th>Storage</th><th></th></tr></thead><tbody>
         {users?.map((u) => {
           const online = P?.users.find((x: any) => x.userId === u.id);
           return (
-            <tr key={u.id}><td><a href="#" onClick={(e) => { e.preventDefault(); setDetail(u.id); }}>{u.email}</a><div className="small-text muted">#{u.id}{u.company ? ` · ${u.company}` : ''}</div></td>
-              <td><span className={`badge ${u.role === 'super_admin' ? 'solid' : ''}`}>{u.role === 'super_admin' ? 'Super Admin' : 'Normal User'}</span></td><td><span className={`badge ${u.status === 'enabled' ? 'strong' : 'dashed'}`}>{u.status}</span></td>
-              <td>{online ? <span className="badge solid">{online.sockets} tab(s)</span> : <span className="faint">offline</span>}</td><td className="num">{u.active_sessions}</td>
-              <td className="small-text">{new Date(u.created_at).toLocaleDateString()}</td><td className="small-text">{fmtDate(u.last_login_at)}</td><td className="num">{u.login_count}</td>
-              <td className="num">{u.comments_active}</td><td className="num">{u.annotations_total}</td><td className="num">{u.bookmarks}/{u.folders}</td><td className="num">{u.files}</td>
-              <td className="small-text">{fmtBytes(u.storage_bytes)} / {fmtBytes(u.quota_bytes)}<div style={{ height: 4, background: 'var(--line)' }}><div style={{ height: 4, width: `${Math.min(100, (u.storage_bytes / (u.quota_bytes || 1)) * 100)}%`, background: 'var(--fg)' }} /></div></td>
-              <td><div className="row" style={{ flexWrap: 'nowrap' }}><button className="small" onClick={() => setDetail(u.id)}>Details</button>{u.id !== me?.id && <button className="small" onClick={() => toggle(u)}>{u.status === 'enabled' ? 'Disable' : 'Enable'}</button>}{u.id !== me?.id && u.role !== 'super_admin' && u.status === 'enabled' && <button className="small primary" title="Open the app as this user (2 hours). Your admin session stays active." onClick={async () => { if (!(await confirmDialog(`Sign in as ${u.email}? You will see the app exactly as this user. Use \"Return to admin\" to come back.`))) return; try { await post(`/admin/users/${u.id}/impersonate`, {}); window.location.assign('/'); } catch (e) { alert((e as Error).message); } }}>Login as</button>}</div></td></tr>);
+            <tr key={u.id}><td className="rt-main"><a href="#" onClick={(e) => { e.preventDefault(); setDetail(u.id); }}>{u.email}</a><div className="small-text muted">#{u.id}{u.company ? ` · ${u.company}` : ''}</div></td>
+              <td data-label="Role"><span className={`badge ${u.role === 'super_admin' ? 'solid' : ''}`}>{u.role === 'super_admin' ? 'Super Admin' : 'Normal User'}</span></td><td data-label="Status"><span className={`badge ${u.status === 'enabled' ? 'strong' : 'dashed'}`}>{u.status}</span></td>
+              <td data-label="Online">{online ? <span className="badge solid">{online.sockets} tab(s)</span> : <span className="faint">offline</span>}</td><td className="num" data-label="Sessions">{u.active_sessions}</td>
+              <td className="small-text" data-label="Registered">{new Date(u.created_at).toLocaleDateString()}</td><td className="small-text" data-label="Last login">{fmtDate(u.last_login_at)}</td><td className="num" data-label="Logins">{u.login_count}</td>
+              <td className="num" data-label="Comments">{u.comments_active}</td><td className="num" data-label="Annotations">{u.annotations_total}</td><td className="num" data-label="Bookmarks">{u.bookmarks}/{u.folders}</td><td className="num" data-label="Files">{u.files}</td>
+              <td className="small-text rt-wide" data-label="Storage">{fmtBytes(u.storage_bytes)} / {fmtBytes(u.quota_bytes)}<div style={{ height: 4, background: 'var(--line)' }}><div style={{ height: 4, width: `${Math.min(100, (u.storage_bytes / (u.quota_bytes || 1)) * 100)}%`, background: 'var(--fg)' }} /></div></td>
+              <td className="rt-actions"><div className="row" style={{ flexWrap: 'wrap' }}><button className="small" onClick={() => setDetail(u.id)}>Details</button>{u.id !== me?.id && <button className="small" onClick={() => toggle(u)}>{u.status === 'enabled' ? 'Disable' : 'Enable'}</button>}{u.id !== me?.id && u.role !== 'super_admin' && u.status === 'enabled' && <button className="small primary" title="Open the app as this user (2 hours). Your admin session stays active." onClick={async () => { if (!(await confirmDialog(`Sign in as ${u.email}? You will see the app exactly as this user. Use \"Return to admin\" to come back.`))) return; try { await post(`/admin/users/${u.id}/impersonate`, {}); window.location.assign('/'); } catch (e) { alert((e as Error).message); } }}>Login as</button>}</div></td></tr>);
         })}</tbody></table></div>
       {detail && <UserDetail id={detail} onClose={() => { setDetail(null); refresh(); }} />}
       {create && <CreateUser onClose={() => { setCreate(false); refresh(); }} />}
@@ -132,54 +132,81 @@ function UserDetail({ id, onClose }: { id: number; onClose: () => void }) {
   const [newPw, setNewPw] = useState('');
   const [mustChange, setMustChange] = useState(true);
   const [fa, setFa] = useState('');
+  const [tab, setTab] = useState('overview');
   useEffect(() => { if (u) setFa(u.full_access_until ? toLocalInput(new Date(u.full_access_until)) : ''); }, [u?.full_access_until]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (u) setLim({ quotaMB: Math.round(u.limits.quotaBytes / 1048576), fileMB: Math.round(u.limits.maxFileBytes / 1048576), att: u.limits.maxAttachmentsPerComment }); }, [u]);
   const run = async (fn: () => Promise<any>) => { try { setMsg(await fn()); reload(); } catch (e) { setMsg(e); } };
   if (!u || !lim) return <Modal title="User" onClose={onClose}><Loading /></Modal>;
   const s = u.storage;
+  const online = u.presence.length > 0;
+  const pct = Math.min(100, s.percent ?? 0);
   return (
     <Modal title={u.email} onClose={onClose} wide>
+      <div className="ud-head">
+        <div className="ud-badges">
+          <span className={`badge ${u.role === 'super_admin' ? 'solid' : ''}`}>{u.role === 'super_admin' ? 'Super Admin' : 'Normal User'}</span>
+          <span className={`badge ${u.status === 'enabled' ? 'strong' : 'dashed'}`}>{u.status}</span>
+          {online ? <span className="badge solid">online · {u.presence.length} tab(s)</span> : <span className="badge dashed">offline</span>}
+          <span className="small-text muted">#{u.id}{u.company ? ` · ${u.company}` : ''}</span>
+        </div>
+        <div className="ud-stats">
+          <div><b>{fmtDate(u.created_at)}</b><span>Registered</span></div>
+          <div><b>{u.last_login_at ? fmtDate(u.last_login_at) : '—'}</b><span>Last login</span></div>
+          <div><b>{u.login_count}</b><span>Logins ({u.failed_login_count} failed)</span></div>
+          <div><b>{fmtBytes(s.total)}</b><span>of {fmtBytes(u.limits.quotaBytes)} ({pct}%)</span></div>
+        </div>
+      </div>
+      <div className="tabs" role="tablist">
+        {([['overview', 'Overview'], ['access', 'Access & security'], ['storage', 'Storage & limits'], ['sessions', `Sessions (${u.sessions.length})`], ['history', 'Login history']] as [string, string][]).map(([k, l]) => <button key={k} role="tab" aria-selected={tab === k} className={`tab ${tab === k ? 'active' : ''}`} onClick={() => setTab(k)}>{l}</button>)}
+      </div>
       <ErrorBox e={msg instanceof Error ? msg : null} />
       {msg && !(msg instanceof Error) && <div className="ok-box mono small-text">{JSON.stringify(msg)}</div>}
-      <div className="grid2">
-        <div><h3>Account</h3><table><tbody>
+      {tab === 'overview' && (<>
+        <table className="ud-table"><tbody>
           <tr><th>ID</th><td>{u.id}</td></tr><tr><th>Role</th><td>{u.role}</td></tr><tr><th>Status</th><td>{u.status}</td></tr><tr><th>Registered</th><td>{fmtDate(u.created_at)}</td></tr><tr><th>Last login</th><td>{fmtDate(u.last_login_at)}</td></tr><tr><th>Logins / failed</th><td>{u.login_count} / {u.failed_login_count}</td></tr>
           <tr><th>Full access until</th><td>{u.full_access_until ? <>{fmtDate(u.full_access_until)} {new Date(u.full_access_until) > new Date() ? <span className="badge solid">active</span> : <span className="badge dashed">expired</span>}</> : '—'}</td></tr><tr><th>Phone</th><td>{u.phone ?? '—'}</td></tr><tr><th>Company</th><td>{u.company ?? '—'}</td></tr><tr><th>Designation</th><td>{u.designation ?? '—'}</td></tr></tbody></table>
-          <div className="row" style={{ marginTop: 8 }}>
-            <select value={u.role} onChange={(e) => run(() => patch(`/admin/users/${u.id}`, { role: e.target.value }))} aria-label="Role"><option value="user">Normal User</option><option value="super_admin">Super Admin</option></select>
+        <p className="small-text muted">Content counts (private items are never shown here): {u.counts.annotations} annotations ({u.counts.public_annotations} public), {u.counts.bookmarks} bookmarks, {u.counts.folders} folders.</p>
+      </>)}
+      {tab === 'access' && (<div className="ud-sections">
+        <section><h3>Role &amp; sessions</h3><div className="row">
+          <select value={u.role} onChange={(e) => run(() => patch(`/admin/users/${u.id}`, { role: e.target.value }))} aria-label="Role"><option value="user">Normal User</option><option value="super_admin">Super Admin</option></select>
             <button className="small" onClick={async () => (await confirmDialog('Generate a one-time temporary password? All sessions of this user will end.')) && run(() => post(`/admin/users/${u.id}/reset-password`))}>Reset password</button>
-            <button className="small" onClick={() => run(() => post(`/admin/users/${u.id}/revoke-all`, {}))}>Log out all sessions</button></div>
-          <h3 style={{ marginTop: 12 }}>Free full access until</h3>
+            <button className="small" onClick={() => run(() => post(`/admin/users/${u.id}/revoke-all`, {}))}>Log out all sessions</button></div></section>
+        <section><h3>Free full access until</h3>
           <div className="row">
             <DateField withTime label="Full access until" value={fa} onChange={setFa} />
             <button className="small primary" onClick={() => run(() => patch(`/admin/users/${u.id}`, { fullAccessUntil: fa ? new Date(fa).toISOString() : null }))}>Save date</button>
             <button className="small" onClick={() => { const d = new Date(Date.now() + 2 * 86400000); setFa(toLocalInput(d)); }}>+2 days from now</button>
             <button className="small" onClick={() => run(() => patch(`/admin/users/${u.id}`, { fullAccessUntil: null }))}>Remove</button></div>
           <div className="small-text faint">Until this date the user has Pro features without a subscription. After it passes, a subscription is needed.</div>
-          <h3 style={{ marginTop: 12 }}>Set password</h3>
+        </section>
+        <section><h3>Set password</h3>
           <div className="row"><PasswordInput value={newPw} onChange={(e) => setNewPw(e.target.value)} autoComplete="new-password" placeholder="New password for this user" />
             <button className="small primary" disabled={!newPw} onClick={async () => (await confirmDialog(`Set this password for ${u.email}? All sessions of this user will end.`)) && run(async () => { const r = await post(`/admin/users/${u.id}/reset-password`, { password: newPw, mustChange }); setNewPw(''); return r; })}>Set password</button></div>
-          <label style={{ margin: '6px 0 0', display: 'inline-flex', gap: 6, alignItems: 'center', fontWeight: 400 }}><input type="checkbox" checked={mustChange} onChange={(e) => setMustChange(e.target.checked)} />Require the user to change it at next login</label></div>
-        <div><h3>Storage</h3><table><tbody>
+          <label style={{ margin: '6px 0 0', display: 'inline-flex', gap: 6, alignItems: 'center', fontWeight: 400 }}><input type="checkbox" checked={mustChange} onChange={(e) => setMustChange(e.target.checked)} />Require the user to change it at next login</label>
+        </section>
+      </div>)}
+      {tab === 'storage' && (<div className="ud-sections">
+        <section><h3>Usage</h3><div className="ud-bar"><div style={{ width: `${pct}%` }} /></div><table className="ud-table"><tbody>
           <tr><th>Total used</th><td>{fmtBytes(s.total)} ({s.percent}% of {fmtBytes(u.limits.quotaBytes)})</td></tr><tr><th>Remaining</th><td>{fmtBytes(s.remaining)}</td></tr>
           <tr><th>Files</th><td>{s.files}</td></tr><tr><th>Images</th><td>{fmtBytes(s.images)}</td></tr><tr><th>Comment attachments</th><td>{fmtBytes(s.attachments)}</td></tr><tr><th>Documents</th><td>{fmtBytes(s.documents)}</td></tr><tr><th>Exports</th><td>{fmtBytes(s.exports)}</td></tr><tr><th>Thumbnails</th><td>{fmtBytes(s.thumbnails)}</td></tr></tbody></table>
           {rec && <div className="small-text" style={{ marginTop: 6 }}><b>Filesystem reconciliation:</b> {fmtBytes(rec.filesystem.filesystemBytes)} in {rec.filesystem.filesystemFiles} files on disk · missing files: {rec.filesystem.missingFileUploadIds.length} · size mismatches: {rec.filesystem.sizeMismatchUploadIds.length} · orphan files: {rec.filesystem.orphanCount}
             {(rec.filesystem.missingFileUploadIds.length > 0 || rec.filesystem.orphanCount > 0) && <span className="badge warn" style={{ marginLeft: 4 }}>inconsistent</span>}</div>}
-          <h3 style={{ marginTop: 10 }}>Limits</h3>
+        </section>
+        <section><h3>Limits</h3>
           <div className="row"><label style={{ margin: 0 }}>Quota MB <input type="number" style={{ width: 80 }} value={lim.quotaMB} onChange={(e) => setLim({ ...lim, quotaMB: e.target.value })} /></label><label style={{ margin: 0 }}>Max file MB <input type="number" style={{ width: 70 }} value={lim.fileMB} onChange={(e) => setLim({ ...lim, fileMB: e.target.value })} /></label><label style={{ margin: 0 }}>Images / comment <input type="number" style={{ width: 60 }} value={lim.att} onChange={(e) => setLim({ ...lim, att: e.target.value })} /></label>
-            <button className="small primary" onClick={() => run(() => put(`/admin/users/${u.id}/limits`, { quotaBytes: Math.round(lim.quotaMB * 1048576), maxFileBytes: Math.round(lim.fileMB * 1048576), maxAttachmentsPerComment: Number(lim.att) }))}>Save</button></div></div>
-      </div>
-      <p className="small-text muted">Content counts (private items are never shown here): {u.counts.annotations} annotations ({u.counts.public_annotations} public), {u.counts.bookmarks} bookmarks, {u.counts.folders} folders.</p>
-      <h3>Sessions</h3>
-      <div className="table-wrap"><table><thead><tr><th>#</th><th>Device</th><th>IP</th><th>Created</th><th>Last seen</th><th>Expires</th><th>State</th><th></th></tr></thead><tbody>{u.sessions.map((x: any) => {
+            <button className="small primary" onClick={() => run(() => put(`/admin/users/${u.id}/limits`, { quotaBytes: Math.round(lim.quotaMB * 1048576), maxFileBytes: Math.round(lim.fileMB * 1048576), maxAttachmentsPerComment: Number(lim.att) }))}>Save</button>
+          </div>
+        </section>
+      </div>)}
+      {tab === 'sessions' && (<div className="table-wrap"><table><thead><tr><th>#</th><th>Device</th><th>IP</th><th>Created</th><th>Last seen</th><th>Expires</th><th>State</th><th></th></tr></thead><tbody>{u.sessions.map((x: any) => {
         const live = u.presence.some((c: any) => c.sessionId === x.id);
         const active = !x.revoked_at && new Date(x.expires_at) > new Date();
         return <tr key={x.id}><td>{x.id}</td><td className="small-text">{(x.user_agent ?? '').slice(0, 60)}</td><td className="small-text">{x.ip}</td><td className="small-text">{fmtDate(x.created_at)}</td><td className="small-text">{fmtDate(x.last_seen_at)}</td><td className="small-text">{fmtDate(x.expires_at)}</td>
           <td>{x.revoked_at ? <span className="badge dashed">revoked: {x.revoke_reason}</span> : active ? <span className="badge strong">active{live ? ' · connected' : ''}</span> : <span className="badge dashed">expired</span>}</td>
           <td>{active && <button className="small" onClick={async () => (await confirmDialog('Log out this session only?')) && run(() => post(`/admin/sessions/${x.id}/revoke`, {}))}>Log out</button>}</td></tr>;
-      })}</tbody></table></div>
-      <h3 style={{ marginTop: 10 }}>Login history</h3>
-      <div className="table-wrap" style={{ maxHeight: 200, overflow: 'auto' }}><table><tbody>{u.loginHistory.map((h: any, i: number) => <tr key={i}><td className="small-text">{fmtDate(h.created_at)}</td><td>{h.success ? 'success' : 'FAILED'}</td><td className="small-text">{h.reason}</td><td className="small-text">{h.ip}</td></tr>)}</tbody></table></div>
+      })}</tbody></table></div>)}
+      {tab === 'history' && (<div className="table-wrap" style={{ maxHeight: 200, overflow: 'auto' }}><table><tbody>{u.loginHistory.map((h: any, i: number) => <tr key={i}><td className="small-text">{fmtDate(h.created_at)}</td><td>{h.success ? 'success' : 'FAILED'}</td><td className="small-text">{h.reason}</td><td className="small-text">{h.ip}</td></tr>)}</tbody></table></div>)}
     </Modal>
   );
 }

@@ -821,3 +821,32 @@ tr.kn-detail > td { padding: 0; background: var(--bg-alt); box-shadow: inset 3px
 .pay-info th { text-align: left; width: 190px; font-weight: 600; color: var(--fg-muted); padding: 5px 10px 5px 0; vertical-align: top; text-transform: none; letter-spacing: 0; font-size: .86rem; }
 .pay-info td { padding: 5px 0; }
 .hl-note { background: var(--hl-yellow); padding: 1px 6px; font-weight: 650; }
+
+/* Users table: card layout on small screens */
+@media (max-width: 960px) {
+  .rtable, .rtable tbody { display: block; width: 100%; }
+  .rtable thead { display: none; }
+  .rtable tr { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--bg); }
+  .rtable td { display: block; border: 0; padding: 0; text-align: left; min-width: 0; }
+  .rtable td[data-label]::before { content: attr(data-label); display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: var(--fg-faint); margin-bottom: 1px; }
+  .rtable td.num { text-align: left; }
+  .rtable .rt-main, .rtable .rt-wide, .rtable .rt-actions { grid-column: 1 / -1; }
+  .rtable .rt-actions { padding-top: 8px; border-top: 1px solid var(--line); }
+  .table-wrap:has(> .rtable) { overflow: visible; border: 0; }
+}
+
+/* User detail dialog */
+.ud-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.ud-badges { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ud-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.ud-stats > div { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; background: var(--bg-alt); min-width: 0; }
+.ud-stats b { display: block; font-size: .95rem; overflow-wrap: anywhere; }
+.ud-stats span { font-size: .75rem; color: var(--fg-muted); }
+.ud-sections { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+.ud-sections section { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; min-width: 0; }
+.ud-sections h3 { margin-top: 0; font-size: .95rem; }
+.ud-table { width: 100%; max-width: 640px; }
+.ud-table th { width: 38%; text-align: left; font-weight: 600; color: var(--fg-muted); }
+.ud-bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+.ud-bar > div { height: 100%; background: var(--inv-bg); }
+@media (max-width: 700px) { .ud-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
