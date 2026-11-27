@@ -1,5 +1,11 @@
 import { test, expect, type Browser, type BrowserContext, type Page, type Locator } from '@playwright/test';
 
+/** The "Searchable text" tab is off by default, even for the Super Admin: switch it on (Settings → UI settings) through the API. */
+async function enableSearchableText(page: Page) {
+  const me = await (await page.request.get('/api/auth/me')).json();
+  await page.request.patch('/api/me/settings', { data: { ui_settings: { ...me.settings.ui_settings, show_searchable_text: true } }, headers: { 'X-CSRF-Token': me.csrfToken } });
+}
+
 test.describe.configure({ mode: 'serial' });
 
 const ADMIN = { email: 'root@e2e.test', initial: 'Initial-Pass-9876!', pw: 'Changed-Pass-4321!' };
@@ -522,6 +528,7 @@ test.describe('bookmarks', () => {
 
 test.describe('library, import and verification (Super Admin)', () => {
   test('library lists both imported manuals; page viewer renders and text search works', async () => {
+    await enableSearchableText(admin);
     await admin.goto('/library');
     await expect(admin.locator('tbody tr')).toHaveCount(2);
     await admin.locator('tbody a').first().click();
@@ -600,8 +607,9 @@ test.describe('administration', () => {
     await expect(admin.locator('tr', { hasText: ALICE.email })).toContainText('Normal User');
     await expect(admin.locator('tr', { hasText: ALICE.email }).locator('.badge.solid', { hasText: /tab/ })).toBeVisible({ timeout: 20_000 });
     await admin.getByRole('link', { name: ALICE.email }).click();
+    await admin.getByRole('dialog').getByRole('tab', { name: 'Storage & limits' }).click(); // the user detail is split into tabs
     await expect(admin.getByRole('dialog')).toContainText('Filesystem reconciliation');
-    await expect(admin.getByRole('dialog')).toContainText('Login history');
+    await expect(admin.getByRole('dialog').getByRole('tab', { name: 'Login history' })).toBeVisible();
     await admin.keyboard.press('Escape');
   });
 
@@ -931,6 +939,7 @@ test.describe('premium: free limits, plans dialog, subscription review (Super Ad
   });
 
   test('Super Admin: a manual page opened from search or from a note reopens on the "Searchable text" tab; normal users have no such tab', async () => {
+    await enableSearchableText(admin);
     const hit = (await (await admin.request.get('/api/search', { params: { q: 'frequency' } })).json()).pages[0];
     // search result link
     await admin.goto('/');

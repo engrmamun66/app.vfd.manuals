@@ -134,20 +134,40 @@ export function Drawer({ title, onClose, children, width = 440 }: { title: strin
   );
 }
 
-export function Modal({ title, onClose, children, wide }: { title: string; onClose: () => void; children: ReactNode; wide?: boolean }) {
+/** Animates its own height when the content changes (e.g. switching tabs inside a dialog). */
+function AutoHeight({ children }: { children: ReactNode }) {
+  const inner = useRef<HTMLDivElement>(null);
+  const [h, setH] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    const el = inner.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => setH((prev) => { const n = el.offsetHeight; if (prev !== null && prev !== n) setBusy(true); return n; }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <div className="auto-h" style={h === null ? undefined : { height: h, overflow: busy ? 'hidden' : undefined }} onTransitionEnd={(e) => e.target === e.currentTarget && setBusy(false)}>
+      <div ref={inner}>{children}</div>
+    </div>
+  );
+}
+
+export function Modal({ title, onClose: onClosed, children, wide }: { title: string; onClose: () => void; children: ReactNode; wide?: boolean }) {
+  const [closing, onClose] = useAnimatedClose(onClosed);
   useEffect(() => {
     const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     document.addEventListener('keydown', esc);
     return () => document.removeEventListener('keydown', esc);
   }, [onClose]);
   return (
-    <div className="modal-bg" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div className={`modal-bg ${closing ? 'closing' : ''}`} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className={`modal ${wide ? 'wide' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
         <div className="row between" style={{ marginBottom: 10 }}>
           <h2 style={{ margin: 0 }}>{title}</h2>
           <button className="ghost small" onClick={onClose} aria-label="Close">✕</button>
         </div>
-        {children}
+        <AutoHeight>{children}</AutoHeight>
       </div>
     </div>
   );
